@@ -1,6 +1,7 @@
 // Copyright (c) Microsoft Open Technologies, Inc. All rights reserved. See License.txt in the project root for license information.
 
 using System;
+using System.Collections.Generic;
 using System.IO;
 using System.IO.Compression;
 using System.Linq;
@@ -43,17 +44,8 @@ namespace Microsoft.AspNet.Security.DataHandler.Serializer
             }
         }
 
-        public static void Write(BinaryWriter writer, AuthenticationTicket model)
+        public static void Write([NotNull] BinaryWriter writer, [NotNull] AuthenticationTicket model)
         {
-            if (writer == null)
-            {
-                throw new ArgumentNullException("writer");
-            }
-            if (model == null)
-            {
-                throw new ArgumentNullException("model");
-            }
-
             writer.Write(FormatVersion);
             ClaimsIdentity identity = model.Identity;
             writer.Write(identity.AuthenticationType);
@@ -71,13 +63,8 @@ namespace Microsoft.AspNet.Security.DataHandler.Serializer
             PropertiesSerializer.Write(writer, model.Properties);
         }
 
-        public static AuthenticationTicket Read(BinaryReader reader)
+        public static AuthenticationTicket Read([NotNull] BinaryReader reader)
         {
-            if (reader == null)
-            {
-                throw new ArgumentNullException("reader");
-            }
-
             if (reader.ReadInt32() != FormatVersion)
             {
                 return null;
@@ -98,7 +85,7 @@ namespace Microsoft.AspNet.Security.DataHandler.Serializer
                 claims[index] = new Claim(type, value, valueType, issuer, originalIssuer);
             }
             var identity = new ClaimsIdentity(claims, authenticationType, nameClaimType, roleClaimType);
-            AuthenticationProperties properties = PropertiesSerializer.Read(reader);
+            var properties = PropertiesSerializer.Read(reader);
             return new AuthenticationTicket(identity, properties);
         }
 

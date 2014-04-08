@@ -4,6 +4,7 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.IO;
+using Microsoft.AspNet.Abstractions.Security;
 
 namespace Microsoft.AspNet.Security.DataHandler.Serializer
 {
@@ -37,17 +38,8 @@ namespace Microsoft.AspNet.Security.DataHandler.Serializer
             }
         }
 
-        public static void Write(BinaryWriter writer, AuthenticationProperties properties)
+        public static void Write([NotNull] BinaryWriter writer, [NotNull] AuthenticationProperties properties)
         {
-            if (writer == null)
-            {
-                throw new ArgumentNullException("writer");
-            }
-            if (properties == null)
-            {
-                throw new ArgumentNullException("properties");
-            }
-
             writer.Write(FormatVersion);
             writer.Write(properties.Dictionary.Count);
             foreach (var kv in properties.Dictionary)
@@ -57,13 +49,8 @@ namespace Microsoft.AspNet.Security.DataHandler.Serializer
             }
         }
 
-        public static AuthenticationProperties Read(BinaryReader reader)
+        public static AuthenticationProperties Read([NotNull] BinaryReader reader)
         {
-            if (reader == null)
-            {
-                throw new ArgumentNullException("reader");
-            }
-
             if (reader.ReadInt32() != FormatVersion)
             {
                 return null;

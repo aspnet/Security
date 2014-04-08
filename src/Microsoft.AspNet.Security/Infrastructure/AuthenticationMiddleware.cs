@@ -10,20 +10,15 @@ namespace Microsoft.AspNet.Security.Infrastructure
     {
         private readonly RequestDelegate _next;
 
-        protected AuthenticationMiddleware(RequestDelegate next, TOptions options)
+        protected AuthenticationMiddleware([NotNull] RequestDelegate next, [NotNull] TOptions options)
         {
-            if (options == null)
-            {
-                throw new ArgumentNullException("options");
-            }
-
             Options = options;
             _next = next;
         }
 
         public TOptions Options { get; set; }
 
-        public override async Task Invoke(HttpContext context)
+        public async Task Invoke(HttpContext context)
         {
             AuthenticationHandler<TOptions> handler = CreateHandler();
             await handler.Initialize(Options, context);

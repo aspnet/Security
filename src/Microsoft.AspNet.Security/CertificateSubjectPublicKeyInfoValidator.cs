@@ -1,5 +1,5 @@
 ﻿// Copyright (c) Microsoft Open Technologies, Inc. All rights reserved. See License.txt in the project root for license information.
-/* TODO:
+#if NET45
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -27,13 +27,8 @@ namespace Microsoft.AspNet.Security
         /// </summary>
         /// <param name="validBase64EncodedSubjectPublicKeyInfoHashes">A collection of valid base64 encoded hashes of the certificate public key information blob.</param>
         /// <param name="algorithm">The algorithm used to generate the hashes.</param>
-        public CertificateSubjectPublicKeyInfoValidator(IEnumerable<string> validBase64EncodedSubjectPublicKeyInfoHashes, SubjectPublicKeyInfoAlgorithm algorithm)
+        public CertificateSubjectPublicKeyInfoValidator([NotNull] IEnumerable<string> validBase64EncodedSubjectPublicKeyInfoHashes, SubjectPublicKeyInfoAlgorithm algorithm)
         {
-            if (validBase64EncodedSubjectPublicKeyInfoHashes == null)
-            {
-                throw new ArgumentNullException("validBase64EncodedSubjectPublicKeyInfoHashes");
-            }
-
             _validBase64EncodedSubjectPublicKeyInfoHashes = new HashSet<string>(validBase64EncodedSubjectPublicKeyInfoHashes);
 
             if (_validBase64EncodedSubjectPublicKeyInfoHashes.Count == 0)
@@ -57,16 +52,11 @@ namespace Microsoft.AspNet.Security
         /// <param name="chain">The chain of certificate authorities associated with the remote certificate.</param>
         /// <param name="sslPolicyErrors">One or more errors associated with the remote certificate.</param>
         /// <returns>A Boolean value that determines whether the specified certificate is accepted for authentication.</returns>
-        public bool Validate(object sender, X509Certificate certificate, X509Chain chain, SslPolicyErrors sslPolicyErrors)
+        public bool Validate(object sender, X509Certificate certificate, [NotNull] X509Chain chain, SslPolicyErrors sslPolicyErrors)
         {
             if (sslPolicyErrors != SslPolicyErrors.None)
             {
                 return false;
-            }
-
-            if (chain == null)
-            {
-                throw new ArgumentNullException("chain");
             }
 
             if (chain.ChainElements.Count < 2)
@@ -132,4 +122,4 @@ namespace Microsoft.AspNet.Security
         }
     }
 }
-*/
+#endif
