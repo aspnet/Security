@@ -50,6 +50,9 @@ namespace Microsoft.AspNet.Security.Authorization
                     }
                 }
 
+                // reset the retry flag
+                context.Retry = false;
+
                 // give a chance for policies to change claims or the grant
                 foreach (var policy in _policies)
                 {
