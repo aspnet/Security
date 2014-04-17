@@ -41,9 +41,9 @@ namespace Microsoft.AspNet.Security.Authorization
                 // we don't need to check for owned claims if the permission is already granted
                 if (!context.Granted)
                 {
-                    if (user != null)
+                    if (context.User != null)
                     {
-                        if (claims.Any(claim => user.HasClaim(claim.Type, claim.Value)))
+                        if (context.Claims.Any(claim => user.HasClaim(claim.Type, claim.Value)))
                         {
                             context.Granted = true;
                         }
