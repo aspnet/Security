@@ -11,7 +11,7 @@ namespace Microsoft.AspNet.Security.Authorization
     /// </summary>
     public class AuthorizationPolicyContext
     {
-        public AuthorizationPolicyContext([NotNull]IEnumerable<Claim> claims, ClaimsPrincipal user, object resource )
+        public AuthorizationPolicyContext(IEnumerable<Claim> claims, ClaimsPrincipal user, object resource )
         {
             Claims = (claims ?? Enumerable.Empty<Claim>()).ToList();
             User = user;
