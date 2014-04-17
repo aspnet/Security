@@ -13,7 +13,7 @@ namespace Microsoft.AspNet.Security.Authorization
     {
         public AuthorizationPolicyContext(IEnumerable<Claim> claims, ClaimsPrincipal user, object resource )
         {
-            Claims = claims.ToList();
+            Claims = (claims ?? new Claim[0]).ToList();
             User = user;
             Resource = resource;
         }
