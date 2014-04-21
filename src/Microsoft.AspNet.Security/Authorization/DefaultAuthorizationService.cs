@@ -11,7 +11,7 @@ namespace Microsoft.AspNet.Security.Authorization
     public class DefaultAuthorizationService : IAuthorizationService
     {
         private readonly IList<IAuthorizationPolicy> _policies;
-        public const int MaxRetries = 1337;
+        public int MaxRetries = 99;
 
         public DefaultAuthorizationService(IEnumerable<IAuthorizationPolicy> policies)
         {
