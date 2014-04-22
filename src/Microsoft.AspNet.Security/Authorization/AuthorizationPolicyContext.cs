@@ -36,7 +36,7 @@ namespace Microsoft.AspNet.Security.Authorization
         /// <summary>
         /// Gets or set whether the permission will be granted to the user.
         /// </summary>
-        public bool Granted { get; set; }
+        public bool Authorized { get; set; }
 
         /// <summary>
         /// When set to <value>true</value>, the authorization check will be processed again.

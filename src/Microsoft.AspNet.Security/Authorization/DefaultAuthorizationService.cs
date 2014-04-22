@@ -44,13 +44,13 @@ namespace Microsoft.AspNet.Security.Authorization
             for (retries = 0; retries < MaxRetries; retries++)
             {
                 // we don't need to check for owned claims if the permission is already granted
-                if (!context.Granted)
+                if (!context.Authorized)
                 {
                     if (context.User != null)
                     {
                         if (context.Claims.Any(claim => user.HasClaim(claim.Type, claim.Value)))
                         {
-                            context.Granted = true;
+                            context.Authorized = true;
                         }
                     }
                 }
@@ -81,7 +81,7 @@ namespace Microsoft.AspNet.Security.Authorization
                 await policy.AppliedAsync(context);
             }
 
-            return context.Granted;
+            return context.Authorized;
         }
 
         public bool Authorize(IEnumerable<Claim> claims, ClaimsPrincipal user, object resource)
