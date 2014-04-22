@@ -18,12 +18,17 @@ namespace Microsoft.AspNet.Security.Authorization
             _policies = policies.OrderBy(x => x.Order).ToArray();
         }
 
-        public async Task<bool> CheckAsync(IEnumerable<Claim> claims, ClaimsPrincipal user)
+        public async Task<bool> AuthorizeAsync(IEnumerable<Claim> claims, ClaimsPrincipal user)
         {
-            return await CheckAsync(claims, user, null);
+            return await AuthorizeAsync(claims, user, null);
         }
 
-        public async Task<bool> CheckAsync(IEnumerable<Claim> claims, ClaimsPrincipal user, object resource)
+        public bool Authorize(IEnumerable<Claim> claims, ClaimsPrincipal user)
+        {
+            return  AuthorizeAsync(claims, user, null).Result;
+        }
+
+        public async Task<bool> AuthorizeAsync(IEnumerable<Claim> claims, ClaimsPrincipal user, object resource)
         {
             var context = new AuthorizationPolicyContext(claims, user, resource);
 
@@ -77,6 +82,11 @@ namespace Microsoft.AspNet.Security.Authorization
             }
 
             return context.Granted;
+        }
+
+        public bool Authorize(IEnumerable<Claim> claims, ClaimsPrincipal user, object resource)
+        {
+            return AuthorizeAsync(claims, user, resource).Result;
         }
     }
 }

@@ -8,7 +8,7 @@ using Xunit;
 
 namespace Microsoft.AspNet.Security.Test
 {
-    public class DefaultPermissionAuthorizationServiceTests
+    public class DefaultAuthorizationServiceTests
     {
         [Fact]
         public void Check_ShouldAllowIfClaimIsPresent()
@@ -20,7 +20,7 @@ namespace Microsoft.AspNet.Security.Test
                 );
 
             // Act
-            var allowed = authorizationService.CheckAsync(new Claim[] { new Claim("Permission", "CanViewPage") }, user).Result;
+            var allowed = authorizationService.Authorize(new Claim[] { new Claim("Permission", "CanViewPage") }, user);
 
             // Assert
             Assert.True(allowed);
@@ -30,7 +30,7 @@ namespace Microsoft.AspNet.Security.Test
         public void Check_ShouldAllowIfClaimIsAmongValues()
         {
             // Arrange
-            var permissionService = new DefaultAuthorizationService(Enumerable.Empty<IAuthorizationPolicy>());
+            var authorizationService = new DefaultAuthorizationService(Enumerable.Empty<IAuthorizationPolicy>());
             var user = new ClaimsPrincipal(
                 new ClaimsIdentity(
                     new Claim[] { 
@@ -41,7 +41,7 @@ namespace Microsoft.AspNet.Security.Test
                 );
 
             // Act
-            var allowed = permissionService.CheckAsync(new Claim[] { new Claim("Permission", "CanViewPage") }, user).Result;
+            var allowed = authorizationService.Authorize(new Claim[] { new Claim("Permission", "CanViewPage") }, user);
 
             // Assert
             Assert.True(allowed);
@@ -61,7 +61,7 @@ namespace Microsoft.AspNet.Security.Test
                 );
 
             // Act
-            var allowed = authorizationService.CheckAsync(new Claim[] { new Claim("Permission", "CanViewPage") }, user).Result;
+            var allowed = authorizationService.Authorize(new Claim[] { new Claim("Permission", "CanViewPage") }, user);
 
             // Assert
             Assert.False(allowed);
@@ -81,7 +81,7 @@ namespace Microsoft.AspNet.Security.Test
                 );
 
             // Act
-            var allowed = authorizationService.CheckAsync(new Claim[] { new Claim("Permission", "CanViewPage") }, user).Result;
+            var allowed = authorizationService.Authorize(new Claim[] { new Claim("Permission", "CanViewPage") }, user);
 
             // Assert
             Assert.False(allowed);
@@ -91,7 +91,7 @@ namespace Microsoft.AspNet.Security.Test
         public void Check_ShouldNotAllowIfNoClaims()
         {
             // Arrange
-            var permissionService = new DefaultAuthorizationService(Enumerable.Empty<IAuthorizationPolicy>());
+            var authorizationService = new DefaultAuthorizationService(Enumerable.Empty<IAuthorizationPolicy>());
             var user = new ClaimsPrincipal(
                 new ClaimsIdentity(
                     new Claim[0],
@@ -99,7 +99,7 @@ namespace Microsoft.AspNet.Security.Test
                 );
 
             // Act
-            var allowed = permissionService.CheckAsync(new Claim[] { new Claim("Permission", "CanViewPage") }, user).Result;
+            var allowed = authorizationService.Authorize(new Claim[] { new Claim("Permission", "CanViewPage") }, user);
 
             // Assert
             Assert.False(allowed);
@@ -109,11 +109,11 @@ namespace Microsoft.AspNet.Security.Test
         public void Check_ShouldNotAllowIfUserIsNull()
         {
             // Arrange
-            var permissionService = new DefaultAuthorizationService(Enumerable.Empty<IAuthorizationPolicy>());
+            var authorizationService = new DefaultAuthorizationService(Enumerable.Empty<IAuthorizationPolicy>());
             ClaimsPrincipal user = null;
 
             // Act
-            var allowed = permissionService.CheckAsync(new Claim[] { new Claim("Permission", "CanViewPage") }, user).Result;
+            var allowed = authorizationService.Authorize(new Claim[] { new Claim("Permission", "CanViewPage") }, user);
 
             // Assert
             Assert.False(allowed);
@@ -133,7 +133,7 @@ namespace Microsoft.AspNet.Security.Test
                 );
 
             // Act
-            var allowed = authorizationService.CheckAsync(new Claim[] { new Claim("Permission", "CanViewPage") }, user).Result;
+            var allowed = authorizationService.Authorize(new Claim[] { new Claim("Permission", "CanViewPage") }, user);
 
             // Assert
             Assert.False(allowed);
@@ -162,7 +162,7 @@ namespace Microsoft.AspNet.Security.Test
             var authorizationService = new DefaultAuthorizationService(policies);
             
             // Act
-            var allowed = authorizationService.CheckAsync(null, null).Result;
+            var allowed = authorizationService.Authorize(null, null);
 
             // Assert
             Assert.Equal("-12030", result);
@@ -197,7 +197,7 @@ namespace Microsoft.AspNet.Security.Test
             var authorizationService = new DefaultAuthorizationService(policies);
             
             // Act
-            var allowed = authorizationService.CheckAsync(null, null).Result;
+            var allowed = authorizationService.Authorize(null, null);
 
             // Assert
             Assert.Equal("Applying-1Applying20Applying30Apply-1Apply20Apply30Applied-1Applied20Applied30", result);
@@ -218,7 +218,7 @@ namespace Microsoft.AspNet.Security.Test
             var authorizationService = new DefaultAuthorizationService(policies);
             
             // Act
-            var allowed = authorizationService.CheckAsync(null, null).Result;
+            var allowed = authorizationService.Authorize(null, null);
 
             // Assert
             Assert.NotNull(claims);
@@ -239,7 +239,7 @@ namespace Microsoft.AspNet.Security.Test
 
             // Act
             // Assert
-            Exception ex = Assert.Throws<AggregateException>(() => authorizationService.CheckAsync(null, null).Result);
+            Exception ex = Assert.Throws<AggregateException>(() => authorizationService.Authorize(null, null));
         }
  
         [Fact]
@@ -267,7 +267,7 @@ namespace Microsoft.AspNet.Security.Test
             var authorizationService = new DefaultAuthorizationService(policies);
             
             // Act
-            var allowed = authorizationService.CheckAsync(new Claim [0], user).Result;
+            var allowed = authorizationService.Authorize(Enumerable.Empty<Claim>(), user);
 
             // Assert
             Assert.True(allowed);
