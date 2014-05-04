@@ -51,7 +51,6 @@ namespace Microsoft.AspNet.Security.Authorization
         /// <param name="user">The user to check claims against.</param>
         /// <param name="resource">The resource the claims should be check with.</param>
         /// <returns><value>true</value> when the user fulfills one of the claims, <value>false</value> otherwise.</returns>
-        
         public static bool Authorize(this IAuthorizationService service, Claim claim, ClaimsPrincipal user, object resource)
         {
             return service.Authorize(new Claim[] { claim }, user, resource);
