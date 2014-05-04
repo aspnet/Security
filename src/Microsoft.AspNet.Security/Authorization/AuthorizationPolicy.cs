@@ -13,19 +13,19 @@ namespace Microsoft.AspNet.Security.Authorization
     {
         public int Order { get; set; }
         
-        public virtual async Task ApplyingAsync(AuthorizationPolicyContext context)
+        public virtual Task ApplyingAsync(AuthorizationPolicyContext context)
         {
-            await Task.FromResult(0);
+            return Task.FromResult(0);
         }
 
-        public virtual async Task ApplyAsync(AuthorizationPolicyContext context) 
+        public virtual Task ApplyAsync(AuthorizationPolicyContext context) 
         {
-            await Task.FromResult(0);
+            return Task.FromResult(0);
         }
 
-        public virtual async Task AppliedAsync(AuthorizationPolicyContext context)
+        public virtual Task AppliedAsync(AuthorizationPolicyContext context)
         {
-            await Task.FromResult(0);
+            return Task.FromResult(0);
         }
     }
 }
