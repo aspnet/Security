@@ -162,7 +162,7 @@ namespace Microsoft.AspNet.Security.Test
             var authorizationService = new DefaultAuthorizationService(policies);
             
             // Act
-            var allowed = authorizationService.Authorize(null, null);
+            var allowed = authorizationService.Authorize(Enumerable.Empty<Claim>(), null);
 
             // Assert
             Assert.Equal("-12030", result);
@@ -197,7 +197,7 @@ namespace Microsoft.AspNet.Security.Test
             var authorizationService = new DefaultAuthorizationService(policies);
             
             // Act
-            var allowed = authorizationService.Authorize(null, null);
+            var allowed = authorizationService.Authorize(Enumerable.Empty<Claim>(), null);
 
             // Assert
             Assert.Equal("Applying-1Applying20Applying30Apply-1Apply20Apply30Applied-1Applied20Applied30", result);
@@ -218,7 +218,7 @@ namespace Microsoft.AspNet.Security.Test
             var authorizationService = new DefaultAuthorizationService(policies);
             
             // Act
-            var allowed = authorizationService.Authorize(null, null);
+            var allowed = authorizationService.Authorize(Enumerable.Empty<Claim>(), null);
 
             // Assert
             Assert.NotNull(claims);
@@ -239,7 +239,7 @@ namespace Microsoft.AspNet.Security.Test
 
             // Act
             // Assert
-            Exception ex = Assert.Throws<AggregateException>(() => authorizationService.Authorize(null, null));
+            Exception ex = Assert.Throws<AggregateException>(() => authorizationService.Authorize(Enumerable.Empty<Claim>(), null));
         }
  
         [Fact]
