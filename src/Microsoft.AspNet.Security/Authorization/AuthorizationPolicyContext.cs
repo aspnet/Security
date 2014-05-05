@@ -17,13 +17,10 @@ namespace Microsoft.AspNet.Security.Authorization
             User = user;
             Resource = resource;
 
-            UserClaims = new List<Claim>();
-
-            if(user != null)
-            {
-                // user claims are copied to a new and mutable list
-                UserClaims = user.Claims.ToList();
-            }
+            // user claims are copied to a new and mutable list
+            UserClaims = user != null
+                ? user.Claims.ToList()
+                : new List<Claim>();
         }
 
         /// <summary>
