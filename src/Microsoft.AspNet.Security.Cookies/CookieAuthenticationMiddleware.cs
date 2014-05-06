@@ -2,7 +2,7 @@
 
 using System;
 using Microsoft.AspNet.Abstractions;
-using Microsoft.AspNet.Logging;
+using Microsoft.Framework.Logging;
 using Microsoft.AspNet.Security.DataHandler;
 using Microsoft.AspNet.Security.DataProtection;
 using Microsoft.AspNet.Security.Infrastructure;

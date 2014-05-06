@@ -11,7 +11,7 @@ using System.Threading.Tasks;
 using Microsoft.AspNet.Abstractions;
 using Microsoft.AspNet.Abstractions.Security;
 using Microsoft.AspNet.HttpFeature.Security;
-using Microsoft.AspNet.Logging;
+using Microsoft.Framework.Logging;
 using Microsoft.AspNet.Security.DataHandler.Encoder;
 
 namespace Microsoft.AspNet.Security.Infrastructure

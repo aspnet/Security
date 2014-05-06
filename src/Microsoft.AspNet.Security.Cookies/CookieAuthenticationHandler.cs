@@ -4,7 +4,7 @@ using System;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNet.Security.Infrastructure;
-using Microsoft.AspNet.Logging;
+using Microsoft.Framework.Logging;
 using Microsoft.AspNet.PipelineCore.Collections;
 using Microsoft.AspNet.Abstractions;
 using Microsoft.AspNet.HttpFeature.Security;
