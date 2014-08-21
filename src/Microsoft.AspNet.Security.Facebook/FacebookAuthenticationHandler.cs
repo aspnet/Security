@@ -18,7 +18,7 @@ using Newtonsoft.Json.Linq;
 
 namespace Microsoft.AspNet.Security.Facebook
 {
-    internal class FacebookAuthenticationHandler : AuthenticationHandler<FacebookAuthenticationOptions>
+    internal class FacebookAuthenticationHandler : AuthenticationHandler<IFacebookAuthenticationOptions>
     {
         private const string XmlSchemaString = "http://www.w3.org/2001/XMLSchema#string";
         private const string TokenEndpoint = "https://graph.facebook.com/oauth/access_token";

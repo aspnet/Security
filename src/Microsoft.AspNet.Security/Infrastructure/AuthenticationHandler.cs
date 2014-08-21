@@ -33,7 +33,7 @@ namespace Microsoft.AspNet.Security.Infrastructure
         private bool _applyResponseInitialized;
         private object _applyResponseSyncLock;
 
-        private AuthenticationOptions _baseOptions;
+        private IAuthenticationOptions _baseOptions;
 
         protected IChallengeContext ChallengeContext { get; set; }
         protected SignInIdentityContext SignInIdentityContext { get; set; }
@@ -53,14 +53,14 @@ namespace Microsoft.AspNet.Security.Infrastructure
 
         protected PathString RequestPathBase { get; private set; }
 
-        internal AuthenticationOptions BaseOptions
+        internal IAuthenticationOptions BaseOptions
         {
             get { return _baseOptions; }
         }
 
         public IAuthenticationHandler PriorHandler { get; set; }
 
-        protected async Task BaseInitializeAsync(AuthenticationOptions options, HttpContext context)
+        protected async Task BaseInitializeAsync(IAuthenticationOptions options, HttpContext context)
         {
             _baseOptions = options;
             Context = context;

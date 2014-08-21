@@ -13,7 +13,7 @@ namespace Microsoft.AspNet.Security.Facebook
     /// <summary>
     /// Configuration options for <see cref="FacebookAuthenticationMiddleware"/>
     /// </summary>
-    public class FacebookAuthenticationOptions : AuthenticationOptions
+    public class FacebookAuthenticationOptions : AuthenticationOptions, IFacebookAuthenticationOptions
     {
         /// <summary>
         /// Initializes a new <see cref="FacebookAuthenticationOptions"/>

@@ -11,7 +11,7 @@ namespace Microsoft.AspNet.Security.Infrastructure
     /// Base class for the per-request work performed by most authentication middleware.
     /// </summary>
     /// <typeparam name="TOptions">Specifies which type for of AuthenticationOptions property</typeparam>
-    public abstract class AuthenticationHandler<TOptions> : AuthenticationHandler where TOptions : AuthenticationOptions
+    public abstract class AuthenticationHandler<TOptions> : AuthenticationHandler where TOptions : IAuthenticationOptions
     {
         protected TOptions Options { get; private set; }
 
