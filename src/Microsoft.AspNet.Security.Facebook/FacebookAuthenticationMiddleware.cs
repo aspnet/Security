@@ -17,7 +17,7 @@ namespace Microsoft.AspNet.Security.Facebook
     /// ASP.NET middleware for authenticating users using Facebook
     /// </summary>
     [SuppressMessage("Microsoft.Design", "CA1001:TypesThatOwnDisposableFieldsShouldBeDisposable", Justification = "Middleware is not disposable.")]
-    public class FacebookAuthenticationMiddleware : AuthenticationMiddleware<FacebookAuthenticationOptions>
+    public class FacebookAuthenticationMiddleware : AuthenticationMiddleware<IFacebookAuthenticationOptions>
     {
         private readonly ILogger _logger;
         private readonly HttpClient _httpClient;
@@ -32,7 +32,7 @@ namespace Microsoft.AspNet.Security.Facebook
             IDataProtectionProvider dataProtectionProvider,
             ILoggerFactory loggerFactory,
             IServiceProvider services,
-            FacebookAuthenticationOptions options)
+            IFacebookAuthenticationOptions options)
             : base(next, options)
         {
             if (string.IsNullOrWhiteSpace(Options.AppId))
@@ -65,14 +65,14 @@ namespace Microsoft.AspNet.Security.Facebook
         /// <summary>
         /// Provides the <see cref="AuthenticationHandler"/> object for processing authentication-related requests.
         /// </summary>
-        /// <returns>An <see cref="AuthenticationHandler"/> configured with the <see cref="FacebookAuthenticationOptions"/> supplied to the constructor.</returns>
-        protected override AuthenticationHandler<FacebookAuthenticationOptions> CreateHandler()
+        /// <returns>An <see cref="AuthenticationHandler"/> configured with the <see cref="IFacebookAuthenticationOptions"/> supplied to the constructor.</returns>
+        protected override AuthenticationHandler<IFacebookAuthenticationOptions> CreateHandler()
         {
             return new FacebookAuthenticationHandler(_httpClient, _logger);
         }
 
         [SuppressMessage("Microsoft.Reliability", "CA2000:Dispose objects before losing scope", Justification = "Managed by caller")]
-        private static HttpMessageHandler ResolveHttpMessageHandler(FacebookAuthenticationOptions options)
+        private static HttpMessageHandler ResolveHttpMessageHandler(IFacebookAuthenticationOptions options)
         {
             HttpMessageHandler handler = options.BackchannelHttpHandler ??
 #if NET45

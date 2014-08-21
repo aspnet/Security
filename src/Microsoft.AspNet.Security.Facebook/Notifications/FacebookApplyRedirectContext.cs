@@ -10,7 +10,7 @@ namespace Microsoft.AspNet.Security.Facebook
     /// <summary>
     /// Context passed when a Challenge causes a redirect to authorize endpoint in the Facebook middleware
     /// </summary>
-    public class FacebookApplyRedirectContext : BaseContext<FacebookAuthenticationOptions>
+    public class FacebookApplyRedirectContext : BaseContext<IFacebookAuthenticationOptions>
     {
         /// <summary>
         /// Creates a new context object.
@@ -21,7 +21,7 @@ namespace Microsoft.AspNet.Security.Facebook
         /// <param name="redirectUri">The initial redirect URI</param>
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1054:UriParametersShouldNotBeStrings", MessageId = "3#",
             Justification = "Represents header value")]
-        public FacebookApplyRedirectContext(HttpContext context, FacebookAuthenticationOptions options,
+        public FacebookApplyRedirectContext(HttpContext context, IFacebookAuthenticationOptions options,
             AuthenticationProperties properties, string redirectUri)
             : base(context, options)
         {

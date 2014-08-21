@@ -9,7 +9,7 @@ using Microsoft.AspNet.Http;
 
 namespace Microsoft.AspNet.Security.Infrastructure
 {
-    public abstract class AuthenticationMiddleware<TOptions> where TOptions : AuthenticationOptions
+    public abstract class AuthenticationMiddleware<TOptions> where TOptions : IAuthenticationOptions
     {
         private readonly RequestDelegate _next;
 
