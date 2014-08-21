@@ -32,7 +32,7 @@ namespace Microsoft.AspNet.Builder
         /// <param name="app">The <see cref="IBuilder"/> passed to the configure method</param>
         /// <param name="options">Middleware configuration options</param>
         /// <returns>The updated <see cref="IBuilder"/></returns>
-        public static IBuilder UseFacebookAuthentication([NotNull] this IBuilder app, [NotNull] FacebookAuthenticationOptions options)
+        public static IBuilder UseFacebookAuthentication([NotNull] this IBuilder app, [NotNull] IFacebookAuthenticationOptions options)
         {
             if (string.IsNullOrEmpty(options.SignInAsAuthenticationType))
             {
