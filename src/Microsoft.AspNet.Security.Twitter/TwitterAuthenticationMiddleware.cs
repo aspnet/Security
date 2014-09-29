@@ -12,6 +12,7 @@ using Microsoft.AspNet.Security.DataProtection;
 using Microsoft.AspNet.Security.Infrastructure;
 using Microsoft.AspNet.Security.Twitter.Messages;
 using Microsoft.Framework.Logging;
+using Microsoft.Framework.OptionsModel;
 
 namespace Microsoft.AspNet.Security.Twitter
 {
@@ -35,8 +36,9 @@ namespace Microsoft.AspNet.Security.Twitter
             RequestDelegate next,
             IDataProtectionProvider dataProtectionProvider,
             ILoggerFactory loggerFactory,
-            TwitterAuthenticationOptions options)
-            : base(next, options)
+            IOptionsAccessor<TwitterAuthenticationOptions> options,
+            string optionsName)
+            : base(next, options.GetNamedOptions(optionsName))
         {
             if (string.IsNullOrWhiteSpace(Options.ConsumerSecret))
             {
@@ -56,7 +58,7 @@ namespace Microsoft.AspNet.Security.Twitter
             if (Options.StateDataFormat == null)
             {
                 IDataProtector dataProtector = DataProtectionHelpers.CreateDataProtector(dataProtectionProvider,
-                    typeof(TwitterAuthenticationMiddleware).FullName, options.AuthenticationType, "v1");
+                    typeof(TwitterAuthenticationMiddleware).FullName, Options.AuthenticationType, "v1");
                 Options.StateDataFormat = new SecureDataFormat<RequestToken>(
                     Serializers.RequestToken,
                     dataProtector,

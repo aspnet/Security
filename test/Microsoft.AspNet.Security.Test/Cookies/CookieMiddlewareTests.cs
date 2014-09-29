@@ -18,6 +18,8 @@ using Microsoft.AspNet.Http.Security;
 using Microsoft.AspNet.TestHost;
 using Shouldly;
 using Xunit;
+using Microsoft.Framework.OptionsModel;
+using Microsoft.Framework.DependencyInjection;
 
 namespace Microsoft.AspNet.Security.Cookies
 {
@@ -363,11 +365,25 @@ namespace Microsoft.AspNet.Security.Cookies
             return me;
         }
 
+        private class InstanceOptionsAccessor(CookieAuthenticationOptions options) : IOptionsAccessor<CookieAuthenticationOptions>
+        {
+            public CookieAuthenticationOptions Options { get; } = options;
+
+            public CookieAuthenticationOptions GetNamedOptions(string name)
+            {
+                return Options;
+            }
+        }
+
         private static TestServer CreateServer(CookieAuthenticationOptions options, Func<HttpContext, Task> testpath = null)
         {
             return TestServer.Create(app =>
             {
-                app.UseCookieAuthentication(options);
+                app.UseServices(services =>
+                {
+                    services.AddInstance<IOptionsAccessor<CookieAuthenticationOptions>>(new InstanceOptionsAccessor(options));
+                });
+                app.UseCookieAuthentication();
                 app.Use(async (context, next) =>
                 {
                     var req = context.Request;

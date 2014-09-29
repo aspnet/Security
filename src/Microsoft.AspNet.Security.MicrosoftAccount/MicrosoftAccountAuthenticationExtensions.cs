@@ -10,36 +10,42 @@ namespace Microsoft.AspNet.Builder
     /// </summary>
     public static class MicrosoftAccountAuthenticationExtensions
     {
-        /// <summary>
-        /// Authenticate users using Microsoft Account.
-        /// </summary>
-        /// <param name="app">The <see cref="IApplicationBuilder"/> passed to the configure method.</param>
-        /// <param name="clientId">The application client ID assigned by the Microsoft authentication service.</param>
-        /// <param name="clientSecret">The application client secret assigned by the Microsoft authentication service.</param>
-        /// <returns>The updated <see cref="IApplicationBuilder"/>.</returns>
-        public static IApplicationBuilder UseMicrosoftAccountAuthentication([NotNull] this IApplicationBuilder app, [NotNull] string clientId, [NotNull] string clientSecret)
+        ///// <summary>
+        ///// Authenticate users using Microsoft Account.
+        ///// </summary>
+        ///// <param name="app">The <see cref="IApplicationBuilder"/> passed to the configure method.</param>
+        ///// <param name="clientId">The application client ID assigned by the Microsoft authentication service.</param>
+        ///// <param name="clientSecret">The application client secret assigned by the Microsoft authentication service.</param>
+        ///// <returns>The updated <see cref="IApplicationBuilder"/>.</returns>
+        //public static IApplicationBuilder UseMicrosoftAccountAuthentication([NotNull] this IApplicationBuilder app, [NotNull] string clientId, [NotNull] string clientSecret)
+        //{
+        //    return app.UseMicrosoftAccountAuthentication(
+        //        new MicrosoftAccountAuthenticationOptions
+        //        {
+        //            ClientId = clientId,
+        //            ClientSecret = clientSecret,
+        //        });
+        //}
+
+        ///// <summary>
+        ///// Authenticate users using Microsoft Account.
+        ///// </summary>
+        ///// <param name="app">The <see cref="IApplicationBuilder"/> passed to the configure method.</param>
+        ///// <param name="options">The middleware configuration options.</param>
+        ///// <returns>The updated <see cref="IApplicationBuilder"/>.</returns>
+        //public static IApplicationBuilder UseMicrosoftAccountAuthentication([NotNull] this IApplicationBuilder app, [NotNull] MicrosoftAccountAuthenticationOptions options)
+        //{
+        //    if (string.IsNullOrEmpty(options.SignInAsAuthenticationType))
+        //    {
+        //        options.SignInAsAuthenticationType = app.GetDefaultSignInAsAuthenticationType();
+        //    }
+        //    return app.UseMiddleware<MicrosoftAccountAuthenticationMiddleware>(options);
+        //}
+
+        public static IApplicationBuilder UseMicrosoftAccountAuthentication([NotNull] this IApplicationBuilder app, string optionsName = "")
         {
-            return app.UseMicrosoftAccountAuthentication(
-                new MicrosoftAccountAuthenticationOptions
-                {
-                    ClientId = clientId,
-                    ClientSecret = clientSecret,
-                });
+            return app.UseMiddleware<MicrosoftAccountAuthenticationMiddleware>(optionsName);
         }
 
-        /// <summary>
-        /// Authenticate users using Microsoft Account.
-        /// </summary>
-        /// <param name="app">The <see cref="IApplicationBuilder"/> passed to the configure method.</param>
-        /// <param name="options">The middleware configuration options.</param>
-        /// <returns>The updated <see cref="IApplicationBuilder"/>.</returns>
-        public static IApplicationBuilder UseMicrosoftAccountAuthentication([NotNull] this IApplicationBuilder app, [NotNull] MicrosoftAccountAuthenticationOptions options)
-        {
-            if (string.IsNullOrEmpty(options.SignInAsAuthenticationType))
-            {
-                options.SignInAsAuthenticationType = app.GetDefaultSignInAsAuthenticationType();
-            }
-            return app.UseMiddleware<MicrosoftAccountAuthenticationMiddleware>(options);
-        }
     }
 }

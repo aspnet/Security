@@ -20,6 +20,8 @@ using Microsoft.AspNet.TestHost;
 using Newtonsoft.Json;
 using Shouldly;
 using Xunit;
+using Microsoft.Framework.OptionsModel;
+using Microsoft.Framework.DependencyInjection;
 
 namespace Microsoft.AspNet.Security.Tests.MicrosoftAccount
 {
@@ -41,7 +43,7 @@ namespace Microsoft.AspNet.Security.Tests.MicrosoftAccount
                 }
             };
             var server = CreateServer(
-                app => app.UseMicrosoftAccountAuthentication(options),
+                options,
                 context =>
                 {
                     context.Response.Challenge("Microsoft");
@@ -57,7 +59,11 @@ namespace Microsoft.AspNet.Security.Tests.MicrosoftAccount
         public async Task ChallengeWillTriggerRedirection()
         {
             var server = CreateServer(
-                app => app.UseMicrosoftAccountAuthentication("Test Client Id", "Test Client Secret"),
+                new MicrosoftAccountAuthenticationOptions()
+                {
+                    ClientId = "Test Client Id",
+                    ClientSecret = "Test Client Secret"
+                },
                 context =>
                 {
                     context.Response.Challenge("Microsoft");
@@ -124,7 +130,7 @@ namespace Microsoft.AspNet.Security.Tests.MicrosoftAccount
                 }
             };
             var server = CreateServer(
-                app => app.UseMicrosoftAccountAuthentication(options),
+                options,
                 context =>
                 {
                     Describe(context.Response, (ClaimsIdentity)context.User.Identity);
@@ -151,19 +157,24 @@ namespace Microsoft.AspNet.Security.Tests.MicrosoftAccount
             transaction.FindClaimValue("RefreshToken").ShouldBe("Test Refresh Token");
         }
 
-        private static TestServer CreateServer(Action<IApplicationBuilder> configure, Func<HttpContext, bool> handler)
+        private static TestServer CreateServer(MicrosoftAccountAuthenticationOptions actualOptions, Func<HttpContext, bool> handler)
         {
             return TestServer.Create(app =>
             {
-                app.UseCookieAuthentication(new CookieAuthenticationOptions
+                app.UseServices(services =>
                 {
-                    AuthenticationType = "External"
+                    services.SetupOptions<CookieAuthenticationOptions>(options =>
+                    {
+                        options.AuthenticationType = "External";
+                    });
+                    services.SetupOptions<ExternalAuthenticationOptions>(options =>
+                    {
+                        options.SignInAsAuthenticationType = "External";
+                    });
+                    services.AddInstance<IOptionsAccessor<MicrosoftAccountAuthenticationOptions>>(new InstanceOptionsAccessor<MicrosoftAccountAuthenticationOptions>(actualOptions));
                 });
-                app.SetDefaultSignInAsAuthenticationType("External");
-                if (configure != null)
-                {
-                    configure(app);
-                }
+                app.UseCookieAuthentication();
+                app.UseMicrosoftAccountAuthentication();
                 app.Use(async (context, next) =>
                 {
                     if (handler == null || !handler(context))

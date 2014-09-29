@@ -10,35 +10,45 @@ namespace Microsoft.AspNet.Builder
     /// </summary>
     public static class FacebookAuthenticationExtensions
     {
-        /// <summary>
-        /// Authenticate users using Facebook.
-        /// </summary>
-        /// <param name="app">The <see cref="IApplicationBuilder"/> passed to the configure method.</param>
-        /// <param name="appId">The appId assigned by Facebook.</param>
-        /// <param name="appSecret">The appSecret assigned by Facebook.</param>
-        /// <returns>The updated <see cref="IApplicationBuilder"/>.</returns>
-        public static IApplicationBuilder UseFacebookAuthentication([NotNull] this IApplicationBuilder app, [NotNull] string appId, [NotNull] string appSecret)
-        {
-            return app.UseFacebookAuthentication(new FacebookAuthenticationOptions()
-            {
-                AppId = appId,
-                AppSecret = appSecret,
-            });
-        }
+        ///// <summary>
+        ///// Authenticate users using Facebook.
+        ///// </summary>
+        ///// <param name="app">The <see cref="IApplicationBuilder"/> passed to the configure method.</param>
+        ///// <param name="appId">The appId assigned by Facebook.</param>
+        ///// <param name="appSecret">The appSecret assigned by Facebook.</param>
+        ///// <returns>The updated <see cref="IApplicationBuilder"/>.</returns>
+        //public static IApplicationBuilder UseFacebookAuthentication([NotNull] this IApplicationBuilder app, [NotNull] string appId, [NotNull] string appSecret)
+        //{
+        //    return app.UseFacebookAuthentication(new FacebookAuthenticationOptions()
+        //    {
+        //        AppId = appId,
+        //        AppSecret = appSecret,
+        //    });
+        //}
+
+        ///// <summary>
+        ///// Authenticate users using Facebook.
+        ///// </summary>
+        ///// <param name="app">The <see cref="IApplicationBuilder"/> passed to the configure method.</param>
+        ///// <param name="options">The middleware configuration options.</param>
+        ///// <returns>The updated <see cref="IApplicationBuilder"/>.</returns>
+        //public static IApplicationBuilder UseFacebookAuthentication([NotNull] this IApplicationBuilder app, [NotNull] FacebookAuthenticationOptions options)
+        //{
+        //    if (string.IsNullOrEmpty(options.SignInAsAuthenticationType))
+        //    {
+        //        options.SignInAsAuthenticationType = app.GetDefaultSignInAsAuthenticationType();
+        //    }
+        //    return app.UseMiddleware<FacebookAuthenticationMiddleware>(options);
+        //}
 
         /// <summary>
         /// Authenticate users using Facebook.
         /// </summary>
         /// <param name="app">The <see cref="IApplicationBuilder"/> passed to the configure method.</param>
-        /// <param name="options">The middleware configuration options.</param>
         /// <returns>The updated <see cref="IApplicationBuilder"/>.</returns>
-        public static IApplicationBuilder UseFacebookAuthentication([NotNull] this IApplicationBuilder app, [NotNull] FacebookAuthenticationOptions options)
+        public static IApplicationBuilder UseFacebookAuthentication([NotNull] this IApplicationBuilder app, string optionsName = "")
         {
-            if (string.IsNullOrEmpty(options.SignInAsAuthenticationType))
-            {
-                options.SignInAsAuthenticationType = app.GetDefaultSignInAsAuthenticationType();
-            }
-            return app.UseMiddleware<FacebookAuthenticationMiddleware>(options);
+            return app.UseMiddleware<FacebookAuthenticationMiddleware>(optionsName);
         }
     }
 }

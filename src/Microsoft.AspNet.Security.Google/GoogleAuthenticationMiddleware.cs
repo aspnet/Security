@@ -11,6 +11,7 @@ using Microsoft.AspNet.Security.DataProtection;
 using Microsoft.AspNet.Security.Infrastructure;
 using Microsoft.AspNet.Security.OAuth;
 using Microsoft.Framework.Logging;
+using Microsoft.Framework.OptionsModel;
 
 namespace Microsoft.AspNet.Security.Google
 {
@@ -31,12 +32,18 @@ namespace Microsoft.AspNet.Security.Google
             RequestDelegate next,
             IDataProtectionProvider dataProtectionProvider,
             ILoggerFactory loggerFactory,
-            GoogleAuthenticationOptions options)
-            : base(next, dataProtectionProvider, loggerFactory, options)
+            IOptionsAccessor<ExternalAuthenticationOptions> externalOptions,
+            IOptionsAccessor<GoogleAuthenticationOptions> options,
+            string optionsName)
+            : base(next, dataProtectionProvider, loggerFactory, externalOptions, options.GetNamedOptions(optionsName))
         {
             if (Options.Notifications == null)
             {
                 Options.Notifications = new GoogleAuthenticationNotifications();
+            }
+            if (string.IsNullOrEmpty(Options.SignInAsAuthenticationType))
+            {
+                Options.SignInAsAuthenticationType = externalOptions.Options.SignInAsAuthenticationType;
             }
 
             if (Options.Scope.Count == 0)

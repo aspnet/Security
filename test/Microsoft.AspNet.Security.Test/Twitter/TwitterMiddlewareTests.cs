@@ -15,6 +15,8 @@ using Microsoft.AspNet.TestHost;
 using Newtonsoft.Json;
 using Shouldly;
 using Xunit;
+using Microsoft.Framework.OptionsModel;
+using Microsoft.Framework.DependencyInjection;
 
 namespace Microsoft.AspNet.Security.Twitter
 {
@@ -54,7 +56,8 @@ namespace Microsoft.AspNet.Security.Twitter
                 BackchannelCertificateValidator = null
             };
             var server = CreateServer(
-                app => app.UseTwitterAuthentication(options),
+                options,
+                app => app.UseTwitterAuthentication(),
                 context =>
                 {
                     context.Response.Challenge("Twitter");
@@ -93,7 +96,8 @@ namespace Microsoft.AspNet.Security.Twitter
                 BackchannelCertificateValidator = null
             };
             var server = CreateServer(
-                app => app.UseTwitterAuthentication(options),
+                options,
+                app => app.UseTwitterAuthentication(),
                 context =>
                 {
                     context.Response.Challenge("Twitter");
@@ -105,15 +109,23 @@ namespace Microsoft.AspNet.Security.Twitter
             location.ShouldContain("https://twitter.com/oauth/authenticate?oauth_token=");
         }
 
-        private static TestServer CreateServer(Action<IApplicationBuilder> configure, Func<HttpContext, bool> handler)
+        private static TestServer CreateServer(TwitterAuthenticationOptions twitterOptions, Action<IApplicationBuilder> configure, Func<HttpContext, bool> handler)
         {
             return TestServer.Create(app =>
             {
-                app.SetDefaultSignInAsAuthenticationType("External");
-                app.UseCookieAuthentication(new CookieAuthenticationOptions
+                app.UseServices(services =>
                 {
-                    AuthenticationType = "External"
+                    services.SetupOptions<CookieAuthenticationOptions>(options =>
+                    {
+                        options.AuthenticationType = "External";
+                    });
+                    services.SetupOptions<ExternalAuthenticationOptions>(options =>
+                    {
+                        options.SignInAsAuthenticationType = "External";
+                    });
+                    services.AddInstance<IOptionsAccessor<TwitterAuthenticationOptions>>(new InstanceOptionsAccessor<TwitterAuthenticationOptions>(twitterOptions));
                 });
+                app.UseCookieAuthentication();
                 if (configure != null)
                 {
                     configure(app);
