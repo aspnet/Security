@@ -3,6 +3,7 @@
 
 using Microsoft.AspNet.Security.Facebook;
 using Microsoft.AspNet.Security.Infrastructure;
+using Microsoft.Framework.DependencyInjection;
 using System;
 
 namespace Microsoft.AspNet.Builder
@@ -12,36 +13,10 @@ namespace Microsoft.AspNet.Builder
     /// </summary>
     public static class FacebookAuthenticationExtensions
     {
-        ///// <summary>
-        ///// Authenticate users using Facebook.
-        ///// </summary>
-        ///// <param name="app">The <see cref="IApplicationBuilder"/> passed to the configure method.</param>
-        ///// <param name="appId">The appId assigned by Facebook.</param>
-        ///// <param name="appSecret">The appSecret assigned by Facebook.</param>
-        ///// <returns>The updated <see cref="IApplicationBuilder"/>.</returns>
-        //public static IApplicationBuilder UseFacebookAuthentication([NotNull] this IApplicationBuilder app, [NotNull] string appId, [NotNull] string appSecret)
-        //{
-        //    return app.UseFacebookAuthentication(new FacebookAuthenticationOptions()
-        //    {
-        //        AppId = appId,
-        //        AppSecret = appSecret,
-        //    });
-        //}
-
-        ///// <summary>
-        ///// Authenticate users using Facebook.
-        ///// </summary>
-        ///// <param name="app">The <see cref="IApplicationBuilder"/> passed to the configure method.</param>
-        ///// <param name="options">The middleware configuration options.</param>
-        ///// <returns>The updated <see cref="IApplicationBuilder"/>.</returns>
-        //public static IApplicationBuilder UseFacebookAuthentication([NotNull] this IApplicationBuilder app, [NotNull] FacebookAuthenticationOptions options)
-        //{
-        //    if (string.IsNullOrEmpty(options.SignInAsAuthenticationType))
-        //    {
-        //        options.SignInAsAuthenticationType = app.GetDefaultSignInAsAuthenticationType();
-        //    }
-        //    return app.UseMiddleware<FacebookAuthenticationMiddleware>(options);
-        //}
+        public static IServiceCollection ConfigureFacebookAuthentication([NotNull] this IServiceCollection services, [NotNull] Action<FacebookAuthenticationOptions> configure)
+        {
+            return services.ConfigureOptions(configure);
+        }
 
         /// <summary>
         /// Authenticate users using Facebook.

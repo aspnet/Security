@@ -3,6 +3,7 @@
 
 using Microsoft.AspNet.Security.Google;
 using Microsoft.AspNet.Security.Infrastructure;
+using Microsoft.Framework.DependencyInjection;
 using System;
 
 namespace Microsoft.AspNet.Builder
@@ -12,43 +13,17 @@ namespace Microsoft.AspNet.Builder
     /// </summary>
     public static class GoogleAuthenticationExtensions
     {
-        ///// <summary>
-        ///// Authenticate users using Google OAuth 2.0.
-        ///// </summary>
-        ///// <param name="app">The <see cref="IApplicationBuilder"/> passed to the configure method.</param>
-        ///// <param name="clientId">The google assigned client id.</param>
-        ///// <param name="clientSecret">The google assigned client secret.</param>
-        ///// <returns>The updated <see cref="IApplicationBuilder"/>.</returns>
-        //public static IApplicationBuilder UseGoogleAuthentication([NotNull] this IApplicationBuilder app, [NotNull] string clientId, [NotNull] string clientSecret)
-        //{
-        //    return app.UseGoogleAuthentication(
-        //        new GoogleAuthenticationOptions
-        //        {
-        //            ClientId = clientId,
-        //            ClientSecret = clientSecret
-        //        });
-        //}
-
-        ///// <summary>
-        ///// Authenticate users using Google OAuth 2.0.
-        ///// </summary>
-        ///// <param name="app">The <see cref="IApplicationBuilder"/> passed to the configure method.</param>
-        ///// <param name="options">Middleware configuration options.</param>
-        ///// <returns>The updated <see cref="IApplicationBuilder"/>.</returns>
-        //public static IApplicationBuilder UseGoogleAuthentication([NotNull] this IApplicationBuilder app, [NotNull] GoogleAuthenticationOptions options)
-        //{
-        //    if (string.IsNullOrEmpty(options.SignInAsAuthenticationType))
-        //    {
-        //        options.SignInAsAuthenticationType = app.GetDefaultSignInAsAuthenticationType();
-        //    }
-        //    return app.UseMiddleware<GoogleAuthenticationMiddleware>(options);
-        //}
+        public static IServiceCollection ConfigureGoogleAuthentication([NotNull] this IServiceCollection services, [NotNull] Action<GoogleAuthenticationOptions> configure)
+        {
+            return services.ConfigureOptions(configure);
+        }
 
         /// <summary>
         /// Authenticate users using Google OAuth 2.0.
         /// </summary>
         /// <param name="app">The <see cref="IApplicationBuilder"/> passed to the configure method.</param>
-        /// <param name="options">Middleware configuration options.</param>
+        /// <param name="configureOptions">Used to configure Middleware options.</param>
+        /// <param name="optionsName">Name of the options instance to be used</param>
         /// <returns>The updated <see cref="IApplicationBuilder"/>.</returns>
         public static IApplicationBuilder UseGoogleAuthentication([NotNull] this IApplicationBuilder app, Action<GoogleAuthenticationOptions> configureOptions = null, string optionsName = "")
         {

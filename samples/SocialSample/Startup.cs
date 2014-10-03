@@ -24,16 +24,19 @@ namespace CookieSample
         {
             app.UseErrorPage();
 
-            app.UseServices.SetupOptions<ExternalAuthenticationOptions>(options =>
+            app.UseServices(services =>
             {
-                options.SignInAsAuthenticationType = CookieAuthenticationDefaults.AuthenticationType;
+                services.ConfigureOptions<ExternalAuthenticationOptions>(options =>
+                {
+
+                    options.SignInAsAuthenticationType = CookieAuthenticationDefaults.AuthenticationType;
+                });
             });
-            app.SetDefaultSignInAsAuthenticationType(CookieAuthenticationDefaults.AuthenticationType);// TODO: remove
 
             app.UseCookieAuthentication(options =>
-            {
-                options.LoginPath = new PathString("/login");
-            });
+                {
+                    options.LoginPath = new PathString("/login");
+                });
 
             app.UseFacebookAuthentication(options =>
             {
@@ -122,8 +125,8 @@ namespace CookieSample
                 {
                     OnGetUserInformationAsync = async (context) =>
                     {
-                        // Get the GitHub user
-                        HttpRequestMessage userRequest = new HttpRequestMessage(HttpMethod.Get, context.Options.UserInformationEndpoint);
+                            // Get the GitHub user
+                            HttpRequestMessage userRequest = new HttpRequestMessage(HttpMethod.Get, context.Options.UserInformationEndpoint);
                         userRequest.Headers.Authorization = new AuthenticationHeaderValue("Bearer", context.AccessToken);
                         userRequest.Headers.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
                         HttpResponseMessage userResponse = await context.Backchannel.SendAsync(userRequest, context.HttpContext.RequestAborted);
@@ -171,9 +174,9 @@ namespace CookieSample
                     string authType = context.Request.Query["authtype"];
                     if (!string.IsNullOrEmpty(authType))
                     {
-                        // By default the client will be redirect back to the URL that issued the challenge (/login?authtype=foo),
-                        // send them to the home page instead (/).
-                        context.Response.Challenge(new AuthenticationProperties() { RedirectUri = "/" }, authType);
+                            // By default the client will be redirect back to the URL that issued the challenge (/login?authtype=foo),
+                            // send them to the home page instead (/).
+                            context.Response.Challenge(new AuthenticationProperties() { RedirectUri = "/" }, authType);
                         return;
                     }
 
@@ -207,8 +210,8 @@ namespace CookieSample
             {
                 if (!context.User.Identity.IsAuthenticated)
                 {
-                    // The cookie middleware will intercept this 401 and redirect to /login
-                    context.Response.Challenge();
+                        // The cookie middleware will intercept this 401 and redirect to /login
+                        context.Response.Challenge();
                     return;
                 }
                 await next();
