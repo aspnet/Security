@@ -85,8 +85,8 @@ namespace CookieSample
             The sample app can then be run via:
              k web
             */
-            app.UseOAuthAuthentication("Microsoft-AccessToken", options => 
-            { 
+            app.UseOAuthAuthentication("Microsoft-AccessToken", options =>
+            {
                 options.Caption = "MicrosoftAccount-AccessToken - Requires project changes";
                 options.ClientId = "00000000480FF62E";
                 options.ClientSecret = "bLw2JIvf8Y1TaToipPEqxTVlOeJwCUsr";
@@ -174,9 +174,9 @@ namespace CookieSample
                     string authType = context.Request.Query["authtype"];
                     if (!string.IsNullOrEmpty(authType))
                     {
-                            // By default the client will be redirect back to the URL that issued the challenge (/login?authtype=foo),
-                            // send them to the home page instead (/).
-                            context.Response.Challenge(new AuthenticationProperties() { RedirectUri = "/" }, authType);
+                        // By default the client will be redirect back to the URL that issued the challenge (/login?authtype=foo),
+                        // send them to the home page instead (/).
+                        context.Response.Challenge(new AuthenticationProperties() { RedirectUri = "/" }, authType);
                         return;
                     }
 
@@ -210,8 +210,8 @@ namespace CookieSample
             {
                 if (!context.User.Identity.IsAuthenticated)
                 {
-                        // The cookie middleware will intercept this 401 and redirect to /login
-                        context.Response.Challenge();
+                    // The cookie middleware will intercept this 401 and redirect to /login
+                    context.Response.Challenge();
                     return;
                 }
                 await next();
