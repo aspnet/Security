@@ -3,6 +3,7 @@
 
 using Microsoft.AspNet.Security.Infrastructure;
 using Microsoft.AspNet.Security.MicrosoftAccount;
+using Microsoft.Framework.DependencyInjection;
 using System;
 
 namespace Microsoft.AspNet.Builder

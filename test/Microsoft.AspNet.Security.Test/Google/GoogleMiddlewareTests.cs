@@ -467,16 +467,12 @@ namespace Microsoft.AspNet.Security.Google
             {
                 app.UseServices(services =>
                 {
-                    services.SetupOptions<CookieAuthenticationOptions>(options =>
-                    {
-                        options.AuthenticationType = CookieAuthenticationType;
-                    });
-                    services.SetupOptions<ExternalAuthenticationOptions>(options =>
+                    services.ConfigureOptions<ExternalAuthenticationOptions>(options =>
                     {
                         options.SignInAsAuthenticationType = CookieAuthenticationType;
                     });
                 });
-                app.UseCookieAuthentication();
+                app.UseCookieAuthentication(options => options.AuthenticationType = CookieAuthenticationType);
                 app.UseGoogleAuthentication(configureOptions);
                 app.Use(async (context, next) =>
                 {

@@ -25,20 +25,21 @@ namespace Microsoft.AspNet.Security.Twitter
         [Fact]
         public async Task ChallengeWillTriggerApplyRedirectEvent()
         {
-            var options = new TwitterAuthenticationOptions()
-            {
-                ConsumerKey = "Test Consumer Key",
-                ConsumerSecret = "Test Consumer Secret",
-                Notifications = new TwitterAuthenticationNotifications
+            var server = CreateServer(
+                app => app.UseTwitterAuthentication(options =>
                 {
-                    OnApplyRedirect = context =>
+                    options.ConsumerKey = "Test Consumer Key";
+                    options.ConsumerSecret = "Test Consumer Secret";
+                    options.Notifications = new TwitterAuthenticationNotifications
                     {
-                        context.Response.Redirect(context.RedirectUri + "&custom=test");
-                    }
-                },
-                BackchannelHttpHandler = new TestHttpMessageHandler
-                {
-                    Sender = req =>
+                        OnApplyRedirect = context =>
+                        {
+                            context.Response.Redirect(context.RedirectUri + "&custom=test");
+                        }
+                    };
+                    options.BackchannelHttpHandler = new TestHttpMessageHandler
+                    {
+                        Sender = req =>
                         {
                             if (req.RequestUri.AbsoluteUri == "https://api.twitter.com/oauth/request_token")
                             {
@@ -52,12 +53,9 @@ namespace Microsoft.AspNet.Security.Twitter
                             }
                             return Task.FromResult<HttpResponseMessage>(null);
                         }
-                },
-                BackchannelCertificateValidator = null
-            };
-            var server = CreateServer(
-                options,
-                app => app.UseTwitterAuthentication(),
+                    };
+                    options.BackchannelCertificateValidator = null;
+                }),
                 context =>
                 {
                     context.Response.Challenge("Twitter");
@@ -72,32 +70,30 @@ namespace Microsoft.AspNet.Security.Twitter
         [Fact]
         public async Task ChallengeWillTriggerRedirection()
         {
-            var options = new TwitterAuthenticationOptions()
-            {
-                ConsumerKey = "Test Consumer Key",
-                ConsumerSecret = "Test Consumer Secret",
-                BackchannelHttpHandler = new TestHttpMessageHandler
-                {
-                    Sender = req =>
-                    {
-                        if (req.RequestUri.AbsoluteUri == "https://api.twitter.com/oauth/request_token")
-                        {
-                            return Task.FromResult(new HttpResponseMessage(HttpStatusCode.OK)
-                            {
-                                Content =
-                                    new StringContent("oauth_callback_confirmed=true&oauth_token=test_oauth_token&oauth_token_secret=test_oauth_token_secret",
-                                        Encoding.UTF8,
-                                        "application/x-www-form-urlencoded")
-                            });
-                        }
-                        return Task.FromResult<HttpResponseMessage>(null);
-                    }
-                },
-                BackchannelCertificateValidator = null
-            };
             var server = CreateServer(
-                options,
-                app => app.UseTwitterAuthentication(),
+                app => app.UseTwitterAuthentication(options =>
+                {
+                    options.ConsumerKey = "Test Consumer Key";
+                    options.ConsumerSecret = "Test Consumer Secret";
+                    options.BackchannelHttpHandler = new TestHttpMessageHandler
+                    {
+                        Sender = req =>
+                        {
+                            if (req.RequestUri.AbsoluteUri == "https://api.twitter.com/oauth/request_token")
+                            {
+                                return Task.FromResult(new HttpResponseMessage(HttpStatusCode.OK)
+                                {
+                                    Content =
+                                        new StringContent("oauth_callback_confirmed=true&oauth_token=test_oauth_token&oauth_token_secret=test_oauth_token_secret",
+                                            Encoding.UTF8,
+                                            "application/x-www-form-urlencoded")
+                                });
+                            }
+                            return Task.FromResult<HttpResponseMessage>(null);
+                        }
+                    };
+                    options.BackchannelCertificateValidator = null;
+                }),
                 context =>
                 {
                     context.Response.Challenge("Twitter");
@@ -109,23 +105,21 @@ namespace Microsoft.AspNet.Security.Twitter
             location.ShouldContain("https://twitter.com/oauth/authenticate?oauth_token=");
         }
 
-        private static TestServer CreateServer(TwitterAuthenticationOptions twitterOptions, Action<IApplicationBuilder> configure, Func<HttpContext, bool> handler)
+        private static TestServer CreateServer(Action<IApplicationBuilder> configure, Func<HttpContext, bool> handler)
         {
             return TestServer.Create(app =>
             {
                 app.UseServices(services =>
                 {
-                    services.SetupOptions<CookieAuthenticationOptions>(options =>
-                    {
-                        options.AuthenticationType = "External";
-                    });
-                    services.SetupOptions<ExternalAuthenticationOptions>(options =>
+                    services.ConfigureOptions<ExternalAuthenticationOptions>(options =>
                     {
                         options.SignInAsAuthenticationType = "External";
                     });
-                    services.AddInstance<IOptionsAccessor<TwitterAuthenticationOptions>>(new InstanceOptionsAccessor<TwitterAuthenticationOptions>(twitterOptions));
                 });
-                app.UseCookieAuthentication();
+                app.UseCookieAuthentication(options =>
+                {
+                    options.AuthenticationType = "External";
+                });
                 if (configure != null)
                 {
                     configure(app);

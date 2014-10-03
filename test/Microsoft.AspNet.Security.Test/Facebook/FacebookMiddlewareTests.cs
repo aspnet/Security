@@ -29,7 +29,7 @@ namespace Microsoft.AspNet.Security.Facebook
                 {
                     app.UseServices(services =>
                     {
-                        services.SetupOptions<FacebookAuthenticationOptions>(options =>
+                        services.ConfigureFacebookAuthentication(options =>
                         {
                             options.AppId = "Test App Id";
                             options.AppSecret = "Test App Secret";
@@ -41,11 +41,11 @@ namespace Microsoft.AspNet.Security.Facebook
                                 }
                             };
                         });
-                        services.SetupOptions<CookieAuthenticationOptions>(options =>
+                        services.ConfigureCookieAuthentication(options =>
                         {
                             options.AuthenticationType = "External";
                         });
-                        services.SetupOptions<ExternalAuthenticationOptions>(options =>
+                        services.ConfigureOptions<ExternalAuthenticationOptions>(options =>
                         {
                             options.SignInAsAuthenticationType = "External";
                         });
@@ -72,16 +72,16 @@ namespace Microsoft.AspNet.Security.Facebook
                 {
                     app.UseServices(services =>
                     {
-                        services.SetupOptions<FacebookAuthenticationOptions>(options =>
+                        services.ConfigureFacebookAuthentication(options =>
                         {
                             options.AppId = "Test App Id";
                             options.AppSecret = "Test App Secret";
                         });
-                        services.SetupOptions<CookieAuthenticationOptions>(options =>
+                        services.ConfigureCookieAuthentication(options =>
                         {
                             options.AuthenticationType = "External";
                         });
-                        services.SetupOptions<ExternalAuthenticationOptions>(options =>
+                        services.ConfigureOptions<ExternalAuthenticationOptions>(options =>
                         {
                             options.SignInAsAuthenticationType = "External";
                         });
