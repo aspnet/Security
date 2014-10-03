@@ -10,7 +10,9 @@ namespace CookieSample
         public void Configure(IApplicationBuilder app)
         {
             app.UseServices(services => { });
-            app.UseCookieAuthentication();
+            app.UseCookieAuthentication(options =>
+            {
+            });
 
             app.Run(async context =>
             {

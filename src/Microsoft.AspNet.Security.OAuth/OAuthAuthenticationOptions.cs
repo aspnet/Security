@@ -67,12 +67,9 @@ namespace Microsoft.AspNet.Security.OAuth
         /// <summary>
         /// Get or sets the text that the user can display on a sign in user interface.
         /// </summary>
-        /// <remarks>
-        /// The default value is the authentication type.
-        /// </remarks>
         public string Caption
         {
-            get { return Description.Caption ?? AuthenticationType; }
+            get { return Description.Caption; }
             set { Description.Caption = value; }
         }
 
