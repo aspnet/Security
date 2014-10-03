@@ -30,7 +30,7 @@ namespace Microsoft.AspNet.Security.Facebook
             ILoggerFactory loggerFactory,
             IOptionsAccessor<ExternalAuthenticationOptions> externalOptions,
             IOptionsAccessor<FacebookAuthenticationOptions> options,
-            OptionsConfiguration<FacebookAuthenticationOptions> optionsConfig)
+            OptionsAction<FacebookAuthenticationOptions> optionsConfig)
             : base(next, dataProtectionProvider, loggerFactory, externalOptions, options, optionsConfig)
         {
                 if (string.IsNullOrWhiteSpace(Options.AppId))

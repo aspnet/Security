@@ -10,8 +10,6 @@ namespace Microsoft.AspNet.Security.OAuth
 {
     public static class OAuthAuthenticationDefaults
     {
-        public const string AuthenticationType = "OAuth";
-
         public static readonly Func<OAuthGetUserInformationContext, Task> DefaultOnGetUserInformationAsync = context =>
         {
             // If the developer doesn't specify a user-info callback, just give them the tokens.

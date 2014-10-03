@@ -2,8 +2,8 @@
 // Licensed under the Apache License, Version 2.0. See License.txt in the project root for license information.
 
 using Microsoft.AspNet.Security.Cookies;
-using Microsoft.AspNet.Security.Infrastructure;
 using Microsoft.Framework.DependencyInjection;
+using Microsoft.Framework.OptionsModel;
 using System;
 
 namespace Microsoft.AspNet.Builder
@@ -27,10 +27,10 @@ namespace Microsoft.AspNet.Builder
         /// <returns>The original app parameter</returns>
         public static IApplicationBuilder UseCookieAuthentication([NotNull] this IApplicationBuilder app, Action<CookieAuthenticationOptions> configureOptions = null, string optionsName = "")
         {
-            return app.UseMiddleware<CookieAuthenticationMiddleware>(new OptionsConfiguration<CookieAuthenticationOptions>
+            return app.UseMiddleware<CookieAuthenticationMiddleware>(new OptionsAction<CookieAuthenticationOptions>
             {
                 Name = optionsName,
-                ConfigureOptions = configureOptions
+                Action = configureOptions
             });
         }
     }

@@ -44,10 +44,8 @@ namespace CookieSample
                 options.AppSecret = "a124463c4719c94b4228d9a240e5dc1a";
             });
 
-            app.UseOAuthAuthentication(options =>
+            app.UseOAuthAuthentication("Google-AccessToken", options =>
             {
-                options.AuthenticationType = "Google-AccessToken";
-                options.Caption = "Google-AccessToken";
                 options.ClientId = "560027070069-37ldt4kfuohhu3m495hk2j4pjp92d382.apps.googleusercontent.com";
                 options.ClientSecret = "n2Q-GEw9RQjzcRbU3qhfTj8f";
                 options.CallbackPath = new PathString("/signin-google-token");
@@ -56,7 +54,7 @@ namespace CookieSample
                 options.Scope.Add("openid");
                 options.Scope.Add("profile");
                 options.Scope.Add("email");
-            }, "Google-AccessToken");
+            });
 
             app.UseGoogleAuthentication(options =>
             {
@@ -87,9 +85,8 @@ namespace CookieSample
             The sample app can then be run via:
              k web
             */
-            app.UseOAuthAuthentication(options => 
+            app.UseOAuthAuthentication("Microsoft-AccessToken", options => 
             { 
-                options.AuthenticationType = "Microsoft-AccessToken";
                 options.Caption = "MicrosoftAccount-AccessToken - Requires project changes";
                 options.ClientId = "00000000480FF62E";
                 options.ClientSecret = "bLw2JIvf8Y1TaToipPEqxTVlOeJwCUsr";
@@ -97,7 +94,7 @@ namespace CookieSample
                 options.AuthorizationEndpoint = MicrosoftAccountAuthenticationDefaults.AuthorizationEndpoint;
                 options.TokenEndpoint = MicrosoftAccountAuthenticationDefaults.TokenEndpoint;
                 options.Scope.Add("wl.basic");
-            }, "Microsoft-AccessToken");
+            });
 
             app.UseMicrosoftAccountAuthentication(options =>
             {
@@ -106,21 +103,17 @@ namespace CookieSample
                 options.ClientSecret = "bLw2JIvf8Y1TaToipPEqxTVlOeJwCUsr";
             });
 
-            app.UseOAuthAuthentication(options =>
+            app.UseOAuthAuthentication("GitHub-AccessToken", options =>
             {
-                options.AuthenticationType = "GitHub-AccessToken";
-                options.Caption = "GitHub-AccessToken";
                 options.ClientId = "8c0c5a572abe8fe89588";
                 options.ClientSecret = "e1d95eaf03461d27acd6f49d4fc7bf19d6ac8cda";
                 options.CallbackPath = new PathString("/signin-github-token");
                 options.AuthorizationEndpoint = "https://github.com/login/oauth/authorize";
                 options.TokenEndpoint = "https://github.com/login/oauth/access_token";
-            }, "GitHub-AccessToken");
+            });
 
-            app.UseOAuthAuthentication(options =>
+            app.UseOAuthAuthentication("GitHub", options =>
             {
-                options.AuthenticationType = "GitHub";
-                options.Caption = "GitHub";
                 options.ClientId = "49e302895d8b09ea5656";
                 options.ClientSecret = "98f1bf028608901e9df91d64ee61536fe562064b";
                 options.CallbackPath = new PathString("/signin-github");
@@ -171,7 +164,7 @@ namespace CookieSample
                         context.Identity = identity;
                     },
                 };
-            }, "GitHub");
+            });
 
             // Choose an authentication type
             app.Map("/login", signoutApp =>

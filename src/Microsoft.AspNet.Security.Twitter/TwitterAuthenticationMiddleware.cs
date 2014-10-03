@@ -36,8 +36,9 @@ namespace Microsoft.AspNet.Security.Twitter
             RequestDelegate next,
             IDataProtectionProvider dataProtectionProvider,
             ILoggerFactory loggerFactory,
+            IOptionsAccessor<ExternalAuthenticationOptions> externalOptions,
             IOptionsAccessor<TwitterAuthenticationOptions> options,
-            OptionsConfiguration<TwitterAuthenticationOptions> optionsConfig)
+            OptionsAction<TwitterAuthenticationOptions> optionsConfig)
             : base(next, options, optionsConfig)
         {
             if (string.IsNullOrWhiteSpace(Options.ConsumerSecret))
@@ -63,6 +64,11 @@ namespace Microsoft.AspNet.Security.Twitter
                     Serializers.RequestToken,
                     dataProtector,
                     TextEncodings.Base64Url);
+            }
+
+            if (string.IsNullOrEmpty(Options.SignInAsAuthenticationType))
+            {
+                Options.SignInAsAuthenticationType = externalOptions.Options.SignInAsAuthenticationType;
             }
 
             _httpClient = new HttpClient(ResolveHttpMessageHandler(Options));

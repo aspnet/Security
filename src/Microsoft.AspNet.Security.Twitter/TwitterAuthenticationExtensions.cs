@@ -4,6 +4,7 @@
 using Microsoft.AspNet.Security.Infrastructure;
 using Microsoft.AspNet.Security.Twitter;
 using Microsoft.Framework.DependencyInjection;
+using Microsoft.Framework.OptionsModel;
 using System;
 
 namespace Microsoft.AspNet.Builder
@@ -20,10 +21,10 @@ namespace Microsoft.AspNet.Builder
 
         public static IApplicationBuilder UseTwitterAuthentication([NotNull] this IApplicationBuilder app, Action<TwitterAuthenticationOptions> configureOptions = null, string optionsName = "")
         {
-            return app.UseMiddleware<TwitterAuthenticationMiddleware>(new OptionsConfiguration<TwitterAuthenticationOptions>
+            return app.UseMiddleware<TwitterAuthenticationMiddleware>(new OptionsAction<TwitterAuthenticationOptions>
             {
                 Name = optionsName,
-                ConfigureOptions = configureOptions
+                Action = configureOptions
             });
         }
     }

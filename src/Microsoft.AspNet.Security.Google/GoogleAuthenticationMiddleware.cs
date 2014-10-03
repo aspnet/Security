@@ -34,16 +34,12 @@ namespace Microsoft.AspNet.Security.Google
             ILoggerFactory loggerFactory,
             IOptionsAccessor<ExternalAuthenticationOptions> externalOptions,
             IOptionsAccessor<GoogleAuthenticationOptions> options,
-            OptionsConfiguration<GoogleAuthenticationOptions> optionsConfig)
+            OptionsAction<GoogleAuthenticationOptions> optionsConfig)
             : base(next, dataProtectionProvider, loggerFactory, externalOptions, options, optionsConfig)
         {
             if (Options.Notifications == null)
             {
                 Options.Notifications = new GoogleAuthenticationNotifications();
-            }
-            if (string.IsNullOrEmpty(Options.SignInAsAuthenticationType))
-            {
-                Options.SignInAsAuthenticationType = externalOptions.Options.SignInAsAuthenticationType;
             }
 
             if (Options.Scope.Count == 0)

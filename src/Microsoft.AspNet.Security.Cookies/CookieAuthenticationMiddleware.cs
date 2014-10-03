@@ -21,7 +21,7 @@ namespace Microsoft.AspNet.Security.Cookies
             IDataProtectionProvider dataProtectionProvider, 
             ILoggerFactory loggerFactory, 
             IOptionsAccessor<CookieAuthenticationOptions> options,
-            OptionsConfiguration<CookieAuthenticationOptions> optionsConfig)
+            OptionsAction<CookieAuthenticationOptions> optionsConfig)
             : base(next, options, optionsConfig)
         {
             if (Options.Notifications == null)

@@ -2,8 +2,8 @@
 // Licensed under the Apache License, Version 2.0. See License.txt in the project root for license information.
 
 using Microsoft.AspNet.Security.Facebook;
-using Microsoft.AspNet.Security.Infrastructure;
 using Microsoft.Framework.DependencyInjection;
+using Microsoft.Framework.OptionsModel;
 using System;
 
 namespace Microsoft.AspNet.Builder
@@ -25,10 +25,10 @@ namespace Microsoft.AspNet.Builder
         /// <returns>The updated <see cref="IApplicationBuilder"/>.</returns>
         public static IApplicationBuilder UseFacebookAuthentication([NotNull] this IApplicationBuilder app, Action<FacebookAuthenticationOptions> configureOptions = null, string optionsName = "")
         {
-            return app.UseMiddleware<FacebookAuthenticationMiddleware>(new OptionsConfiguration<FacebookAuthenticationOptions>
+            return app.UseMiddleware<FacebookAuthenticationMiddleware>(new OptionsAction<FacebookAuthenticationOptions>
             {
                 Name = optionsName,
-                ConfigureOptions = configureOptions
+                Action = configureOptions
             });
         }
     }

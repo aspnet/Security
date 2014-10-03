@@ -10,24 +10,14 @@ using Microsoft.Framework.OptionsModel;
 
 namespace Microsoft.AspNet.Security.Infrastructure
 {
-    public class OptionsConfiguration<T>
-    {
-        public Action<T> ConfigureOptions { get; set; }
-        public string Name { get; set; }
-    }
-
-
     public abstract class AuthenticationMiddleware<TOptions> where TOptions : AuthenticationOptions, new()
     {
         private readonly RequestDelegate _next;
 
-        protected AuthenticationMiddleware([NotNull] RequestDelegate next, [NotNull] IOptionsAccessor<TOptions> options, OptionsConfiguration<TOptions> optionsConfig)
+        protected AuthenticationMiddleware([NotNull] RequestDelegate next, [NotNull] IOptionsAccessor<TOptions> options, OptionsAction<TOptions> optionsAction)
         {
-            Options = options.GetNamedOptions(optionsConfig.Name);
-            if (optionsConfig.ConfigureOptions != null)
-            {
-                optionsConfig.ConfigureOptions(Options);
-            }
+            Options = options.GetNamedOptions(optionsAction.Name);
+            optionsAction.Invoke(Options);
             _next = next;
         }
 

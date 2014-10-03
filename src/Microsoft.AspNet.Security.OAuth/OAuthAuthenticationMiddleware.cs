@@ -35,7 +35,7 @@ namespace Microsoft.AspNet.Security.OAuth
             ILoggerFactory loggerFactory,
             IOptionsAccessor<ExternalAuthenticationOptions> externalOptions,
             IOptionsAccessor<TOptions> options,
-            OptionsConfiguration<TOptions> optionsConfig)
+            OptionsAction<TOptions> optionsConfig)
             : base(next, options, optionsConfig)
         {
             // todo: review error handling
