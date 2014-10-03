@@ -78,6 +78,10 @@ namespace Microsoft.AspNet.Security.OAuth
             {
                 Options.SignInAsAuthenticationType = externalOptions.Options.SignInAsAuthenticationType;
             }
+            if (string.IsNullOrEmpty(Options.SignInAsAuthenticationType))
+            {
+                throw new ArgumentException(string.Format(CultureInfo.CurrentCulture, Resources.Exception_OptionMustBeProvided, "SignInAsAuthenticationType"));
+            }
         }
 
         protected HttpClient Backchannel { get; private set; }

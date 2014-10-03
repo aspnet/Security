@@ -70,6 +70,10 @@ namespace Microsoft.AspNet.Security.Twitter
             {
                 Options.SignInAsAuthenticationType = externalOptions.Options.SignInAsAuthenticationType;
             }
+            if (string.IsNullOrEmpty(Options.SignInAsAuthenticationType))
+            {
+                throw new ArgumentException(string.Format(CultureInfo.CurrentCulture, Resources.Exception_OptionMustBeProvided, "SignInAsAuthenticationType"));
+            }
 
             _httpClient = new HttpClient(ResolveHttpMessageHandler(Options));
             _httpClient.Timeout = Options.BackchannelTimeout;
