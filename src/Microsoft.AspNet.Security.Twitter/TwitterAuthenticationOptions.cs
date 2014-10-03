@@ -16,9 +16,10 @@ namespace Microsoft.AspNet.Security.Twitter
         /// <summary>
         /// Initializes a new instance of the <see cref="TwitterAuthenticationOptions"/> class.
         /// </summary>
-        public TwitterAuthenticationOptions() : base(TwitterAuthenticationDefaults.AuthenticationType)
+        public TwitterAuthenticationOptions()
         {
-            Caption = TwitterAuthenticationDefaults.AuthenticationType;
+            AuthenticationType = TwitterAuthenticationDefaults.AuthenticationType;
+            Caption = AuthenticationType;
             CallbackPath = new PathString("/signin-twitter");
             AuthenticationMode = AuthenticationMode.Passive;
             BackchannelTimeout = TimeSpan.FromSeconds(60);
