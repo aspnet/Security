@@ -18,8 +18,7 @@ namespace Microsoft.AspNet.Security.OAuth
         /// <summary>
         /// Initializes a new <see cref="OAuthAuthenticationOptions"/>.
         /// </summary>
-        public OAuthAuthenticationOptions([NotNull] string authenticationType)
-            : base(authenticationType)
+        public OAuthAuthenticationOptions([NotNull] string authenticationType) : base(authenticationType)
         {
             Caption = authenticationType;
             AuthenticationMode = AuthenticationMode.Passive;

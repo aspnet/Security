@@ -30,8 +30,8 @@ namespace Microsoft.AspNet.Security.MicrosoftAccount
             ILoggerFactory loggerFactory,
             IOptionsAccessor<ExternalAuthenticationOptions> externalOptions,
             IOptionsAccessor<MicrosoftAccountAuthenticationOptions> options,
-            string optionsName)
-            : base(next, dataProtectionProvider, loggerFactory, externalOptions, options.GetNamedOptions(optionsName))
+            OptionsConfiguration<MicrosoftAccountAuthenticationOptions> optionsConfig)
+            : base(next, dataProtectionProvider, loggerFactory, externalOptions, options, optionsConfig)
         {
             if (Options.Notifications == null)
             {

@@ -6,18 +6,32 @@ using System;
 using System.Threading.Tasks;
 using Microsoft.AspNet.Builder;
 using Microsoft.AspNet.Http;
+using Microsoft.Framework.OptionsModel;
 
 namespace Microsoft.AspNet.Security.Infrastructure
 {
-    public abstract class AuthenticationMiddleware<TOptions> where TOptions : AuthenticationOptions
+    public class OptionsConfiguration<T>
+    {
+        public Action<T> ConfigureOptions { get; set; }
+        public string Name { get; set; }
+    }
+
+
+    public abstract class AuthenticationMiddleware<TOptions> where TOptions : AuthenticationOptions, new()
     {
         private readonly RequestDelegate _next;
 
-        protected AuthenticationMiddleware([NotNull] RequestDelegate next, [NotNull] TOptions options)
+        protected AuthenticationMiddleware([NotNull] RequestDelegate next, [NotNull] IOptionsAccessor<TOptions> options, OptionsConfiguration<TOptions> optionsConfig)
         {
-            Options = options;
+            Options = options.GetNamedOptions(optionsConfig.Name);
+            if (optionsConfig.ConfigureOptions != null)
+            {
+                optionsConfig.ConfigureOptions(Options);
+            }
             _next = next;
         }
+
+        public string AuthenticationType { get; set; }
 
         public TOptions Options { get; set; }
 

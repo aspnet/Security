@@ -1,7 +1,9 @@
 ﻿// Copyright (c) Microsoft Open Technologies, Inc. All rights reserved.
 // Licensed under the Apache License, Version 2.0. See License.txt in the project root for license information.
 
+using Microsoft.AspNet.Security.Infrastructure;
 using Microsoft.AspNet.Security.MicrosoftAccount;
+using System;
 
 namespace Microsoft.AspNet.Builder
 {
@@ -42,10 +44,13 @@ namespace Microsoft.AspNet.Builder
         //    return app.UseMiddleware<MicrosoftAccountAuthenticationMiddleware>(options);
         //}
 
-        public static IApplicationBuilder UseMicrosoftAccountAuthentication([NotNull] this IApplicationBuilder app, string optionsName = "")
+        public static IApplicationBuilder UseMicrosoftAccountAuthentication([NotNull] this IApplicationBuilder app, Action<MicrosoftAccountAuthenticationOptions> configureOptions = null, string optionsName = "")
         {
-            return app.UseMiddleware<MicrosoftAccountAuthenticationMiddleware>(optionsName);
+            return app.UseMiddleware<MicrosoftAccountAuthenticationMiddleware>(new OptionsConfiguration<MicrosoftAccountAuthenticationOptions>
+            {
+                Name = optionsName,
+                ConfigureOptions = configureOptions
+            });
         }
-
     }
 }

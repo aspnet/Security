@@ -34,8 +34,8 @@ namespace Microsoft.AspNet.Security.Google
             ILoggerFactory loggerFactory,
             IOptionsAccessor<ExternalAuthenticationOptions> externalOptions,
             IOptionsAccessor<GoogleAuthenticationOptions> options,
-            string optionsName)
-            : base(next, dataProtectionProvider, loggerFactory, externalOptions, options.GetNamedOptions(optionsName))
+            OptionsConfiguration<GoogleAuthenticationOptions> optionsConfig)
+            : base(next, dataProtectionProvider, loggerFactory, externalOptions, options, optionsConfig)
         {
             if (Options.Notifications == null)
             {

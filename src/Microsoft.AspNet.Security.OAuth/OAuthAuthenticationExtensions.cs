@@ -4,6 +4,7 @@
 using System;
 using System.Globalization;
 using Microsoft.AspNet.Security.OAuth;
+using Microsoft.AspNet.Security.Infrastructure;
 
 namespace Microsoft.AspNet.Builder
 {
@@ -18,17 +19,13 @@ namespace Microsoft.AspNet.Builder
         /// <param name="app">The <see cref="IApplicationBuilder"/> passed to the configure method.</param>
         /// <param name="options">The middleware configuration options.</param>
         /// <returns>The updated <see cref="IApplicationBuilder"/>.</returns>
-        public static IApplicationBuilder UseOAuthAuthentication([NotNull] this IApplicationBuilder app, [NotNull] OAuthAuthenticationOptions<IOAuthAuthenticationNotifications> options)
+        public static IApplicationBuilder UseOAuthAuthentication([NotNull] this IApplicationBuilder app, Action<OAuthAuthenticationOptions<IOAuthAuthenticationNotifications>> configureOptions = null, string optionsName = "")
         {
-            if (string.IsNullOrEmpty(options.SignInAsAuthenticationType))
+            return app.UseMiddleware<OAuthAuthenticationMiddleware<OAuthAuthenticationOptions<IOAuthAuthenticationNotifications>, IOAuthAuthenticationNotifications>>(new OptionsConfiguration<OAuthAuthenticationOptions<IOAuthAuthenticationNotifications>>
             {
-                options.SignInAsAuthenticationType = app.GetDefaultSignInAsAuthenticationType();
-            }
-            if (options.Notifications == null)
-            {
-                options.Notifications = new OAuthAuthenticationNotifications();
-            }
-            return app.UseMiddleware<OAuthAuthenticationMiddleware<OAuthAuthenticationOptions<IOAuthAuthenticationNotifications>, IOAuthAuthenticationNotifications>>(options);
+                Name = optionsName,
+                ConfigureOptions = configureOptions
+            });
         }
     }
 }

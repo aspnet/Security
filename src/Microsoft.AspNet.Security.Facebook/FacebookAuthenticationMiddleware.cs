@@ -30,23 +30,23 @@ namespace Microsoft.AspNet.Security.Facebook
             ILoggerFactory loggerFactory,
             IOptionsAccessor<ExternalAuthenticationOptions> externalOptions,
             IOptionsAccessor<FacebookAuthenticationOptions> options,
-            string optionsName)
-            : base(next, dataProtectionProvider, loggerFactory, externalOptions, options.GetNamedOptions(optionsName))
+            OptionsConfiguration<FacebookAuthenticationOptions> optionsConfig)
+            : base(next, dataProtectionProvider, loggerFactory, externalOptions, options, optionsConfig)
         {
-            if (string.IsNullOrWhiteSpace(Options.AppId))
-            {
-                throw new ArgumentException(string.Format(CultureInfo.CurrentCulture, Resources.Exception_OptionMustBeProvided, "AppId"));
-            }
-            if (string.IsNullOrWhiteSpace(Options.AppSecret))
-            {
-                throw new ArgumentException(string.Format(CultureInfo.CurrentCulture, Resources.Exception_OptionMustBeProvided, "AppSecret"));
-            }
+                if (string.IsNullOrWhiteSpace(Options.AppId))
+                {
+                    throw new ArgumentException(string.Format(CultureInfo.CurrentCulture, Resources.Exception_OptionMustBeProvided, "AppId"));
+                }
+                if (string.IsNullOrWhiteSpace(Options.AppSecret))
+                {
+                    throw new ArgumentException(string.Format(CultureInfo.CurrentCulture, Resources.Exception_OptionMustBeProvided, "AppSecret"));
+                }
 
-            if (Options.Notifications == null)
-            {
-                Options.Notifications = new FacebookAuthenticationNotifications();
+                if (Options.Notifications == null)
+                {
+                    Options.Notifications = new FacebookAuthenticationNotifications();
+                }
             }
-        }
 
         /// <summary>
         /// Provides the <see cref="AuthenticationHandler"/> object for processing authentication-related requests.

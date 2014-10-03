@@ -2,6 +2,8 @@
 // Licensed under the Apache License, Version 2.0. See License.txt in the project root for license information.
 
 using Microsoft.AspNet.Security.Google;
+using Microsoft.AspNet.Security.Infrastructure;
+using System;
 
 namespace Microsoft.AspNet.Builder
 {
@@ -48,10 +50,13 @@ namespace Microsoft.AspNet.Builder
         /// <param name="app">The <see cref="IApplicationBuilder"/> passed to the configure method.</param>
         /// <param name="options">Middleware configuration options.</param>
         /// <returns>The updated <see cref="IApplicationBuilder"/>.</returns>
-        public static IApplicationBuilder UseGoogleAuthentication([NotNull] this IApplicationBuilder app, string optionsName = "")
+        public static IApplicationBuilder UseGoogleAuthentication([NotNull] this IApplicationBuilder app, Action<GoogleAuthenticationOptions> configureOptions = null, string optionsName = "")
         {
-            return app.UseMiddleware<GoogleAuthenticationMiddleware>(optionsName);
+            return app.UseMiddleware<GoogleAuthenticationMiddleware>(new OptionsConfiguration<GoogleAuthenticationOptions>
+            {
+                Name = optionsName,
+                ConfigureOptions = configureOptions
+            });
         }
-
     }
 }

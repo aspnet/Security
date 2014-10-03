@@ -5,9 +5,14 @@ using Microsoft.Framework.OptionsModel;
 
 namespace Microsoft.AspNet.Security
 {
-    public class InstanceOptionsAccessor<TOptions>(TOptions options) : IOptionsAccessor<TOptions> where TOptions : class, new()
+    public class InstanceOptionsAccessor<TOptions> : IOptionsAccessor<TOptions> where TOptions : class, new()
     {
-        public TOptions Options { get; } = options;
+        public InstanceOptionsAccessor(TOptions options)
+        {
+            Options = options;
+        }
+
+        public TOptions Options { get; private set; }
 
         public TOptions GetNamedOptions(string name)
         {

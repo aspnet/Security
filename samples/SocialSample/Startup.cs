@@ -14,6 +14,7 @@ using Microsoft.AspNet.Security.MicrosoftAccount;
 using Microsoft.AspNet.Security.OAuth;
 using Microsoft.AspNet.Security.Twitter;
 using Newtonsoft.Json.Linq;
+using Microsoft.Framework.DependencyInjection;
 
 namespace CookieSample
 {
@@ -23,39 +24,44 @@ namespace CookieSample
         {
             app.UseErrorPage();
 
-            app.SetDefaultSignInAsAuthenticationType(CookieAuthenticationDefaults.AuthenticationType);
-
-            app.UseCookieAuthentication(new CookieAuthenticationOptions()
+            app.UseServices.SetupOptions<ExternalAuthenticationOptions>(options =>
             {
-                LoginPath = new PathString("/login"),
+                options.SignInAsAuthenticationType = CookieAuthenticationDefaults.AuthenticationType;
+            });
+            app.SetDefaultSignInAsAuthenticationType(CookieAuthenticationDefaults.AuthenticationType);// TODO: remove
+
+            app.UseCookieAuthentication(options =>
+            {
+                options.LoginPath = new PathString("/login");
             });
 
-            app.UseFacebookAuthentication(new FacebookAuthenticationOptions()
+            app.UseFacebookAuthentication(options =>
             {
-                AppId = "569522623154478",
-                AppSecret = "a124463c4719c94b4228d9a240e5dc1a",
+                options.AppId = "569522623154478";
+                options.AppSecret = "a124463c4719c94b4228d9a240e5dc1a";
             });
 
-            app.UseOAuthAuthentication(new OAuthAuthenticationOptions<IOAuthAuthenticationNotifications>("Google-AccessToken")
+            app.UseOAuthAuthentication(options =>
             {
-                ClientId = "560027070069-37ldt4kfuohhu3m495hk2j4pjp92d382.apps.googleusercontent.com",
-                ClientSecret = "n2Q-GEw9RQjzcRbU3qhfTj8f",
-                CallbackPath = new PathString("/signin-google-token"),
-                AuthorizationEndpoint = GoogleAuthenticationDefaults.AuthorizationEndpoint,
-                TokenEndpoint = GoogleAuthenticationDefaults.TokenEndpoint,
-                Scope = { "openid", "profile", "email" },
+                options.AuthenticationType = "Google-AccessToken";
+                options.ClientId = "560027070069-37ldt4kfuohhu3m495hk2j4pjp92d382.apps.googleusercontent.com";
+                options.ClientSecret = "n2Q-GEw9RQjzcRbU3qhfTj8f";
+                options.CallbackPath = new PathString("/signin-google-token");
+                options.AuthorizationEndpoint = GoogleAuthenticationDefaults.AuthorizationEndpoint;
+                options.TokenEndpoint = GoogleAuthenticationDefaults.TokenEndpoint;
+                options.Scope = { "openid", "profile", "email" };
             });
 
-            app.UseGoogleAuthentication(new GoogleAuthenticationOptions()
+            app.UseGoogleAuthentication(options =>
             {
-                ClientId = "560027070069-37ldt4kfuohhu3m495hk2j4pjp92d382.apps.googleusercontent.com",
-                ClientSecret = "n2Q-GEw9RQjzcRbU3qhfTj8f",
+                options.ClientId = "560027070069-37ldt4kfuohhu3m495hk2j4pjp92d382.apps.googleusercontent.com";
+                options.ClientSecret = "n2Q-GEw9RQjzcRbU3qhfTj8f";
             });
 
-            app.UseTwitterAuthentication(new TwitterAuthenticationOptions()
+            app.UseTwitterAuthentication(options =>
             {
-                ConsumerKey = "6XaCTaLbMqfj6ww3zvZ5g",
-                ConsumerSecret = "Il2eFzGIrYhz6BWjYhVXBPQSfZuS4xoHpSSyD9PI",
+                options.ConsumerKey = "6XaCTaLbMqfj6ww3zvZ5g";
+                options.ConsumerSecret = "Il2eFzGIrYhz6BWjYhVXBPQSfZuS4xoHpSSyD9PI";
             });
 
             /*
@@ -86,20 +92,21 @@ namespace CookieSample
                 Scope = { "wl.basic" },
             });
 
-            app.UseMicrosoftAccountAuthentication(new MicrosoftAccountAuthenticationOptions()
+            app.UseMicrosoftAccountAuthentication(options =>
             {
-                Caption = "MicrosoftAccount - Requires project changes",
-                ClientId = "00000000480FF62E",
-                ClientSecret = "bLw2JIvf8Y1TaToipPEqxTVlOeJwCUsr",
+                options.Caption = "MicrosoftAccount - Requires project changes";
+                options.ClientId = "00000000480FF62E";
+                options.ClientSecret = "bLw2JIvf8Y1TaToipPEqxTVlOeJwCUsr";
             });
 
-            app.UseOAuthAuthentication(new OAuthAuthenticationOptions<IOAuthAuthenticationNotifications>("GitHub-AccessToken")
+            app.UseOAuthAuthentication(options =>
             {
-                ClientId = "8c0c5a572abe8fe89588",
-                ClientSecret = "e1d95eaf03461d27acd6f49d4fc7bf19d6ac8cda",
-                CallbackPath = new PathString("/signin-github-token"),
-                AuthorizationEndpoint = "https://github.com/login/oauth/authorize",
-                TokenEndpoint = "https://github.com/login/oauth/access_token",
+                options.AuthenticationType = "GitHub-AccessToken";
+                options.ClientId = "8c0c5a572abe8fe89588";
+                options.ClientSecret = "e1d95eaf03461d27acd6f49d4fc7bf19d6ac8cda";
+                options.CallbackPath = new PathString("/signin-github-token");
+                options.AuthorizationEndpoint = "https://github.com/login/oauth/authorize";
+                options.TokenEndpoint = "https://github.com/login/oauth/access_token";
             });
 
             app.UseOAuthAuthentication(new OAuthAuthenticationOptions<IOAuthAuthenticationNotifications>("GitHub")

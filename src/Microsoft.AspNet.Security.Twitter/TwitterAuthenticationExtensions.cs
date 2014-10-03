@@ -1,7 +1,9 @@
 ﻿// Copyright (c) Microsoft Open Technologies, Inc. All rights reserved.
 // Licensed under the Apache License, Version 2.0. See License.txt in the project root for license information.
 
+using Microsoft.AspNet.Security.Infrastructure;
 using Microsoft.AspNet.Security.Twitter;
+using System;
 
 namespace Microsoft.AspNet.Builder
 {
@@ -42,9 +44,13 @@ namespace Microsoft.AspNet.Builder
         //    return app.UseMiddleware<TwitterAuthenticationMiddleware>(options);
         //}
 
-        public static IApplicationBuilder UseTwitterAuthentication([NotNull] this IApplicationBuilder app, string optionsName = "")
+        public static IApplicationBuilder UseTwitterAuthentication([NotNull] this IApplicationBuilder app, Action<TwitterAuthenticationOptions> configureOptions = null, string optionsName = "")
         {
-            return app.UseMiddleware<TwitterAuthenticationMiddleware>(optionsName);
+            return app.UseMiddleware<TwitterAuthenticationMiddleware>(new OptionsConfiguration<TwitterAuthenticationOptions>
+            {
+                Name = optionsName,
+                ConfigureOptions = configureOptions
+            });
         }
     }
 }

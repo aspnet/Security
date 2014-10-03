@@ -11,6 +11,11 @@ namespace Microsoft.AspNet.Security.OAuth
         /// <summary>
         /// Initializes a new <see cref="OAuthAuthenticationOptions"/>.
         /// </summary>
+        public OAuthAuthenticationOptions() : base(OAuthAuthenticationDefaults.AuthenticationType) { }
+
+        /// <summary>
+        /// Initializes a new <see cref="OAuthAuthenticationOptions"/>.
+        /// </summary>
         public OAuthAuthenticationOptions([NotNull] string authenticationType)
             : base(authenticationType)
         {

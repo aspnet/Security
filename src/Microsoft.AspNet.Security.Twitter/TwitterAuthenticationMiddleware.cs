@@ -37,8 +37,8 @@ namespace Microsoft.AspNet.Security.Twitter
             IDataProtectionProvider dataProtectionProvider,
             ILoggerFactory loggerFactory,
             IOptionsAccessor<TwitterAuthenticationOptions> options,
-            string optionsName)
-            : base(next, options.GetNamedOptions(optionsName))
+            OptionsConfiguration<TwitterAuthenticationOptions> optionsConfig)
+            : base(next, options, optionsConfig)
         {
             if (string.IsNullOrWhiteSpace(Options.ConsumerSecret))
             {

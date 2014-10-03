@@ -19,7 +19,7 @@ namespace Microsoft.AspNet.Security.OAuth
     /// </summary>
     [SuppressMessage("Microsoft.Design", "CA1001:TypesThatOwnDisposableFieldsShouldBeDisposable", Justification = "Middleware are not disposable.")]
     public class OAuthAuthenticationMiddleware<TOptions, TNotifications> : AuthenticationMiddleware<TOptions>
-        where TOptions : OAuthAuthenticationOptions<TNotifications>
+        where TOptions : OAuthAuthenticationOptions<TNotifications>, new()
         where TNotifications : IOAuthAuthenticationNotifications
     {
         /// <summary>
@@ -34,9 +34,11 @@ namespace Microsoft.AspNet.Security.OAuth
             IDataProtectionProvider dataProtectionProvider,
             ILoggerFactory loggerFactory,
             IOptionsAccessor<ExternalAuthenticationOptions> externalOptions,
-            TOptions options)
-            : base(next, options)
+            IOptionsAccessor<TOptions> options,
+            OptionsConfiguration<TOptions> optionsConfig)
+            : base(next, options, optionsConfig)
         {
+            // todo: review error handling
             if (string.IsNullOrWhiteSpace(Options.AuthenticationType))
             {
                 throw new ArgumentException(string.Format(CultureInfo.CurrentCulture, Resources.Exception_OptionMustBeProvided, "AuthenticationType"));
