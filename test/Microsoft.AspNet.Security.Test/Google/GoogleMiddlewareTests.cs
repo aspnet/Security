@@ -21,6 +21,8 @@ using Shouldly;
 using Xunit;
 using Microsoft.Framework.OptionsModel;
 using Microsoft.Framework.DependencyInjection;
+using Microsoft.AspNet.Security.DataProtection;
+using Microsoft.AspNet.Security.DataHandler;
 
 namespace Microsoft.AspNet.Security.Google
 {
@@ -210,13 +212,15 @@ namespace Microsoft.AspNet.Security.Google
             transaction.Response.StatusCode.ShouldBe(HttpStatusCode.InternalServerError);
         }
 
-        [Fact(Skip = "TODO getting options out")]
+        [Fact]
         public async Task ReplyPathWillAuthenticateValidAuthorizeCodeAndState()
         {
+            ISecureDataFormat<AuthenticationProperties> stateFormat = new PropertiesDataFormat(DataProtectionProvider.CreateNew().CreateProtector("GoogleTest"));
             var server = CreateServer(options =>
             {
                 options.ClientId = "Test Id";
                 options.ClientSecret = "Test Secret";
+                options.StateDataFormat = stateFormat;
                 options.BackchannelHttpHandler = new TestHttpMessageHandler
                 {
                     Sender = async req =>
@@ -262,8 +266,7 @@ namespace Microsoft.AspNet.Security.Google
             var correlationValue = "TestCorrelationId";
             properties.Dictionary.Add(correlationKey, correlationValue);
             properties.RedirectUri = "/me";
-            // bugbug: how to get options out
-            var state = new GoogleAuthenticationOptions().StateDataFormat.Protect(properties);
+            var state = stateFormat.Protect(properties);
             var transaction = await SendAsync(server, 
                 "https://example.com/signin-google?code=TestCode&state=" + Uri.EscapeDataString(state),
                 correlationKey + "=" + correlationValue);
@@ -283,14 +286,15 @@ namespace Microsoft.AspNet.Security.Google
             transaction.FindClaimValue(ClaimTypes.Email).ShouldBe("Test email");
         }
 
-        [Fact(Skip = "TODO getting options out")]
+        [Fact]
         public async Task ReplyPathWillRejectIfCodeIsInvalid()
         {
-            var googleOptions = new GoogleAuthenticationOptions();
+            ISecureDataFormat<AuthenticationProperties> stateFormat = new PropertiesDataFormat(DataProtectionProvider.CreateNew().CreateProtector("GoogleTest"));
             var server = CreateServer(options =>
             {
                 options.ClientId = "Test Id";
                 options.ClientSecret = "Test Secret";
+                options.StateDataFormat = stateFormat;
                 options.BackchannelHttpHandler = new TestHttpMessageHandler
                 {
                     Sender = req =>
@@ -304,8 +308,7 @@ namespace Microsoft.AspNet.Security.Google
             var correlationValue = "TestCorrelationId";
             properties.Dictionary.Add(correlationKey, correlationValue);
             properties.RedirectUri = "/me";
-            // bugbug: how to get options out
-            var state = new GoogleAuthenticationOptions().StateDataFormat.Protect(properties);
+            var state = stateFormat.Protect(properties);
             var transaction = await SendAsync(server,
                 "https://example.com/signin-google?code=TestCode&state=" + Uri.EscapeDataString(state),
                 correlationKey + "=" + correlationValue);
@@ -313,13 +316,15 @@ namespace Microsoft.AspNet.Security.Google
             transaction.Response.Headers.Location.ToString().ShouldContain("error=access_denied");
         }
 
-        [Fact(Skip = "TODO getting options out")]
+        [Fact]
         public async Task ReplyPathWillRejectIfAccessTokenIsMissing()
         {
+            ISecureDataFormat<AuthenticationProperties> stateFormat = new PropertiesDataFormat(DataProtectionProvider.CreateNew().CreateProtector("GoogleTest"));
             var server = CreateServer(options =>
             {
                 options.ClientId = "Test Id";
                 options.ClientSecret = "Test Secret";
+                options.StateDataFormat = stateFormat;
                 options.BackchannelHttpHandler = new TestHttpMessageHandler
                 {
                     Sender = req =>
@@ -333,8 +338,7 @@ namespace Microsoft.AspNet.Security.Google
             var correlationValue = "TestCorrelationId";
             properties.Dictionary.Add(correlationKey, correlationValue);
             properties.RedirectUri = "/me";
-            // bugbug: how to get options out
-            var state = new GoogleAuthenticationOptions().StateDataFormat.Protect(properties);
+            var state = stateFormat.Protect(properties);
             var transaction = await SendAsync(server,
                 "https://example.com/signin-google?code=TestCode&state=" + Uri.EscapeDataString(state),
                 correlationKey + "=" + correlationValue);
@@ -342,13 +346,15 @@ namespace Microsoft.AspNet.Security.Google
             transaction.Response.Headers.Location.ToString().ShouldContain("error=access_denied");
         }
 
-        [Fact(Skip = "TODO getting options out")]
+        [Fact]
         public async Task AuthenticatedEventCanGetRefreshToken()
         {
+            ISecureDataFormat<AuthenticationProperties> stateFormat = new PropertiesDataFormat(DataProtectionProvider.CreateNew().CreateProtector("GoogleTest"));
             var server = CreateServer(options =>
             {
                 options.ClientId = "Test Id";
                 options.ClientSecret = "Test Secret";
+                options.StateDataFormat = stateFormat;
                 options.BackchannelHttpHandler = new TestHttpMessageHandler
                 {
                     Sender = async req =>
@@ -404,8 +410,7 @@ namespace Microsoft.AspNet.Security.Google
             var correlationValue = "TestCorrelationId";
             properties.Dictionary.Add(correlationKey, correlationValue);
             properties.RedirectUri = "/me";
-            // bugbug: how to get options out
-            var state = new GoogleAuthenticationOptions().StateDataFormat.Protect(properties);
+            var state = stateFormat.Protect(properties);
             var transaction = await SendAsync(server,
                 "https://example.com/signin-google?code=TestCode&state=" + Uri.EscapeDataString(state),
                 correlationKey + "=" + correlationValue);
