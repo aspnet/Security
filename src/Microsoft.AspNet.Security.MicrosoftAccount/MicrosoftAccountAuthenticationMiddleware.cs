@@ -8,6 +8,7 @@ using Microsoft.AspNet.Security.DataProtection;
 using Microsoft.AspNet.Security.Infrastructure;
 using Microsoft.AspNet.Security.OAuth;
 using Microsoft.Framework.Logging;
+using Microsoft.Framework.OptionsModel;
 
 namespace Microsoft.AspNet.Security.MicrosoftAccount
 {
@@ -27,8 +28,10 @@ namespace Microsoft.AspNet.Security.MicrosoftAccount
             RequestDelegate next,
             IDataProtectionProvider dataProtectionProvider,
             ILoggerFactory loggerFactory,
-            MicrosoftAccountAuthenticationOptions options)
-            : base(next, dataProtectionProvider, loggerFactory, options)
+            IOptionsAccessor<ExternalAuthenticationOptions> externalOptions,
+            IOptionsAccessor<MicrosoftAccountAuthenticationOptions> options,
+            OptionsAction<MicrosoftAccountAuthenticationOptions> optionsConfig)
+            : base(next, dataProtectionProvider, loggerFactory, externalOptions, options, optionsConfig)
         {
             if (Options.Notifications == null)
             {
