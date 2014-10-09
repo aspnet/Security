@@ -111,7 +111,7 @@ namespace Microsoft.AspNet.Security.Twitter
             {
                 app.UsePerRequestServices(services =>
                 {
-                    services.ConfigureOptions<ExternalAuthenticationOptions>(options =>
+                    services.Configure<ExternalAuthenticationOptions>(options =>
                     {
                         options.SignInAsAuthenticationType = "External";
                     });
