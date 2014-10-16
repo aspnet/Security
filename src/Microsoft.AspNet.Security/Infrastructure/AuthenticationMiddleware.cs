@@ -7,14 +7,13 @@ using System.Threading.Tasks;
 using Microsoft.AspNet.Builder;
 using Microsoft.AspNet.Http;
 using Microsoft.Framework.OptionsModel;
+using Microsoft.AspNet.RequestContainer;
 
 namespace Microsoft.AspNet.Security.Infrastructure
 {
-    public abstract class AuthenticationMiddleware<TOptions> where TOptions : AuthenticationOptions, new()
+    public abstract class AuthenticationMiddleware<TOptions> : AutoRequestServicesMiddleware where TOptions : AuthenticationOptions, new()
     {
-        private readonly RequestDelegate _next;
-
-        protected AuthenticationMiddleware([NotNull] RequestDelegate next, [NotNull] IOptions<TOptions> options, ConfigureOptions<TOptions> configureOptions)
+        protected AuthenticationMiddleware([NotNull] RequestDelegate next, [NotNull] IServiceProvider services, [NotNull] IOptions<TOptions> options, ConfigureOptions<TOptions> configureOptions) : base(next, services)
         {
             if (configureOptions != null)
             {
@@ -25,20 +24,19 @@ namespace Microsoft.AspNet.Security.Infrastructure
             {
                 Options = options.Options;
             }
-            _next = next;
         }
 
         public string AuthenticationType { get; set; }
 
         public TOptions Options { get; set; }
 
-        public async Task Invoke(HttpContext context)
+        public override async Task InvokeCore(HttpContext context)
         {
             AuthenticationHandler<TOptions> handler = CreateHandler();
             await handler.Initialize(Options, context);
             if (!await handler.InvokeAsync())
             {
-                await _next(context);
+                await Next(context);
             }
             await handler.TeardownAsync();
         }
