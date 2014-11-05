@@ -467,6 +467,7 @@ namespace Microsoft.AspNet.Security.Google
             {
                 app.UseServices(services =>
                 {
+                    services.AddSingleton<IEventBus, EventBus>();
                     services.Configure<ExternalAuthenticationOptions>(options =>
                     {
                         options.SignInAsAuthenticationType = CookieAuthenticationType;

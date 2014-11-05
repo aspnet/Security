@@ -30,7 +30,7 @@ namespace Microsoft.AspNet.Security.Cookies
             CookieHttpOnly = true;
             CookieSecure = CookieSecureOption.SameAsRequest;
             SystemClock = new SystemClock();
-            Notifications = new CookieAuthenticationNotifications();
+            //Notifications = new CookieAuthenticationNotifications();
         }
 
         /// <summary>
@@ -116,12 +116,12 @@ namespace Microsoft.AspNet.Security.Cookies
         [SuppressMessage("Microsoft.Design", "CA1056:UriPropertiesShouldNotBeStrings", Justification = "ReturnUrl is the name of a querystring parameter")]
         public string ReturnUrlParameter { get; set; }
 
-        /// <summary>
-        /// The Provider may be assigned to an instance of an object created by the application at startup time. The middleware
-        /// calls methods on the provider which give the application control at certain points where processing is occuring. 
-        /// If it is not provided a default instance is supplied which does nothing when the methods are called.
-        /// </summary>
-        public ICookieAuthenticationNotifications Notifications { get; set; }
+        ///// <summary>
+        ///// The Provider may be assigned to an instance of an object created by the application at startup time. The middleware
+        ///// calls methods on the provider which give the application control at certain points where processing is occuring. 
+        ///// If it is not provided a default instance is supplied which does nothing when the methods are called.
+        ///// </summary>
+        //public ICookieAuthenticationNotifications Notifications { get; set; }
 
         /// <summary>
         /// The TicketDataFormat is used to protect and unprotect the identity and other properties which are stored in the

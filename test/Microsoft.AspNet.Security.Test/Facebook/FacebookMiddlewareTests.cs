@@ -29,6 +29,7 @@ namespace Microsoft.AspNet.Security.Facebook
                 {
                     app.UseServices(services =>
                     {
+                        services.AddSingleton<IEventBus, EventBus>();
                         services.ConfigureFacebookAuthentication(options =>
                         {
                             options.AppId = "Test App Id";
@@ -72,6 +73,7 @@ namespace Microsoft.AspNet.Security.Facebook
                 {
                     app.UseServices(services =>
                     {
+                        services.AddSingleton<IEventBus, EventBus>();
                         services.ConfigureFacebookAuthentication(options =>
                         {
                             options.AppId = "Test App Id";

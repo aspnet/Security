@@ -165,6 +165,7 @@ namespace Microsoft.AspNet.Security.Tests.MicrosoftAccount
             {
                 app.UseServices(services =>
                 {
+                    services.AddSingleton<IEventBus, EventBus>();
                     services.Configure<ExternalAuthenticationOptions>(options =>
                     {
                         options.SignInAsAuthenticationType = "External";
