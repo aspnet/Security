@@ -1,7 +1,6 @@
 // Copyright (c) Microsoft Open Technologies, Inc. All rights reserved.
 // Licensed under the Apache License, Version 2.0. See License.txt in the project root for license information.
 
-
 using System;
 using System.Linq;
 using System.Security.Claims;
@@ -106,17 +105,14 @@ namespace Microsoft.AspNet.Security.Cookies
                 }
 
                 var context = new CookieValidateIdentityContext(Context, ticket, Options);
-
                 await _events.RaiseAsync(context);
-                //await Options.Notifications.ValidateIdentity(context);
-
                 return new AuthenticationTicket(context.Identity, context.Properties);
             }
             catch (Exception exception)
             {
                 CookieExceptionContext exceptionContext = new CookieExceptionContext(Context, Options,
                     CookieExceptionContext.ExceptionLocation.Authenticate, exception, ticket);
-                //Options.Notifications.Exception(exceptionContext);
+                await _events.RaiseAsync(exceptionContext);
                 if (exceptionContext.Rethrow)
                 {
                     throw;
@@ -187,7 +183,6 @@ namespace Microsoft.AspNet.Security.Cookies
                     }
 
                     await _events.RaiseAsync(signInContext);
-                    //Options.Notifications.ResponseSignIn(signInContext);
 
                     if (signInContext.Properties.IsPersistent)
                     {
@@ -224,7 +219,6 @@ namespace Microsoft.AspNet.Security.Cookies
                         signInContext.Properties);
 
                     await _events.RaiseAsync(signedInContext);
-                    //Options.Notifications.ResponseSignedIn(signedInContext);
                 }
                 else if (shouldSignout)
                 {
@@ -239,7 +233,6 @@ namespace Microsoft.AspNet.Security.Cookies
                         cookieOptions);
 
                     await _events.RaiseAsync(context);
-                    //Options.Notifications.ResponseSignOut(context);
 
                     Options.CookieManager.DeleteCookie(
                         Context,
@@ -296,9 +289,7 @@ namespace Microsoft.AspNet.Security.Cookies
                     if (!string.IsNullOrWhiteSpace(redirectUri)
                         && IsHostRelative(redirectUri))
                     {
-                        //var redirectContext = ;
                         await RaiseRedirect(new CookieApplyRedirectContext(Context, Options, redirectUri));
-                        //Options.Notifications.ApplyRedirect(redirectContext);
                     }
                 }
             }
@@ -307,7 +298,6 @@ namespace Microsoft.AspNet.Security.Cookies
                 CookieExceptionContext exceptionContext = new CookieExceptionContext(Context, Options,
                     CookieExceptionContext.ExceptionLocation.ApplyResponseGrant, exception, model);
                 await _events.RaiseAsync(exceptionContext);
-                //Options.Notifications.Exception(exceptionContext);
                 if (exceptionContext.Rethrow)
                 {
                     throw;
@@ -380,14 +370,12 @@ namespace Microsoft.AspNet.Security.Cookies
                 }
 
                 await RaiseRedirect(new CookieApplyRedirectContext(Context, Options, loginUri));
-                //Options.Notifications.ApplyRedirect(redirectContext);
             }
             catch (Exception exception)
             {
                 CookieExceptionContext exceptionContext = new CookieExceptionContext(Context, Options,
                     CookieExceptionContext.ExceptionLocation.ApplyResponseChallenge, exception, ticket: null);
                 await _events.RaiseAsync(exceptionContext);
-                //Options.Notifications.Exception(exceptionContext);
                 if (exceptionContext.Rethrow)
                 {
                     throw;

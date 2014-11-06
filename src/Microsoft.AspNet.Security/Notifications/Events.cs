@@ -40,7 +40,6 @@ namespace Microsoft.AspNet.Security
         {
             return await _handler(ev);
         }
-
     }
 
     public class EventBus : IEventBus

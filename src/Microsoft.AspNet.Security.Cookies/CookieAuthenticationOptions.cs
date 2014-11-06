@@ -30,7 +30,6 @@ namespace Microsoft.AspNet.Security.Cookies
             CookieHttpOnly = true;
             CookieSecure = CookieSecureOption.SameAsRequest;
             SystemClock = new SystemClock();
-            //Notifications = new CookieAuthenticationNotifications();
         }
 
         /// <summary>

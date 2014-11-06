@@ -255,8 +255,9 @@ namespace Microsoft.AspNet.Security.Cookies
         {
             var clock = new TestClock();
             var services = new ServiceCollection();
-            services.AddInstance<IEventHandler>(
-                new EventHandler<CookieResponseSignInContext>(context =>
+            services.AddInstance<IEventHandler>(new CookieEventHandler<CookieResponseSignInContext>(
+                null,
+                context =>
                 {
                     context.Properties.ExpiresUtc = clock.UtcNow.Add(TimeSpan.FromMinutes(5));
                     return Task.FromResult(true);
