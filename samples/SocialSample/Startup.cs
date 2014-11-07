@@ -32,8 +32,7 @@ namespace CookieSample
                 });
 
                 // Retrieving user information is unique to each OAuth provider.
-                services.AddInstance<IEventHandler>(new AuthenticationEventHandler<OAuthGetUserInformationContext, OAuthAuthenticationOptions>(
-                    "GitHub",
+                services.ConfigureEventBus(options => options.AddAuthenticationEventHandler<OAuthGetUserInformationContext, OAuthAuthenticationOptions>(
                     async (context) =>
                     {
                         // Get the GitHub user
@@ -73,8 +72,7 @@ namespace CookieSample
                         }
 
                         context.Identity = identity;
-                        return true;
-                    }));
+                    }, "GitHub"));
             });
 
             app.UseCookieAuthentication(options =>

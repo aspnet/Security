@@ -256,7 +256,7 @@ namespace Microsoft.AspNet.Security.Cookies
             var clock = new TestClock();
             var services = new ServiceCollection();
             services.AddSingleton<IEventBus, EventBus>();
-            services.Configure<EventBusOptions>(options =>
+            services.ConfigureEventBus(options =>
             {
                 options.AddAuthenticationEventHandler<CookieResponseSignInContext, CookieAuthenticationOptions>(
                     context =>
