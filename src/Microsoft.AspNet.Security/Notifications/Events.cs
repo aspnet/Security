@@ -24,6 +24,7 @@ namespace Microsoft.AspNet.Security
     public interface IEventHandler<T> : IEventHandler
     {
         // If true, stop calling other handlers
+        // consider taking previous handled so everyone gets a chance?
         Task<bool> HandleAsync(T ev);
     }
 

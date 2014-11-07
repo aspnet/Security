@@ -16,19 +16,21 @@ using Newtonsoft.Json.Linq;
 
 namespace Microsoft.AspNet.Security.OAuth
 {
-    public class OAuthAuthenticationHandler<TOptions, TNotifications> : AuthenticationHandler<TOptions>
-        where TOptions : OAuthAuthenticationOptions<TNotifications>
-        where TNotifications : IOAuthAuthenticationNotifications
+    public class OAuthAuthenticationHandler<TOptions> : AuthenticationHandler<TOptions>
+        where TOptions : OAuthAuthenticationOptions
     {
-        public OAuthAuthenticationHandler(HttpClient backchannel, ILogger logger)
+        public OAuthAuthenticationHandler(HttpClient backchannel, ILogger logger, IEventBus events)
         {
             Backchannel = backchannel;
             Logger = logger;
+            EventBus = events;
         }
 
         protected HttpClient Backchannel { get; private set; }
 
         protected ILogger Logger { get; private set; }
+
+        protected IEventBus EventBus { get; private set; }
 
         public override async Task<bool> InvokeAsync()
         {
@@ -56,7 +58,7 @@ namespace Microsoft.AspNet.Security.OAuth
             };
             ticket.Properties.RedirectUri = null;
 
-            await Options.Notifications.ReturnEndpoint(context);
+            await EventBus.RaiseAsync(context);
 
             if (context.SignInAsAuthenticationType != null && context.Identity != null)
             {
@@ -174,11 +176,20 @@ namespace Microsoft.AspNet.Security.OAuth
             {
                 Properties = properties,
             };
-            await Options.Notifications.GetUserInformationAsync(context);
+            // Apply default behavior if not handled
+            if (!await EventBus.RaiseAsync(context))
+            {
+                await OAuthAuthenticationDefaults.DefaultOnGetUserInformationAsync.Invoke(context);
+            }
             return new AuthenticationTicket(context.Identity, context.Properties);
         }
 
         protected override void ApplyResponseChallenge()
+        {
+            ApplyResponseChallengeAsync().GetAwaiter().GetResult();
+        }
+
+        protected override async Task ApplyResponseChallengeAsync()
         {
             if (Response.StatusCode != 401)
             {
@@ -219,7 +230,11 @@ namespace Microsoft.AspNet.Security.OAuth
             var redirectContext = new OAuthApplyRedirectContext(
                 Context, Options,
                 properties, authorizationEndpoint);
-            Options.Notifications.ApplyRedirect(redirectContext);
+            // If not handled apply default redirect
+            if (!await EventBus.RaiseAsync(redirectContext))
+            {
+                Context.Response.Redirect(redirectContext.RedirectUri);
+            }
         }
 
         protected virtual string BuildChallengeUrl(AuthenticationProperties properties, string redirectUri)

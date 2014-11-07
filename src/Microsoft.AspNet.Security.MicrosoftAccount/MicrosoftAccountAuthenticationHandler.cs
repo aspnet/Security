@@ -1,13 +1,10 @@
 ﻿// Copyright (c) Microsoft Open Technologies, Inc. All rights reserved.
 // Licensed under the Apache License, Version 2.0. See License.txt in the project root for license information.
 
-using System;
-using System.Collections.Generic;
 using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Security.Claims;
 using System.Threading.Tasks;
-using Microsoft.AspNet.Http;
 using Microsoft.AspNet.Http.Security;
 using Microsoft.AspNet.Security.OAuth;
 using Microsoft.Framework.Logging;
@@ -15,10 +12,10 @@ using Newtonsoft.Json.Linq;
 
 namespace Microsoft.AspNet.Security.MicrosoftAccount
 {
-    internal class MicrosoftAccountAuthenticationHandler : OAuthAuthenticationHandler<MicrosoftAccountAuthenticationOptions, IMicrosoftAccountAuthenticationNotifications>
+    internal class MicrosoftAccountAuthenticationHandler : OAuthAuthenticationHandler<MicrosoftAccountAuthenticationOptions>
     {
-        public MicrosoftAccountAuthenticationHandler(HttpClient httpClient, ILogger logger)
-            : base(httpClient, logger)
+        public MicrosoftAccountAuthenticationHandler(HttpClient httpClient, ILogger logger, IEventBus events)
+            : base(httpClient, logger, events)
         {
         }
 
@@ -50,7 +47,7 @@ namespace Microsoft.AspNet.Security.MicrosoftAccount
                 context.Identity.AddClaim(new Claim(ClaimTypes.Email, context.Email, ClaimValueTypes.String, Options.AuthenticationType));
             }
 
-            await Options.Notifications.Authenticated(context);
+            await EventBus.RaiseAsync(context);
 
             return new AuthenticationTicket(context.Identity, context.Properties);
         }

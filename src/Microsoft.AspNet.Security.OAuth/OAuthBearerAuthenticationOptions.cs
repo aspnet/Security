@@ -33,13 +33,6 @@ namespace Microsoft.AspNet.Security.OAuth
         public string Challenge { get; set; }
 
         /// <summary>
-        /// The object provided by the application to process events raised by the bearer authentication middleware.
-        /// The application may implement the interface fully, or it may create an instance of OAuthBearerAuthenticationProvider
-        /// and assign delegates only to the events it wants to process.
-        /// </summary>
-        public IOAuthBearerAuthenticationNotifications Notifications { get; set; }
-
-        /// <summary>
         /// The data format used to un-protect the information contained in the access token.
         /// If not provided by the application the default data protection provider depends on the host server. 
         /// The SystemWeb host on IIS will use ASP.NET machine key data protection, and HttpListener and other self-hosted

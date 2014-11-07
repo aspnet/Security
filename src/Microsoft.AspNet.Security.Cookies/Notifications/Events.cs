@@ -9,18 +9,20 @@ using System.Threading.Tasks;
 namespace Microsoft.AspNet.Security.Cookies
 {
     // TODO: rename BaseContext -> BaseEvent
-    public class CookieEventHandler<TCookieEvent> : IEventHandler<TCookieEvent> where TCookieEvent : BaseContext<CookieAuthenticationOptions>
+    public class AuthenticationEventHandler<TEvent, TOptions> : IEventHandler<TEvent> 
+        where TOptions : AuthenticationOptions
+        where TEvent : BaseContext<TOptions> 
     {
-        private readonly Func<TCookieEvent, Task<bool>> _handler;
+        private readonly Func<TEvent, Task<bool>> _handler;
         private readonly string _authenticationType;
 
-        public CookieEventHandler(string authenticationType, Func<TCookieEvent, Task<bool>> handler)
+        public AuthenticationEventHandler(string authenticationType, Func<TEvent, Task<bool>> handler)
         {
             _handler = handler;
             _authenticationType = authenticationType;
         }
 
-        public Task<bool> HandleAsync(TCookieEvent ev)
+        public Task<bool> HandleAsync(TEvent ev)
         {
             // REVIEW: should we allow unspecified auth type to hook all cookies?
             if (string.IsNullOrWhiteSpace(_authenticationType) ||

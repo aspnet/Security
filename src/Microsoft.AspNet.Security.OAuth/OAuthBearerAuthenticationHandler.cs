@@ -12,11 +12,13 @@ namespace Microsoft.AspNet.Security.OAuth
     {
         private readonly ILogger _logger;
         private readonly string _challenge;
+        private readonly IEventBus _events;
 
-        public OAuthBearerAuthenticationHandler(ILogger logger, string challenge)
+        public OAuthBearerAuthenticationHandler(ILogger logger, string challenge, IEventBus events)
         {
             _logger = logger;
             _challenge = challenge;
+            _events = events;
         }
 
         protected override AuthenticationTicket AuthenticateCore()
@@ -41,7 +43,7 @@ namespace Microsoft.AspNet.Security.OAuth
 
                 // Give application opportunity to find from a different location, adjust, or reject token
                 var requestTokenContext = new OAuthRequestTokenContext(Context, requestToken);
-                await Options.Notifications.RequestToken(requestTokenContext);
+                await _events.RaiseAsync(requestTokenContext);
 
                 // If no token found, no further work possible
                 if (string.IsNullOrEmpty(requestTokenContext.Token))
@@ -88,7 +90,7 @@ namespace Microsoft.AspNet.Security.OAuth
                     context.Validated();
                 }
 
-                await Options.Notifications.ValidateIdentity(context);
+                await _events.RaiseAsync(context);
                 if (!context.IsValidated)
                 {
                     return null;
@@ -106,6 +108,11 @@ namespace Microsoft.AspNet.Security.OAuth
 
         protected override void ApplyResponseChallenge()
         {
+            ApplyResponseChallengeAsync().GetAwaiter().GetResult();
+        }
+
+        protected override async Task ApplyResponseChallengeAsync()
+        {
             if (Response.StatusCode != 401)
             {
                 return;
@@ -114,7 +121,11 @@ namespace Microsoft.AspNet.Security.OAuth
             if (ChallengeContext != null)
             {
                 OAuthChallengeContext challengeContext = new OAuthChallengeContext(Context, _challenge);
-                Options.Notifications.ApplyChallenge(challengeContext);
+                // Apply default behavior if not handled
+                if (!await _events.RaiseAsync(challengeContext))
+                {
+                    Context.Response.Headers.AppendValues("WWW-Authenticate", _challenge);
+                }
             }
         }
 

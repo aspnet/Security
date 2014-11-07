@@ -20,10 +20,10 @@ using Microsoft.AspNet.TestHost;
 using Newtonsoft.Json;
 using Shouldly;
 using Xunit;
-using Microsoft.Framework.OptionsModel;
 using Microsoft.Framework.DependencyInjection;
 using Microsoft.AspNet.Security.DataHandler;
 using Microsoft.AspNet.Security.DataProtection;
+using Microsoft.AspNet.Security.OAuth;
 
 namespace Microsoft.AspNet.Security.Tests.MicrosoftAccount
 {
@@ -32,24 +32,25 @@ namespace Microsoft.AspNet.Security.Tests.MicrosoftAccount
         [Fact]
         public async Task ChallengeWillTriggerApplyRedirectEvent()
         {
+            var services = new ServiceCollection();
+            services.AddInstance<IEventHandler>(new AuthenticationEventHandler<OAuthApplyRedirectContext, OAuthAuthenticationOptions>(
+                null,
+                context =>
+                {
+                    context.Response.Redirect(context.RedirectUri + "&custom=test");
+                    return Task.FromResult(true);
+                }));
             var server = CreateServer(
                 options =>
                 {
                     options.ClientId = "Test Client Id";
                     options.ClientSecret = "Test Client Secret";
-                    options.Notifications = new MicrosoftAccountAuthenticationNotifications
-                    {
-                        OnApplyRedirect = context =>
-                        {
-                            context.Response.Redirect(context.RedirectUri + "&custom=test");
-                        }
-                    };
                 },
                 context =>
                 {
                     context.Response.Challenge("Microsoft");
                     return true;
-                });
+                }, services);
             var transaction = await SendAsync(server, "http://example.com/challenge");
             transaction.Response.StatusCode.ShouldBe(HttpStatusCode.Redirect);
             var query = transaction.Response.Headers.Location.Query;
@@ -85,6 +86,15 @@ namespace Microsoft.AspNet.Security.Tests.MicrosoftAccount
         public async Task AuthenticatedEventCanGetRefreshToken()
         {
             ISecureDataFormat<AuthenticationProperties> stateFormat = new PropertiesDataFormat(new EphemeralDataProtectionProvider().CreateProtector("MsftTest"));
+            var services = new ServiceCollection();
+            services.AddInstance<IEventHandler>(new AuthenticationEventHandler<MicrosoftAccountAuthenticatedContext, OAuthAuthenticationOptions>(
+                null,
+                context =>
+                {
+                    var refreshToken = context.RefreshToken;
+                    context.Identity.AddClaim(new Claim("RefreshToken", refreshToken));
+                    return Task.FromResult(true);
+                }));
             var server = CreateServer(
                 options =>
                 {
@@ -123,21 +133,12 @@ namespace Microsoft.AspNet.Security.Tests.MicrosoftAccount
                             return null;
                         }
                     };
-                    options.Notifications = new MicrosoftAccountAuthenticationNotifications
-                    {
-                        OnAuthenticated = context =>
-                        {
-                            var refreshToken = context.RefreshToken;
-                            context.Identity.AddClaim(new Claim("RefreshToken", refreshToken));
-                            return Task.FromResult<object>(null);
-                        }
-                    };
                 },
                 context =>
                 {
                     Describe(context.Response, (ClaimsIdentity)context.User.Identity);
                     return true;
-                });
+                }, services);
             var properties = new AuthenticationProperties();
             var correlationKey = ".AspNet.Correlation.Microsoft";
             var correlationValue = "TestCorrelationId";
@@ -159,7 +160,7 @@ namespace Microsoft.AspNet.Security.Tests.MicrosoftAccount
             transaction.FindClaimValue("RefreshToken").ShouldBe("Test Refresh Token");
         }
 
-        private static TestServer CreateServer(Action<MicrosoftAccountAuthenticationOptions> configureOptions, Func<HttpContext, bool> handler)
+        private static TestServer CreateServer(Action<MicrosoftAccountAuthenticationOptions> configureOptions, Func<HttpContext, bool> handler, IServiceCollection defaultServices = null)
         {
             return TestServer.Create(app =>
             {
@@ -170,6 +171,10 @@ namespace Microsoft.AspNet.Security.Tests.MicrosoftAccount
                     {
                         options.SignInAsAuthenticationType = "External";
                     });
+                    if (defaultServices != null)
+                    {
+                        services.Add(defaultServices);
+                    }
                 });
                 app.UseCookieAuthentication(options => options.AuthenticationType = "External");
                 app.UseMicrosoftAccountAuthentication(configureOptions);

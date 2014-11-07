@@ -19,10 +19,10 @@ using Microsoft.AspNet.TestHost;
 using Newtonsoft.Json;
 using Shouldly;
 using Xunit;
-using Microsoft.Framework.OptionsModel;
 using Microsoft.Framework.DependencyInjection;
 using Microsoft.AspNet.Security.DataProtection;
 using Microsoft.AspNet.Security.DataHandler;
+using Microsoft.AspNet.Security.OAuth;
 
 namespace Microsoft.AspNet.Security.Google
 {
@@ -182,18 +182,19 @@ namespace Microsoft.AspNet.Security.Google
         [Fact]
         public async Task ChallengeWillTriggerApplyRedirectEvent()
         {
+            var services = new ServiceCollection();
+            services.AddInstance<IEventHandler>(new AuthenticationEventHandler<OAuthApplyRedirectContext, OAuthAuthenticationOptions>(
+                null,
+                context =>
+                {
+                    context.Response.Redirect(context.RedirectUri + "&custom=test");
+                    return Task.FromResult(true);
+                }));
             var server = CreateServer(options =>
             {
                 options.ClientId = "Test Id";
                 options.ClientSecret = "Test Secret";
-                options.Notifications = new GoogleAuthenticationNotifications
-                {
-                    OnApplyRedirect = context =>
-                        {
-                            context.Response.Redirect(context.RedirectUri + "&custom=test");
-                        }
-                };
-            });
+            }, null, services);
             var transaction = await SendAsync(server, "https://example.com/challenge");
             transaction.Response.StatusCode.ShouldBe(HttpStatusCode.Redirect);
             var query = transaction.Response.Headers.Location.Query;
@@ -350,6 +351,16 @@ namespace Microsoft.AspNet.Security.Google
         public async Task AuthenticatedEventCanGetRefreshToken()
         {
             ISecureDataFormat<AuthenticationProperties> stateFormat = new PropertiesDataFormat(new EphemeralDataProtectionProvider().CreateProtector("GoogleTest"));
+            var services = new ServiceCollection();
+            services.AddInstance<IEventHandler>(new AuthenticationEventHandler<GoogleAuthenticatedContext, OAuthAuthenticationOptions>(
+                null,
+                context =>
+                {
+                    var refreshToken = context.RefreshToken;
+                    context.Identity.AddClaim(new Claim("RefreshToken", refreshToken));
+                    return Task.FromResult(true);
+                }));
+
             var server = CreateServer(options =>
             {
                 options.ClientId = "Test Id";
@@ -395,16 +406,7 @@ namespace Microsoft.AspNet.Security.Google
                         return null;
                     }
                 };
-                options.Notifications = new GoogleAuthenticationNotifications()
-                {
-                    OnAuthenticated = context =>
-                        {
-                            var refreshToken = context.RefreshToken;
-                            context.Identity.AddClaim(new Claim("RefreshToken", refreshToken));
-                            return Task.FromResult<object>(null);
-                        }
-                };
-            });
+            }, null, services);
             var properties = new AuthenticationProperties();
             var correlationKey = ".AspNet.Correlation.Google";
             var correlationValue = "TestCorrelationId";
@@ -461,13 +463,17 @@ namespace Microsoft.AspNet.Security.Google
             return transaction;
         }
 
-        private static TestServer CreateServer(Action<GoogleAuthenticationOptions> configureOptions, Func<HttpContext, Task> testpath = null)
+        private static TestServer CreateServer(Action<GoogleAuthenticationOptions> configureOptions, Func<HttpContext, Task> testpath = null, IServiceCollection defaultServices = null)
         {
             return TestServer.Create(app =>
             {
                 app.UseServices(services =>
                 {
                     services.AddSingleton<IEventBus, EventBus>();
+                    if (defaultServices != null)
+                    {
+                        services.Add(defaultServices);
+                    }
                     services.Configure<ExternalAuthenticationOptions>(options =>
                     {
                         options.SignInAsAuthenticationType = CookieAuthenticationType;

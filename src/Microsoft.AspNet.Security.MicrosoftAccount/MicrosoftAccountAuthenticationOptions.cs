@@ -9,7 +9,7 @@ namespace Microsoft.AspNet.Security.MicrosoftAccount
     /// <summary>
     /// Configuration options for <see cref="MicrosoftAccountAuthenticationMiddleware"/>.
     /// </summary>
-    public class MicrosoftAccountAuthenticationOptions : OAuthAuthenticationOptions<IMicrosoftAccountAuthenticationNotifications>
+    public class MicrosoftAccountAuthenticationOptions : OAuthAuthenticationOptions
     {
         /// <summary>
         /// Initializes a new <see cref="MicrosoftAccountAuthenticationOptions"/>.

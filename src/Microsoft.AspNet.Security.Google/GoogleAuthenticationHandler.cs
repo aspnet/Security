@@ -15,10 +15,10 @@ using Newtonsoft.Json.Linq;
 
 namespace Microsoft.AspNet.Security.Google
 {
-    internal class GoogleAuthenticationHandler : OAuthAuthenticationHandler<GoogleAuthenticationOptions, IGoogleAuthenticationNotifications>
+    internal class GoogleAuthenticationHandler : OAuthAuthenticationHandler<GoogleAuthenticationOptions>
     {
-        public GoogleAuthenticationHandler(HttpClient httpClient, ILogger logger)
-            : base(httpClient, logger)
+        public GoogleAuthenticationHandler(HttpClient httpClient, ILogger logger, IEventBus events)
+            : base(httpClient, logger, events)
         {
         }
 
@@ -70,7 +70,7 @@ namespace Microsoft.AspNet.Security.Google
             }
             context.Properties = properties;
 
-            await Options.Notifications.Authenticated(context);
+            await EventBus.RaiseAsync(context);
 
             return new AuthenticationTicket(context.Identity, context.Properties);
         }

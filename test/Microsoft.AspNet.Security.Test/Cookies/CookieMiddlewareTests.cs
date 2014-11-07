@@ -255,7 +255,7 @@ namespace Microsoft.AspNet.Security.Cookies
         {
             var clock = new TestClock();
             var services = new ServiceCollection();
-            services.AddInstance<IEventHandler>(new CookieEventHandler<CookieResponseSignInContext>(
+            services.AddInstance<IEventHandler>(new AuthenticationEventHandler<CookieResponseSignInContext, CookieAuthenticationOptions>(
                 null,
                 context =>
                 {
@@ -268,13 +268,6 @@ namespace Microsoft.AspNet.Security.Cookies
                 options.SystemClock = clock;
                 options.ExpireTimeSpan = TimeSpan.FromMinutes(10);
                 options.SlidingExpiration = false;
-                //options.Notifications = new CookieAuthenticationNotifications()
-                //{
-                //    OnResponseSignIn = context =>
-                //    {
-                //        context.Properties.ExpiresUtc = clock.UtcNow.Add(TimeSpan.FromMinutes(5));
-                //    }
-                //};
             }, 
             SignInAsAlice, services);
 
