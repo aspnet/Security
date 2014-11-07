@@ -2,6 +2,8 @@
 // Licensed under the Apache License, Version 2.0. See License.txt in the project root for license information.
 
 
+using Microsoft.Framework.DependencyInjection;
+using Microsoft.Framework.OptionsModel;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -14,6 +16,25 @@ namespace Microsoft.AspNet.Security
     {
         // Returns true if anyone handled the event
         Task<bool> RaiseAsync(object ev);
+    }
+
+    public class EventBusOptions
+    {
+        public IList<IEventHandler> Handlers { get; private set; } = new List<IEventHandler>();
+    }
+
+    public static class EventServiceCollectionExtensions
+    {
+        public static IServiceCollection AddEventHandler<TEvent>(this IServiceCollection services, Func<TEvent, Task<bool>> action)
+        {
+            services.AddInstance(new EventHandler<TEvent>(ev => action(ev)));
+            return services;
+        }
+
+        public static IServiceCollection ConfigureEventBus(this IServiceCollection services, Action<EventBusOptions> configure)
+        {
+            return services.Configure(configure);
+        }
     }
 
     // use DI to find subscribers of event
@@ -45,12 +66,12 @@ namespace Microsoft.AspNet.Security
 
     public class EventBus : IEventBus
     {
-        private IEnumerable<IEventHandler> _handlers;
-
-        public EventBus(IEnumerable<IEventHandler> handlers)
+        public EventBus(IOptions<EventBusOptions> options)
         {
-            _handlers = handlers;
+            Options = options.Options;
         }
+
+        public EventBusOptions Options { get; private set; }
 
         private static async Task<bool> InvokeHandle(IEventHandler handler, object ev)
         {
@@ -64,7 +85,7 @@ namespace Microsoft.AspNet.Security
             // TODO: cache
 
             var handlerType = typeof(IEventHandler<>).MakeGenericType(ev.GetType());
-            var query = _handlers.Where(h => handlerType.GetTypeInfo().IsAssignableFrom(h.GetType().GetTypeInfo()));
+            var query = Options.Handlers.Where(h => handlerType.GetTypeInfo().IsAssignableFrom(h.GetType().GetTypeInfo()));
             var handlers = query.ToArray().Cast<IEventHandler>();
 
             // DI will enumerate in reverse order of registration, 

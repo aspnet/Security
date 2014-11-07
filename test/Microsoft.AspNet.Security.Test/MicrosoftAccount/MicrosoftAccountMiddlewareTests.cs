@@ -33,8 +33,7 @@ namespace Microsoft.AspNet.Security.Tests.MicrosoftAccount
         public async Task ChallengeWillTriggerApplyRedirectEvent()
         {
             var services = new ServiceCollection();
-            services.AddInstance<IEventHandler>(new AuthenticationEventHandler<OAuthApplyRedirectContext, OAuthAuthenticationOptions>(
-                null,
+            services.ConfigureEventBus(options => options.AddAuthenticationEventHandler<OAuthApplyRedirectContext, OAuthAuthenticationOptions>(
                 context =>
                 {
                     context.Response.Redirect(context.RedirectUri + "&custom=test");
@@ -87,14 +86,17 @@ namespace Microsoft.AspNet.Security.Tests.MicrosoftAccount
         {
             ISecureDataFormat<AuthenticationProperties> stateFormat = new PropertiesDataFormat(new EphemeralDataProtectionProvider().CreateProtector("MsftTest"));
             var services = new ServiceCollection();
-            services.AddInstance<IEventHandler>(new AuthenticationEventHandler<MicrosoftAccountAuthenticatedContext, OAuthAuthenticationOptions>(
-                null,
-                context =>
-                {
-                    var refreshToken = context.RefreshToken;
-                    context.Identity.AddClaim(new Claim("RefreshToken", refreshToken));
-                    return Task.FromResult(true);
-                }));
+            services.Configure<EventBusOptions>(options =>
+            {
+                options.AddAuthenticationEventHandler<MicrosoftAccountAuthenticatedContext, OAuthAuthenticationOptions>(
+                    context =>
+                    {
+                        var refreshToken = context.RefreshToken;
+                        context.Identity.AddClaim(new Claim("RefreshToken", refreshToken));
+                        return Task.FromResult(0);
+                    });
+            });
+
             var server = CreateServer(
                 options =>
                 {

@@ -255,13 +255,16 @@ namespace Microsoft.AspNet.Security.Cookies
         {
             var clock = new TestClock();
             var services = new ServiceCollection();
-            services.AddInstance<IEventHandler>(new AuthenticationEventHandler<CookieResponseSignInContext, CookieAuthenticationOptions>(
-                null,
-                context =>
-                {
-                    context.Properties.ExpiresUtc = clock.UtcNow.Add(TimeSpan.FromMinutes(5));
-                    return Task.FromResult(true);
-                }));
+            services.AddSingleton<IEventBus, EventBus>();
+            services.Configure<EventBusOptions>(options =>
+            {
+                options.AddAuthenticationEventHandler<CookieResponseSignInContext, CookieAuthenticationOptions>(
+                    context =>
+                    {
+                        context.Properties.ExpiresUtc = clock.UtcNow.Add(TimeSpan.FromMinutes(5));
+                        return Task.FromResult(true);
+                    });
+            });
 
             TestServer server = CreateServer(options =>
             {
@@ -373,11 +376,11 @@ namespace Microsoft.AspNet.Security.Cookies
             {
                 app.UseServices(services =>
                 {
+                    services.AddSingleton<IEventBus, EventBus>();
                     if (defaultServices != null)
                     {
                         services.Add(defaultServices);
                     }
-                    services.AddSingleton<IEventBus, EventBus>();
                 });
                 app.UseCookieAuthentication(configureOptions);
                 app.Use(async (context, next) =>

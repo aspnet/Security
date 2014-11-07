@@ -27,8 +27,7 @@ namespace Microsoft.AspNet.Security.Twitter
         public async Task ChallengeWillTriggerApplyRedirectEvent()
         {
             var services = new ServiceCollection();
-            services.AddInstance<IEventHandler>(new AuthenticationEventHandler<TwitterApplyRedirectContext, TwitterAuthenticationOptions>(
-                "Twitter",
+            services.ConfigureEventBus(options => options.AddAuthenticationEventHandler<TwitterApplyRedirectContext, TwitterAuthenticationOptions>(
                 context =>
                 {
                     context.Response.Redirect(context.RedirectUri + "&custom=test");

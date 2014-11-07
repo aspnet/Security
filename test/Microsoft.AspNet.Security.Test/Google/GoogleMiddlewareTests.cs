@@ -23,6 +23,7 @@ using Microsoft.Framework.DependencyInjection;
 using Microsoft.AspNet.Security.DataProtection;
 using Microsoft.AspNet.Security.DataHandler;
 using Microsoft.AspNet.Security.OAuth;
+using Microsoft.AspNet.Security;
 
 namespace Microsoft.AspNet.Security.Google
 {
@@ -183,8 +184,7 @@ namespace Microsoft.AspNet.Security.Google
         public async Task ChallengeWillTriggerApplyRedirectEvent()
         {
             var services = new ServiceCollection();
-            services.AddInstance<IEventHandler>(new AuthenticationEventHandler<OAuthApplyRedirectContext, OAuthAuthenticationOptions>(
-                null,
+            services.ConfigureEventBus(options => options.AddAuthenticationEventHandler<OAuthApplyRedirectContext, OAuthAuthenticationOptions>(
                 context =>
                 {
                     context.Response.Redirect(context.RedirectUri + "&custom=test");
@@ -352,14 +352,16 @@ namespace Microsoft.AspNet.Security.Google
         {
             ISecureDataFormat<AuthenticationProperties> stateFormat = new PropertiesDataFormat(new EphemeralDataProtectionProvider().CreateProtector("GoogleTest"));
             var services = new ServiceCollection();
-            services.AddInstance<IEventHandler>(new AuthenticationEventHandler<GoogleAuthenticatedContext, OAuthAuthenticationOptions>(
-                null,
-                context =>
-                {
-                    var refreshToken = context.RefreshToken;
-                    context.Identity.AddClaim(new Claim("RefreshToken", refreshToken));
-                    return Task.FromResult(true);
-                }));
+            services.Configure<EventBusOptions>(options =>
+            {
+                options.AddAuthenticationEventHandler<GoogleAuthenticatedContext, OAuthAuthenticationOptions>(
+                    context =>
+                    {
+                        var refreshToken = context.RefreshToken;
+                        context.Identity.AddClaim(new Claim("RefreshToken", refreshToken));
+                        return Task.FromResult(true);
+                    });
+            });
 
             var server = CreateServer(options =>
             {

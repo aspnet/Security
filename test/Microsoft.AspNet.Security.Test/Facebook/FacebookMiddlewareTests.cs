@@ -35,8 +35,7 @@ namespace Microsoft.AspNet.Security.Facebook
                             options.AppSecret = "Test App Secret";
                         });
 
-                        services.AddInstance<IEventHandler>(new AuthenticationEventHandler<OAuthApplyRedirectContext, OAuthAuthenticationOptions>(
-                            null /* authtype */,
+                        services.ConfigureEventBus(options => options.AddAuthenticationEventHandler<OAuthApplyRedirectContext, OAuthAuthenticationOptions>(
                             context =>
                             {
                                 context.Response.Redirect(context.RedirectUri + "&custom=test");

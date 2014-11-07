@@ -3,11 +3,30 @@
 
 
 using Microsoft.AspNet.Security.Notifications;
+using Microsoft.Framework.DependencyInjection;
 using System;
 using System.Threading.Tasks;
 
 namespace Microsoft.AspNet.Security.Cookies
 {
+    public static class AuthenticationServiceCollectionExtensions
+    {
+        public static void AddAuthenticationEventHandler<TEvent, TOptions>(
+            this EventBusOptions options, 
+            Func<TEvent, Task> action, 
+            string authenticationType = null,
+            bool handled = true)
+            where TOptions : AuthenticationOptions
+            where TEvent : BaseContext<TOptions>
+        {
+            options.Handlers.Add(new AuthenticationEventHandler<TEvent, TOptions>(authenticationType, async ev =>
+            {
+                await action(ev);
+                return handled;
+            }));
+        }
+    }
+
     // TODO: rename BaseContext -> BaseEvent
     public class AuthenticationEventHandler<TEvent, TOptions> : IEventHandler<TEvent> 
         where TOptions : AuthenticationOptions
