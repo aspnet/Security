@@ -87,7 +87,7 @@ namespace Microsoft.AspNet.Security
             return AuthorizeAsync(claims, user, resource).GetAwaiter().GetResult();
         }
 
-        private bool ClaimsMatch([NotNull] IEnumerable<Claim> x, [NotNull] IEnumerable<Claim> y)
+        private static bool ClaimsMatch([NotNull] IEnumerable<Claim> x, [NotNull] IEnumerable<Claim> y)
         {
             return x.Any(claim => 
                         y.Any(userClaim => 
