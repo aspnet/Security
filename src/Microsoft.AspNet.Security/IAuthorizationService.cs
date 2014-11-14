@@ -12,22 +12,18 @@ namespace Microsoft.AspNet.Security
     public interface IAuthorizationManager
     {
         // User is asking for the following named actions
-        Task<bool> AuthorizeAsync(IEnumerable<IAuthorizationAction> requestedActions, ClaimsPrincipal user, params object[] resources);
-
         Task<bool> AuthorizeAsync<TPolicy>(ClaimsPrincipal user, params object[] resources) where TPolicy : IAuthorizationPolicy;
-    }
 
-    // Do we need this interface?  Could just use a string otherwise
-    public interface IAuthorizationAction
-    {
-        string Name { get; set; }
+        void Register<TPolicy>();
     }
 
     public class AuthorizationContext
     {
-        public IEnumerable<IAuthorizationAction> Actions { get; private set; }
+        //Support multiple? public IEnumerable<IAuthorizationAction> Policy { get; private set; }
+        public IAuthorizationPolicy Policy { get; private set; }
         public ClaimsPrincipal User { get; private set; }
         public IEnumerable<object> Resources { get; private set; }
+        public bool Authorized { get; set; }
     }
 
     public interface IAuthorizationPolicy 
@@ -35,7 +31,7 @@ namespace Microsoft.AspNet.Security
         // Unique name for the policy
         string Name { get; }
 
-        Task<bool> AuthorizeAsync(AuthorizationContext context);
+        Task AuthorizeAsync(AuthorizationContext context);
     }
     // TODO: Want to name it IAuthorizationPolicy but its taken, also could represent an action?
 
@@ -54,9 +50,10 @@ namespace Microsoft.AspNet.Security
 
         public string Name { get; private set; }
 
-        public Task<bool> AuthorizeAsync(AuthorizationContext context)
+        public Task AuthorizeAsync(AuthorizationContext context)
         {
-            return Task.FromResult(ClaimsMatch(context.User.Claims.ToList(), _claims));
+            context.Authorized = ClaimsMatch(context.User.Claims.ToList(), _claims);
+            return Task.FromResult(0);
         }
 
         private static bool ClaimsMatch([NotNull] IEnumerable<Claim> x, [NotNull] IEnumerable<Claim> y)
@@ -83,24 +80,13 @@ namespace Microsoft.AspNet.Security
 
         public string Name { get; private set; }
 
-        public Task<bool> AuthorizeAsync(AuthorizationContext context)
+        public Task AuthorizeAsync(AuthorizationContext context)
         {
             var userIdClaim = context.User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.NameIdentifier);
             if (userIdClaim != null) {
-                return Task.FromResult(_allowedUserIds.Any(id => id == userIdClaim.Value));
+                context.Authorized = _allowedUserIds.Any(id => id == userIdClaim.Value);
             }
-            return Task.FromResult(false);
-        }
-
-        private static bool ClaimsMatch([NotNull] IEnumerable<Claim> x, [NotNull] IEnumerable<Claim> y)
-        {
-            return x.Any(claim =>
-                        y.Any(userClaim =>
-                            string.Equals(claim.Type, userClaim.Type, StringComparison.OrdinalIgnoreCase) &&
-                            string.Equals(claim.Value, userClaim.Value, StringComparison.Ordinal)
-                        )
-                    );
-
+            return Task.FromResult(0);
         }
     }
 
