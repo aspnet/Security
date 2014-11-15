@@ -28,11 +28,13 @@ namespace Microsoft.AspNet.Security.Twitter
 
         private readonly HttpClient _httpClient;
         private readonly ILogger _logger;
+        private readonly IEventBus _events;
 
-        public TwitterAuthenticationHandler(HttpClient httpClient, ILogger logger)
+        public TwitterAuthenticationHandler(HttpClient httpClient, ILogger logger, IEventBus events)
         {
             _httpClient = httpClient;
             _logger = logger;
+            _events = events;
         }
 
         public override async Task<bool> InvokeAsync()
@@ -112,7 +114,7 @@ namespace Microsoft.AspNet.Security.Twitter
 
                 Response.Cookies.Delete(StateCookie, cookieOptions);
 
-                await Options.Notifications.Authenticated(context);
+                await _events.RaiseAsync(context);
 
                 return new AuthenticationTicket(context.Identity, context.Properties);
             }
@@ -174,7 +176,11 @@ namespace Microsoft.AspNet.Security.Twitter
                 var redirectContext = new TwitterApplyRedirectContext(
                     Context, Options,
                     properties, twitterAuthenticationEndpoint);
-                Options.Notifications.ApplyRedirect(redirectContext);
+                // If no one handled the redirect, apply the default behavior
+                if (!await _events.RaiseAsync(redirectContext))
+                {
+                    redirectContext.Response.Redirect(redirectContext.RedirectUri);
+                }
             }
             else
             {
@@ -199,7 +205,7 @@ namespace Microsoft.AspNet.Security.Twitter
             };
             model.Properties.RedirectUri = null;
 
-            await Options.Notifications.ReturnEndpoint(context);
+            await _events.RaiseAsync(context);
 
             if (context.SignInAsAuthenticationType != null && context.Identity != null)
             {

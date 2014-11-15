@@ -9,13 +9,12 @@ using System.Net.Http;
 using System.Threading.Tasks;
 using Microsoft.AspNet.Builder;
 using Microsoft.AspNet.Http;
-using Microsoft.AspNet.Http.Security;
 using Microsoft.AspNet.Security.Cookies;
 using Microsoft.AspNet.TestHost;
 using Microsoft.Framework.DependencyInjection;
-using Microsoft.Framework.OptionsModel;
 using Shouldly;
 using Xunit;
+using Microsoft.AspNet.Security.OAuth;
 
 namespace Microsoft.AspNet.Security.Facebook
 {
@@ -29,18 +28,19 @@ namespace Microsoft.AspNet.Security.Facebook
                 {
                     app.UseServices(services =>
                     {
+                        services.AddSingleton<IEventBus, EventBus>();
                         services.ConfigureFacebookAuthentication(options =>
                         {
                             options.AppId = "Test App Id";
                             options.AppSecret = "Test App Secret";
-                            options.Notifications = new FacebookAuthenticationNotifications
-                            {
-                                OnApplyRedirect = context =>
-                                {
-                                    context.Response.Redirect(context.RedirectUri + "&custom=test");
-                                }
-                            };
                         });
+
+                        services.ConfigureEventBus(options => options.AddAuthenticationEventHandler<OAuthApplyRedirectContext, OAuthAuthenticationOptions>(
+                            context =>
+                            {
+                                context.Response.Redirect(context.RedirectUri + "&custom=test");
+                                return Task.FromResult(true);
+                            }));
                         services.ConfigureCookieAuthentication(options =>
                         {
                             options.AuthenticationType = "External";
@@ -72,6 +72,7 @@ namespace Microsoft.AspNet.Security.Facebook
                 {
                     app.UseServices(services =>
                     {
+                        services.AddSingleton<IEventBus, EventBus>();
                         services.ConfigureFacebookAuthentication(options =>
                         {
                             options.AppId = "Test App Id";

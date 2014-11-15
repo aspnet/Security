@@ -1,7 +1,6 @@
 // Copyright (c) Microsoft Open Technologies, Inc. All rights reserved.
 // Licensed under the Apache License, Version 2.0. See License.txt in the project root for license information.
 
-
 using System;
 using System.Linq;
 using System.Security.Claims;
@@ -23,15 +22,17 @@ namespace Microsoft.AspNet.Security.Cookies
         private const string SessionIdClaim = "Microsoft.AspNet.Security.Cookies-SessionId";
 
         private readonly ILogger _logger;
+        private readonly IEventBus _events;
 
         private bool _shouldRenew;
         private DateTimeOffset _renewIssuedUtc;
         private DateTimeOffset _renewExpiresUtc;
         private string _sessionKey;
 
-        public CookieAuthenticationHandler([NotNull] ILogger logger)
+        public CookieAuthenticationHandler([NotNull] ILogger logger, [NotNull] IEventBus events)
         {
             _logger = logger;
+            _events = events;
         }
 
         protected override AuthenticationTicket AuthenticateCore()
@@ -104,16 +105,14 @@ namespace Microsoft.AspNet.Security.Cookies
                 }
 
                 var context = new CookieValidateIdentityContext(Context, ticket, Options);
-
-                await Options.Notifications.ValidateIdentity(context);
-
+                await _events.RaiseAsync(context);
                 return new AuthenticationTicket(context.Identity, context.Properties);
             }
             catch (Exception exception)
             {
                 CookieExceptionContext exceptionContext = new CookieExceptionContext(Context, Options,
                     CookieExceptionContext.ExceptionLocation.Authenticate, exception, ticket);
-                Options.Notifications.Exception(exceptionContext);
+                await _events.RaiseAsync(exceptionContext);
                 if (exceptionContext.Rethrow)
                 {
                     throw;
@@ -183,7 +182,7 @@ namespace Microsoft.AspNet.Security.Cookies
                         signin.Properties.ExpiresUtc = issuedUtc.Add(Options.ExpireTimeSpan);
                     }
 
-                    Options.Notifications.ResponseSignIn(signInContext);
+                    await _events.RaiseAsync(signInContext);
 
                     if (signInContext.Properties.IsPersistent)
                     {
@@ -219,7 +218,7 @@ namespace Microsoft.AspNet.Security.Cookies
                         signInContext.Identity,
                         signInContext.Properties);
 
-                    Options.Notifications.ResponseSignedIn(signedInContext);
+                    await _events.RaiseAsync(signedInContext);
                 }
                 else if (shouldSignout)
                 {
@@ -232,8 +231,8 @@ namespace Microsoft.AspNet.Security.Cookies
                         Context,
                         Options,
                         cookieOptions);
-                    
-                    Options.Notifications.ResponseSignOut(context);
+
+                    await _events.RaiseAsync(context);
 
                     Options.CookieManager.DeleteCookie(
                         Context,
@@ -290,8 +289,7 @@ namespace Microsoft.AspNet.Security.Cookies
                     if (!string.IsNullOrWhiteSpace(redirectUri)
                         && IsHostRelative(redirectUri))
                     {
-                        var redirectContext = new CookieApplyRedirectContext(Context, Options, redirectUri);
-                        Options.Notifications.ApplyRedirect(redirectContext);
+                        await RaiseRedirect(new CookieApplyRedirectContext(Context, Options, redirectUri));
                     }
                 }
             }
@@ -299,11 +297,20 @@ namespace Microsoft.AspNet.Security.Cookies
             {
                 CookieExceptionContext exceptionContext = new CookieExceptionContext(Context, Options,
                     CookieExceptionContext.ExceptionLocation.ApplyResponseGrant, exception, model);
-                Options.Notifications.Exception(exceptionContext);
+                await _events.RaiseAsync(exceptionContext);
                 if (exceptionContext.Rethrow)
                 {
                     throw;
                 }
+            }
+        }
+
+        private async Task RaiseRedirect(CookieApplyRedirectContext redirectContext)
+        {
+            // If no one handled the redirect, apply the default behavior
+            if (!await _events.RaiseAsync(redirectContext))
+            {
+                DefaultBehavior.ApplyRedirect.Invoke(redirectContext);
             }
         }
 
@@ -321,6 +328,11 @@ namespace Microsoft.AspNet.Security.Cookies
         }
 
         protected override void ApplyResponseChallenge()
+        {
+            ApplyResponseChallengeAsync().GetAwaiter().GetResult();
+        }
+
+        protected override async Task ApplyResponseChallengeAsync()
         {
             if (Response.StatusCode != 401 || !Options.LoginPath.HasValue )
             {
@@ -357,14 +369,13 @@ namespace Microsoft.AspNet.Security.Cookies
                         new QueryString(Options.ReturnUrlParameter, currentUri);
                 }
 
-                var redirectContext = new CookieApplyRedirectContext(Context, Options, loginUri);
-                Options.Notifications.ApplyRedirect(redirectContext);
+                await RaiseRedirect(new CookieApplyRedirectContext(Context, Options, loginUri));
             }
             catch (Exception exception)
             {
                 CookieExceptionContext exceptionContext = new CookieExceptionContext(Context, Options,
                     CookieExceptionContext.ExceptionLocation.ApplyResponseChallenge, exception, ticket: null);
-                Options.Notifications.Exception(exceptionContext);
+                await _events.RaiseAsync(exceptionContext);
                 if (exceptionContext.Rethrow)
                 {
                     throw;

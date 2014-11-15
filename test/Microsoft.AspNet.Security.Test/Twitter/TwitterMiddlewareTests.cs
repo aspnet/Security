@@ -17,6 +17,7 @@ using Shouldly;
 using Xunit;
 using Microsoft.Framework.OptionsModel;
 using Microsoft.Framework.DependencyInjection;
+using Microsoft.AspNet.Security.OAuth;
 
 namespace Microsoft.AspNet.Security.Twitter
 {
@@ -25,18 +26,19 @@ namespace Microsoft.AspNet.Security.Twitter
         [Fact]
         public async Task ChallengeWillTriggerApplyRedirectEvent()
         {
+            var services = new ServiceCollection();
+            services.ConfigureEventBus(options => options.AddAuthenticationEventHandler<TwitterApplyRedirectContext, TwitterAuthenticationOptions>(
+                context =>
+                {
+                    context.Response.Redirect(context.RedirectUri + "&custom=test");
+                    return Task.FromResult(true);
+                }));
+
             var server = CreateServer(
                 app => app.UseTwitterAuthentication(options =>
                 {
                     options.ConsumerKey = "Test Consumer Key";
                     options.ConsumerSecret = "Test Consumer Secret";
-                    options.Notifications = new TwitterAuthenticationNotifications
-                    {
-                        OnApplyRedirect = context =>
-                        {
-                            context.Response.Redirect(context.RedirectUri + "&custom=test");
-                        }
-                    };
                     options.BackchannelHttpHandler = new TestHttpMessageHandler
                     {
                         Sender = req =>
@@ -60,7 +62,7 @@ namespace Microsoft.AspNet.Security.Twitter
                 {
                     context.Response.Challenge("Twitter");
                     return true;
-                });
+                }, services);
             var transaction = await SendAsync(server, "http://example.com/challenge");
             transaction.Response.StatusCode.ShouldBe(HttpStatusCode.Redirect);
             var query = transaction.Response.Headers.Location.Query;
@@ -105,12 +107,17 @@ namespace Microsoft.AspNet.Security.Twitter
             location.ShouldContain("https://twitter.com/oauth/authenticate?oauth_token=");
         }
 
-        private static TestServer CreateServer(Action<IApplicationBuilder> configure, Func<HttpContext, bool> handler)
+        private static TestServer CreateServer(Action<IApplicationBuilder> configure, Func<HttpContext, bool> handler, IServiceCollection defaultServices = null)
         {
             return TestServer.Create(app =>
             {
                 app.UseServices(services =>
                 {
+                    services.AddSingleton<IEventBus, EventBus>();
+                    if (defaultServices != null)
+                    {
+                        services.Add(defaultServices);
+                    }
                     services.Configure<ExternalAuthenticationOptions>(options =>
                     {
                         options.SignInAsAuthenticationType = "External";

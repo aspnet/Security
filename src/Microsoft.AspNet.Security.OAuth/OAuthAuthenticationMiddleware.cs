@@ -18,9 +18,8 @@ namespace Microsoft.AspNet.Security.OAuth
     /// An ASP.NET middleware for authenticating users using OAuth services.
     /// </summary>
     [SuppressMessage("Microsoft.Design", "CA1001:TypesThatOwnDisposableFieldsShouldBeDisposable", Justification = "Middleware are not disposable.")]
-    public class OAuthAuthenticationMiddleware<TOptions, TNotifications> : AuthenticationMiddleware<TOptions>
-        where TOptions : OAuthAuthenticationOptions<TNotifications>, new()
-        where TNotifications : IOAuthAuthenticationNotifications
+    public class OAuthAuthenticationMiddleware<TOptions> : AuthenticationMiddleware<TOptions>
+        where TOptions : OAuthAuthenticationOptions, new()
     {
         /// <summary>
         /// Initializes a new <see cref="OAuthAuthenticationMiddleware"/>.
@@ -33,6 +32,7 @@ namespace Microsoft.AspNet.Security.OAuth
         public OAuthAuthenticationMiddleware(
             RequestDelegate next,
             IServiceProvider services,
+            IEventBus events,
             IDataProtectionProvider dataProtectionProvider,
             ILoggerFactory loggerFactory,
             IOptions<ExternalAuthenticationOptions> externalOptions,
@@ -63,6 +63,7 @@ namespace Microsoft.AspNet.Security.OAuth
             }
 
             Logger = loggerFactory.Create(this.GetType().FullName);
+            Events = events;
 
             if (Options.StateDataFormat == null)
             {
@@ -90,17 +91,19 @@ namespace Microsoft.AspNet.Security.OAuth
 
         protected ILogger Logger { get; private set; }
 
+        protected IEventBus Events { get; private set; }
+
         /// <summary>
         /// Provides the <see cref="AuthenticationHandler"/> object for processing authentication-related requests.
         /// </summary>
         /// <returns>An <see cref="AuthenticationHandler"/> configured with the <see cref="OAuthAuthenticationOptions"/> supplied to the constructor.</returns>
         protected override AuthenticationHandler<TOptions> CreateHandler()
         {
-            return new OAuthAuthenticationHandler<TOptions, TNotifications>(Backchannel, Logger);
+            return new OAuthAuthenticationHandler<TOptions>(Backchannel, Logger, Events);
         }
 
         [SuppressMessage("Microsoft.Reliability", "CA2000:Dispose objects before losing scope", Justification = "Managed by caller")]
-        private static HttpMessageHandler ResolveHttpMessageHandler(OAuthAuthenticationOptions<TNotifications> options)
+        private static HttpMessageHandler ResolveHttpMessageHandler(OAuthAuthenticationOptions options)
         {
             HttpMessageHandler handler = options.BackchannelHttpHandler ??
 #if ASPNET50

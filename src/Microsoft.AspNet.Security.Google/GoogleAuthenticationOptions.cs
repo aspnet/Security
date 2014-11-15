@@ -13,7 +13,7 @@ namespace Microsoft.AspNet.Security.Google
     /// <summary>
     /// Configuration options for <see cref="GoogleAuthenticationMiddleware"/>.
     /// </summary>
-    public class GoogleAuthenticationOptions : OAuthAuthenticationOptions<IGoogleAuthenticationNotifications>
+    public class GoogleAuthenticationOptions : OAuthAuthenticationOptions
     {
         /// <summary>
         /// Initializes a new <see cref="GoogleAuthenticationOptions"/>.

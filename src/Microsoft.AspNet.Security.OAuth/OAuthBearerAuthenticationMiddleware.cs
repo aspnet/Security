@@ -22,6 +22,8 @@ namespace Microsoft.AspNet.Security.OAuth
 
         private readonly string _challenge;
 
+        private readonly IEventBus _events;
+
         /// <summary>
         /// Bearer authentication component which is added to an HTTP pipeline. This constructor is not
         /// called by application code directly, instead it is added by calling the the IAppBuilder UseOAuthBearerAuthentication 
@@ -30,6 +32,7 @@ namespace Microsoft.AspNet.Security.OAuth
         public OAuthBearerAuthenticationMiddleware(
             RequestDelegate next,
             IServiceProvider services,
+            IEventBus events,
             IDataProtectionProvider dataProtectionProvider,
             ILoggerFactory loggerFactory,
             IOptions<OAuthBearerAuthenticationOptions> options,
@@ -37,6 +40,7 @@ namespace Microsoft.AspNet.Security.OAuth
             : base(next, services, options, configureOptions)
         {
             _logger = loggerFactory.Create<OAuthBearerAuthenticationMiddleware>();
+            _events = events;
 
             if (!string.IsNullOrWhiteSpace(Options.Challenge))
             {
@@ -49,11 +53,6 @@ namespace Microsoft.AspNet.Security.OAuth
             else
             {
                 _challenge = "Bearer realm=\"" + Options.Realm + "\"";
-            }
-
-            if (Options.Notifications == null)
-            {
-                Options.Notifications = new OAuthBearerAuthenticationNotifications();
             }
 
             if (Options.AccessTokenFormat == null)
@@ -75,7 +74,7 @@ namespace Microsoft.AspNet.Security.OAuth
         /// <returns>A new instance of the request handler</returns>
         protected override AuthenticationHandler<OAuthBearerAuthenticationOptions> CreateHandler()
         {
-            return new OAuthBearerAuthenticationHandler(_logger, _challenge);
+            return new OAuthBearerAuthenticationHandler(_logger, _challenge, _events);
         }
     }
 }

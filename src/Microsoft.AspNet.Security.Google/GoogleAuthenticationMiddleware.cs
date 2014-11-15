@@ -3,10 +3,7 @@
 
 using System;
 using System.Diagnostics.CodeAnalysis;
-using System.Globalization;
-using System.Net.Http;
 using Microsoft.AspNet.Builder;
-using Microsoft.AspNet.Security.DataHandler;
 using Microsoft.AspNet.Security.DataProtection;
 using Microsoft.AspNet.Security.Infrastructure;
 using Microsoft.AspNet.Security.OAuth;
@@ -19,7 +16,7 @@ namespace Microsoft.AspNet.Security.Google
     /// An ASP.NET middleware for authenticating users using Google OAuth 2.0.
     /// </summary>
     [SuppressMessage("Microsoft.Design", "CA1001:TypesThatOwnDisposableFieldsShouldBeDisposable", Justification = "Middleware are not disposable.")]
-    public class GoogleAuthenticationMiddleware : OAuthAuthenticationMiddleware<GoogleAuthenticationOptions, IGoogleAuthenticationNotifications>
+    public class GoogleAuthenticationMiddleware : OAuthAuthenticationMiddleware<GoogleAuthenticationOptions>
     {
         /// <summary>
         /// Initializes a new <see cref="GoogleAuthenticationMiddleware"/>.
@@ -32,18 +29,14 @@ namespace Microsoft.AspNet.Security.Google
         public GoogleAuthenticationMiddleware(
             RequestDelegate next,
             IServiceProvider services,
+            IEventBus events,
             IDataProtectionProvider dataProtectionProvider,
             ILoggerFactory loggerFactory,
             IOptions<ExternalAuthenticationOptions> externalOptions,
             IOptions<GoogleAuthenticationOptions> options,
             ConfigureOptions<GoogleAuthenticationOptions> configureOptions = null)
-            : base(next, services, dataProtectionProvider, loggerFactory, externalOptions, options, configureOptions)
+            : base(next, services, events, dataProtectionProvider, loggerFactory, externalOptions, options, configureOptions)
         {
-            if (Options.Notifications == null)
-            {
-                Options.Notifications = new GoogleAuthenticationNotifications();
-            }
-
             if (Options.Scope.Count == 0)
             {
                 // Google OAuth 2.0 asks for non-empty scope. If user didn't set it, set default scope to 
@@ -61,7 +54,7 @@ namespace Microsoft.AspNet.Security.Google
         /// <returns>An <see cref="AuthenticationHandler"/> configured with the <see cref="GoogleAuthenticationOptions"/> supplied to the constructor.</returns>
         protected override AuthenticationHandler<GoogleAuthenticationOptions> CreateHandler()
         {
-            return new GoogleAuthenticationHandler(Backchannel, Logger);
+            return new GoogleAuthenticationHandler(Backchannel, Logger, Events);
         }
     }
 }

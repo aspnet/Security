@@ -24,6 +24,7 @@ namespace Microsoft.AspNet.Security.Twitter
     {
         private readonly ILogger _logger;
         private readonly HttpClient _httpClient;
+        private readonly IEventBus _events;
 
         /// <summary>
         /// Initializes a <see cref="TwitterAuthenticationMiddleware"/>
@@ -36,6 +37,7 @@ namespace Microsoft.AspNet.Security.Twitter
         public TwitterAuthenticationMiddleware(
             RequestDelegate next,
             IServiceProvider services,
+            IEventBus events,
             IDataProtectionProvider dataProtectionProvider,
             ILoggerFactory loggerFactory,
             IOptions<ExternalAuthenticationOptions> externalOptions,
@@ -53,11 +55,8 @@ namespace Microsoft.AspNet.Security.Twitter
             }
 
             _logger = loggerFactory.Create(typeof(TwitterAuthenticationMiddleware).FullName);
+            _events = events;
 
-            if (Options.Notifications == null)
-            {
-                Options.Notifications = new TwitterAuthenticationNotifications();
-            }
             if (Options.StateDataFormat == null)
             {
                 IDataProtector dataProtector = dataProtectionProvider.CreateDataProtector(
@@ -91,7 +90,7 @@ namespace Microsoft.AspNet.Security.Twitter
         /// <returns>An <see cref="AuthenticationHandler"/> configured with the <see cref="TwitterAuthenticationOptions"/> supplied to the constructor.</returns>
         protected override AuthenticationHandler<TwitterAuthenticationOptions> CreateHandler()
         {
-            return new TwitterAuthenticationHandler(_httpClient, _logger);
+            return new TwitterAuthenticationHandler(_httpClient, _logger, _events);
         }
 
         [SuppressMessage("Microsoft.Reliability", "CA2000:Dispose objects before losing scope", Justification = "Managed by caller")]

@@ -30,6 +30,49 @@ namespace CookieSample
                 {
                     options.SignInAsAuthenticationType = CookieAuthenticationDefaults.AuthenticationType;
                 });
+
+                // Retrieving user information is unique to each OAuth provider.
+                services.ConfigureEventBus(options => options.AddAuthenticationEventHandler<OAuthGetUserInformationContext, OAuthAuthenticationOptions>(
+                    async (context) =>
+                    {
+                        // Get the GitHub user
+                        HttpRequestMessage userRequest = new HttpRequestMessage(HttpMethod.Get, context.Options.UserInformationEndpoint);
+                        userRequest.Headers.Authorization = new AuthenticationHeaderValue("Bearer", context.AccessToken);
+                        userRequest.Headers.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
+                        HttpResponseMessage userResponse = await context.Backchannel.SendAsync(userRequest, context.HttpContext.RequestAborted);
+                        userResponse.EnsureSuccessStatusCode();
+                        var text = await userResponse.Content.ReadAsStringAsync();
+                        JObject user = JObject.Parse(text);
+
+                        var identity = new ClaimsIdentity(
+                            context.Options.AuthenticationType,
+                            ClaimsIdentity.DefaultNameClaimType,
+                            ClaimsIdentity.DefaultRoleClaimType);
+
+                        JToken value;
+                        var id = user.TryGetValue("id", out value) ? value.ToString() : null;
+                        if (!string.IsNullOrEmpty(id))
+                        {
+                            identity.AddClaim(new Claim(ClaimTypes.NameIdentifier, id, ClaimValueTypes.String, context.Options.AuthenticationType));
+                        }
+                        var userName = user.TryGetValue("login", out value) ? value.ToString() : null;
+                        if (!string.IsNullOrEmpty(userName))
+                        {
+                            identity.AddClaim(new Claim(ClaimsIdentity.DefaultNameClaimType, userName, ClaimValueTypes.String, context.Options.AuthenticationType));
+                        }
+                        var name = user.TryGetValue("name", out value) ? value.ToString() : null;
+                        if (!string.IsNullOrEmpty(name))
+                        {
+                            identity.AddClaim(new Claim("urn:github:name", name, ClaimValueTypes.String, context.Options.AuthenticationType));
+                        }
+                        var link = user.TryGetValue("url", out value) ? value.ToString() : null;
+                        if (!string.IsNullOrEmpty(link))
+                        {
+                            identity.AddClaim(new Claim("urn:github:url", link, ClaimValueTypes.String, context.Options.AuthenticationType));
+                        }
+
+                        context.Identity = identity;
+                    }, "GitHub"));
             });
 
             app.UseCookieAuthentication(options =>
@@ -123,50 +166,6 @@ namespace CookieSample
                 options.AuthorizationEndpoint = "https://github.com/login/oauth/authorize";
                 options.TokenEndpoint = "https://github.com/login/oauth/access_token";
                 options.UserInformationEndpoint = "https://api.github.com/user";
-                // Retrieving user information is unique to each provider.
-                options.Notifications = new OAuthAuthenticationNotifications()
-                {
-                    OnGetUserInformationAsync = async (context) =>
-                    {
-                        // Get the GitHub user
-                        HttpRequestMessage userRequest = new HttpRequestMessage(HttpMethod.Get, context.Options.UserInformationEndpoint);
-                        userRequest.Headers.Authorization = new AuthenticationHeaderValue("Bearer", context.AccessToken);
-                        userRequest.Headers.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
-                        HttpResponseMessage userResponse = await context.Backchannel.SendAsync(userRequest, context.HttpContext.RequestAborted);
-                        userResponse.EnsureSuccessStatusCode();
-                        var text = await userResponse.Content.ReadAsStringAsync();
-                        JObject user = JObject.Parse(text);
-
-                        var identity = new ClaimsIdentity(
-                            context.Options.AuthenticationType,
-                            ClaimsIdentity.DefaultNameClaimType,
-                            ClaimsIdentity.DefaultRoleClaimType);
-
-                        JToken value;
-                        var id = user.TryGetValue("id", out value) ? value.ToString() : null;
-                        if (!string.IsNullOrEmpty(id))
-                        {
-                            identity.AddClaim(new Claim(ClaimTypes.NameIdentifier, id, ClaimValueTypes.String, context.Options.AuthenticationType));
-                        }
-                        var userName = user.TryGetValue("login", out value) ? value.ToString() : null;
-                        if (!string.IsNullOrEmpty(userName))
-                        {
-                            identity.AddClaim(new Claim(ClaimsIdentity.DefaultNameClaimType, userName, ClaimValueTypes.String, context.Options.AuthenticationType));
-                        }
-                        var name = user.TryGetValue("name", out value) ? value.ToString() : null;
-                        if (!string.IsNullOrEmpty(name))
-                        {
-                            identity.AddClaim(new Claim("urn:github:name", name, ClaimValueTypes.String, context.Options.AuthenticationType));
-                        }
-                        var link = user.TryGetValue("url", out value) ? value.ToString() : null;
-                        if (!string.IsNullOrEmpty(link))
-                        {
-                            identity.AddClaim(new Claim("urn:github:url", link, ClaimValueTypes.String, context.Options.AuthenticationType));
-                        }
-
-                        context.Identity = identity;
-                    },
-                };
             });
 
             // Choose an authentication type

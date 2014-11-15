@@ -16,19 +16,21 @@ namespace Microsoft.AspNet.Security.Cookies
     public class CookieAuthenticationMiddleware : AuthenticationMiddleware<CookieAuthenticationOptions>
     {
         private readonly ILogger _logger;
+        private readonly IEventBus _events;
 
         public CookieAuthenticationMiddleware(RequestDelegate next, 
             IServiceProvider services,
+            IEventBus events,
             IDataProtectionProvider dataProtectionProvider, 
             ILoggerFactory loggerFactory, 
             IOptions<CookieAuthenticationOptions> options,
             ConfigureOptions<CookieAuthenticationOptions> configureOptions)
             : base(next, services, options, configureOptions)
         {
-            if (Options.Notifications == null)
-            {
-                Options.Notifications = new CookieAuthenticationNotifications();
-            }
+            //if (Options.Notifications == null)
+            //{
+            //    Options.Notifications = new CookieAuthenticationNotifications();
+            //}
             if (String.IsNullOrEmpty(Options.CookieName))
             {
                 Options.CookieName = CookieAuthenticationDefaults.CookiePrefix + Options.AuthenticationType;
@@ -45,11 +47,12 @@ namespace Microsoft.AspNet.Security.Cookies
             }
 
             _logger = loggerFactory.Create(typeof(CookieAuthenticationMiddleware).FullName);
+            _events = events;
         }
 
         protected override AuthenticationHandler<CookieAuthenticationOptions> CreateHandler()
         {
-            return new CookieAuthenticationHandler(_logger);
+            return new CookieAuthenticationHandler(_logger, _events);
         }
     }
 }

@@ -17,10 +17,10 @@ using Newtonsoft.Json.Linq;
 
 namespace Microsoft.AspNet.Security.Facebook
 {
-    internal class FacebookAuthenticationHandler : OAuthAuthenticationHandler<FacebookAuthenticationOptions, IFacebookAuthenticationNotifications>
+    internal class FacebookAuthenticationHandler : OAuthAuthenticationHandler<FacebookAuthenticationOptions>
     {
-        public FacebookAuthenticationHandler(HttpClient httpClient, ILogger logger)
-            : base(httpClient, logger)
+        public FacebookAuthenticationHandler(HttpClient httpClient, ILogger logger, IEventBus events)
+            : base(httpClient, logger, events)
         {
         }
 
@@ -95,7 +95,7 @@ namespace Microsoft.AspNet.Security.Facebook
             }
             context.Properties = properties;
 
-            await Options.Notifications.Authenticated(context);
+            await EventBus.RaiseAsync(context);
 
             return new AuthenticationTicket(context.Identity, context.Properties);
         }

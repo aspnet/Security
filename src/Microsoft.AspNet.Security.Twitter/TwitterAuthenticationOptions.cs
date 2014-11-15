@@ -98,10 +98,5 @@ namespace Microsoft.AspNet.Security.Twitter
         /// Gets or sets the type used to secure data handled by the middleware.
         /// </summary>
         public ISecureDataFormat<RequestToken> StateDataFormat { get; set; }
-
-        /// <summary>
-        /// Gets or sets the <see cref="ITwitterAuthenticationProvider"/> used to handle authentication events.
-        /// </summary>
-        public ITwitterAuthenticationNotifications Notifications { get; set; }
     }
 }

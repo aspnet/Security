@@ -2,20 +2,19 @@
 // Licensed under the Apache License, Version 2.0. See License.txt in the project root for license information.
 
 using System;
-using System.Globalization;
 using Microsoft.AspNet.Builder;
 using Microsoft.AspNet.Security.DataProtection;
 using Microsoft.AspNet.Security.Infrastructure;
-using Microsoft.AspNet.Security.OAuth;
 using Microsoft.Framework.Logging;
 using Microsoft.Framework.OptionsModel;
+using Microsoft.AspNet.Security.OAuth;
 
 namespace Microsoft.AspNet.Security.MicrosoftAccount
 {
     /// <summary>
     /// An ASP.NET middleware for authenticating users using the Microsoft Account service.
     /// </summary>
-    public class MicrosoftAccountAuthenticationMiddleware : OAuthAuthenticationMiddleware<MicrosoftAccountAuthenticationOptions, IMicrosoftAccountAuthenticationNotifications>
+    public class MicrosoftAccountAuthenticationMiddleware : OAuthAuthenticationMiddleware<MicrosoftAccountAuthenticationOptions>
     {
         /// <summary>
         /// Initializes a new <see cref="MicrosoftAccountAuthenticationMiddleware"/>.
@@ -28,17 +27,14 @@ namespace Microsoft.AspNet.Security.MicrosoftAccount
         public MicrosoftAccountAuthenticationMiddleware(
             RequestDelegate next,
             IServiceProvider services,
+            IEventBus events,
             IDataProtectionProvider dataProtectionProvider,
             ILoggerFactory loggerFactory,
             IOptions<ExternalAuthenticationOptions> externalOptions,
             IOptions<MicrosoftAccountAuthenticationOptions> options,
             ConfigureOptions<MicrosoftAccountAuthenticationOptions> configureOptions = null)
-            : base(next, services, dataProtectionProvider, loggerFactory, externalOptions, options, configureOptions)
+            : base(next, services, events, dataProtectionProvider, loggerFactory, externalOptions, options, configureOptions)
         {
-            if (Options.Notifications == null)
-            {
-                Options.Notifications = new MicrosoftAccountAuthenticationNotifications();
-            }
             if (Options.Scope.Count == 0)
             {
                 // LiveID requires a scope string, so if the user didn't set one we go for the least possible.
@@ -53,7 +49,7 @@ namespace Microsoft.AspNet.Security.MicrosoftAccount
         /// <returns>An <see cref="AuthenticationHandler"/> configured with the <see cref="MicrosoftAccountAuthenticationOptions"/> supplied to the constructor.</returns>
         protected override AuthenticationHandler<MicrosoftAccountAuthenticationOptions> CreateHandler()
         {
-            return new MicrosoftAccountAuthenticationHandler(Backchannel, Logger);
+            return new MicrosoftAccountAuthenticationHandler(Backchannel, Logger, Events);
         }
     }
 }

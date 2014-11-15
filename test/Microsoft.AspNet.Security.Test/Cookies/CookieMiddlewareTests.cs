@@ -18,7 +18,6 @@ using Microsoft.AspNet.Http.Security;
 using Microsoft.AspNet.TestHost;
 using Shouldly;
 using Xunit;
-using Microsoft.Framework.OptionsModel;
 using Microsoft.Framework.DependencyInjection;
 
 namespace Microsoft.AspNet.Security.Cookies
@@ -255,19 +254,25 @@ namespace Microsoft.AspNet.Security.Cookies
         public async Task CookieExpirationCanBeOverridenInEvent()
         {
             var clock = new TestClock();
+            var services = new ServiceCollection();
+            services.AddSingleton<IEventBus, EventBus>();
+            services.ConfigureEventBus(options =>
+            {
+                options.AddAuthenticationEventHandler<CookieResponseSignInContext, CookieAuthenticationOptions>(
+                    context =>
+                    {
+                        context.Properties.ExpiresUtc = clock.UtcNow.Add(TimeSpan.FromMinutes(5));
+                        return Task.FromResult(true);
+                    });
+            });
+
             TestServer server = CreateServer(options =>
             {
                 options.SystemClock = clock;
                 options.ExpireTimeSpan = TimeSpan.FromMinutes(10);
                 options.SlidingExpiration = false;
-                options.Notifications = new CookieAuthenticationNotifications()
-                {
-                    OnResponseSignIn = context =>
-                    {
-                        context.Properties.ExpiresUtc = clock.UtcNow.Add(TimeSpan.FromMinutes(5));
-                    }
-                };
-            }, SignInAsAlice);
+            }, 
+            SignInAsAlice, services);
 
             Transaction transaction1 = await SendAsync(server, "http://example.com/testpath");
 
@@ -365,10 +370,18 @@ namespace Microsoft.AspNet.Security.Cookies
             return me;
         }
 
-        private static TestServer CreateServer(Action<CookieAuthenticationOptions> configureOptions, Func<HttpContext, Task> testpath = null)
+        private static TestServer CreateServer(Action<CookieAuthenticationOptions> configureOptions, Func<HttpContext, Task> testpath = null, IServiceCollection defaultServices = null)
         {
             return TestServer.Create(app =>
             {
+                app.UseServices(services =>
+                {
+                    services.AddSingleton<IEventBus, EventBus>();
+                    if (defaultServices != null)
+                    {
+                        services.Add(defaultServices);
+                    }
+                });
                 app.UseCookieAuthentication(configureOptions);
                 app.Use(async (context, next) =>
                 {
