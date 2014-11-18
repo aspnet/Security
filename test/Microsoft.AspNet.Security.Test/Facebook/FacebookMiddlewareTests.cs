@@ -11,9 +11,11 @@ using Microsoft.AspNet.Builder;
 using Microsoft.AspNet.Http;
 using Microsoft.AspNet.Http.Security;
 using Microsoft.AspNet.Security.Cookies;
+using Microsoft.AspNet.Security.Test;
 using Microsoft.AspNet.TestHost;
 using Microsoft.Framework.DependencyInjection;
 using Microsoft.Framework.OptionsModel;
+using Microsoft.Framework.Runtime;
 using Shouldly;
 using Xunit;
 
@@ -24,32 +26,31 @@ namespace Microsoft.AspNet.Security.Facebook
         [Fact]
         public async Task ChallengeWillTriggerApplyRedirectEvent()
         {
-            var server = CreateServer(
+            var services = new ServiceCollection().AddSingleton<IApplicationEnvironment, TestApplicationEnvironment>();
+            services.ConfigureFacebookAuthentication(options =>
+            {
+                options.AppId = "Test App Id";
+                options.AppSecret = "Test App Secret";
+                options.Notifications = new FacebookAuthenticationNotifications
+                {
+                    OnApplyRedirect = context =>
+                    {
+                        context.Response.Redirect(context.RedirectUri + "&custom=test");
+                    }
+                };
+            });
+            services.ConfigureCookieAuthentication(options =>
+            {
+                options.AuthenticationType = "External";
+            });
+            services.Configure<ExternalAuthenticationOptions>(options =>
+            {
+                options.SignInAsAuthenticationType = "External";
+            });
+
+            var server = CreateServer(services,
                 app =>
                 {
-                    app.UseServices(services =>
-                    {
-                        services.ConfigureFacebookAuthentication(options =>
-                        {
-                            options.AppId = "Test App Id";
-                            options.AppSecret = "Test App Secret";
-                            options.Notifications = new FacebookAuthenticationNotifications
-                            {
-                                OnApplyRedirect = context =>
-                                {
-                                    context.Response.Redirect(context.RedirectUri + "&custom=test");
-                                }
-                            };
-                        });
-                        services.ConfigureCookieAuthentication(options =>
-                        {
-                            options.AuthenticationType = "External";
-                        });
-                        services.Configure<ExternalAuthenticationOptions>(options =>
-                        {
-                            options.SignInAsAuthenticationType = "External";
-                        });
-                    });
                     app.UseFacebookAuthentication();
                     app.UseCookieAuthentication();
                 },
@@ -67,25 +68,23 @@ namespace Microsoft.AspNet.Security.Facebook
         [Fact]
         public async Task ChallengeWillTriggerRedirection()
         {
-            var server = CreateServer(
+            var services = new ServiceCollection().AddSingleton<IApplicationEnvironment, TestApplicationEnvironment>();
+            services.ConfigureFacebookAuthentication(options =>
+            {
+                options.AppId = "Test App Id";
+                options.AppSecret = "Test App Secret";
+            });
+            services.ConfigureCookieAuthentication(options =>
+            {
+                options.AuthenticationType = "External";
+            });
+            services.Configure<ExternalAuthenticationOptions>(options =>
+            {
+                options.SignInAsAuthenticationType = "External";
+            });
+            var server = CreateServer(services,
                 app =>
                 {
-                    app.UseServices(services =>
-                    {
-                        services.ConfigureFacebookAuthentication(options =>
-                        {
-                            options.AppId = "Test App Id";
-                            options.AppSecret = "Test App Secret";
-                        });
-                        services.ConfigureCookieAuthentication(options =>
-                        {
-                            options.AuthenticationType = "External";
-                        });
-                        services.Configure<ExternalAuthenticationOptions>(options =>
-                        {
-                            options.SignInAsAuthenticationType = "External";
-                        });
-                    });
                     app.UseFacebookAuthentication();
                     app.UseCookieAuthentication();
                 },
@@ -105,9 +104,9 @@ namespace Microsoft.AspNet.Security.Facebook
             location.ShouldContain("state=");
         }
 
-        private static TestServer CreateServer(Action<IApplicationBuilder> configure, Func<HttpContext, bool> handler)
+        private static TestServer CreateServer(IServiceCollection services, Action<IApplicationBuilder> configure, Func<HttpContext, bool> handler)
         {
-            return TestServer.Create(app =>
+            return TestServer.Create(services, app =>
             {
                 if (configure != null)
                 {

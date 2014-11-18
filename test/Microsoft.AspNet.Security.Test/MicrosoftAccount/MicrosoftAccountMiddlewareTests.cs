@@ -24,6 +24,8 @@ using Microsoft.Framework.OptionsModel;
 using Microsoft.Framework.DependencyInjection;
 using Microsoft.AspNet.Security.DataHandler;
 using Microsoft.AspNet.Security.DataProtection;
+using Microsoft.Framework.Runtime;
+using Microsoft.AspNet.Security.Test;
 
 namespace Microsoft.AspNet.Security.Tests.MicrosoftAccount
 {
@@ -161,15 +163,13 @@ namespace Microsoft.AspNet.Security.Tests.MicrosoftAccount
 
         private static TestServer CreateServer(Action<MicrosoftAccountAuthenticationOptions> configureOptions, Func<HttpContext, bool> handler)
         {
-            return TestServer.Create(app =>
+            var services = new ServiceCollection().AddSingleton<IApplicationEnvironment, TestApplicationEnvironment>();
+            services.Configure<ExternalAuthenticationOptions>(options =>
             {
-                app.UseServices(services =>
-                {
-                    services.Configure<ExternalAuthenticationOptions>(options =>
-                    {
-                        options.SignInAsAuthenticationType = "External";
-                    });
-                });
+                options.SignInAsAuthenticationType = "External";
+            });
+            return TestServer.Create(services, app =>
+            {
                 app.UseCookieAuthentication(options => options.AuthenticationType = "External");
                 app.UseMicrosoftAccountAuthentication(configureOptions);
                 app.Use(async (context, next) =>
