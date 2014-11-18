@@ -14,15 +14,15 @@ using System.Xml.Linq;
 using Microsoft.AspNet.Builder;
 using Microsoft.AspNet.Http;
 using Microsoft.AspNet.Http.Security;
-using Microsoft.AspNet.Security.Cookies;
+using Microsoft.AspNet.Security.DataHandler;
+using Microsoft.AspNet.Security.DataProtection;
+using Microsoft.AspNet.Security.Test;
 using Microsoft.AspNet.TestHost;
+using Microsoft.Framework.DependencyInjection;
+using Microsoft.Framework.Runtime;
 using Newtonsoft.Json;
 using Shouldly;
 using Xunit;
-using Microsoft.Framework.OptionsModel;
-using Microsoft.Framework.DependencyInjection;
-using Microsoft.AspNet.Security.DataProtection;
-using Microsoft.AspNet.Security.DataHandler;
 
 namespace Microsoft.AspNet.Security.Google
 {
@@ -463,15 +463,14 @@ namespace Microsoft.AspNet.Security.Google
 
         private static TestServer CreateServer(Action<GoogleAuthenticationOptions> configureOptions, Func<HttpContext, Task> testpath = null)
         {
-            return TestServer.Create(app =>
+            var services = new ServiceCollection().AddSingleton<IApplicationEnvironment, TestApplicationEnvironment>();
+            services.Configure<ExternalAuthenticationOptions>(options =>
             {
-                app.UseServices(services =>
-                {
-                    services.Configure<ExternalAuthenticationOptions>(options =>
-                    {
-                        options.SignInAsAuthenticationType = CookieAuthenticationType;
-                    });
-                });
+                options.SignInAsAuthenticationType = CookieAuthenticationType;
+            });
+
+            return TestServer.Create(services, app =>
+            {
                 app.UseCookieAuthentication(options => options.AuthenticationType = CookieAuthenticationType);
                 app.UseGoogleAuthentication(configureOptions);
                 app.Use(async (context, next) =>
