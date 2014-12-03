@@ -11,7 +11,10 @@ namespace Microsoft.AspNet.Security
     /// </summary>
     public class AuthorizationContext
     {
-        public AuthorizationContext(IAuthorizationPolicy policy, ClaimsPrincipal user, IEnumerable<object> resources)
+        public AuthorizationContext(
+            [NotNull] IAuthorizationPolicy policy, 
+            [NotNull] ClaimsPrincipal user, 
+            IEnumerable<object> resources)
         {
             Policy = policy;
             User = user;

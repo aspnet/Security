@@ -26,7 +26,7 @@ namespace Microsoft.AspNet.Security
             }
         }
 
-        public async Task<bool> AuthorizeAsync(IAuthorizationPolicy policy, ClaimsPrincipal user, params object[] resources)
+        public async Task<bool> AuthorizeAsync([NotNull] IAuthorizationPolicy policy, ClaimsPrincipal user, params object[] resources)
         {
             if (user == null)
             {

@@ -11,7 +11,7 @@ namespace Microsoft.AspNet.Security
     {
         private readonly List<AuthorizationClaimRequirement> _reqs = new List<AuthorizationClaimRequirement>();
 
-        public AuthorizationPolicy(params string[] authTypes)
+        public AuthorizationPolicy([NotNull] params string[] authTypes)
         {
             AuthenticationTypes = authTypes;
         }
