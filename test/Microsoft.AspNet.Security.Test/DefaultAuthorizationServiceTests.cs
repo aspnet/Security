@@ -3,6 +3,8 @@
 
 using System.Security.Claims;
 using System.Threading.Tasks;
+using Microsoft.Framework.OptionsModel;
+using Moq;
 using Xunit;
 
 namespace Microsoft.AspNet.Security.Test
@@ -14,13 +16,17 @@ namespace Microsoft.AspNet.Security.Test
         {
             // Arrange
             var policy = new AuthorizationPolicy("Basic").Requires("Permission", "CanViewPage");
-            var authorizationService = new DefaultAuthorizationService(null);
+            var authorizationOptions = new AuthorizationOptions();
+            authorizationOptions.Policies["Basic"] = policy;
+            var options = new Mock<IOptions<AuthorizationOptions>>();
+            options.Setup(o => o.Options).Returns(authorizationOptions);
+            var authorizationService = new DefaultAuthorizationService(options.Object, null);
             var user = new ClaimsPrincipal(
                 new ClaimsIdentity(new Claim[] { new Claim("Permission", "CanViewPage") }, "Basic")
                 );
 
             // Act
-            var allowed = await authorizationService.AuthorizeAsync(policy, user);
+            var allowed = await authorizationService.AuthorizeAsync("Basic", user);
 
             // Assert
             Assert.True(allowed);
@@ -31,7 +37,11 @@ namespace Microsoft.AspNet.Security.Test
         {
             // Arrange
             var policy = new AuthorizationPolicy("Basic").Requires("Permission", "CanViewPage", "CanViewAnything");
-            var authorizationService = new DefaultAuthorizationService(null);
+            var authorizationOptions = new AuthorizationOptions();
+            authorizationOptions.Policies["Basic"] = policy;
+            var options = new Mock<IOptions<AuthorizationOptions>>();
+            options.Setup(o => o.Options).Returns(authorizationOptions);
+            var authorizationService = new DefaultAuthorizationService(options.Object, null);
             var user = new ClaimsPrincipal(
                 new ClaimsIdentity(
                     new Claim[] {
@@ -42,7 +52,7 @@ namespace Microsoft.AspNet.Security.Test
                 );
 
             // Act
-            var allowed = await authorizationService.AuthorizeAsync(policy, user);
+            var allowed = await authorizationService.AuthorizeAsync("Basic", user);
 
             // Assert
             Assert.True(allowed);
@@ -53,7 +63,11 @@ namespace Microsoft.AspNet.Security.Test
         {
             // Arrange
             var policy = new AuthorizationPolicy("Basic").Requires("Permission", "CanViewPage", "CanViewAnything");
-            var authorizationService = new DefaultAuthorizationService(null);
+            var authorizationOptions = new AuthorizationOptions();
+            authorizationOptions.Policies["Basic"] = policy;
+            var options = new Mock<IOptions<AuthorizationOptions>>();
+            options.Setup(o => o.Options).Returns(authorizationOptions);
+            var authorizationService = new DefaultAuthorizationService(options.Object, null);
             var user = new ClaimsPrincipal(
                 new ClaimsIdentity(
                     new Claim[] {
@@ -63,7 +77,7 @@ namespace Microsoft.AspNet.Security.Test
                 );
 
             // Act
-            var allowed = await authorizationService.AuthorizeAsync(policy, user);
+            var allowed = await authorizationService.AuthorizeAsync("Basic", user);
 
             // Assert
             Assert.False(allowed);
@@ -74,7 +88,11 @@ namespace Microsoft.AspNet.Security.Test
         {
             // Arrange
             var policy = new AuthorizationPolicy("Basic").Requires("Permission", "CanViewPage");
-            var authorizationService = new DefaultAuthorizationService(null);
+            var authorizationOptions = new AuthorizationOptions();
+            authorizationOptions.Policies["Basic"] = policy;
+            var options = new Mock<IOptions<AuthorizationOptions>>();
+            options.Setup(o => o.Options).Returns(authorizationOptions);
+            var authorizationService = new DefaultAuthorizationService(options.Object, null);
             var user = new ClaimsPrincipal(
                 new ClaimsIdentity(
                     new Claim[] {
@@ -84,7 +102,7 @@ namespace Microsoft.AspNet.Security.Test
                 );
 
             // Act
-            var allowed = await authorizationService.AuthorizeAsync(policy, user);
+            var allowed = await authorizationService.AuthorizeAsync("Basic", user);
 
             // Assert
             Assert.False(allowed);
@@ -95,7 +113,11 @@ namespace Microsoft.AspNet.Security.Test
         {
             // Arrange
             var policy = new AuthorizationPolicy("Basic").Requires("Permission", "CanViewPage");
-            var authorizationService = new DefaultAuthorizationService(null);
+            var authorizationOptions = new AuthorizationOptions();
+            authorizationOptions.Policies["Basic"] = policy;
+            var options = new Mock<IOptions<AuthorizationOptions>>();
+            options.Setup(o => o.Options).Returns(authorizationOptions);
+            var authorizationService = new DefaultAuthorizationService(options.Object, null);
             var user = new ClaimsPrincipal(
                 new ClaimsIdentity(
                     new Claim[0],
@@ -103,7 +125,7 @@ namespace Microsoft.AspNet.Security.Test
                 );
 
             // Act
-            var allowed = await authorizationService.AuthorizeAsync(policy, user);
+            var allowed = await authorizationService.AuthorizeAsync("Basic", user);
 
             // Assert
             Assert.False(allowed);
@@ -114,11 +136,15 @@ namespace Microsoft.AspNet.Security.Test
         {
             // Arrange
             var policy = new AuthorizationPolicy("Basic").Requires("Permission", "CanViewPage");
-            var authorizationService = new DefaultAuthorizationService(null);
+            var authorizationOptions = new AuthorizationOptions();
+            authorizationOptions.Policies["Basic"] = policy;
+            var options = new Mock<IOptions<AuthorizationOptions>>();
+            options.Setup(o => o.Options).Returns(authorizationOptions);
+            var authorizationService = new DefaultAuthorizationService(options.Object, null);
             ClaimsPrincipal user = null;
 
             // Act
-            var allowed = await authorizationService.AuthorizeAsync(policy, user);
+            var allowed = await authorizationService.AuthorizeAsync("Basic", user);
 
             // Assert
             Assert.False(allowed);
@@ -129,7 +155,11 @@ namespace Microsoft.AspNet.Security.Test
         {
             // Arrange
             var policy = new AuthorizationPolicy("Basic").Requires("Permission", "CanViewPage");
-            var authorizationService = new DefaultAuthorizationService(null);
+            var authorizationOptions = new AuthorizationOptions();
+            authorizationOptions.Policies["Basic"] = policy;
+            var options = new Mock<IOptions<AuthorizationOptions>>();
+            options.Setup(o => o.Options).Returns(authorizationOptions);
+            var authorizationService = new DefaultAuthorizationService(options.Object, null);
             var user = new ClaimsPrincipal(
                 new ClaimsIdentity(
                     new Claim[] {
@@ -139,10 +169,60 @@ namespace Microsoft.AspNet.Security.Test
                 );
 
             // Act
-            var allowed = await authorizationService.AuthorizeAsync(policy, user);
+            var allowed = await authorizationService.AuthorizeAsync("Basic", user);
 
             // Assert
             Assert.False(allowed);
         }
+
+        [Fact]
+        public async Task Check_ShouldAllowWithNoAuthType()
+        {
+            // Arrange
+            var policy = new AuthorizationPolicy().Requires("Permission", "CanViewPage");
+            var authorizationOptions = new AuthorizationOptions();
+            authorizationOptions.Policies["Basic"] = policy;
+            var options = new Mock<IOptions<AuthorizationOptions>>();
+            options.Setup(o => o.Options).Returns(authorizationOptions);
+            var authorizationService = new DefaultAuthorizationService(options.Object, null);
+            var user = new ClaimsPrincipal(
+                new ClaimsIdentity(
+                    new Claim[] {
+                        new Claim("Permission", "CanViewPage"),
+                    },
+                    null)
+                );
+
+            // Act
+            var allowed = await authorizationService.AuthorizeAsync("Basic", user);
+
+            // Assert
+            Assert.False(allowed);
+        }
+
+        [Fact]
+        public async Task Check_ShouldNotAllowIfUnknownPolicy()
+        {
+            // Arrange
+            var authorizationOptions = new AuthorizationOptions();
+            var options = new Mock<IOptions<AuthorizationOptions>>();
+            options.Setup(o => o.Options).Returns(authorizationOptions);
+            var authorizationService = new DefaultAuthorizationService(options.Object, null);
+            var user = new ClaimsPrincipal(
+                new ClaimsIdentity(
+                    new Claim[] {
+                        new Claim("Permission", "CanViewComment"),
+                    },
+                    null)
+                );
+
+            // Act
+            var allowed = await authorizationService.AuthorizeAsync("Basic", user);
+
+            // Assert
+            Assert.False(allowed);
+        }
+
+
     }
 }

@@ -8,6 +8,6 @@ namespace Microsoft.AspNet.Security
     // TODO: make policies read only
     public class AuthorizationOptions
     {
-        IDictionary<string, IAuthorizationPolicy> Policies { get; } = new Dictionary<string, IAuthorizationPolicy>();
+        public IDictionary<string, IAuthorizationPolicy> Policies { get; } = new Dictionary<string, IAuthorizationPolicy>();
     }
 }

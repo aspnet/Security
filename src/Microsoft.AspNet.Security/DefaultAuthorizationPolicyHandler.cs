@@ -12,7 +12,11 @@ namespace Microsoft.AspNet.Security
         public Task<bool> AuthorizeAsync([NotNull] AuthorizationContext context)
         {
             // TODO: optimize this
-            var filteredIdentities = context.User.Identities.Where(id => context.Policy.AuthenticationTypes.Contains(id.AuthenticationType));
+            var filteredIdentities = context.User.Identities;
+            if (context.Policy.AuthenticationTypes != null)
+            {
+                filteredIdentities = filteredIdentities.Where(id => context.Policy.AuthenticationTypes.Contains(id.AuthenticationType));
+            }
             foreach (var requires in context.Policy.Requirements)
             {
                 bool found = false;

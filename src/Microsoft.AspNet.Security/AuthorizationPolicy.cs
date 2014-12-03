@@ -11,11 +11,12 @@ namespace Microsoft.AspNet.Security
     {
         private readonly List<AuthorizationClaimRequirement> _reqs = new List<AuthorizationClaimRequirement>();
 
-        public AuthorizationPolicy([NotNull] params string[] authTypes)
+        public AuthorizationPolicy(params string[] authTypes)
         {
             AuthenticationTypes = authTypes;
         }
 
+        // NOTE: null auth types means use all auth types
         public IEnumerable<string> AuthenticationTypes { get; private set; }
 
         public IEnumerable<AuthorizationClaimRequirement> Requirements { get { return _reqs; } }
