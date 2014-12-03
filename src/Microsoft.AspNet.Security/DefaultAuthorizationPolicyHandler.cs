@@ -13,7 +13,7 @@ namespace Microsoft.AspNet.Security
         {
             // TODO: optimize this
             var filteredIdentities = context.User.Identities;
-            if (context.Policy.AuthenticationTypes != null)
+            if (context.Policy.AuthenticationTypes != null && context.Policy.AuthenticationTypes.Any())
             {
                 filteredIdentities = filteredIdentities.Where(id => context.Policy.AuthenticationTypes.Contains(id.AuthenticationType));
             }

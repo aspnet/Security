@@ -197,7 +197,7 @@ namespace Microsoft.AspNet.Security.Test
             var allowed = await authorizationService.AuthorizeAsync("Basic", user);
 
             // Assert
-            Assert.False(allowed);
+            Assert.True(allowed);
         }
 
         [Fact]
@@ -221,6 +221,32 @@ namespace Microsoft.AspNet.Security.Test
 
             // Assert
             Assert.False(allowed);
+        }
+
+
+        [Fact]
+        public async Task Check_CustomRolePolicy()
+        {
+            // Arrange
+            var policy = new AuthorizationPolicy()
+                .Requires(ClaimTypes.Role, "Administrator")
+                .Requires(ClaimTypes.Role, "User");
+            var options = new Mock<IOptions<AuthorizationOptions>>();
+            var authorizationService = new DefaultAuthorizationService(options.Object, null);
+            var user = new ClaimsPrincipal(
+                new ClaimsIdentity(
+                    new Claim[] {
+                        new Claim(ClaimTypes.Role, "User"),
+                        new Claim(ClaimTypes.Role, "Administrator")
+                    },
+                    "Basic")
+                );
+
+            // Act
+            var allowed = await authorizationService.AuthorizeAsync(policy, user);
+
+            // Assert
+            Assert.True(allowed);
         }
 
 
