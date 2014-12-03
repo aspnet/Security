@@ -1,0 +1,38 @@
+// Copyright (c) Microsoft Open Technologies, Inc. All rights reserved.
+// Licensed under the Apache License, Version 2.0. See License.txt in the project root for license information.
+
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Security.Claims;
+using System.Threading.Tasks;
+
+namespace Microsoft.AspNet.Security
+{
+    public class DefaultAuthoriziationPolicyHandler : IAuthorizationPolicyHandler
+    {
+        public Task<bool> AuthorizeAsync(AuthorizationContext context)
+        {
+            // TODO: optimize this
+            var filteredIdentities = context.User.Identities.Where(id => context.Policy.AuthenticationTypes.Contains(id.AuthenticationType));
+            foreach (var requires in context.Policy.Requirements)
+            {
+                bool found = false;
+                foreach (var identity in filteredIdentities)
+                {
+                    found = identity.Claims.Any(c => string.Equals(c.Type, requires.ClaimType, StringComparison.OrdinalIgnoreCase)
+                                                     && requires.ClaimValueRequirement.Contains(c.Value, StringComparer.Ordinal));
+                    if (found)
+                    {
+                        break;
+                    }
+                }
+                if (!found)
+                {
+                    return Task.FromResult(false);
+                }
+            }
+            return Task.FromResult(true);
+        }
+    }
+}
