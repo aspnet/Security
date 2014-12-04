@@ -22,8 +22,16 @@ namespace Microsoft.AspNet.Security
                 bool found = false;
                 foreach (var identity in filteredIdentities)
                 {
-                    found = identity.Claims.Any(c => string.Equals(c.Type, requires.ClaimType, StringComparison.OrdinalIgnoreCase)
-                                                     && requires.ClaimValueRequirement.Contains(c.Value, StringComparer.Ordinal));
+                    // Just check for presence of the claim type if no values specified
+                    if (requires.ClaimValueRequirement == null || !requires.ClaimValueRequirement.Any())
+                    {
+                        found = identity.Claims.Any(c => string.Equals(c.Type, requires.ClaimType, StringComparison.OrdinalIgnoreCase));
+                    }
+                    else
+                    {
+                        found = identity.Claims.Any(c => string.Equals(c.Type, requires.ClaimType, StringComparison.OrdinalIgnoreCase)
+                                                         && requires.ClaimValueRequirement.Contains(c.Value, StringComparer.Ordinal));
+                    }
                     if (found)
                     {
                         break;

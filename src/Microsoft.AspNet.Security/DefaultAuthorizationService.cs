@@ -30,11 +30,12 @@ namespace Microsoft.AspNet.Security
 
         public Task<bool> AuthorizeAsync([NotNull] string policyName, ClaimsPrincipal user, params object[] resources)
         {
-            if (!_options.Policies.ContainsKey(policyName))
+            var policy = _options.GetPolicy(policyName);
+            if (policy == null)
             {
                 return Task.FromResult(false);
             }
-            return AuthorizeAsync(_options.Policies[policyName], user, resources);
+            return AuthorizeAsync(policy, user, resources);
         }
 
         public async Task<bool> AuthorizeAsync([NotNull] IAuthorizationPolicy policy, ClaimsPrincipal user, params object[] resources)

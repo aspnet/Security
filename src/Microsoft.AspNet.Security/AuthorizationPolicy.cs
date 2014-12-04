@@ -16,7 +16,8 @@ namespace Microsoft.AspNet.Security
             AuthenticationTypes = authTypes;
         }
 
-        // NOTE: null auth types means use all auth types
+        // REVIEW: rename IncludedAuthenticationTypes?
+        // NOTE: null or no auth types means use all auth types
         public IEnumerable<string> AuthenticationTypes { get; private set; }
 
         public IEnumerable<AuthorizationClaimRequirement> Requirements { get { return _reqs; } }
@@ -30,5 +31,16 @@ namespace Microsoft.AspNet.Security
             });
             return this;
         }
+
+        public AuthorizationPolicy RequiresAny(string claimType)
+        {
+            _reqs.Add(new AuthorizationClaimRequirement
+            {
+                ClaimType = claimType,
+                ClaimValueRequirement = null
+            });
+            return this;
+        }
+
     }
 }

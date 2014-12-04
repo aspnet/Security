@@ -5,6 +5,8 @@ using System.Collections.Generic;
 
 namespace Microsoft.AspNet.Security
 {
+    // Consider merging IAuthorizationPolicy with IAuthorizationPolicyHandler?
+
     public interface IAuthorizationPolicy
     {
         // Auth types requested by this policy
@@ -14,6 +16,7 @@ namespace Microsoft.AspNet.Security
     }
 
     // Must contain a claim with the specified name, and at least one of the required values
+    // If ValueRequirement is null or empty, that means any claim is valid
     public class AuthorizationClaimRequirement
     {
         public string ClaimType { get; set; }
