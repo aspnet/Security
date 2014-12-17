@@ -1,12 +1,11 @@
 // Copyright (c) Microsoft Open Technologies, Inc. All rights reserved.
 // Licensed under the Apache License, Version 2.0. See License.txt in the project root for license information.
 
-using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Security.Claims;
 using System.Threading.Tasks;
-using Microsoft.AspNet.Security;
+using Microsoft.Framework.OptionsModel;
+using Moq;
 using Xunit;
 
 namespace Microsoft.AspNet.Security.Test
@@ -14,87 +13,112 @@ namespace Microsoft.AspNet.Security.Test
     public class DefaultAuthorizationServiceTests
     {
         [Fact]
-        public void Check_ShouldAllowIfClaimIsPresent()
+        public async Task Authorize_ShouldAllowIfClaimIsPresent()
         {
             // Arrange
-            var authorizationService = new DefaultAuthorizationService(Enumerable.Empty<IAuthorizationPolicy>());
+            var policy = new AuthorizationPolicy("Basic").Requires("Permission", "CanViewPage");
+            var authorizationOptions = new AuthorizationOptions();
+            authorizationOptions.AddPolicy("Basic", policy);
+            var options = new Mock<IOptions<AuthorizationOptions>>();
+            options.Setup(o => o.Options).Returns(authorizationOptions);
+            var authorizationService = new DefaultAuthorizationService(options.Object, null);
             var user = new ClaimsPrincipal(
-                new ClaimsIdentity( new Claim[] { new Claim("Permission", "CanViewPage") }, "Basic")
+                new ClaimsIdentity(new Claim[] { new Claim("Permission", "CanViewPage") }, "Basic")
                 );
 
             // Act
-            var allowed = authorizationService.Authorize(new Claim[] { new Claim("Permission", "CanViewPage") }, user);
+            var allowed = await authorizationService.AuthorizeAsync("Basic", user);
 
             // Assert
             Assert.True(allowed);
         }
 
         [Fact]
-        public void Check_ShouldAllowIfClaimIsAmongValues()
+        public async Task Authorize_ShouldAllowIfClaimIsAmongValues()
         {
             // Arrange
-            var authorizationService = new DefaultAuthorizationService(Enumerable.Empty<IAuthorizationPolicy>());
+            var policy = new AuthorizationPolicy("Basic").Requires("Permission", "CanViewPage", "CanViewAnything");
+            var authorizationOptions = new AuthorizationOptions();
+            authorizationOptions.AddPolicy("Basic", policy);
+            var options = new Mock<IOptions<AuthorizationOptions>>();
+            options.Setup(o => o.Options).Returns(authorizationOptions);
+            var authorizationService = new DefaultAuthorizationService(options.Object, null);
             var user = new ClaimsPrincipal(
                 new ClaimsIdentity(
-                    new Claim[] { 
-                        new Claim("Permission", "CanViewPage"), 
+                    new Claim[] {
+                        new Claim("Permission", "CanViewPage"),
                         new Claim("Permission", "CanViewAnything")
-                    }, 
+                    },
                     "Basic")
                 );
 
             // Act
-            var allowed = authorizationService.Authorize(new Claim[] { new Claim("Permission", "CanViewPage") }, user);
+            var allowed = await authorizationService.AuthorizeAsync("Basic", user);
 
             // Assert
             Assert.True(allowed);
         }
 
         [Fact]
-        public void Check_ShouldNotAllowIfClaimTypeIsNotPresent()
+        public async Task Authorize_ShouldNotAllowIfClaimTypeIsNotPresent()
         {
             // Arrange
-            var authorizationService = new DefaultAuthorizationService(Enumerable.Empty<IAuthorizationPolicy>());
+            var policy = new AuthorizationPolicy("Basic").Requires("Permission", "CanViewPage", "CanViewAnything");
+            var authorizationOptions = new AuthorizationOptions();
+            authorizationOptions.AddPolicy("Basic", policy);
+            var options = new Mock<IOptions<AuthorizationOptions>>();
+            options.Setup(o => o.Options).Returns(authorizationOptions);
+            var authorizationService = new DefaultAuthorizationService(options.Object, null);
             var user = new ClaimsPrincipal(
                 new ClaimsIdentity(
-                    new Claim[] { 
-                        new Claim("SomethingElse", "CanViewPage"), 
+                    new Claim[] {
+                        new Claim("SomethingElse", "CanViewPage"),
                     },
                     "Basic")
                 );
 
             // Act
-            var allowed = authorizationService.Authorize(new Claim[] { new Claim("Permission", "CanViewPage") }, user);
+            var allowed = await authorizationService.AuthorizeAsync("Basic", user);
 
             // Assert
             Assert.False(allowed);
         }
 
         [Fact]
-        public void Check_ShouldNotAllowIfClaimValueIsNotPresent()
+        public async Task Authorize_ShouldNotAllowIfClaimValueIsNotPresent()
         {
             // Arrange
-            var authorizationService = new DefaultAuthorizationService(Enumerable.Empty<IAuthorizationPolicy>());
+            var policy = new AuthorizationPolicy("Basic").Requires("Permission", "CanViewPage");
+            var authorizationOptions = new AuthorizationOptions();
+            authorizationOptions.AddPolicy("Basic", policy);
+            var options = new Mock<IOptions<AuthorizationOptions>>();
+            options.Setup(o => o.Options).Returns(authorizationOptions);
+            var authorizationService = new DefaultAuthorizationService(options.Object, null);
             var user = new ClaimsPrincipal(
                 new ClaimsIdentity(
-                    new Claim[] { 
-                        new Claim("Permission", "CanViewComment"), 
+                    new Claim[] {
+                        new Claim("Permission", "CanViewComment"),
                     },
                     "Basic")
                 );
 
             // Act
-            var allowed = authorizationService.Authorize(new Claim[] { new Claim("Permission", "CanViewPage") }, user);
+            var allowed = await authorizationService.AuthorizeAsync("Basic", user);
 
             // Assert
             Assert.False(allowed);
         }
 
         [Fact]
-        public void Check_ShouldNotAllowIfNoClaims()
+        public async Task Authorize_ShouldNotAllowIfNoClaims()
         {
             // Arrange
-            var authorizationService = new DefaultAuthorizationService(Enumerable.Empty<IAuthorizationPolicy>());
+            var policy = new AuthorizationPolicy("Basic").Requires("Permission", "CanViewPage");
+            var authorizationOptions = new AuthorizationOptions();
+            authorizationOptions.AddPolicy("Basic", policy);
+            var options = new Mock<IOptions<AuthorizationOptions>>();
+            options.Setup(o => o.Options).Returns(authorizationOptions);
+            var authorizationService = new DefaultAuthorizationService(options.Object, null);
             var user = new ClaimsPrincipal(
                 new ClaimsIdentity(
                     new Claim[0],
@@ -102,205 +126,334 @@ namespace Microsoft.AspNet.Security.Test
                 );
 
             // Act
-            var allowed = authorizationService.Authorize(new Claim[] { new Claim("Permission", "CanViewPage") }, user);
+            var allowed = await authorizationService.AuthorizeAsync("Basic", user);
 
             // Assert
             Assert.False(allowed);
         }
 
         [Fact]
-        public void Check_ShouldNotAllowIfUserIsNull()
+        public async Task Authorize_ShouldNotAllowIfUserIsNull()
         {
             // Arrange
-            var authorizationService = new DefaultAuthorizationService(Enumerable.Empty<IAuthorizationPolicy>());
+            var policy = new AuthorizationPolicy("Basic").Requires("Permission", "CanViewPage");
+            var authorizationOptions = new AuthorizationOptions();
+            authorizationOptions.AddPolicy("Basic", policy);
+            var options = new Mock<IOptions<AuthorizationOptions>>();
+            options.Setup(o => o.Options).Returns(authorizationOptions);
+            var authorizationService = new DefaultAuthorizationService(options.Object, null);
             ClaimsPrincipal user = null;
 
             // Act
-            var allowed = authorizationService.Authorize(new Claim[] { new Claim("Permission", "CanViewPage") }, user);
+            var allowed = await authorizationService.AuthorizeAsync("Basic", user);
 
             // Assert
             Assert.False(allowed);
         }
 
         [Fact]
-        public void Check_ShouldNotAllowIfUserIsNotAuthenticated()
+        public async Task Authorize_ShouldNotAllowIfUserIsNotAuthenticated()
         {
             // Arrange
-            var authorizationService = new DefaultAuthorizationService(Enumerable.Empty<IAuthorizationPolicy>());
+            var policy = new AuthorizationPolicy("Basic").Requires("Permission", "CanViewPage");
+            var authorizationOptions = new AuthorizationOptions();
+            authorizationOptions.AddPolicy("Basic", policy);
+            var options = new Mock<IOptions<AuthorizationOptions>>();
+            options.Setup(o => o.Options).Returns(authorizationOptions);
+            var authorizationService = new DefaultAuthorizationService(options.Object, null);
             var user = new ClaimsPrincipal(
                 new ClaimsIdentity(
-                    new Claim[] { 
-                        new Claim("Permission", "CanViewComment"), 
+                    new Claim[] {
+                        new Claim("Permission", "CanViewComment"),
                     },
                     null)
                 );
 
             // Act
-            var allowed = authorizationService.Authorize(new Claim[] { new Claim("Permission", "CanViewPage") }, user);
+            var allowed = await authorizationService.AuthorizeAsync("Basic", user);
 
             // Assert
             Assert.False(allowed);
         }
 
         [Fact]
-        public void Check_ShouldApplyPoliciesInOrder()
+        public async Task Authorize_ShouldAllowWithNoAuthType()
         {
             // Arrange
-            string result = "";
-            var policies = new IAuthorizationPolicy[] {
-                new FakePolicy() {
-                    Order = 20,
-                    ApplyingAsyncAction = (context) => { result += "20"; }
-                },
-                new FakePolicy() {
-                    Order = -1,
-                    ApplyingAsyncAction = (context) => { result += "-1"; }
-                },
-                new FakePolicy() {
-                    Order = 30,
-                    ApplyingAsyncAction = (context) => { result += "30"; }
-                },
-            };
-
-            var authorizationService = new DefaultAuthorizationService(policies);
-            
-            // Act
-            var allowed = authorizationService.Authorize(Enumerable.Empty<Claim>(), null);
-
-            // Assert
-            Assert.Equal("-12030", result);
-        }
-
-        [Fact]
-        public void Check_ShouldInvokeApplyingApplyAppliedInOrder()
-        {
-            // Arrange
-            string result = "";
-            var policies = new IAuthorizationPolicy[] {
-                new FakePolicy() {
-                    Order = 20,
-                    ApplyingAsyncAction = (context) => { result += "Applying20"; },
-                    ApplyAsyncAction = (context) => { result += "Apply20"; },
-                    AppliedAsyncAction = (context) => { result += "Applied20"; }
-                },
-                new FakePolicy() {
-                    Order = -1,
-                    ApplyingAsyncAction = (context) => { result += "Applying-1"; },
-                    ApplyAsyncAction = (context) => { result += "Apply-1"; },
-                    AppliedAsyncAction = (context) => { result += "Applied-1"; }
-                },
-                new FakePolicy() {
-                    Order = 30,
-                    ApplyingAsyncAction = (context) => { result += "Applying30"; },
-                    ApplyAsyncAction = (context) => { result += "Apply30"; },
-                    AppliedAsyncAction = (context) => { result += "Applied30"; }
-                },
-            };
-
-            var authorizationService = new DefaultAuthorizationService(policies);
-            
-            // Act
-            var allowed = authorizationService.Authorize(Enumerable.Empty<Claim>(), null);
-
-            // Assert
-            Assert.Equal("Applying-1Applying20Applying30Apply-1Apply20Apply30Applied-1Applied20Applied30", result);
-        }
-
-        [Fact]
-        public void Check_ShouldConvertNullClaimsToEmptyList()
-        {
-            // Arrange
-            IList<Claim> claims = null;
-            var policies = new IAuthorizationPolicy[] {
-                new FakePolicy() {
-                    Order = 20,
-                    ApplyingAsyncAction = (context) => { claims = context.Claims; }
-                }
-            };
-
-            var authorizationService = new DefaultAuthorizationService(policies);
-            
-            // Act
-            var allowed = authorizationService.Authorize(Enumerable.Empty<Claim>(), null);
-
-            // Assert
-            Assert.NotNull(claims);
-            Assert.Equal(0, claims.Count);
-        }
-
-        [Fact]
-        public void Check_ShouldThrowWhenPoliciesDontStop()
-        {
-            // Arrange
-            var policies = new IAuthorizationPolicy[] {
-                new FakePolicy() {
-                    ApplyAsyncAction = (context) => { context.Retry = true; }
-                }
-            };
-
-            var authorizationService = new DefaultAuthorizationService(policies);
-
-            // Act
-            // Assert
-            Exception ex = Assert.Throws<InvalidOperationException>(() => authorizationService.Authorize(Enumerable.Empty<Claim>(), null));
-        }
- 
-        [Fact]
-        public void Check_ApplyCanMutateCheckedClaims()
-        {
-
-            // Arrange
+            var policy = new AuthorizationPolicy().Requires("Permission", "CanViewPage");
+            var authorizationOptions = new AuthorizationOptions();
+            authorizationOptions.AddPolicy("Basic", policy);
+            var options = new Mock<IOptions<AuthorizationOptions>>();
+            options.Setup(o => o.Options).Returns(authorizationOptions);
+            var authorizationService = new DefaultAuthorizationService(options.Object, null);
             var user = new ClaimsPrincipal(
-                new ClaimsIdentity( new Claim[] { new Claim("Permission", "CanDeleteComments") }, "Basic")
+                new ClaimsIdentity(
+                    new Claim[] {
+                        new Claim("Permission", "CanViewPage"),
+                    },
+                    null)
                 );
 
-            var policies = new IAuthorizationPolicy[] {
-                new FakePolicy() {
-                    ApplyAsyncAction = (context) => { 
-                        // for instance, if user owns the comment
-                        if(!context.Claims.Any(claim => claim.Type == "Permission" && claim.Value == "CanDeleteComments"))
-                        {
-                            context.Claims.Add(new Claim("Permission", "CanDeleteComments")); 
-                            context.Retry = true;
-                        }
-                    }
-                }
-            };
-
-            var authorizationService = new DefaultAuthorizationService(policies);
-            
             // Act
-            var allowed = authorizationService.Authorize(Enumerable.Empty<Claim>(), user);
+            var allowed = await authorizationService.AuthorizeAsync("Basic", user);
 
             // Assert
             Assert.True(allowed);
         }
 
         [Fact]
-        public void Check_PoliciesCanMutateUsersClaims()
+        public async Task Authorize_ShouldNotAllowIfUnknownPolicy()
         {
-
             // Arrange
+            var authorizationOptions = new AuthorizationOptions();
+            var options = new Mock<IOptions<AuthorizationOptions>>();
+            options.Setup(o => o.Options).Returns(authorizationOptions);
+            var authorizationService = new DefaultAuthorizationService(options.Object, null);
             var user = new ClaimsPrincipal(
-                new ClaimsIdentity(new Claim[0], "Basic")
+                new ClaimsIdentity(
+                    new Claim[] {
+                        new Claim("Permission", "CanViewComment"),
+                    },
+                    null)
                 );
 
-            var policies = new IAuthorizationPolicy[] {
-                new FakePolicy() {
-                    ApplyAsyncAction = (context) => { 
-                        if (!context.Authorized) 
-                        {
-                            context.UserClaims.Add(new Claim("Permission", "CanDeleteComments")); 
-                            context.Retry = true;
-                        }
-                    }
-                }
-            };
-
-            var authorizationService = new DefaultAuthorizationService(policies);
-            
             // Act
-            var allowed = authorizationService.Authorize(new Claim("Permission", "CanDeleteComments"), user);
+            var allowed = await authorizationService.AuthorizeAsync("Basic", user);
+
+            // Assert
+            Assert.False(allowed);
+        }
+
+        [Fact]
+        public async Task Authorize_CustomRolePolicy()
+        {
+            // Arrange
+            var policy = new AuthorizationPolicy()
+                .Requires(ClaimTypes.Role, "Administrator")
+                .Requires(ClaimTypes.Role, "User");
+            var options = new Mock<IOptions<AuthorizationOptions>>();
+            var authorizationService = new DefaultAuthorizationService(options.Object, null);
+            var user = new ClaimsPrincipal(
+                new ClaimsIdentity(
+                    new Claim[] {
+                        new Claim(ClaimTypes.Role, "User"),
+                        new Claim(ClaimTypes.Role, "Administrator")
+                    },
+                    "Basic")
+                );
+
+            // Act
+            var allowed = await authorizationService.AuthorizeAsync(policy, user);
+
+            // Assert
+            Assert.True(allowed);
+        }
+
+        [Fact]
+        public async Task Authorize_HasAnyClaimOfTypePolicy()
+        {
+            // Arrange
+            var policy = new AuthorizationPolicy()
+                .RequiresAny(ClaimTypes.Role);
+            var options = new Mock<IOptions<AuthorizationOptions>>();
+            var authorizationService = new DefaultAuthorizationService(options.Object, null);
+            var user = new ClaimsPrincipal(
+                new ClaimsIdentity(
+                    new Claim[] {
+                        new Claim(ClaimTypes.Role, ""),
+                    },
+                    "Basic")
+                );
+
+            // Act
+            var allowed = await authorizationService.AuthorizeAsync(policy, user);
+
+            // Assert
+            Assert.True(allowed);
+        }
+
+        [Fact]
+        public async Task Authorize_PolicyRequiresAuthenticationTypeWithNameClaim()
+        {
+            // Arrange
+            var policy = new AuthorizationPolicy("AuthType")
+                .RequiresAny(ClaimTypes.Name);
+            var options = new Mock<IOptions<AuthorizationOptions>>();
+            var authorizationService = new DefaultAuthorizationService(options.Object, null);
+            var user = new ClaimsPrincipal(
+                new ClaimsIdentity(
+                    new Claim[] {
+                        new Claim(ClaimTypes.Name, "Name"),
+                    },
+                    "AuthType")
+                );
+
+            // Act
+            var allowed = await authorizationService.AuthorizeAsync(policy, user);
+
+            // Assert
+            Assert.True(allowed);
+        }
+
+        [Fact]
+        public async Task RolePolicyCanRequireSingleRole()
+        {
+            // Arrange
+            var policy = new RolesAuthorizationPolicy("AuthType")
+                .RequiresRole("Admin");
+            var options = new Mock<IOptions<AuthorizationOptions>>();
+            var authorizationService = new DefaultAuthorizationService(options.Object, null);
+            var user = new ClaimsPrincipal(
+                new ClaimsIdentity(
+                    new Claim[] {
+                        new Claim(ClaimTypes.Role, "Admin"),
+                    },
+                    "AuthType")
+                );
+
+            // Act
+            var allowed = await authorizationService.AuthorizeAsync(policy, user);
+
+            // Assert
+            Assert.True(allowed);
+        }
+
+        [Fact]
+        public async Task RolePolicyCanRequireOneOfManyRoles()
+        {
+            // Arrange
+            var policy = new RolesAuthorizationPolicy("AuthType")
+                .RequiresRole("Admin", "Users");
+            var options = new Mock<IOptions<AuthorizationOptions>>();
+            var authorizationService = new DefaultAuthorizationService(options.Object, null);
+            var user = new ClaimsPrincipal(
+                new ClaimsIdentity(
+                    new Claim[] {
+                        new Claim(ClaimTypes.Role, "Users"),
+                    },
+                    "AuthType")
+                );
+
+            // Act
+            var allowed = await authorizationService.AuthorizeAsync(policy, user);
+
+            // Assert
+            Assert.True(allowed);
+        }
+
+        [Fact]
+        public async Task RolePolicyCanBlockWrongRole()
+        {
+            // Arrange
+            var policy = new RolesAuthorizationPolicy("AuthType")
+                .RequiresRole("Admin", "Users");
+            var options = new Mock<IOptions<AuthorizationOptions>>();
+            var authorizationService = new DefaultAuthorizationService(options.Object, null);
+            var user = new ClaimsPrincipal(
+                new ClaimsIdentity(
+                    new Claim[] {
+                        new Claim(ClaimTypes.Role, "Nope"),
+                    },
+                    "AuthType")
+                );
+
+            // Act
+            var allowed = await authorizationService.AuthorizeAsync(policy, user);
+
+            // Assert
+            Assert.False(allowed);
+        }
+
+        [Fact]
+        public async Task RolePolicyCanBlockNoRole()
+        {
+            // Arrange
+            var policy = new RolesAuthorizationPolicy("AuthType")
+                .RequiresRole("Admin", "Users");
+            var options = new Mock<IOptions<AuthorizationOptions>>();
+            var authorizationService = new DefaultAuthorizationService(options.Object, null);
+            var user = new ClaimsPrincipal(
+                new ClaimsIdentity(
+                    new Claim[] {
+                    },
+                    "AuthType")
+                );
+
+            // Act
+            var allowed = await authorizationService.AuthorizeAsync(policy, user);
+
+            // Assert
+            Assert.False(allowed);
+        }
+
+        private class GrumpyPolicyHandler : IAuthorizationPolicyHandler
+        {
+            public Task<bool> AuthorizeAsync(AuthorizationContext context)
+            {
+                return Task.FromResult(false);
+            }
+        }
+
+        [Fact]
+        public async Task CustomPolicyCanBlock()
+        {
+            // Arrange
+            var policy = new AuthorizationPolicy("AuthType")
+                .RequiresAny(ClaimTypes.Name)
+                .AddHandler(new GrumpyPolicyHandler());
+            var options = new Mock<IOptions<AuthorizationOptions>>();
+            var authorizationService = new DefaultAuthorizationService(options.Object);
+            var user = new ClaimsPrincipal(
+                new ClaimsIdentity(
+                    new Claim[] {
+                        new Claim(ClaimTypes.Name, "Name"),
+                    },
+                    "AuthType")
+                );
+
+            // Act
+            var allowed = await authorizationService.AuthorizeAsync(policy, user);
+
+            // Assert
+            Assert.False(allowed);
+        }
+
+        [Fact]
+        public async Task PolicyHandlerCanApproveWithNoDefaultHandler()
+        {
+            // Arrange
+            var policy = new AuthorizationPolicy("AuthType")
+                .RequiresAny(ClaimTypes.Name)
+                .AddHandler(new DefaultAuthoriziationPolicyHandler());
+            var options = new Mock<IOptions<AuthorizationOptions>>();
+            var authorizationService = new DefaultAuthorizationService(options.Object, new List<IAuthorizationPolicyHandler>());
+            var user = new ClaimsPrincipal(
+                new ClaimsIdentity(
+                    new Claim[] {
+                        new Claim(ClaimTypes.Name, "Name"),
+                    },
+                    "AuthType")
+                );
+
+            // Act
+            var allowed = await authorizationService.AuthorizeAsync(policy, user);
+
+            // Assert
+            Assert.True(allowed);
+        }
+
+        [Fact]
+        public async Task AlwaysApproveWithNoPolicyHandlers()
+        {
+            // Arrange
+            var policy = new AuthorizationPolicy("TotallyBogus")
+                .RequiresAny(ClaimTypes.Name);
+            var options = new Mock<IOptions<AuthorizationOptions>>();
+            var authorizationService = new DefaultAuthorizationService(options.Object, new List<IAuthorizationPolicyHandler>());
+            var user = new ClaimsPrincipal();
+
+            // Act
+            var allowed = await authorizationService.AuthorizeAsync(policy, user);
 
             // Assert
             Assert.True(allowed);

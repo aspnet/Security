@@ -1,34 +1,34 @@
 // Copyright (c) Microsoft Open Technologies, Inc. All rights reserved.
 // Licensed under the Apache License, Version 2.0. See License.txt in the project root for license information.
 
-using System.Collections.Generic;
 using System.Security.Claims;
 using System.Threading.Tasks;
 
+// REVIEW: should all AuthZ stuff go under Security.Authorization?
 namespace Microsoft.AspNet.Security
 {
     /// <summary>
-    /// Checks claims based permissions for a user.
+    /// Checks policy based permissions for a user
     /// </summary>
     public interface IAuthorizationService
     {
+        // REVIEW: should this be moved to a manager?
         /// <summary>
-        /// Checks if a user has specific claims for a specific context obj.
+        /// Checks if a user meets a specific authorization policy
         /// </summary>
-        /// <param name="claims">The claims to check against a specific user.</param>
-        /// <param name="user">The user to check claims against.</param>
-        /// <param name="resource">The resource the claims should be check with.</param>
-        /// <returns><value>true</value> when the user fulfills one of the claims, <value>false</value> otherwise.</returns>
-        Task<bool> AuthorizeAsync(IEnumerable<Claim> claims, ClaimsPrincipal user, object resource);
+        /// <param name="policy">The policy to check against a specific user.</param>
+        /// <param name="user">The user to check the policy against.</param>
+        /// <param name="resource">The resource the policy should be checked with.</param>
+        /// <returns><value>true</value> when the user fulfills the policy, <value>false</value> otherwise.</returns>
+        Task<bool> AuthorizeAsync(string policyName, ClaimsPrincipal user, params object[] resources);
 
         /// <summary>
-        /// Checks if a user has specific claims for a specific context obj.
+        /// Checks if a user meets a specific authorization policy
         /// </summary>
-        /// <param name="claims">The claims to check against a specific user.</param>
-        /// <param name="user">The user to check claims against.</param>
-        /// <param name="resource">The resource the claims should be check with.</param>
-        /// <returns><value>true</value> when the user fulfills one of the claims, <value>false</value> otherwise.</returns>
-        bool Authorize(IEnumerable<Claim> claims, ClaimsPrincipal user, object resource);
-
+        /// <param name="policy">The policy to check against a specific user.</param>
+        /// <param name="user">The user to check the policy against.</param>
+        /// <param name="resource">The resource the policy should be checked with.</param>
+        /// <returns><value>true</value> when the user fulfills the policy, <value>false</value> otherwise.</returns>
+        Task<bool> AuthorizeAsync(IAuthorizationPolicy policy, ClaimsPrincipal user, params object[] resources);
     }
 }
