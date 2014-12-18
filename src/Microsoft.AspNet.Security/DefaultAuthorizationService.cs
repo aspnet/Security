@@ -19,7 +19,6 @@ namespace Microsoft.AspNet.Security
             if (handlers == null)
             {
                 _handlers = new List<IAuthorizationPolicyHandler>();
-                _handlers.Add(new DefaultAuthoriziationPolicyHandler());
             }
             else
             {
@@ -40,13 +39,7 @@ namespace Microsoft.AspNet.Security
 
         public async Task<bool> AuthorizeAsync([NotNull] IAuthorizationPolicy policy, ClaimsPrincipal user, params object[] resources)
         {
-            // REVIEW: should we just require [NotNull] user?
-            if (user == null)
-            {
-                return false;
-            }
-
-            // Authorize only returns true if EVERY policy approves
+            // Authorize only returns true if EVERY policy handler approves
             var context = new AuthorizationContext(policy, user, resources);
             // Run global handlers first
             foreach (var handler in _handlers)
@@ -56,12 +49,12 @@ namespace Microsoft.AspNet.Security
                     return false;
                 }
             }
-            // Run policy specific handlers next
-            if (policy.Handlers != null)
+            // Check policy requirements next
+            if (policy.Requirements != null)
             {
-                foreach (var handler in policy.Handlers)
+                foreach (var req in policy.Requirements)
                 {
-                    if (!await handler.AuthorizeAsync(context))
+                    if (!await req.CheckAsync(context))
                     {
                         return false;
                     }

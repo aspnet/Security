@@ -2,10 +2,10 @@
 // Licensed under the Apache License, Version 2.0. See License.txt in the project root for license information.
 
 using System;
+using Microsoft.AspNet.Security;
 using Microsoft.Framework.ConfigurationModel;
-using Microsoft.Framework.DependencyInjection;
 
-namespace Microsoft.AspNet.Security
+namespace Microsoft.Framework.DependencyInjection
 {
     public static class ServiceCollectionExtensions
     {

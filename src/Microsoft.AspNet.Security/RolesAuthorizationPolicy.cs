@@ -11,7 +11,7 @@ namespace Microsoft.AspNet.Security
 
         public RolesAuthorizationPolicy RequiresRole([NotNull] params string[] roles)
         {
-            Requires(ClaimTypes.Role, roles);
+            RequiresClaim(ClaimTypes.Role, roles);
             return this;
         }
     }

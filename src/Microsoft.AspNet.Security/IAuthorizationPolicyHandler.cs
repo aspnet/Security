@@ -5,7 +5,7 @@ using System.Threading.Tasks;
 
 namespace Microsoft.AspNet.Security
 {
-    // This guy does the work, default implementation will verify requirements from context.User
+    // Global handlers which are run before specific policy requirements
     public interface IAuthorizationPolicyHandler
     {
         // REVIEW: should this be void and just manipulate Authorized on context instead?

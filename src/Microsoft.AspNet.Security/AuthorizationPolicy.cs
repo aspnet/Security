@@ -2,52 +2,49 @@
 // Licensed under the Apache License, Version 2.0. See License.txt in the project root for license information.
 
 using System.Collections.Generic;
-using System.Security.Claims;
-using System.Threading.Tasks;
 
 namespace Microsoft.AspNet.Security
 {
     public class AuthorizationPolicy : IAuthorizationPolicy
     {
-        private readonly List<AuthorizationClaimRequirement> _reqs = new List<AuthorizationClaimRequirement>();
-        private readonly List<IAuthorizationPolicyHandler> _handlers = new List<IAuthorizationPolicyHandler>();
+        private readonly List<IAuthorizationRequirement> _reqs = new List<IAuthorizationRequirement>();
 
-        public AuthorizationPolicy(params string[] authTypes)
+        public AuthorizationPolicy(params string[] authTypesFilter)
         {
-            AuthenticationTypes = authTypes;
+            AuthenticationTypesFilter = authTypesFilter;
         }
 
         // REVIEW: rename IncludedAuthenticationTypes?
         // NOTE: null or no auth types means use all auth types
-        public IEnumerable<string> AuthenticationTypes { get; private set; }
+        public IEnumerable<string> AuthenticationTypesFilter { get; private set; }
 
-        public IEnumerable<AuthorizationClaimRequirement> Requirements { get { return _reqs; } }
+        public IEnumerable<IAuthorizationRequirement> Requirements { get { return _reqs; } }
 
-        public IEnumerable<IAuthorizationPolicyHandler> Handlers { get { return _handlers; } }
-
-        public AuthorizationPolicy Requires([NotNull] string claimType, params string[] requiredValues)
+        public AuthorizationPolicy RequiresClaim([NotNull] string claimType, params string[] requiredValues)
         {
-            _reqs.Add(new AuthorizationClaimRequirement
+            _reqs.Add(new ClaimRequirement
             {
+                AuthenticationTypesFilter = AuthenticationTypesFilter,
                 ClaimType = claimType,
                 ClaimValueRequirement = requiredValues
             });
             return this;
         }
 
-        public AuthorizationPolicy RequiresAny([NotNull] string claimType)
+        public AuthorizationPolicy RequiresClaim([NotNull] string claimType)
         {
-            _reqs.Add(new AuthorizationClaimRequirement
+            _reqs.Add(new ClaimRequirement
             {
+                AuthenticationTypesFilter = AuthenticationTypesFilter,
                 ClaimType = claimType,
                 ClaimValueRequirement = null
             });
             return this;
         }
 
-        public AuthorizationPolicy AddHandler([NotNull] IAuthorizationPolicyHandler handler)
+        public AuthorizationPolicy Requires([NotNull] IAuthorizationRequirement req)
         {
-            _handlers.Add(handler);
+            _reqs.Add(req);
             return this;
         }
     }
