@@ -3,6 +3,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Security.Claims;
 using System.Threading.Tasks;
 using Microsoft.Framework.OptionsModel;
@@ -300,7 +301,7 @@ namespace Microsoft.AspNet.Security.Test
         public async Task RolePolicyCanRequireSingleRole()
         {
             // Arrange
-            var policy = new RolesAuthorizationPolicy("AuthType")
+            var policy = new AuthorizationPolicy("AuthType")
                 .RequiresRole("Admin");
             var options = new Mock<IOptions<AuthorizationOptions>>();
             var authorizationService = new DefaultAuthorizationService(options.Object, null);
@@ -323,7 +324,7 @@ namespace Microsoft.AspNet.Security.Test
         public async Task RolePolicyCanRequireOneOfManyRoles()
         {
             // Arrange
-            var policy = new RolesAuthorizationPolicy("AuthType")
+            var policy = new AuthorizationPolicy("AuthType")
                 .RequiresRole("Admin", "Users");
             var options = new Mock<IOptions<AuthorizationOptions>>();
             var authorizationService = new DefaultAuthorizationService(options.Object, null);
@@ -346,7 +347,7 @@ namespace Microsoft.AspNet.Security.Test
         public async Task RolePolicyCanBlockWrongRole()
         {
             // Arrange
-            var policy = new RolesAuthorizationPolicy("AuthType")
+            var policy = new AuthorizationPolicy("AuthType")
                 .RequiresRole("Admin", "Users");
             var options = new Mock<IOptions<AuthorizationOptions>>();
             var authorizationService = new DefaultAuthorizationService(options.Object, null);
@@ -369,7 +370,7 @@ namespace Microsoft.AspNet.Security.Test
         public async Task RolePolicyCanBlockNoRole()
         {
             // Arrange
-            var policy = new RolesAuthorizationPolicy("AuthType")
+            var policy = new AuthorizationPolicy("AuthType")
                 .RequiresRole("Admin", "Users");
             var options = new Mock<IOptions<AuthorizationOptions>>();
             var authorizationService = new DefaultAuthorizationService(options.Object, null);
@@ -513,6 +514,64 @@ namespace Microsoft.AspNet.Security.Test
             var options = new Mock<IOptions<AuthorizationOptions>>();
             var authorizationService = new DefaultAuthorizationService(options.Object, new List<IAuthorizationPolicyHandler>());
             var user = new ClaimsPrincipal();
+
+            // Act
+            var allowed = await authorizationService.AuthorizeAsync(policy, user);
+
+            // Assert
+            Assert.False(allowed);
+        }
+
+        private class SpecificAuthTypeRequirement : IAuthorizationRequirement
+        {
+            public SpecificAuthTypeRequirement(params string[] authTypes)
+            {
+                AuthenticationTypesFilter = authTypes;
+            }
+
+            public IEnumerable<string> AuthenticationTypesFilter { get; private set; }
+
+            public Task<bool> CheckAsync(AuthorizationContext context)
+            {
+                if (context.User == null)
+                {
+                    return Task.FromResult(false);
+                }
+                var filteredIdentities = context.User.Identities;
+                if (AuthenticationTypesFilter != null && AuthenticationTypesFilter.Any())
+                {
+                    filteredIdentities = filteredIdentities.Where(id => AuthenticationTypesFilter.Contains(id.AuthenticationType));
+                }
+                return Task.FromResult(filteredIdentities.Any());
+            }
+        }
+
+        [Fact]
+        public async Task CanRequireSpecificAuthType()
+        {
+            // Arrange
+            var policy = new AuthorizationPolicy()
+                .Requires(new SpecificAuthTypeRequirement("AuthType"));
+            var options = new Mock<IOptions<AuthorizationOptions>>();
+            var authorizationService = new DefaultAuthorizationService(options.Object, new List<IAuthorizationPolicyHandler>());
+            var user = new ClaimsPrincipal(new ClaimsIdentity("AuthType"));
+
+            // Act
+            var allowed = await authorizationService.AuthorizeAsync(policy, user);
+
+            // Assert
+            Assert.True(allowed);
+        }
+
+        [Fact]
+        public async Task RequireSpecificAuthTypeWillFailIfNotFound()
+        {
+            // Arrange
+            var policy = new AuthorizationPolicy()
+                .Requires(new SpecificAuthTypeRequirement("AuthType"));
+            var options = new Mock<IOptions<AuthorizationOptions>>();
+            var authorizationService = new DefaultAuthorizationService(options.Object, new List<IAuthorizationPolicyHandler>());
+            var user = new ClaimsPrincipal(new ClaimsIdentity("Bogus"));
 
             // Act
             var allowed = await authorizationService.AuthorizeAsync(policy, user);

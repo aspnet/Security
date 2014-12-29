@@ -2,11 +2,15 @@
 // Licensed under the Apache License, Version 2.0. See License.txt in the project root for license information.
 
 using System.Collections.Generic;
+using System.Threading.Tasks;
 
 namespace Microsoft.AspNet.Security
 {
-    public interface IAuthorizationPolicy
+    public interface IAuthorizationRequirement
     {
-        IEnumerable<IAuthorizationRequirement> Requirements { get; }
+        // Auth types filter for this requirement
+        IEnumerable<string> AuthenticationTypesFilter { get; }
+
+        Task<bool> CheckAsync(AuthorizationContext context);
     }
 }

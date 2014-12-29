@@ -2,6 +2,7 @@
 // Licensed under the Apache License, Version 2.0. See License.txt in the project root for license information.
 
 using System.Collections.Generic;
+using System.Security.Claims;
 
 namespace Microsoft.AspNet.Security
 {
@@ -26,7 +27,7 @@ namespace Microsoft.AspNet.Security
             {
                 AuthenticationTypesFilter = AuthenticationTypesFilter,
                 ClaimType = claimType,
-                ClaimValueRequirement = requiredValues
+                AllowedValues = requiredValues
             });
             return this;
         }
@@ -37,8 +38,14 @@ namespace Microsoft.AspNet.Security
             {
                 AuthenticationTypesFilter = AuthenticationTypesFilter,
                 ClaimType = claimType,
-                ClaimValueRequirement = null
+                AllowedValues = null
             });
+            return this;
+        }
+
+        public AuthorizationPolicy RequiresRole([NotNull] params string[] roles)
+        {
+            RequiresClaim(ClaimTypes.Role, roles);
             return this;
         }
 
