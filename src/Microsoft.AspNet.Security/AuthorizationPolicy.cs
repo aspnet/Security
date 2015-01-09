@@ -7,26 +7,40 @@ using System.Threading.Tasks;
 
 namespace Microsoft.AspNet.Security
 {
-    /// <summary>
-    /// This class provides a base implementation for <see cref="IAuthorizationPolicy" />
-    /// </summary>
-    public abstract class AuthorizationPolicy : IAuthorizationPolicy
+    public class AuthorizationPolicy : IAuthorizationPolicy
     {
-        public int Order { get; set; }
-        
-        public virtual Task ApplyingAsync(AuthorizationPolicyContext context)
+        private readonly List<AuthorizationClaimRequirement> _reqs = new List<AuthorizationClaimRequirement>();
+
+        public AuthorizationPolicy(params string[] authTypes)
         {
-            return Task.FromResult(0);
+            AuthenticationTypes = authTypes;
         }
 
-        public virtual Task ApplyAsync(AuthorizationPolicyContext context) 
+        // REVIEW: rename IncludedAuthenticationTypes?
+        // NOTE: null or no auth types means use all auth types
+        public IEnumerable<string> AuthenticationTypes { get; private set; }
+
+        public IEnumerable<AuthorizationClaimRequirement> Requirements { get { return _reqs; } }
+
+        public AuthorizationPolicy Requires(string claimType, params string[] requiredValues)
         {
-            return Task.FromResult(0);
+            _reqs.Add(new AuthorizationClaimRequirement
+            {
+                ClaimType = claimType,
+                ClaimValueRequirement = requiredValues
+            });
+            return this;
         }
 
-        public virtual Task AppliedAsync(AuthorizationPolicyContext context)
+        public AuthorizationPolicy RequiresAny(string claimType)
         {
-            return Task.FromResult(0);
+            _reqs.Add(new AuthorizationClaimRequirement
+            {
+                ClaimType = claimType,
+                ClaimValueRequirement = null
+            });
+            return this;
         }
+
     }
 }
