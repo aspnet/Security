@@ -1,39 +1,36 @@
 // Copyright (c) Microsoft Open Technologies, Inc. All rights reserved.
 // Licensed under the Apache License, Version 2.0. See License.txt in the project root for license information.
 
+using Microsoft.AspNet.Security.Notifications;
 using System;
 using System.Threading.Tasks;
 
+/// <summary>
+/// Specifies events which the <see cref="OAuthBearerAuthenticationMiddleware"></see> invokes to enable developer control over the authentication process. />
+/// </summary>
 namespace Microsoft.AspNet.Security.OAuth
 {
     /// <summary>
     /// OAuth bearer token middleware provider
     /// </summary>
-    public class OAuthBearerAuthenticationNotifications : IOAuthBearerAuthenticationNotifications
+    public class OAuthBearerAuthenticationNotifications
     {
         /// <summary>
         /// Initializes a new instance of the <see cref="OAuthBearerAuthenticationProvider"/> class
         /// </summary>
         public OAuthBearerAuthenticationNotifications()
         {
-            OnRequestToken = context => Task.FromResult<object>(null);
-            OnValidateIdentity = context => Task.FromResult<object>(null);
+            AuthenticationFailed = notification => Task.FromResult(0);
+            MessageReceived = notification => Task.FromResult(0);
+            SecurityTokenReceived = notification => Task.FromResult(0);
+            SecurityTokenValidated = notification => Task.FromResult(0);
+
             OnApplyChallenge = context =>
             {
                 context.HttpContext.Response.Headers.AppendValues("WWW-Authenticate", context.Challenge);
                 return Task.FromResult(0);
             };
-        }
-
-        /// <summary>
-        /// Handles processing OAuth bearer token.
-        /// </summary>
-        public Func<OAuthRequestTokenContext, Task> OnRequestToken { get; set; }
-
-        /// <summary>
-        /// Handles validating the identity produced from an OAuth bearer token.
-        /// </summary>
-        public Func<OAuthValidateIdentityContext, Task> OnValidateIdentity { get; set; }
+		}
 
         /// <summary>
         /// Handles applying the authentication challenge to the response message.
@@ -41,24 +38,24 @@ namespace Microsoft.AspNet.Security.OAuth
         public Func<OAuthChallengeContext, Task> OnApplyChallenge { get; set; }
 
         /// <summary>
-        /// Handles processing OAuth bearer token.
+        /// Invoked if exceptions are thrown during request processing. The exceptions will be re-thrown after this event unless suppressed.
         /// </summary>
-        /// <param name="context"></param>
-        /// <returns></returns>
-        public virtual Task RequestToken(OAuthRequestTokenContext context)
-        {
-            return OnRequestToken(context);
-        }
+        public Func<AuthenticationFailedNotification<OAuthRequestTokenContext, OAuthBearerAuthenticationOptions>, Task> AuthenticationFailed { get; set; }
 
         /// <summary>
-        /// Handles validating the identity produced from an OAuth bearer token.
+        /// Invoked when a protocol message is first received.
         /// </summary>
-        /// <param name="context"></param>
-        /// <returns></returns>
-        public virtual Task ValidateIdentity(OAuthValidateIdentityContext context)
-        {
-            return OnValidateIdentity.Invoke(context);
-        }
+        public Func<MessageReceivedNotification<OAuthRequestTokenContext, OAuthBearerAuthenticationOptions>, Task> MessageReceived { get; set; }
+
+        /// <summary>
+        /// Invoked with the security token that has been extracted from the protocol message.
+        /// </summary>
+        public Func<SecurityTokenReceivedNotification<OAuthRequestTokenContext, OAuthBearerAuthenticationOptions>, Task> SecurityTokenReceived { get; set; }
+
+        /// <summary>
+        /// Invoked after the security token has passed validation and a ClaimsIdentity has been generated.
+        /// </summary>
+        public Func<SecurityTokenValidatedNotification<OAuthRequestTokenContext, OAuthBearerAuthenticationOptions>, Task> SecurityTokenValidated { get; set; }
 
         /// <summary>
         /// Handles applying the authentication challenge to the response message.
