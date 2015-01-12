@@ -144,7 +144,7 @@ namespace Microsoft.AspNet.Security.OpenIdConnect
 
         /// <summary>
         /// The OpenIdConnect protocol http://openid.net/specs/openid-connect-core-1_0.html
-        /// recommends adding a nonce to a request to mitigate against replay attacks when obtaining id_tokens.
+        /// recommends adding a nonce to a request as a mitigation against replay attacks when requesting id_tokens.
         /// By default the runtime uses cookies with unique names generated from a hash of the nonce.
         /// </summary>
         public INonceCache NoneCache { get; set; }

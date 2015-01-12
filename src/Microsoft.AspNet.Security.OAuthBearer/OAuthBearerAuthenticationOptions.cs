@@ -25,6 +25,7 @@ namespace Microsoft.AspNet.Security.OAuth
         {
             AuthenticationType = OAuthBearerAuthenticationDefaults.AuthenticationType;
             BackchannelTimeout = TimeSpan.FromMinutes(1);
+            Notifications = new OAuthBearerAuthenticationNotifications();
             RefreshOnIssuerKeyNotFound = true;
             SystemClock = new SystemClock();
             TokenValidationParameters = new TokenValidationParameters();

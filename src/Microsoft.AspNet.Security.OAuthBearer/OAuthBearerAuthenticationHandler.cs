@@ -42,15 +42,15 @@ namespace Microsoft.AspNet.Security.OAuth
         protected override async Task<AuthenticationTicket> AuthenticateCoreAsync()
         {
             ExceptionDispatchInfo authFailedEx = null;
-            OAuthRequestTokenContext requestTokenContext = null;
+            OAuthBearerTokenContext requestTokenContext = null;
             try
             {
                 // Find token in default location
-                requestTokenContext = new OAuthRequestTokenContext(Context, null);
+                requestTokenContext = new OAuthBearerTokenContext(Context, null);
 
                 // Give application opportunity to find from a different location, adjust, or reject token
                 var messageReceivedNotification =
-                    new MessageReceivedNotification<OAuthRequestTokenContext, OAuthBearerAuthenticationOptions>(Context, Options)
+                    new MessageReceivedNotification<OAuthBearerTokenContext, OAuthBearerAuthenticationOptions>(Context, Options)
                     {
                         ProtocolMessage = requestTokenContext,
                     };
@@ -84,9 +84,10 @@ namespace Microsoft.AspNet.Security.OAuth
 
                 // notify user token was received
                 var securityTokenReceivedNotification =
-                new SecurityTokenReceivedNotification<OAuthRequestTokenContext, OAuthBearerAuthenticationOptions>(Context, Options)
+                new SecurityTokenReceivedNotification<OAuthBearerTokenContext, OAuthBearerAuthenticationOptions>(Context, Options)
                 {
                     ProtocolMessage = requestTokenContext,
+                    SecurityToken = requestTokenContext.Token,
                 };
 
                 await Options.Notifications.SecurityTokenReceived(securityTokenReceivedNotification);
@@ -125,7 +126,7 @@ namespace Microsoft.AspNet.Security.OAuth
                         ClaimsPrincipal principal = Options.SecurityTokenValidators.First().ValidateToken(requestTokenContext.Token, validationParameters, out validatedToken);
                         ClaimsIdentity claimsIdentity = principal.Identity as ClaimsIdentity;
                         AuthenticationTicket ticket = new AuthenticationTicket(claimsIdentity, new AuthenticationProperties());
-                        var securityTokenValidatedNotification = new SecurityTokenValidatedNotification<OAuthRequestTokenContext, OAuthBearerAuthenticationOptions>(Context, Options)
+                        var securityTokenValidatedNotification = new SecurityTokenValidatedNotification<OAuthBearerTokenContext, OAuthBearerAuthenticationOptions>(Context, Options)
                         {
                             ProtocolMessage = requestTokenContext,
                             AuthenticationTicket = ticket
@@ -164,7 +165,7 @@ namespace Microsoft.AspNet.Security.OAuth
                 }
 
                 var authenticationFailedNotification =
-                    new AuthenticationFailedNotification<OAuthRequestTokenContext, OAuthBearerAuthenticationOptions>(Context, Options)
+                    new AuthenticationFailedNotification<OAuthBearerTokenContext, OAuthBearerAuthenticationOptions>(Context, Options)
                     {
                         ProtocolMessage = requestTokenContext,
                         Exception = authFailedEx.SourceException
@@ -190,22 +191,6 @@ namespace Microsoft.AspNet.Security.OAuth
         protected override void ApplyResponseChallenge()
         {
             ApplyResponseChallengeAsync().GetAwaiter().GetResult();
-        }
-
-        protected override async Task ApplyResponseChallengeAsync()
-        {
-            if (Response.StatusCode != 401)
-            {
-                return;
-            }
-
-            if (ChallengeContext != null)
-            {
-                OAuthChallengeContext challengeContext = new OAuthChallengeContext(Context, _challenge);
-                await Options.Notifications.ApplyChallenge(challengeContext);
-            }
-
-            return;
         }
 
         protected override void ApplyResponseGrant()

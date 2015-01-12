@@ -24,47 +24,26 @@ namespace Microsoft.AspNet.Security.OAuth
             MessageReceived = notification => Task.FromResult(0);
             SecurityTokenReceived = notification => Task.FromResult(0);
             SecurityTokenValidated = notification => Task.FromResult(0);
-
-            OnApplyChallenge = context =>
-            {
-                context.HttpContext.Response.Headers.AppendValues("WWW-Authenticate", context.Challenge);
-                return Task.FromResult(0);
-            };
 		}
-
-        /// <summary>
-        /// Handles applying the authentication challenge to the response message.
-        /// </summary>
-        public Func<OAuthChallengeContext, Task> OnApplyChallenge { get; set; }
 
         /// <summary>
         /// Invoked if exceptions are thrown during request processing. The exceptions will be re-thrown after this event unless suppressed.
         /// </summary>
-        public Func<AuthenticationFailedNotification<OAuthRequestTokenContext, OAuthBearerAuthenticationOptions>, Task> AuthenticationFailed { get; set; }
+        public Func<AuthenticationFailedNotification<OAuthBearerTokenContext, OAuthBearerAuthenticationOptions>, Task> AuthenticationFailed { get; set; }
 
         /// <summary>
         /// Invoked when a protocol message is first received.
         /// </summary>
-        public Func<MessageReceivedNotification<OAuthRequestTokenContext, OAuthBearerAuthenticationOptions>, Task> MessageReceived { get; set; }
+        public Func<MessageReceivedNotification<OAuthBearerTokenContext, OAuthBearerAuthenticationOptions>, Task> MessageReceived { get; set; }
 
         /// <summary>
         /// Invoked with the security token that has been extracted from the protocol message.
         /// </summary>
-        public Func<SecurityTokenReceivedNotification<OAuthRequestTokenContext, OAuthBearerAuthenticationOptions>, Task> SecurityTokenReceived { get; set; }
+        public Func<SecurityTokenReceivedNotification<OAuthBearerTokenContext, OAuthBearerAuthenticationOptions>, Task> SecurityTokenReceived { get; set; }
 
         /// <summary>
         /// Invoked after the security token has passed validation and a ClaimsIdentity has been generated.
         /// </summary>
-        public Func<SecurityTokenValidatedNotification<OAuthRequestTokenContext, OAuthBearerAuthenticationOptions>, Task> SecurityTokenValidated { get; set; }
-
-        /// <summary>
-        /// Handles applying the authentication challenge to the response message.
-        /// </summary>
-        /// <param name="context"></param>
-        /// <returns></returns>
-        public Task ApplyChallenge(OAuthChallengeContext context)
-        {
-            return OnApplyChallenge(context);
-        }
+        public Func<SecurityTokenValidatedNotification<OAuthBearerTokenContext, OAuthBearerAuthenticationOptions>, Task> SecurityTokenValidated { get; set; }
     }
 }
