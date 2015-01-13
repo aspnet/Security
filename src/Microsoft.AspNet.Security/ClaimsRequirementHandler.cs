@@ -19,7 +19,7 @@ namespace Microsoft.AspNet.Security
             foreach (var req in context.Policy.Requirements)
             {
                 var claimsReq = req as ClaimRequirement;
-                if (req != null)
+                if (claimsReq != null)
                 {
                     // TODO: optimize this
                     bool found = false;

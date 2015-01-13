@@ -1,11 +1,14 @@
 // Copyright (c) Microsoft Open Technologies, Inc. All rights reserved.
 // Licensed under the Apache License, Version 2.0. See License.txt in the project root for license information.
 
+using System;
 using System.Collections.Generic;
 using System.Security.Claims;
 using System.Threading.Tasks;
 using Microsoft.AspNet.Http;
 using Microsoft.AspNet.Http.Security;
+using Microsoft.Framework.DependencyInjection;
+using Microsoft.Framework.DependencyInjection.Fallback;
 using Microsoft.Framework.OptionsModel;
 using Moq;
 using Xunit;
@@ -14,17 +17,46 @@ namespace Microsoft.AspNet.Security.Test
 {
     public class DefaultAuthorizationServiceTests
     {
+        private IAuthorizationService BuildAuthorizationService(Action<IServiceCollection> setupServices = null)
+        {
+            var services = new ServiceCollection();
+            services.AddAuthorization();
+            if (setupServices != null)
+            {
+                setupServices(services);
+            }
+            return services.BuildServiceProvider().GetRequiredService<IAuthorizationService>();
+        }
+
+        private Mock<HttpContext> SetupContext(params ClaimsIdentity[] ids)
+        {
+            var context = new Mock<HttpContext>();
+            context.SetupProperty(c => c.User);
+            var user = new ClaimsPrincipal();
+            user.AddIdentities(ids);
+            context.Object.User = user;
+            foreach (var id in ids)
+            {
+                var authResult = new AuthenticationResult(id, new AuthenticationProperties(), new AuthenticationDescription());
+                context.Setup(c => c.AuthenticateAsync(id.AuthenticationType)).ReturnsAsync(authResult).Verifiable();
+            }
+            return context;
+        }
+
         [Fact]
         public async Task Authorize_ShouldAllowIfClaimIsPresent()
         {
             // Arrange
-            var policy = new AuthorizationPolicyBuilder().RequiresClaim("Permission", "CanViewPage");
-            var context = new Mock<HttpContext>();
-            var authorizationOptions = new AuthorizationOptions();
-            authorizationOptions.AddPolicy("Basic", policy.Build());
-            var authorizationService = SetupAuthService(authorizationOptions, context,
-                new ClaimsIdentity(new Claim[] { new Claim("Permission", "CanViewPage") }, "Basic")
-                );
+            var authorizationService = BuildAuthorizationService(services =>
+            {
+                services.Configure<AuthorizationOptions>(options =>
+                {
+                    options.AddPolicy("Basic", new AuthorizationPolicyBuilder()
+                        .RequiresClaim("Permission", "CanViewPage")
+                        .Build());
+                });
+            });
+            var context = SetupContext(new ClaimsIdentity(new Claim[] { new Claim("Permission", "CanViewPage") }, "Basic"));
 
             // Act
             var allowed = await authorizationService.AuthorizeAsync("Basic", context.Object);
@@ -37,39 +69,37 @@ namespace Microsoft.AspNet.Security.Test
         public async Task Authorize_ShouldAllowIfClaimIsPresentWithSpecifiedAuthType()
         {
             // Arrange
-            var policy = new AuthorizationPolicyBuilder().RequiresClaim("Permission", "CanViewPage");
-            policy.UseOnlyTheseAuthenticationTypes.Add("Basic");
-            var authorizationOptions = new AuthorizationOptions();
-            authorizationOptions.AddPolicy("Basic", policy.Build());
-            var options = new Mock<IOptions<AuthorizationOptions>>();
-            options.Setup(o => o.Options).Returns(authorizationOptions);
-            var handlers = new IAuthorizationHandler[] { new ClaimsRequirementHandler() };
-            var authorizationService = new DefaultAuthorizationService(options.Object, handlers);
-            var id = new ClaimsIdentity(new Claim[] { new Claim("Permission", "CanViewPage") }, "Basic");
-            var authResult = new List<AuthenticationResult>();
-            authResult.Add(new AuthenticationResult(id, new AuthenticationProperties(), new AuthenticationDescription()));
-            var context = new Mock<HttpContext>();
-            context.SetupProperty(c => c.User);
-            context.Setup(c => c.AuthenticateAsync(policy.UseOnlyTheseAuthenticationTypes)).ReturnsAsync(authResult).Verifiable();
+            var authorizationService = BuildAuthorizationService(services =>
+            {
+                services.Configure<AuthorizationOptions>(options =>
+                {
+                    var policy = new AuthorizationPolicyBuilder().RequiresClaim("Permission", "CanViewPage");
+                    policy.UseOnlyTheseAuthenticationTypes.Add("Basic");
+                    options.AddPolicy("Basic", policy.Build());
+                });
+            });
+            var context = SetupContext(new ClaimsIdentity(new Claim[] { new Claim("Permission", "CanViewPage") }, "Basic"));
 
             // Act
             var allowed = await authorizationService.AuthorizeAsync("Basic", context.Object);
 
             // Assert
             Assert.True(allowed);
-
-            context.VerifyAll();
         }
 
         [Fact]
         public async Task Authorize_ShouldAllowIfClaimIsAmongValues()
         {
             // Arrange
-            var policy = new AuthorizationPolicyBuilder().RequiresClaim("Permission", "CanViewPage", "CanViewAnything");
-            var context = new Mock<HttpContext>();
-            var authorizationOptions = new AuthorizationOptions();
-            authorizationOptions.AddPolicy("Basic", policy.Build());
-            var authorizationService = SetupAuthService(authorizationOptions, context,
+            var authorizationService = BuildAuthorizationService(services =>
+            {
+                services.Configure<AuthorizationOptions>(options =>
+                {
+                    var policy = new AuthorizationPolicyBuilder().RequiresClaim("Permission", "CanViewPage", "CanViewAnything");
+                    options.AddPolicy("Basic", policy.Build());
+                });
+            });
+            var context = SetupContext(
                 new ClaimsIdentity(
                     new Claim[] {
                         new Claim("Permission", "CanViewPage"),
@@ -89,9 +119,15 @@ namespace Microsoft.AspNet.Security.Test
         public async Task Authorize_ShouldFailWhenAllRequirementsNotHandled()
         {
             // Arrange
-            var policy = new AuthorizationPolicyBuilder().RequiresClaim("Permission", "CanViewPage", "CanViewAnything");
-            var context = new Mock<HttpContext>();
-            var authorizationService = SetupAuthService(context,
+            var authorizationService = BuildAuthorizationService(services =>
+            {
+                services.Configure<AuthorizationOptions>(options =>
+                {
+                    var policy = new AuthorizationPolicyBuilder().RequiresClaim("Permission", "CanViewPage", "CanViewAnything");
+                    options.AddPolicy("Basic", policy.Build());
+                });
+            });
+            var context = SetupContext(
                 new ClaimsIdentity(
                     new Claim[] {
                         new Claim("SomethingElse", "CanViewPage"),
@@ -110,11 +146,15 @@ namespace Microsoft.AspNet.Security.Test
         public async Task Authorize_ShouldNotAllowIfClaimTypeIsNotPresent()
         {
             // Arrange
-            var policy = new AuthorizationPolicyBuilder().RequiresClaim("Permission", "CanViewPage", "CanViewAnything");
-            var context = new Mock<HttpContext>();
-            var authorizationOptions = new AuthorizationOptions();
-            authorizationOptions.AddPolicy("Basic", policy.Build());
-            var authorizationService = SetupAuthService(authorizationOptions, context,
+            var authorizationService = BuildAuthorizationService(services =>
+            {
+                services.Configure<AuthorizationOptions>(options =>
+                {
+                    var policy = new AuthorizationPolicyBuilder().RequiresClaim("Permission", "CanViewPage", "CanViewAnything");
+                    options.AddPolicy("Basic", policy.Build());
+                });
+            });
+            var context = SetupContext(
                 new ClaimsIdentity(
                     new Claim[] {
                         new Claim("SomethingElse", "CanViewPage"),
@@ -133,11 +173,15 @@ namespace Microsoft.AspNet.Security.Test
         public async Task Authorize_ShouldNotAllowIfClaimValueIsNotPresent()
         {
             // Arrange
-            var policy = new AuthorizationPolicyBuilder().RequiresClaim("Permission", "CanViewPage");
-            var context = new Mock<HttpContext>();
-            var authorizationOptions = new AuthorizationOptions();
-            authorizationOptions.AddPolicy("Basic", policy.Build());
-            var authorizationService = SetupAuthService(authorizationOptions, context,
+            var authorizationService = BuildAuthorizationService(services =>
+            {
+                services.Configure<AuthorizationOptions>(options =>
+                {
+                    var policy = new AuthorizationPolicyBuilder().RequiresClaim("Permission", "CanViewPage");
+                    options.AddPolicy("Basic", policy.Build());
+                });
+            });
+            var context = SetupContext(
                 new ClaimsIdentity(
                     new Claim[] {
                         new Claim("Permission", "CanViewComment"),
@@ -156,11 +200,15 @@ namespace Microsoft.AspNet.Security.Test
         public async Task Authorize_ShouldNotAllowIfNoClaims()
         {
             // Arrange
-            var policy = new AuthorizationPolicyBuilder().RequiresClaim("Permission", "CanViewPage");
-            var context = new Mock<HttpContext>();
-            var authorizationOptions = new AuthorizationOptions();
-            authorizationOptions.AddPolicy("Basic", policy.Build());
-            var authorizationService = SetupAuthService(authorizationOptions, context,
+            var authorizationService = BuildAuthorizationService(services =>
+            {
+                services.Configure<AuthorizationOptions>(options =>
+                {
+                    var policy = new AuthorizationPolicyBuilder().RequiresClaim("Permission", "CanViewPage");
+                    options.AddPolicy("Basic", policy.Build());
+                });
+            });
+            var context = SetupContext(
                 new ClaimsIdentity(
                     new Claim[0],
                     "Basic")
@@ -177,11 +225,15 @@ namespace Microsoft.AspNet.Security.Test
         public async Task Authorize_ShouldNotAllowIfUserIsNull()
         {
             // Arrange
-            var policy = new AuthorizationPolicyBuilder().RequiresClaim("Permission", "CanViewPage");
-            var context = new Mock<HttpContext>();
-            var authorizationOptions = new AuthorizationOptions();
-            authorizationOptions.AddPolicy("Basic", policy.Build());
-            var authorizationService = SetupAuthService(authorizationOptions, context);
+            var authorizationService = BuildAuthorizationService(services =>
+            {
+                services.Configure<AuthorizationOptions>(options =>
+                {
+                    var policy = new AuthorizationPolicyBuilder().RequiresClaim("Permission", "CanViewPage");
+                    options.AddPolicy("Basic", policy.Build());
+                });
+            });
+            var context = SetupContext();
             context.Object.User = null;
 
             // Act
@@ -195,20 +247,16 @@ namespace Microsoft.AspNet.Security.Test
         public async Task Authorize_ShouldNotAllowIfNotCorrectAuthType()
         {
             // Arrange
-            var policy = new AuthorizationPolicyBuilder().RequiresClaim("Permission", "CanViewPage");
-            policy.UseOnlyTheseAuthenticationTypes.Add("Basic");
-            var authorizationOptions = new AuthorizationOptions();
-            authorizationOptions.AddPolicy("Basic", policy.Build());
-            var options = new Mock<IOptions<AuthorizationOptions>>();
-            options.Setup(o => o.Options).Returns(authorizationOptions);
-            var handlers = new IAuthorizationHandler[] { new ClaimsRequirementHandler() };
-            var authorizationService = new DefaultAuthorizationService(options.Object, handlers);
-            var id = new ClaimsIdentity();
-            var authResult = new List<AuthenticationResult>();
-            authResult.Add(new AuthenticationResult(id, new AuthenticationProperties(), new AuthenticationDescription()));
-            var context = new Mock<HttpContext>();
-            context.SetupProperty(c => c.User);
-            context.Setup(c => c.AuthenticateAsync(policy.UseOnlyTheseAuthenticationTypes)).ReturnsAsync(authResult).Verifiable();
+            var authorizationService = BuildAuthorizationService(services =>
+            {
+                services.Configure<AuthorizationOptions>(options =>
+                {
+                    var policy = new AuthorizationPolicyBuilder().RequiresClaim("Permission", "CanViewPage");
+                    policy.UseOnlyTheseAuthenticationTypes.Add("Basic");
+                    options.AddPolicy("Basic", policy.Build());
+                });
+            });
+            var context = SetupContext(new ClaimsIdentity());
 
             // Act
             var allowed = await authorizationService.AuthorizeAsync("Basic", context.Object);
@@ -221,16 +269,20 @@ namespace Microsoft.AspNet.Security.Test
         public async Task Authorize_ShouldAllowWithNoAuthType()
         {
             // Arrange
-            var policy = new AuthorizationPolicyBuilder().RequiresClaim("Permission", "CanViewPage");
-            var context = new Mock<HttpContext>();
-            var authorizationOptions = new AuthorizationOptions();
-            authorizationOptions.AddPolicy("Basic", policy.Build());
-            var authorizationService = SetupAuthService(authorizationOptions, context,
+            var authorizationService = BuildAuthorizationService(services =>
+            {
+                services.Configure<AuthorizationOptions>(options =>
+                {
+                    var policy = new AuthorizationPolicyBuilder().RequiresClaim("Permission", "CanViewPage");
+                    options.AddPolicy("Basic", policy.Build());
+                });
+            });
+            var context = SetupContext(
                 new ClaimsIdentity(
                     new Claim[] {
                         new Claim("Permission", "CanViewPage"),
                     },
-                    null)
+                    "Basic")
                 );
 
             // Act
@@ -244,8 +296,8 @@ namespace Microsoft.AspNet.Security.Test
         public async Task Authorize_ShouldNotAllowIfUnknownPolicy()
         {
             // Arrange
-            var context = new Mock<HttpContext>();
-            var authorizationService = SetupAuthService(context,
+            var authorizationService = BuildAuthorizationService();
+            var context = SetupContext(
                 new ClaimsIdentity(
                     new Claim[] {
                         new Claim("Permission", "CanViewComment"),
@@ -266,8 +318,8 @@ namespace Microsoft.AspNet.Security.Test
             // Arrange
             var policy = new AuthorizationPolicyBuilder().RequiresRole("Administrator")
                 .RequiresClaim(ClaimTypes.Role, "User");
-            var context = new Mock<HttpContext>();
-            var authorizationService = SetupAuthService(context,
+            var authorizationService = BuildAuthorizationService();
+            var context = SetupContext(
                 new ClaimsIdentity(
                     new Claim[] {
                         new Claim(ClaimTypes.Role, "User"),
@@ -288,8 +340,8 @@ namespace Microsoft.AspNet.Security.Test
         {
             // Arrange
             var policy = new AuthorizationPolicyBuilder().RequiresClaim(ClaimTypes.Role);
-            var context = new Mock<HttpContext>();
-            var authorizationService = SetupAuthService(context,
+            var authorizationService = BuildAuthorizationService();
+            var context = SetupContext(
                 new ClaimsIdentity(
                     new Claim[] {
                         new Claim(ClaimTypes.Role, ""),
@@ -310,15 +362,10 @@ namespace Microsoft.AspNet.Security.Test
             // Arrange
             var policy = new AuthorizationPolicyBuilder().RequiresClaim(ClaimTypes.Name);
             policy.UseOnlyTheseAuthenticationTypes.Add("AuthType");
-            var options = new Mock<IOptions<AuthorizationOptions>>();
-            var handlers = new IAuthorizationHandler[] { new ClaimsRequirementHandler() };
-            var authorizationService = new DefaultAuthorizationService(options.Object, handlers);
-            var id = new ClaimsIdentity(new Claim[] { new Claim(ClaimTypes.Name, "Name") }, "AuthType");
-            var authResult = new List<AuthenticationResult>();
-            authResult.Add(new AuthenticationResult(id, new AuthenticationProperties(), new AuthenticationDescription()));
-            var context = new Mock<HttpContext>();
-            context.SetupProperty(c => c.User);
-            context.Setup(c => c.AuthenticateAsync(policy.UseOnlyTheseAuthenticationTypes)).ReturnsAsync(authResult).Verifiable();
+            var authorizationService = BuildAuthorizationService();
+            var context = SetupContext(
+                new ClaimsIdentity(new Claim[] { new Claim(ClaimTypes.Name, "Name") }, "AuthType")
+                );
 
             // Act
             var allowed = await authorizationService.AuthorizeAsync(policy.Build(), context.Object);
@@ -333,15 +380,10 @@ namespace Microsoft.AspNet.Security.Test
             // Arrange
             var policy = new AuthorizationPolicyBuilder().RequiresRole("Admin");
             policy.UseOnlyTheseAuthenticationTypes.Add("AuthType");
-            var options = new Mock<IOptions<AuthorizationOptions>>();
-            var handlers = new IAuthorizationHandler[] { new ClaimsRequirementHandler() };
-            var authorizationService = new DefaultAuthorizationService(options.Object, handlers);
-            var id = new ClaimsIdentity(new Claim[] { new Claim(ClaimTypes.Role, "Admin") }, "AuthType");
-            var authResult = new List<AuthenticationResult>();
-            authResult.Add(new AuthenticationResult(id, new AuthenticationProperties(), new AuthenticationDescription()));
-            var context = new Mock<HttpContext>();
-            context.SetupProperty(c => c.User);
-            context.Setup(c => c.AuthenticateAsync(policy.UseOnlyTheseAuthenticationTypes)).ReturnsAsync(authResult).Verifiable();
+            var authorizationService = BuildAuthorizationService();
+            var context = SetupContext(
+                new ClaimsIdentity(new Claim[] { new Claim(ClaimTypes.Role, "Admin") }, "AuthType")
+            );
 
             // Act
             var allowed = await authorizationService.AuthorizeAsync(policy.Build(), context.Object);
@@ -356,15 +398,9 @@ namespace Microsoft.AspNet.Security.Test
             // Arrange
             var policy = new AuthorizationPolicyBuilder().RequiresRole("Admin", "Users");
             policy.UseOnlyTheseAuthenticationTypes.Add("AuthType");
-            var options = new Mock<IOptions<AuthorizationOptions>>();
-            var handlers = new IAuthorizationHandler[] { new ClaimsRequirementHandler() };
-            var authorizationService = new DefaultAuthorizationService(options.Object, handlers);
-            var id = new ClaimsIdentity(new Claim[] { new Claim(ClaimTypes.Role, "Users") }, "AuthType");
-            var authResult = new List<AuthenticationResult>();
-            authResult.Add(new AuthenticationResult(id, new AuthenticationProperties(), new AuthenticationDescription()));
-            var context = new Mock<HttpContext>();
-            context.SetupProperty(c => c.User);
-            context.Setup(c => c.AuthenticateAsync(policy.UseOnlyTheseAuthenticationTypes)).ReturnsAsync(authResult).Verifiable();
+            var authorizationService = BuildAuthorizationService();
+            var context = SetupContext(
+                new ClaimsIdentity(new Claim[] { new Claim(ClaimTypes.Role, "Users") }, "AuthType"));
 
             // Act
             var allowed = await authorizationService.AuthorizeAsync(policy.Build(), context.Object);
@@ -377,9 +413,9 @@ namespace Microsoft.AspNet.Security.Test
         public async Task RolePolicyCanBlockWrongRole()
         {
             // Arrange
-            var policy = new AuthorizationPolicyBuilder().RequiresRole("Admin", "Users");
-            var context = new Mock<HttpContext>();
-            var authorizationService = SetupAuthService(context,
+            var policy = new AuthorizationPolicyBuilder().RequiresClaim("Permission", "CanViewPage");
+            var authorizationService = BuildAuthorizationService();
+            var context = SetupContext(
                 new ClaimsIdentity(
                     new Claim[] {
                         new Claim(ClaimTypes.Role, "Nope"),
@@ -398,10 +434,16 @@ namespace Microsoft.AspNet.Security.Test
         public async Task RolePolicyCanBlockNoRole()
         {
             // Arrange
-            var policy = new AuthorizationPolicyBuilder().RequiresRole("Admin", "Users");
-            var options = new Mock<IOptions<AuthorizationOptions>>();
-            var context = new Mock<HttpContext>();
-            var authorizationService = SetupAuthService(context,
+
+            var authorizationService = BuildAuthorizationService(services =>
+            {
+                services.Configure<AuthorizationOptions>(options =>
+                {
+                    var policy = new AuthorizationPolicyBuilder().RequiresRole("Admin", "Users");
+                    options.AddPolicy("Basic", policy.Build());
+                });
+            });
+            var context = SetupContext(
                 new ClaimsIdentity(
                     new Claim[] {
                     },
@@ -409,52 +451,25 @@ namespace Microsoft.AspNet.Security.Test
                 );
 
             // Act
-            var allowed = await authorizationService.AuthorizeAsync(policy.Build(), context.Object);
+            var allowed = await authorizationService.AuthorizeAsync("Basic", context.Object);
 
             // Assert
             Assert.False(allowed);
-        }
-
-        private IAuthorizationService SetupAuthService(Mock<HttpContext> context, params ClaimsIdentity[] identities)
-        {
-            return SetupAuthService(null, context, identities);
-        }
-
-        private IAuthorizationService SetupAuthService(AuthorizationOptions authOptions, Mock<HttpContext> context, params ClaimsIdentity[] identities)
-        {
-            authOptions = authOptions ?? new AuthorizationOptions();
-            var options = new Mock<IOptions<AuthorizationOptions>>();
-            options.Setup(o => o.Options).Returns(authOptions);
-            var handlers = new IAuthorizationHandler[] { new ClaimsRequirementHandler() };
-            var authorizationService = new DefaultAuthorizationService(options.Object, handlers);
-            var user = new ClaimsPrincipal(identities);
-            context.SetupProperty(c => c.User);
-            context.Object.User = user;
-            return authorizationService;
-        }
-
-        private IAuthorizationService SetupAuthService(Mock<HttpContext> context, IEnumerable<string> authTypes, params ClaimsIdentity[] identities)
-        {
-            var options = new Mock<IOptions<AuthorizationOptions>>();
-            var handlers = new IAuthorizationHandler[] { new ClaimsRequirementHandler() };
-            var authorizationService = new DefaultAuthorizationService(options.Object, handlers);
-            var authResult = new List<AuthenticationResult>();
-            foreach (var id in identities)
-            {
-                authResult.Add(new AuthenticationResult(id, new AuthenticationProperties(), new AuthenticationDescription()));
-            }
-            context.SetupProperty(c => c.User);
-            context.Setup(c => c.AuthenticateAsync(authTypes)).ReturnsAsync(authResult).Verifiable();
-            return authorizationService;
         }
 
         [Fact]
         public async Task PolicyCanApproveWithNoRequirements()
         {
             // Arrange
-            var policy = new AuthorizationPolicyBuilder();
-            var context = new Mock<HttpContext>();
-            var authorizationService = SetupAuthService(context,
+            var authorizationService = BuildAuthorizationService(services =>
+            {
+                services.Configure<AuthorizationOptions>(options =>
+                {
+                    var policy = new AuthorizationPolicyBuilder();
+                    options.AddPolicy("Basic", policy.Build());
+                });
+            });
+            var context = SetupContext(
                 new ClaimsIdentity(
                     new Claim[] {
                         new Claim(ClaimTypes.Name, "Name"),
@@ -463,7 +478,7 @@ namespace Microsoft.AspNet.Security.Test
                 );
 
             // Act
-            var allowed = await authorizationService.AuthorizeAsync(policy.Build(), context.Object);
+            var allowed = await authorizationService.AuthorizeAsync("Basic", context.Object);
 
             // Assert
             Assert.True(allowed);

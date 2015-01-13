@@ -18,6 +18,7 @@ namespace Microsoft.Framework.DependencyInjection
         public static IServiceCollection AddAuthorization([NotNull] this IServiceCollection services, IConfiguration config = null, Action<AuthorizationOptions> configureOptions = null)
         {
             var describe = new ServiceDescriber(config);
+            services.AddOptions(config);
             services.TryAdd(describe.Transient<IAuthorizationService, DefaultAuthorizationService>());
             services.Add(describe.Transient<IAuthorizationHandler, ClaimsRequirementHandler>());
             if (configureOptions != null)

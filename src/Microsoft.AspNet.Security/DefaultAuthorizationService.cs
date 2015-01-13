@@ -47,10 +47,22 @@ namespace Microsoft.AspNet.Security
                 if (policy.UseOnlyTheseAuthenticationTypes != null && policy.UseOnlyTheseAuthenticationTypes.Any() )
                 {
                     var principal = new ClaimsPrincipal();
-                    var results = await context.AuthenticateAsync(policy.UseOnlyTheseAuthenticationTypes);
-                    foreach (var result in results)
+                    // REVIEW: re requesting the identities fails for MVC currently, so we only request if not found
+                    foreach (var authType in policy.UseOnlyTheseAuthenticationTypes)
                     {
-                        principal.AddIdentity(result.Identity);
+                        var existingIdentities = context.User?.Identities?.Where(i => i.AuthenticationType == authType);
+                        if (existingIdentities != null && existingIdentities.Any())
+                        {
+                            principal.AddIdentities(existingIdentities);
+                        }
+                        else
+                        {
+                            var result = await context.AuthenticateAsync(authType);
+                            if (result != null && result.Identity != null)
+                            {
+                                principal.AddIdentity(result.Identity);
+                            }
+                        }
                     }
                     context.User = principal;
                 }
