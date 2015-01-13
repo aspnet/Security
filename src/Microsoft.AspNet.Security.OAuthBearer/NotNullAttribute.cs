@@ -3,7 +3,7 @@
 
 using System;
 
-namespace Microsoft.AspNet.Security.OAuth
+namespace Microsoft.AspNet.Security.OAuthBearer
 {
     [AttributeUsage(AttributeTargets.Parameter, AllowMultiple = false)]
     internal sealed class NotNullAttribute : Attribute

@@ -8,7 +8,7 @@ using System.Collections.Generic;
 using System.IdentityModel.Tokens;
 using System.Net.Http;
 
-namespace Microsoft.AspNet.Security.OAuth
+namespace Microsoft.AspNet.Security.OAuthBearer
 {
     /// <summary>
     /// Options class provides information needed to control Bearer Authentication middleware behavior
@@ -30,19 +30,6 @@ namespace Microsoft.AspNet.Security.OAuth
             SystemClock = new SystemClock();
             TokenValidationParameters = new TokenValidationParameters();
         }
-
-        /// <summary>
-        /// Determines what realm value is included when the bearer middleware adds a response header to an unauthorized request.
-        /// If not assigned, the response header does not have a realm.
-        /// </summary>
-        public string Realm { get; set; }
-
-        /// <summary>
-        /// Specifies the full challenge to send to the client, and should start with "Bearer". If a challenge is provided then the
-        /// Realm property is ignored. If no challenge is specified then one is created using "Bearer" and the value of the Realm
-        /// property.
-        /// </summary>
-        public string Challenge { get; set; }
 
         /// <summary>
         /// Gets or sets the discovery endpoint for obtaining metadata
@@ -118,7 +105,7 @@ namespace Microsoft.AspNet.Security.OAuth
         public ISystemClock SystemClock { get; set; }
 
         /// <summary>
-        /// Gets or sets the <see cref="SecurityTokenValidators"/> of <see cref="SecurityTokenHandler"/>s used to read and validate <see cref="SecurityToken"/>s. 
+        /// Gets or sets the <see cref="SecurityTokenValidators"/> for validating tokens.
         /// </summary>
         /// <exception cref="ArgumentNullException">if 'value' is null.</exception>
         public ICollection<ISecurityTokenValidator> SecurityTokenValidators

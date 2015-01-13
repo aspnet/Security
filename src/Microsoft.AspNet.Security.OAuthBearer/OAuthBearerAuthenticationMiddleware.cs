@@ -8,12 +8,13 @@ using Microsoft.Framework.Logging;
 using Microsoft.Framework.OptionsModel;
 using Microsoft.IdentityModel.Protocols;
 using System;
+using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Diagnostics.CodeAnalysis;
 using System.IdentityModel.Tokens;
 using System.Net.Http;
 
-namespace Microsoft.AspNet.Security.OAuth
+namespace Microsoft.AspNet.Security.OAuthBearer
 {
 	/// <summary>
 	/// Bearer authentication middleware component which is added to an HTTP pipeline. This class is not
@@ -23,8 +24,6 @@ namespace Microsoft.AspNet.Security.OAuth
 	public class OAuthBearerAuthenticationMiddleware : AuthenticationMiddleware<OAuthBearerAuthenticationOptions>
     {
         private readonly ILogger _logger;
-
-        private readonly string _challenge;
 
         /// <summary>
         /// Bearer authentication component which is added to an HTTP pipeline. This constructor is not
@@ -41,20 +40,6 @@ namespace Microsoft.AspNet.Security.OAuth
             : base(next, services, options, configureOptions)
         {
             _logger = loggerFactory.Create<OAuthBearerAuthenticationMiddleware>();
-
-            if (!string.IsNullOrWhiteSpace(Options.Challenge))
-            {
-                _challenge = Options.Challenge;
-            }
-            else if (string.IsNullOrWhiteSpace(Options.Realm))
-            {
-                _challenge = "Bearer";
-            }
-            else
-            {
-                _challenge = "Bearer realm=\"" + Options.Realm + "\"";
-            }
-
             if (Options.Notifications == null)
             {
                 Options.Notifications = new OAuthBearerAuthenticationNotifications();
@@ -62,7 +47,7 @@ namespace Microsoft.AspNet.Security.OAuth
 
             if (Options.SecurityTokenValidators == null)
             {
-                Options.SecurityTokenValidators = new Collection<ISecurityTokenValidator> { new JwtSecurityTokenHandler() };
+                Options.SecurityTokenValidators = new List<ISecurityTokenValidator> { new JwtSecurityTokenHandler() };
             }
 
             if (string.IsNullOrWhiteSpace(Options.TokenValidationParameters.ValidAudience) && !string.IsNullOrWhiteSpace(Options.Audience))
@@ -76,7 +61,7 @@ namespace Microsoft.AspNet.Security.OAuth
                 {
                     Options.ConfigurationManager = new StaticConfigurationManager<OpenIdConnectConfiguration>(Options.Configuration);
                 }
-                else
+                else if (!(string.IsNullOrWhiteSpace(Options.MetadataAddress) && string.IsNullOrWhiteSpace(Options.Authority)))
                 {
                     if (string.IsNullOrWhiteSpace(Options.MetadataAddress) && !string.IsNullOrWhiteSpace(Options.Authority))
                     {
@@ -92,6 +77,7 @@ namespace Microsoft.AspNet.Security.OAuth
                     HttpClient httpClient = new HttpClient(ResolveHttpMessageHandler(Options));
                     httpClient.Timeout = Options.BackchannelTimeout;
                     httpClient.MaxResponseContentBufferSize = 1024 * 1024 * 10; // 10 MB
+
                     Options.ConfigurationManager = new ConfigurationManager<OpenIdConnectConfiguration>(Options.MetadataAddress, httpClient);
                 }
             }
@@ -103,7 +89,7 @@ namespace Microsoft.AspNet.Security.OAuth
         /// <returns>A new instance of the request handler</returns>
         protected override AuthenticationHandler<OAuthBearerAuthenticationOptions> CreateHandler()
         {
-            return new OAuthBearerAuthenticationHandler(_logger, _challenge);
+            return new OAuthBearerAuthenticationHandler(_logger);
         }
 
         [SuppressMessage("Microsoft.Reliability", "CA2000:Dispose objects before losing scope", Justification = "Managed by caller")]

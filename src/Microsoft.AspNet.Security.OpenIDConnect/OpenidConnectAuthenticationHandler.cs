@@ -24,7 +24,6 @@ namespace Microsoft.AspNet.Security.OpenIdConnect
     {
         private const string NonceProperty = "N";
         private const string UriSchemeDelimiter = "://";
-
         private readonly ILogger _logger;
         private OpenIdConnectConfiguration _configuration;
 
@@ -64,14 +63,14 @@ namespace Microsoft.AspNet.Security.OpenIdConnect
             var signout = SignOutContext;
             if (signout != null)
             {
-                if (_configuration == null)
+                if (_configuration == null && Options.ConfigurationManager != null)
                 {
                     _configuration = await Options.ConfigurationManager.GetConfigurationAsync(Context.RequestAborted);
                 }
 
                 OpenIdConnectMessage openIdConnectMessage = new OpenIdConnectMessage()
                 {
-                    IssuerAddress = _configuration.EndSessionEndpoint ?? string.Empty,
+                    IssuerAddress = _configuration == null ? string.Empty : (_configuration.EndSessionEndpoint ?? string.Empty),
                     RequestType = OpenIdConnectRequestType.LogoutRequest,
                 };
 
@@ -137,7 +136,7 @@ namespace Microsoft.AspNet.Security.OpenIdConnect
                 properties.Dictionary.Add(OpenIdConnectAuthenticationDefaults.RedirectUriUsedForCodeKey, Options.RedirectUri);
             }
 
-            if (_configuration == null)
+            if (_configuration == null && Options.ConfigurationManager != null)
             {
                 _configuration = await Options.ConfigurationManager.GetConfigurationAsync(Context.RequestAborted);
             }
@@ -145,7 +144,7 @@ namespace Microsoft.AspNet.Security.OpenIdConnect
             OpenIdConnectMessage openIdConnectMessage = new OpenIdConnectMessage
             {
                 ClientId = Options.ClientId,
-                IssuerAddress = _configuration.AuthorizationEndpoint ?? string.Empty,
+                IssuerAddress = _configuration == null ? string.Empty : (_configuration.AuthorizationEndpoint ?? string.Empty),
                 RedirectUri = Options.RedirectUri,
                 RequestType = OpenIdConnectRequestType.AuthenticationRequest,
                 Resource = Options.Resource,
@@ -296,50 +295,57 @@ namespace Microsoft.AspNet.Security.OpenIdConnect
                     return null;
                 }
 
-                if (_configuration == null)
+                if (_configuration == null && Options.ConfigurationManager != null)
                 {
                     _configuration = await Options.ConfigurationManager.GetConfigurationAsync(Context.RequestAborted);
                 }
 
                 // Copy and augment to avoid cross request race conditions for updated configurations.
                 TokenValidationParameters validationParameters = Options.TokenValidationParameters.Clone();
-                if (string.IsNullOrWhiteSpace(validationParameters.ValidIssuer))
+                if (_configuration != null)
                 {
-                    validationParameters.ValidIssuer = _configuration.Issuer;
-                }
-                else if (!string.IsNullOrWhiteSpace(_configuration.Issuer))
-                {
-                    validationParameters.ValidIssuers = (validationParameters.ValidIssuers == null ? new[] { _configuration.Issuer } : validationParameters.ValidIssuers.Concat(new[] { _configuration.Issuer }));
+                    if (string.IsNullOrWhiteSpace(validationParameters.ValidIssuer))
+                    {
+                        validationParameters.ValidIssuer = _configuration.Issuer;
+                    }
+                    else if (!string.IsNullOrWhiteSpace(_configuration.Issuer))
+                    {
+                        validationParameters.ValidIssuers = (validationParameters.ValidIssuers == null ? new[] { _configuration.Issuer } : validationParameters.ValidIssuers.Concat(new[] { _configuration.Issuer }));
+                    }
+
+                    validationParameters.IssuerSigningKeys = (validationParameters.IssuerSigningKeys == null ? _configuration.SigningKeys : validationParameters.IssuerSigningKeys.Concat(_configuration.SigningKeys));
                 }
 
-                validationParameters.IssuerSigningKeys = (validationParameters.IssuerSigningKeys == null ? _configuration.SigningKeys : validationParameters.IssuerSigningKeys.Concat(_configuration.SigningKeys));
-                ISecurityTokenValidator validator = null;
-                foreach(var v in Options.SecurityTokenValidators)
+                AuthenticationTicket ticket;
+                SecurityToken validatedToken = null;
+                ClaimsPrincipal principal = null;
+                JwtSecurityToken jwt = null;
+
+                foreach (var validator in Options.SecurityTokenValidators)
                 {
-                    if (v.CanReadToken(openIdConnectMessage.IdToken))
-                        validator = v;
+                    if (validator.CanReadToken(openIdConnectMessage.IdToken))
+                    {
+                        principal = validator.ValidateToken(openIdConnectMessage.IdToken, validationParameters, out validatedToken);
+                        jwt = validatedToken as JwtSecurityToken;
+                        if (jwt == null)
+                        {
+                            throw new InvalidOperationException("Validated Security Token must be a JwtSecurityToken was: " + (validatedToken == null ? "null" : validatedToken.GetType().ToString()));
+                        }
+                    }
                 }
 
-                if (validator == null)
+                if (validatedToken == null)
                 {
                     throw new InvalidOperationException("No SecurityTokenValidator found for token: " + openIdConnectMessage.IdToken);
                 }
 
-                SecurityToken validatedToken;
-                ClaimsPrincipal principal = validator.ValidateToken(openIdConnectMessage.IdToken, validationParameters, out validatedToken);
-                JwtSecurityToken jwt = validatedToken as JwtSecurityToken;
-                if (jwt == null)
-                {
-                    throw new InvalidOperationException("Validated Security Token must be a JwtSecurityToken was: " + validatedToken.GetType());
-                }
-
-                AuthenticationTicket ticket = new AuthenticationTicket(principal, properties, Options.AuthenticationType);
+                ticket = new AuthenticationTicket(principal, properties, Options.AuthenticationType);
                 if (!string.IsNullOrWhiteSpace(openIdConnectMessage.SessionState))
                 {
                     ticket.Properties.Dictionary[OpenIdConnectSessionProperties.SessionState] = openIdConnectMessage.SessionState;
                 }
 
-                if (!string.IsNullOrWhiteSpace(_configuration.CheckSessionIframe))
+                if (_configuration != null && !string.IsNullOrWhiteSpace(_configuration.CheckSessionIframe))
                 {
                     ticket.Properties.Dictionary[OpenIdConnectSessionProperties.CheckSessionIFrame] = _configuration.CheckSessionIframe;
                 }

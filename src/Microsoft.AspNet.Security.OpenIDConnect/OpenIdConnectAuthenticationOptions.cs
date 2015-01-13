@@ -52,6 +52,7 @@ namespace Microsoft.AspNet.Security.OpenIdConnect
         public OpenIdConnectAuthenticationOptions(string authenticationType)
         {
             AuthenticationMode = AuthenticationMode.Active;
+            AuthenticationType = authenticationType;
             BackchannelTimeout = TimeSpan.FromMinutes(1);
             Caption = OpenIdConnectAuthenticationDefaults.Caption;
             ProtocolValidator = new OpenIdConnectProtocolValidator();
@@ -60,7 +61,6 @@ namespace Microsoft.AspNet.Security.OpenIdConnect
             Scope = OpenIdConnectScopes.OpenIdProfile;
             TokenValidationParameters = new TokenValidationParameters();
             UseTokenLifetime = true;
-            AuthenticationType = authenticationType;
         }
 
         /// <summary>
@@ -280,6 +280,28 @@ namespace Microsoft.AspNet.Security.OpenIdConnect
         }
 
         /// <summary>
+        /// Gets or sets the <see cref="SecurityTokenValidators"/> for validating tokens.
+        /// </summary>
+        /// <exception cref="ArgumentNullException">if 'value' is null.</exception>
+        public ICollection<ISecurityTokenValidator> SecurityTokenValidators
+        {
+            get
+            {
+                return _securityTokenValidators;
+            }
+
+            set
+            {
+                if (value == null)
+                {
+                    throw new ArgumentNullException("SecurityTokenValidators");
+                }
+
+                _securityTokenValidators = value;
+            }
+        }
+
+        /// <summary>
         /// Gets or sets the TokenValidationParameters
         /// </summary>
         /// <remarks>Contains the types and definitions required for validating a token.</remarks>
@@ -310,28 +332,6 @@ namespace Microsoft.AspNet.Security.OpenIdConnect
         {
             get;
             set;
-        }
-
-        /// <summary>
-        /// Gets or sets the <see cref="SecurityTokenValidators"/> for validating tokens.
-        /// </summary>
-        /// <exception cref="ArgumentNullException">if 'value' is null.</exception>
-        public ICollection<ISecurityTokenValidator> SecurityTokenValidators
-        {
-            get
-            {
-                return _securityTokenValidators;
-            }
-
-            set
-            {
-                if (value == null)
-                {
-                    throw new ArgumentNullException("SecurityTokenValidators");
-                }
-
-                _securityTokenValidators = value;
-            }
         }
     }
 }

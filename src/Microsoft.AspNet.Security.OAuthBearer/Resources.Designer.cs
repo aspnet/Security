@@ -8,7 +8,7 @@
 // </auto-generated>
 //------------------------------------------------------------------------------
 
-namespace Microsoft.AspNet.Security.OAuth {
+namespace Microsoft.AspNet.Security.OAuthBearer {
     using System;
     
     

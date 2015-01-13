@@ -1,6 +1,7 @@
 // Copyright (c) Microsoft Open Technologies, Inc. All rights reserved.
 // Licensed under the Apache License, Version 2.0. See License.txt in the project root for license information.
 
+using Microsoft.AspNet.Http;
 using Microsoft.AspNet.Http.Security;
 using Microsoft.AspNet.Security.Infrastructure;
 using Microsoft.AspNet.Security.Notifications;
@@ -14,20 +15,16 @@ using System.Runtime.ExceptionServices;
 using System.Security.Claims;
 using System.Threading.Tasks;
 
-namespace Microsoft.AspNet.Security.OAuth
+namespace Microsoft.AspNet.Security.OAuthBearer
 {
     internal class OAuthBearerAuthenticationHandler : AuthenticationHandler<OAuthBearerAuthenticationOptions>
     {
-        private const string HandledResponse = "HandledResponse";
-
         private readonly ILogger _logger;
-        private readonly string _challenge;
         private OpenIdConnectConfiguration _configuration;
 
-        public OAuthBearerAuthenticationHandler(ILogger logger, string challenge)
+        public OAuthBearerAuthenticationHandler(ILogger logger)
         {
             _logger = logger;
-            _challenge = challenge;
         }
 
         protected override AuthenticationTicket AuthenticateCore()
@@ -42,17 +39,14 @@ namespace Microsoft.AspNet.Security.OAuth
         protected override async Task<AuthenticationTicket> AuthenticateCoreAsync()
         {
             ExceptionDispatchInfo authFailedEx = null;
-            OAuthBearerTokenContext requestTokenContext = null;
+            string token = null;
             try
             {
-                // Find token in default location
-                requestTokenContext = new OAuthBearerTokenContext(Context, null);
-
                 // Give application opportunity to find from a different location, adjust, or reject token
                 var messageReceivedNotification =
-                    new MessageReceivedNotification<OAuthBearerTokenContext, OAuthBearerAuthenticationOptions>(Context, Options)
+                    new MessageReceivedNotification<HttpContext, OAuthBearerAuthenticationOptions>(Context, Options)
                     {
-                        ProtocolMessage = requestTokenContext,
+                        ProtocolMessage = Context,
                     };
 
                 // notification can set the token
@@ -67,27 +61,24 @@ namespace Microsoft.AspNet.Security.OAuth
                     return null;
                 }
 
-                if (string.IsNullOrEmpty(requestTokenContext.Token))
+                string authorization = Request.Headers.Get("Authorization");
+                if (authorization.StartsWith("Bearer ", StringComparison.OrdinalIgnoreCase))
                 {
-                    string authorization = Request.Headers.Get("Authorization");
-                    if (authorization.StartsWith("Bearer ", StringComparison.OrdinalIgnoreCase))
-                    {
-                        requestTokenContext.Token = authorization.Substring("Bearer ".Length).Trim();
-                    }
+                     token = authorization.Substring("Bearer ".Length).Trim();
                 }
 
                 // If no token found, no further work possible
-                if (string.IsNullOrEmpty(requestTokenContext.Token))
+                if (string.IsNullOrEmpty(token))
                 {
                     return null;
                 }
 
                 // notify user token was received
                 var securityTokenReceivedNotification =
-                new SecurityTokenReceivedNotification<OAuthBearerTokenContext, OAuthBearerAuthenticationOptions>(Context, Options)
+                new SecurityTokenReceivedNotification<HttpContext, OAuthBearerAuthenticationOptions>(Context, Options)
                 {
-                    ProtocolMessage = requestTokenContext,
-                    SecurityToken = requestTokenContext.Token,
+                    ProtocolMessage = Context,
+                    SecurityToken = token,
                 };
 
                 await Options.Notifications.SecurityTokenReceived(securityTokenReceivedNotification);
@@ -101,34 +92,37 @@ namespace Microsoft.AspNet.Security.OAuth
                     return null;
                 }
 
-                if (_configuration == null)
+                if (_configuration == null && Options.ConfigurationManager != null)
                 {
                     _configuration = await Options.ConfigurationManager.GetConfigurationAsync(Context.RequestAborted);
                 }
 
                 var validationParameters = Options.TokenValidationParameters.Clone();
-                if (validationParameters.ValidIssuer == null && !string.IsNullOrWhiteSpace(_configuration.Issuer))
+                if (_configuration != null)
                 {
-                    validationParameters.ValidIssuer = _configuration.Issuer;
-                }
-                else
-                {
-                    IEnumerable<string> issuers = new[] { _configuration.Issuer };
-                    validationParameters.ValidIssuers = (validationParameters.ValidIssuers == null ? issuers : validationParameters.ValidIssuers.Concat(issuers));
+                    if (validationParameters.ValidIssuer == null && !string.IsNullOrWhiteSpace(_configuration.Issuer))
+                    {
+                        validationParameters.ValidIssuer = _configuration.Issuer;
+                    }
+                    else
+                    {
+                        IEnumerable<string> issuers = new[] { _configuration.Issuer };
+                        validationParameters.ValidIssuers = (validationParameters.ValidIssuers == null ? issuers : validationParameters.ValidIssuers.Concat(issuers));
+                    }
+
+                    validationParameters.IssuerSigningKeys = (validationParameters.IssuerSigningKeys == null ? _configuration.SigningKeys : validationParameters.IssuerSigningKeys.Concat(_configuration.SigningKeys));
                 }
 
-                validationParameters.IssuerSigningKeys = (validationParameters.IssuerSigningKeys == null ? _configuration.SigningKeys : validationParameters.IssuerSigningKeys.Concat(_configuration.SigningKeys));
                 SecurityToken validatedToken;
                 foreach (var validator in Options.SecurityTokenValidators)
                 {
-                    if (validator.CanReadToken(requestTokenContext.Token))
+                    if (validator.CanReadToken(token))
                     {
-                        ClaimsPrincipal principal = Options.SecurityTokenValidators.First().ValidateToken(requestTokenContext.Token, validationParameters, out validatedToken);
-                        ClaimsIdentity claimsIdentity = principal.Identity as ClaimsIdentity;
-                        AuthenticationTicket ticket = new AuthenticationTicket(claimsIdentity, new AuthenticationProperties());
-                        var securityTokenValidatedNotification = new SecurityTokenValidatedNotification<OAuthBearerTokenContext, OAuthBearerAuthenticationOptions>(Context, Options)
+                        ClaimsPrincipal principal = validator.ValidateToken(token, validationParameters, out validatedToken);
+                        AuthenticationTicket ticket = new AuthenticationTicket(principal, new AuthenticationProperties(), Options.AuthenticationType);
+                        var securityTokenValidatedNotification = new SecurityTokenValidatedNotification<HttpContext, OAuthBearerAuthenticationOptions>(Context, Options)
                         {
-                            ProtocolMessage = requestTokenContext,
+                            ProtocolMessage = Context,
                             AuthenticationTicket = ticket
                         };
 
@@ -146,7 +140,7 @@ namespace Microsoft.AspNet.Security.OAuth
                     }
                 }
 
-                throw new InvalidOperationException("No SecurityTokenValidator available for token: " + requestTokenContext.Token);
+                throw new InvalidOperationException("No SecurityTokenValidator available for token: " + token ?? "null");
             }
             catch (Exception ex)
             {
@@ -165,9 +159,9 @@ namespace Microsoft.AspNet.Security.OAuth
                 }
 
                 var authenticationFailedNotification =
-                    new AuthenticationFailedNotification<OAuthBearerTokenContext, OAuthBearerAuthenticationOptions>(Context, Options)
+                    new AuthenticationFailedNotification<HttpContext, OAuthBearerAuthenticationOptions>(Context, Options)
                     {
-                        ProtocolMessage = requestTokenContext,
+                        ProtocolMessage = Context,
                         Exception = authFailedEx.SourceException
                     };
 
@@ -190,7 +184,7 @@ namespace Microsoft.AspNet.Security.OAuth
 
         protected override void ApplyResponseChallenge()
         {
-            ApplyResponseChallengeAsync().GetAwaiter().GetResult();
+            // N/A
         }
 
         protected override void ApplyResponseGrant()
