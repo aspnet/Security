@@ -19,6 +19,7 @@ namespace Microsoft.Framework.DependencyInjection
         {
             var describe = new ServiceDescriber(config);
             services.TryAdd(describe.Transient<IAuthorizationService, DefaultAuthorizationService>());
+            services.Add(describe.Transient<IAuthorizationHandler, ClaimsRequirementHandler>());
             if (configureOptions != null)
             {
                 services.Configure(configureOptions);

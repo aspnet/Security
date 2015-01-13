@@ -2,7 +2,9 @@
 // Licensed under the Apache License, Version 2.0. See License.txt in the project root for license information.
 
 using System.Collections.Generic;
+using System.Linq;
 using System.Security.Claims;
+using Microsoft.AspNet.Http;
 
 namespace Microsoft.AspNet.Security
 {
@@ -11,22 +13,38 @@ namespace Microsoft.AspNet.Security
     /// </summary>
     public class AuthorizationContext
     {
+        private HashSet<IAuthorizationRequirement> _authorizedRequirements = new HashSet<IAuthorizationRequirement>();
+
         public AuthorizationContext(
-            [NotNull] IAuthorizationPolicy policy, 
-            ClaimsPrincipal user, 
-            IEnumerable<object> resources)
+            [NotNull] AuthorizationPolicy policy, 
+            HttpContext context,
+            object resource)
         {
             Policy = policy;
-            User = user;
-            Resources = resources;
+            Context = context;
+            Resource = resource;
         }
 
-        public IAuthorizationPolicy Policy { get; private set; }
-        public ClaimsPrincipal User { get; private set; }
-        public IEnumerable<object> Resources { get; private set; }
+        public AuthorizationPolicy Policy { get; private set; }
+        public ClaimsPrincipal User { get { return Context.User; } }
+        public HttpContext Context { get; private set; }
+        public object Resource { get; private set; }
 
-        // Authorize not needed yet since we fail if any policy handler fails
-        //public bool Authorized { get; set; }
+        public bool Allowed { get; private set; } = true;
+        public void Deny()
+        {
+            Allowed = false;
+        }
+
+        public void RequirementSucceeded(IAuthorizationRequirement requirement)
+        {
+            _authorizedRequirements.Add(requirement);
+        }
+
+        public bool Authorized()
+        {
+            return Allowed && Policy.Requirements.All(req => _authorizedRequirements.Contains(req));
+        }
     }
 }
 

@@ -5,19 +5,18 @@ using System.Collections.Generic;
 
 namespace Microsoft.AspNet.Security
 {
-    // TODO: make policies read only
     public class AuthorizationOptions
     {
-        private IDictionary<string, IAuthorizationPolicy> PolicyMap { get; } = new Dictionary<string, IAuthorizationPolicy>();
+        private IDictionary<string, AuthorizationPolicy> PolicyMap { get; } = new Dictionary<string, AuthorizationPolicy>();
 
-        public void AddPolicy([NotNull] string name, [NotNull] IAuthorizationPolicy policy)
+        public void AddPolicy([NotNull] string name, [NotNull] AuthorizationPolicy policy)
         {
             PolicyMap[name] = policy;
         }
 
-        public IAuthorizationPolicy GetPolicy([NotNull] string name)
+        public AuthorizationPolicy GetPolicy([NotNull] string name)
         {
             return PolicyMap.ContainsKey(name) ? PolicyMap[name] : null;
         }
-    }
+   }
 }

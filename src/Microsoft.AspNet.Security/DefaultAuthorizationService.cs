@@ -5,62 +5,69 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Security.Claims;
 using System.Threading.Tasks;
+using Microsoft.AspNet.Http;
 using Microsoft.Framework.OptionsModel;
 
 namespace Microsoft.AspNet.Security
 {
     public class DefaultAuthorizationService : IAuthorizationService
     {
-        private readonly IList<IAuthorizationPolicyHandler> _handlers;
+        private readonly IList<IAuthorizationHandler> _handlers;
         private readonly AuthorizationOptions _options;
 
-        public DefaultAuthorizationService(IOptions<AuthorizationOptions> options, IEnumerable<IAuthorizationPolicyHandler> handlers = null)
+        public DefaultAuthorizationService(IOptions<AuthorizationOptions> options, IEnumerable<IAuthorizationHandler> handlers = null)
         {
             if (handlers == null)
             {
-                _handlers = new List<IAuthorizationPolicyHandler>();
+                _handlers = new List<IAuthorizationHandler>();
             }
             else
             {
-                _handlers = handlers.ToArray(); // REVIEW: order?
+                _handlers = handlers.ToArray();
             }
             _options = options.Options;
         }
 
-        public Task<bool> AuthorizeAsync([NotNull] string policyName, ClaimsPrincipal user, params object[] resources)
+        public Task<bool> AuthorizeAsync([NotNull] string policyName, HttpContext context, object resource = null)
         {
             var policy = _options.GetPolicy(policyName);
             if (policy == null)
             {
                 return Task.FromResult(false);
             }
-            return AuthorizeAsync(policy, user, resources);
+            return AuthorizeAsync(policy, context, resource);
         }
 
-        public async Task<bool> AuthorizeAsync([NotNull] IAuthorizationPolicy policy, ClaimsPrincipal user, params object[] resources)
+        public async Task<bool> AuthorizeAsync([NotNull] AuthorizationPolicy policy, [NotNull] HttpContext context, object resource = null)
         {
-            // Authorize only returns true if EVERY policy handler approves
-            var context = new AuthorizationContext(policy, user, resources);
-            // Run global handlers first
-            foreach (var handler in _handlers)
+            var user = context.User;
+            try
             {
-                if (!await handler.AuthorizeAsync(context))
+                // Generate the user identities if policy specified the AuthTypes
+                if (policy.UseOnlyTheseAuthenticationTypes != null && policy.UseOnlyTheseAuthenticationTypes.Any() )
                 {
-                    return false;
-                }
-            }
-            // Check policy requirements next
-            if (policy.Requirements != null)
-            {
-                foreach (var req in policy.Requirements)
-                {
-                    if (!await req.CheckAsync(context))
+                    var principal = new ClaimsPrincipal();
+                    var results = await context.AuthenticateAsync(policy.UseOnlyTheseAuthenticationTypes);
+                    foreach (var result in results)
                     {
-                        return false;
+                        principal.AddIdentity(result.Identity);
                     }
+                    context.User = principal;
                 }
+
+                var authContext = new AuthorizationContext(policy, context, resource);
+
+                // Run global handlers first
+                foreach (var handler in _handlers)
+                {
+                    await handler.HandleAsync(authContext);
+                }
+                return authContext.Authorized();
             }
-            return true;
+            finally
+            {
+                context.User = user;
+            }
         }
     }
 }
