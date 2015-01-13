@@ -4,9 +4,8 @@ using Microsoft.Framework.DependencyInjection;
 using Microsoft.AspNet.Security.OpenIdConnect;
 using Microsoft.AspNet.Http.Security;
 using Microsoft.AspNet.Security;
-using Microsoft.AspNet.Security.Cookies;
 
-namespace OpenIDConnectSample
+namespace OpenIdConnectSample
 {
     public class Startup
     {
