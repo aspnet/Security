@@ -212,17 +212,7 @@ namespace Microsoft.AspNet.Security.OpenIdConnect
               && Request.ContentType.StartsWith("application/x-www-form-urlencoded", StringComparison.OrdinalIgnoreCase)
               && Request.Body.CanRead)
             {
-                if (!Request.Body.CanSeek)
-                {
-                    _logger.WriteVerbose("Buffering request body");
-                    // Buffer in case this body was not meant for us.
-                    MemoryStream memoryStream = new MemoryStream();
-                    await Request.Body.CopyToAsync(memoryStream);
-                    memoryStream.Seek(0, SeekOrigin.Begin);
-                    Request.Body = memoryStream;
-                }
-
-                IFormCollection form = (IFormCollection) await Request.ReadFormAsync();
+                IFormCollection form = await Request.ReadFormAsync();
                 Request.Body.Seek(0, SeekOrigin.Begin);
 
                 // TODO: a delegate on OpenIdConnectAuthenticationOptions would allow for users to hook their own custom message.
