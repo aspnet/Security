@@ -162,8 +162,8 @@ namespace Microsoft.AspNet.Security.OAuthBearer
                 List<Claim> claims =
                     new List<Claim>
                     {
-                                    new Claim(ClaimTypes.Email, "bob@contoso.com"),
-                                    new Claim(ClaimsIdentity.DefaultNameClaimType, "bob"),
+                        new Claim(ClaimTypes.Email, "bob@contoso.com"),
+                        new Claim(ClaimsIdentity.DefaultNameClaimType, "bob"),
                     };
 
                 return new ClaimsPrincipal(new ClaimsIdentity(claims, AuthenticationType));
@@ -178,10 +178,7 @@ namespace Microsoft.AspNet.Security.OAuthBearer
                 {
                     services.AddDataProtection();
                 });
-                app.UseCookieAuthentication(options =>
-                {
-                    options.AuthenticationType = "Bearer";
-                });
+
                 if (configureOptions != null)
                 {
                     app.UseOAuthBearerAuthentication(configureOptions);
@@ -215,11 +212,6 @@ namespace Microsoft.AspNet.Security.OAuthBearer
                 Request = request,
                 Response = await server.CreateClient().SendAsync(request),
             };
-
-            if (transaction.Response.Headers.Contains("Set-Cookie"))
-            {
-                transaction.SetCookie = transaction.Response.Headers.GetValues("Set-Cookie").ToList();
-            }
 
             transaction.ResponseText = await transaction.Response.Content.ReadAsStringAsync();
 

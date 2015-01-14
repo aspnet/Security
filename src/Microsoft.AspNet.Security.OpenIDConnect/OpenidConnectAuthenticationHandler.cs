@@ -463,7 +463,7 @@ namespace Microsoft.AspNet.Security.OpenIdConnect
         /// <param name="nonce">the nonce to remember.</param>
         /// <remarks><see cref="HttpResponse.Cookies.Append"/>is called to add a cookie with the name: 'OpenIdConnectAuthenticationDefaults.Nonce + <see cref="OpenIdConnectAuthenticationOptions.StringDataFormat.Protect"/>(nonce)'.
         /// The value of the cookie is: "N".</remarks>
-        public virtual void RememberNonce(string nonce)
+        private void RememberNonce(string nonce)
         {
             if (string.IsNullOrWhiteSpace(nonce))
             {
@@ -487,7 +487,7 @@ namespace Microsoft.AspNet.Security.OpenIdConnect
         /// <returns>'nonceExpectedValue' if a cookie is found that matches, null otherwise.</returns>
         /// <remarks>Examins <see cref="HttpRequest.Cookies.Keys"/> that start with the prefix: 'OpenIdConnectAuthenticationDefaults.Nonce'. 
         /// <see cref="OpenIdConnectAuthenticationOptions.StringDataFormat.Unprotect"/> is used to obtain the actual 'nonce'. If the nonce is found, then <see cref="HttpResponse.Cookies.Delete"/> is called.</remarks>
-        protected virtual string RetrieveNonce(string nonceExpectedValue)
+        private string RetrieveNonce(string nonceExpectedValue)
         {
             if (nonceExpectedValue == null)
             {

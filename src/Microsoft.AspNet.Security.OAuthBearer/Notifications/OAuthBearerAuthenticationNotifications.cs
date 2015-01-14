@@ -21,6 +21,7 @@ namespace Microsoft.AspNet.Security.OAuthBearer
         /// </summary>
         public OAuthBearerAuthenticationNotifications()
         {
+            ApplyChallenge = notification => { notification.HttpContext.Response.Headers.AppendValues("WWW-Authenticate", notification.Options.Challenge); return Task.FromResult(0); };
             AuthenticationFailed = notification => Task.FromResult(0);
             MessageReceived = notification => Task.FromResult(0);
             SecurityTokenReceived = notification => Task.FromResult(0);
@@ -46,5 +47,10 @@ namespace Microsoft.AspNet.Security.OAuthBearer
         /// Invoked after the security token has passed validation and a ClaimsIdentity has been generated.
         /// </summary>
         public Func<SecurityTokenValidatedNotification<HttpContext, OAuthBearerAuthenticationOptions>, Task> SecurityTokenValidated { get; set; }
+
+        /// <summary>
+        /// Invoked to apply a challenge sent back to the caller.
+        /// </summary>
+        public Func<AuthenticationChallengeNotification<OAuthBearerAuthenticationOptions>, Task> ApplyChallenge { get; set; }
     }
 }

@@ -32,7 +32,6 @@ namespace Microsoft.AspNet.Security.OAuthBearer
         public OAuthBearerAuthenticationMiddleware(
             RequestDelegate next,
             IServiceProvider services,
-            IDataProtectionProvider dataProtectionProvider,
             ILoggerFactory loggerFactory,
             IOptions<OAuthBearerAuthenticationOptions> options,
             ConfigureOptions<OAuthBearerAuthenticationOptions> configureOptions)

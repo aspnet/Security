@@ -17,7 +17,7 @@ using Microsoft.IdentityModel.Protocols;
 
 namespace Microsoft.AspNet.Security.OAuthBearer
 {
-    internal class OAuthBearerAuthenticationHandler : AuthenticationHandler<OAuthBearerAuthenticationOptions>
+    public class OAuthBearerAuthenticationHandler : AuthenticationHandler<OAuthBearerAuthenticationOptions>
     {
         private readonly ILogger _logger;
         private OpenIdConnectConfiguration _configuration;
@@ -184,7 +184,12 @@ namespace Microsoft.AspNet.Security.OAuthBearer
 
         protected override void ApplyResponseChallenge()
         {
-            // N/A
+            ApplyResponseChallengeAsync().GetAwaiter().GetResult();
+        }
+
+        protected override async Task ApplyResponseChallengeAsync()
+        {
+            await Options.Notifications.ApplyChallenge(new AuthenticationChallengeNotification<OAuthBearerAuthenticationOptions>(Context, Options));
         }
 
         protected override void ApplyResponseGrant()

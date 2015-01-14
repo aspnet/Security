@@ -25,6 +25,7 @@ namespace Microsoft.AspNet.Security.OAuthBearer
         {
             AuthenticationType = OAuthBearerAuthenticationDefaults.AuthenticationType;
             BackchannelTimeout = TimeSpan.FromMinutes(1);
+            Challenge = OAuthBearerAuthenticationDefaults.AuthenticationType;
             Notifications = new OAuthBearerAuthenticationNotifications();
             RefreshOnIssuerKeyNotFound = true;
             SystemClock = new SystemClock();
@@ -48,6 +49,12 @@ namespace Microsoft.AspNet.Security.OAuthBearer
         /// The expected audience for any received JWT token.
         /// </value>
         public string Audience { get; set; }
+
+        /// <summary>
+        /// Gets or sets the challenge to put in the "WWW-Authenticate" header.
+        /// </summary>
+        /// TODO - brentschmaltz, should not be null.
+        public string Challenge { get; set; }
 
         /// <summary>
         /// The object provided by the application to process events raised by the bearer authentication middleware.
