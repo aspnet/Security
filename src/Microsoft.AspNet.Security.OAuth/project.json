@@ -4,8 +4,6 @@
     "dependencies": {
         "Microsoft.AspNet.Security": "1.0.0-*",
         "Microsoft.AspNet.Security.DataProtection": "1.0.0-*",
-        "Microsoft.IdentityModel.Protocol.Extensions": "2.0.0-beta1-*",
-        "System.IdentityModel.Tokens": "5.0.0-beta1-*"
     },
     "frameworks": {
         "aspnet50": {

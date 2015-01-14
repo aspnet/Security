@@ -5,22 +5,22 @@ using System.Collections.ObjectModel;
 using System.Diagnostics.CodeAnalysis;
 using System.IdentityModel.Tokens;
 using System.Net.Http;
+using System.Text;
 using Microsoft.AspNet.Builder;
 using Microsoft.AspNet.Http;
 using Microsoft.AspNet.Security.DataHandler;
+using Microsoft.AspNet.Security.DataHandler.Encoder;
+using Microsoft.AspNet.Security.DataHandler.Serializer;
 using Microsoft.AspNet.Security.DataProtection;
 using Microsoft.AspNet.Security.Infrastructure;
 using Microsoft.Framework.Logging;
 using Microsoft.Framework.OptionsModel;
 using Microsoft.IdentityModel.Protocols;
-using Microsoft.AspNet.Security.DataHandler.Serializer;
-using Microsoft.AspNet.Security.DataHandler.Encoder;
-using System.Text;
 
 namespace Microsoft.AspNet.Security.OpenIdConnect
 {
     /// <summary>
-    /// OWIN middleware for obtaining identities using OpenIdConnect protocol.
+    /// ASP.NET middleware for obtaining identities using OpenIdConnect protocol.
     /// </summary>
     public class OpenIdConnectAuthenticationMiddleware : AuthenticationMiddleware<OpenIdConnectAuthenticationOptions>
     {
@@ -29,8 +29,8 @@ namespace Microsoft.AspNet.Security.OpenIdConnect
         /// <summary>
         /// Initializes a <see cref="OpenIdConnectAuthenticationMiddleware"/>
         /// </summary>
-        /// <param name="next">The next middleware in the OWIN pipeline to invoke</param>
-        /// <param name="app">The OWIN application</param>
+        /// <param name="next">The next middleware in the ASP.NET pipeline to invoke</param>
+        /// <param name="app">The ASP.NET application</param>
         /// <param name="options">Configuration options for the middleware</param>
         [SuppressMessage("Microsoft.Reliability", "CA2000:Dispose objects before losing scope", Justification = "Managed by caller")]
         public OpenIdConnectAuthenticationMiddleware(

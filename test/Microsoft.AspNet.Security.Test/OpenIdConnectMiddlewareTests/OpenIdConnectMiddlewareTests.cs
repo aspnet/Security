@@ -1,14 +1,5 @@
-﻿using Microsoft.AspNet.Builder;
-using Microsoft.AspNet.Http;
-using Microsoft.AspNet.Http.Security;
-using Microsoft.AspNet.Security.Cookies;
-using Microsoft.AspNet.Security.DataHandler;
-using Microsoft.AspNet.Security.DataProtection;
-using Microsoft.AspNet.Security.OpenIdConnect;
-using Microsoft.AspNet.TestHost;
-using Microsoft.Framework.DependencyInjection;
-using Newtonsoft.Json;
-using Shouldly;
+﻿// Copyright (c) Microsoft Open Technologies, Inc. All rights reserved. See License.txt in the project root for license information.
+
 using System;
 using System.Collections.Generic;
 using System.Globalization;
@@ -21,6 +12,17 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Xml;
 using System.Xml.Linq;
+using Microsoft.AspNet.Builder;
+using Microsoft.AspNet.Http;
+using Microsoft.AspNet.Http.Security;
+using Microsoft.AspNet.Security.Cookies;
+using Microsoft.AspNet.Security.DataHandler;
+using Microsoft.AspNet.Security.DataProtection;
+using Microsoft.AspNet.Security.OpenIdConnect;
+using Microsoft.AspNet.TestHost;
+using Microsoft.Framework.DependencyInjection;
+using Newtonsoft.Json;
+using Shouldly;
 using Xunit;
 
 namespace Microsoft.AspNet.Security.Tests.OpenIdConnect

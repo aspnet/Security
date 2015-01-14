@@ -1,12 +1,6 @@
 // Copyright (c) Microsoft Open Technologies, Inc. All rights reserved.
 // Licensed under the Apache License, Version 2.0. See License.txt in the project root for license information.
 
-using Microsoft.AspNet.Http;
-using Microsoft.AspNet.Http.Security;
-using Microsoft.AspNet.Security.Infrastructure;
-using Microsoft.AspNet.Security.Notifications;
-using Microsoft.Framework.Logging;
-using Microsoft.IdentityModel.Protocols;
 using System;
 using System.Collections.Generic;
 using System.IdentityModel.Tokens;
@@ -14,6 +8,12 @@ using System.Linq;
 using System.Runtime.ExceptionServices;
 using System.Security.Claims;
 using System.Threading.Tasks;
+using Microsoft.AspNet.Http;
+using Microsoft.AspNet.Http.Security;
+using Microsoft.AspNet.Security.Infrastructure;
+using Microsoft.AspNet.Security.Notifications;
+using Microsoft.Framework.Logging;
+using Microsoft.IdentityModel.Protocols;
 
 namespace Microsoft.AspNet.Security.OAuthBearer
 {
@@ -150,7 +150,7 @@ namespace Microsoft.AspNet.Security.OAuthBearer
 
             if (authFailedEx != null)
             {
-                _logger.WriteError("Exception occurred while processing message: '" + authFailedEx.ToString());
+                _logger.WriteError("Exception occurred while processing message", authFailedEx.SourceException);
 
                 // Refresh the configuration for exceptions that may be caused by key rollovers. The user can also request a refresh in the notification.
                 if (Options.RefreshOnIssuerKeyNotFound && authFailedEx.SourceException.GetType().Equals(typeof(SecurityTokenSignatureKeyNotFoundException)))

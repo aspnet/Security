@@ -2,8 +2,8 @@
 
 using System;
 using System.Threading.Tasks;
-using Microsoft.IdentityModel.Protocols;
 using Microsoft.AspNet.Security.Notifications;
+using Microsoft.IdentityModel.Protocols;
 
 namespace Microsoft.AspNet.Security.OpenIdConnect
 {

@@ -1,13 +1,13 @@
 ﻿// Copyright (c) Microsoft Open Technologies, Inc. All rights reserved. See License.txt in the project root for license information.
 
-using Microsoft.AspNet.Http;
-using Microsoft.AspNet.Http.Security;
-using Microsoft.IdentityModel.Protocols;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.IdentityModel.Tokens;
 using System.Net.Http;
+using Microsoft.AspNet.Http;
+using Microsoft.AspNet.Http.Security;
+using Microsoft.IdentityModel.Protocols;
 
 namespace Microsoft.AspNet.Security.OpenIdConnect
 {

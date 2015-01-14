@@ -1,27 +1,26 @@
 ﻿// Copyright (c) Microsoft Open Technologies, Inc. All rights reserved.
 // Licensed under the Apache License, Version 2.0. See License.txt in the project root for license information.
 
+using System;
+using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
+using System.IdentityModel.Tokens;
+using System.Net.Http;
 using Microsoft.AspNet.Builder;
 using Microsoft.AspNet.Security.DataProtection;
 using Microsoft.AspNet.Security.Infrastructure;
 using Microsoft.Framework.Logging;
 using Microsoft.Framework.OptionsModel;
 using Microsoft.IdentityModel.Protocols;
-using System;
-using System.Collections.Generic;
-using System.Collections.ObjectModel;
-using System.Diagnostics.CodeAnalysis;
-using System.IdentityModel.Tokens;
-using System.Net.Http;
 
 namespace Microsoft.AspNet.Security.OAuthBearer
 {
-	/// <summary>
-	/// Bearer authentication middleware component which is added to an HTTP pipeline. This class is not
-	/// created by application code directly, instead it is added by calling the the IAppBuilder UseOAuthBearerAuthentication
-	/// extension method.
-	/// </summary>
-	public class OAuthBearerAuthenticationMiddleware : AuthenticationMiddleware<OAuthBearerAuthenticationOptions>
+    /// <summary>
+    /// Bearer authentication middleware component which is added to an HTTP pipeline. This class is not
+    /// created by application code directly, instead it is added by calling the the IAppBuilder UseOAuthBearerAuthentication
+    /// extension method.
+    /// </summary>
+    public class OAuthBearerAuthenticationMiddleware : AuthenticationMiddleware<OAuthBearerAuthenticationOptions>
     {
         private readonly ILogger _logger;
 
