@@ -248,7 +248,7 @@ namespace Microsoft.AspNet.Security.OpenIdConnect
                     return messageReceivedNotification.AuthenticationTicket;
                 }
 
-				if (messageReceivedNotification.Skipped)
+                if (messageReceivedNotification.Skipped)
                 {
                     return null;
                 }

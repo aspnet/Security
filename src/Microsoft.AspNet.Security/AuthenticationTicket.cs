@@ -1,8 +1,8 @@
 // Copyright (c) Microsoft Open Technologies, Inc. All rights reserved.
 // Licensed under the Apache License, Version 2.0. See License.txt in the project root for license information.
 
-using Microsoft.AspNet.Http.Security;
 using System.Security.Claims;
+using Microsoft.AspNet.Http.Security;
 
 namespace Microsoft.AspNet.Security
 {
