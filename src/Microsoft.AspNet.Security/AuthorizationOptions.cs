@@ -7,6 +7,7 @@ namespace Microsoft.AspNet.Security
 {
     public class AuthorizationOptions
     {
+        // TODO: make this case insensitive
         private IDictionary<string, AuthorizationPolicy> PolicyMap { get; } = new Dictionary<string, AuthorizationPolicy>();
 
         public void AddPolicy([NotNull] string name, [NotNull] AuthorizationPolicy policy)

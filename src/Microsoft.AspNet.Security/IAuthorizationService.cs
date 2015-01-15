@@ -28,7 +28,5 @@ namespace Microsoft.AspNet.Security
         /// <param name="resource">The resource the policy should be checked with.</param>
         /// <returns><value>true</value> when the user fulfills the policy, <value>false</value> otherwise.</returns>
         Task<bool> AuthorizeAsync(AuthorizationPolicy policy, HttpContext context, object resource = null);
-
-        // TODO: Add sync extension methods
     }
 }

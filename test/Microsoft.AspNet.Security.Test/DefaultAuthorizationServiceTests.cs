@@ -35,10 +35,14 @@ namespace Microsoft.AspNet.Security.Test
             var user = new ClaimsPrincipal();
             user.AddIdentities(ids);
             context.Object.User = user;
-            foreach (var id in ids)
+            if (ids != null)
             {
-                var authResult = new AuthenticationResult(id, new AuthenticationProperties(), new AuthenticationDescription());
-                context.Setup(c => c.AuthenticateAsync(id.AuthenticationType)).ReturnsAsync(authResult).Verifiable();
+                var results = new List<AuthenticationResult>();
+                foreach (var id in ids)
+                {
+                    results.Add(new AuthenticationResult(id, new AuthenticationProperties(), new AuthenticationDescription()));
+                }
+                context.Setup(c => c.AuthenticateAsync(It.IsAny<IEnumerable<string>>())).ReturnsAsync(results).Verifiable();
             }
             return context;
         }
@@ -73,8 +77,7 @@ namespace Microsoft.AspNet.Security.Test
             {
                 services.Configure<AuthorizationOptions>(options =>
                 {
-                    var policy = new AuthorizationPolicyBuilder().RequiresClaim("Permission", "CanViewPage");
-                    policy.UseOnlyTheseAuthenticationTypes.Add("Basic");
+                    var policy = new AuthorizationPolicyBuilder("Basic").RequiresClaim("Permission", "CanViewPage");
                     options.AddPolicy("Basic", policy.Build());
                 });
             });
@@ -251,8 +254,7 @@ namespace Microsoft.AspNet.Security.Test
             {
                 services.Configure<AuthorizationOptions>(options =>
                 {
-                    var policy = new AuthorizationPolicyBuilder().RequiresClaim("Permission", "CanViewPage");
-                    policy.UseOnlyTheseAuthenticationTypes.Add("Basic");
+                    var policy = new AuthorizationPolicyBuilder("Basic").RequiresClaim("Permission", "CanViewPage");
                     options.AddPolicy("Basic", policy.Build());
                 });
             });
@@ -360,8 +362,7 @@ namespace Microsoft.AspNet.Security.Test
         public async Task Authorize_PolicyCanAuthenticationTypeWithNameClaim()
         {
             // Arrange
-            var policy = new AuthorizationPolicyBuilder().RequiresClaim(ClaimTypes.Name);
-            policy.UseOnlyTheseAuthenticationTypes.Add("AuthType");
+            var policy = new AuthorizationPolicyBuilder("AuthType").RequiresClaim(ClaimTypes.Name);
             var authorizationService = BuildAuthorizationService();
             var context = SetupContext(
                 new ClaimsIdentity(new Claim[] { new Claim(ClaimTypes.Name, "Name") }, "AuthType")
@@ -378,8 +379,7 @@ namespace Microsoft.AspNet.Security.Test
         public async Task RolePolicyCanRequireSingleRole()
         {
             // Arrange
-            var policy = new AuthorizationPolicyBuilder().RequiresRole("Admin");
-            policy.UseOnlyTheseAuthenticationTypes.Add("AuthType");
+            var policy = new AuthorizationPolicyBuilder("AuthType").RequiresRole("Admin");
             var authorizationService = BuildAuthorizationService();
             var context = SetupContext(
                 new ClaimsIdentity(new Claim[] { new Claim(ClaimTypes.Role, "Admin") }, "AuthType")
@@ -396,8 +396,7 @@ namespace Microsoft.AspNet.Security.Test
         public async Task RolePolicyCanRequireOneOfManyRoles()
         {
             // Arrange
-            var policy = new AuthorizationPolicyBuilder().RequiresRole("Admin", "Users");
-            policy.UseOnlyTheseAuthenticationTypes.Add("AuthType");
+            var policy = new AuthorizationPolicyBuilder("AuthType").RequiresRole("Admin", "Users");
             var authorizationService = BuildAuthorizationService();
             var context = SetupContext(
                 new ClaimsIdentity(new Claim[] { new Claim(ClaimTypes.Role, "Users") }, "AuthType"));
@@ -458,7 +457,7 @@ namespace Microsoft.AspNet.Security.Test
         }
 
         [Fact]
-        public async Task PolicyCanApproveWithNoRequirements()
+        public async Task PolicyFailsWithNoRequirements()
         {
             // Arrange
             var authorizationService = BuildAuthorizationService(services =>
@@ -481,7 +480,7 @@ namespace Microsoft.AspNet.Security.Test
             var allowed = await authorizationService.AuthorizeAsync("Basic", context.Object);
 
             // Assert
-            Assert.True(allowed);
+            Assert.False(allowed);
         }
 
         private class AnyAuthenticatedUserRequirement : IAuthorizationRequirement { }
@@ -501,7 +500,7 @@ namespace Microsoft.AspNet.Security.Test
                     {
                         if (!userIsAnonymous)
                         {
-                            context.RequirementSucceeded(req);
+                            context.Succeed(req);
                         }
                     }
                 }

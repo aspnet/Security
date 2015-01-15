@@ -44,37 +44,26 @@ namespace Microsoft.AspNet.Security
             try
             {
                 // Generate the user identities if policy specified the AuthTypes
-                if (policy.UseOnlyTheseAuthenticationTypes != null && policy.UseOnlyTheseAuthenticationTypes.Any() )
+                if (policy.ActiveAuthenticationTypes != null && policy.ActiveAuthenticationTypes.Any() )
                 {
                     var principal = new ClaimsPrincipal();
+
+                    var results = await context.AuthenticateAsync(policy.ActiveAuthenticationTypes);
                     // REVIEW: re requesting the identities fails for MVC currently, so we only request if not found
-                    foreach (var authType in policy.UseOnlyTheseAuthenticationTypes)
+                    foreach (var result in results)
                     {
-                        var existingIdentities = context.User?.Identities?.Where(i => i.AuthenticationType == authType);
-                        if (existingIdentities != null && existingIdentities.Any())
-                        {
-                            principal.AddIdentities(existingIdentities);
-                        }
-                        else
-                        {
-                            var result = await context.AuthenticateAsync(authType);
-                            if (result != null && result.Identity != null)
-                            {
-                                principal.AddIdentity(result.Identity);
-                            }
-                        }
+                        principal.AddIdentity(result.Identity);
                     }
                     context.User = principal;
                 }
 
                 var authContext = new AuthorizationContext(policy, context, resource);
 
-                // Run global handlers first
                 foreach (var handler in _handlers)
                 {
                     await handler.HandleAsync(authContext);
                 }
-                return authContext.Authorized();
+                return authContext.HasSucceeded;
             }
             finally
             {

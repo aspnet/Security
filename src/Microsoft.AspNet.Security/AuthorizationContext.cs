@@ -13,7 +13,9 @@ namespace Microsoft.AspNet.Security
     /// </summary>
     public class AuthorizationContext
     {
-        private HashSet<IAuthorizationRequirement> _authorizedRequirements = new HashSet<IAuthorizationRequirement>();
+        private HashSet<IAuthorizationRequirement> _pendingRequirements = new HashSet<IAuthorizationRequirement>();
+        private bool _failCalled;
+        private bool _succeedCalled;
 
         public AuthorizationContext(
             [NotNull] AuthorizationPolicy policy, 
@@ -23,6 +25,10 @@ namespace Microsoft.AspNet.Security
             Policy = policy;
             Context = context;
             Resource = resource;
+            foreach (var req in Policy.Requirements)
+            {
+                _pendingRequirements.Add(req);
+            }
         }
 
         public AuthorizationPolicy Policy { get; private set; }
@@ -30,21 +36,26 @@ namespace Microsoft.AspNet.Security
         public HttpContext Context { get; private set; }
         public object Resource { get; private set; }
 
-        public bool Allowed { get; private set; } = true;
-        public void Deny()
-        {
-            Allowed = false;
+        public IEnumerable<IAuthorizationRequirement> PendingRequirements { get { return _pendingRequirements; } }
+
+        public bool HasFailed { get { return _failCalled; } }
+
+        public bool HasSucceeded {
+            get
+            {
+                return !_failCalled && _succeedCalled && !PendingRequirements.Any();
+            }
         }
 
-        public void RequirementSucceeded(IAuthorizationRequirement requirement)
+        public void Fail()
         {
-            _authorizedRequirements.Add(requirement);
+            _failCalled = true;
         }
 
-        public bool Authorized()
+        public void Succeed(IAuthorizationRequirement requirement)
         {
-            return Allowed && Policy.Requirements.All(req => _authorizedRequirements.Contains(req));
+            _succeedCalled = true;
+            _pendingRequirements.Remove(requirement);
         }
     }
 }
-

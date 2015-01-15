@@ -8,13 +8,19 @@ namespace Microsoft.AspNet.Security
 {
     public class AuthorizationPolicyBuilder
     {
+        public AuthorizationPolicyBuilder(params string[] activeAuthenticationTypes)
+        {
+            foreach (var authType in activeAuthenticationTypes) {
+                ActiveAuthenticationTypes.Add(authType);
+            }
+        }
+
         public IList<IAuthorizationRequirement> Requirements { get; set; } = new List<IAuthorizationRequirement>();
-        //TODO: Need to find a real name for this,  Service will AuthenticateAsync for these if 
-        public IList<string> UseOnlyTheseAuthenticationTypes { get; set; } = new List<string>();
+        public IList<string> ActiveAuthenticationTypes { get; set; } = new List<string>();
 
         public AuthorizationPolicyBuilder RequiresClaim([NotNull] string claimType, params string[] requiredValues)
         {
-            Requirements.Add(new ClaimRequirement
+            Requirements.Add(new ClaimsAuthorizationRequirement
             {
                 ClaimType = claimType,
                 AllowedValues = requiredValues
@@ -24,7 +30,7 @@ namespace Microsoft.AspNet.Security
 
         public AuthorizationPolicyBuilder RequiresClaim([NotNull] string claimType)
         {
-            Requirements.Add(new ClaimRequirement
+            Requirements.Add(new ClaimsAuthorizationRequirement
             {
                 ClaimType = claimType,
                 AllowedValues = null
@@ -40,33 +46,7 @@ namespace Microsoft.AspNet.Security
 
         public AuthorizationPolicy Build()
         {
-            return new AuthorizationPolicy(Requirements, UseOnlyTheseAuthenticationTypes);
+            return new AuthorizationPolicy(Requirements, ActiveAuthenticationTypes);
         }
     }
-
-    // Music store use case
-
-    // await AuthorizeAsync<Album>(user, "Edit", albumInstance);
-
-    // No policy name needed because this is auto based on resource (operation is the policy name)
-    //RegisterOperation which auto generates the policy for Authorize<T>
-    //bool AuthorizeAsync<TResource>(ClaimsPrincipal, string operation, TResource instance)
-    //bool AuthorizeAsync<TResource>(IAuthorization, ClaimsPrincipal, string operation, TResource instance)
-
-    //public abstract class ResourceAuthorizationHandler<TResource> : IAuthorizationHandler where TResource : class
-    //{
-    //    public virtual Task HandleAsync(AuthorizationContext context)
-    //    {
-    //        var resource = context.Resource as TResource;
-    //        if (resource != null)
-    //        {
-    //            return HandleAsync(context, resource);
-    //        }
-
-    //        return Task.FromResult(0);
-
-    //    }
-
-    //    public abstract Task HandleAsync(AuthorizationContext context, TResource resource);
-    //}
 }
