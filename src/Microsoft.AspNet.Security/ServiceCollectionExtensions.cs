@@ -21,6 +21,7 @@ namespace Microsoft.Framework.DependencyInjection
             services.AddOptions(config);
             services.TryAdd(describe.Transient<IAuthorizationService, DefaultAuthorizationService>());
             services.Add(describe.Transient<IAuthorizationHandler, ClaimsAuthorizationHandler>());
+            services.Add(describe.Transient<IAuthorizationHandler, DenyAnonymousAuthorizationHandler>());
             if (configureOptions != null)
             {
                 services.Configure(configureOptions);

@@ -483,48 +483,28 @@ namespace Microsoft.AspNet.Security.Test
             Assert.False(allowed);
         }
 
-        private class AnyAuthenticatedUserRequirement : IAuthorizationRequirement { }
-
-        private class AnyAuthenticatedUserHandler : IAuthorizationHandler
-        {
-            public Task HandleAsync(AuthorizationContext context)
-            {
-                var user = context.User;
-                var userIsAnonymous =
-                    user == null ||
-                    user.Identity == null ||
-                    !user.Identity.IsAuthenticated;
-                foreach (var req in context.Policy.Requirements)
-                {
-                    if (req is AnyAuthenticatedUserRequirement)
-                    {
-                        if (!userIsAnonymous)
-                        {
-                            context.Succeed(req);
-                        }
-                    }
-                }
-                return Task.FromResult(0);
-            }
-        }
-
         [Fact]
         public async Task CanApproveAnyAuthenticatedUser()
         {
             // Arrange
-            var policy = new AuthorizationPolicyBuilder();
-            policy.Requirements.Add(new AnyAuthenticatedUserRequirement());
-            var options = new Mock<IOptions<AuthorizationOptions>>();
-            var handlers = new List<IAuthorizationHandler>();
-            handlers.Add(new AnyAuthenticatedUserHandler());
-            var authorizationService = new DefaultAuthorizationService(options.Object, handlers);
-            var user = new ClaimsPrincipal(new ClaimsIdentity("AuthType"));
-            var context = new Mock<HttpContext>();
-            context.SetupProperty(c => c.User);
-            context.Object.User = user;
+            var authorizationService = BuildAuthorizationService(services =>
+            {
+                services.Configure<AuthorizationOptions>(options =>
+                {
+                    var policy = new AuthorizationPolicyBuilder().RequireAuthenticatedUser();
+                    options.AddPolicy("Any", policy.Build());
+                });
+            });
+            var context = SetupContext(
+                new ClaimsIdentity(
+                    new Claim[] {
+                        new Claim(ClaimTypes.Name, "Name"),
+                    },
+                    "AuthType")
+                );
 
             // Act
-            var allowed = await authorizationService.AuthorizeAsync(policy.Build(), context.Object);
+            var allowed = await authorizationService.AuthorizeAsync("Any", context.Object);
 
             // Assert
             Assert.True(allowed);
@@ -534,22 +514,77 @@ namespace Microsoft.AspNet.Security.Test
         public async Task CanBlockNonAuthenticatedUser()
         {
             // Arrange
-            var policy = new AuthorizationPolicyBuilder();
-            policy.Requirements.Add(new AnyAuthenticatedUserRequirement());
-            var options = new Mock<IOptions<AuthorizationOptions>>();
-            var handlers = new List<IAuthorizationHandler>();
-            handlers.Add(new AnyAuthenticatedUserHandler());
-            var authorizationService = new DefaultAuthorizationService(options.Object, handlers);
-            var user = new ClaimsPrincipal();
-            var context = new Mock<HttpContext>();
-            context.SetupProperty(c => c.User);
-            context.Object.User = user;
+            var authorizationService = BuildAuthorizationService(services =>
+            {
+                services.Configure<AuthorizationOptions>(options =>
+                {
+                    var policy = new AuthorizationPolicyBuilder().RequireAuthenticatedUser();
+                    options.AddPolicy("Any", policy.Build());
+                });
+            });
+            var context = SetupContext(new ClaimsIdentity());
 
             // Act
-            var allowed = await authorizationService.AuthorizeAsync(policy.Build(), context.Object);
+            var allowed = await authorizationService.AuthorizeAsync("Any", context.Object);
 
             // Assert
             Assert.False(allowed);
         }
+
+        public class CustomRequirement : IAuthorizationRequirement { }
+        public class CustomHandler : AuthorizationHandler<CustomRequirement>
+        {
+            public override Task<bool> CheckAsync(AuthorizationContext context, CustomRequirement requirement)
+            {
+                return Task.FromResult(true);
+            }
+        }
+
+        [Fact]
+        public async Task CustomReqWithNoHandlerFails()
+        {
+            // Arrange
+            var authorizationService = BuildAuthorizationService(services =>
+            {
+                services.Configure<AuthorizationOptions>(options =>
+                {
+                    var policy = new AuthorizationPolicyBuilder();
+                    policy.Requirements.Add(new CustomRequirement());
+                    options.AddPolicy("Custom", policy.Build());
+                });
+            });
+            var context = SetupContext();
+
+            // Act
+            var allowed = await authorizationService.AuthorizeAsync("Custom", context.Object);
+
+            // Assert
+            Assert.False(allowed);
+        }
+
+
+        [Fact]
+        public async Task CustomReqWithHandlerSucceeds()
+        {
+            // Arrange
+            var authorizationService = BuildAuthorizationService(services =>
+            {
+                services.AddTransient<IAuthorizationHandler, CustomHandler>();
+                services.Configure<AuthorizationOptions>(options =>
+                {
+                    var policy = new AuthorizationPolicyBuilder();
+                    policy.Requirements.Add(new CustomRequirement());
+                    options.AddPolicy("Custom", policy.Build());
+                });
+            });
+            var context = SetupContext();
+
+            // Act
+            var allowed = await authorizationService.AuthorizeAsync("Custom", context.Object);
+
+            // Assert
+            Assert.True(allowed);
+        }
+
     }
 }

@@ -44,6 +44,12 @@ namespace Microsoft.AspNet.Security
             return this;
         }
 
+        public AuthorizationPolicyBuilder RequireAuthenticatedUser()
+        {
+            Requirements.Add(new DenyAnonymousAuthorizationRequirement());
+            return this;
+        }
+
         public AuthorizationPolicy Build()
         {
             return new AuthorizationPolicy(Requirements, ActiveAuthenticationTypes);
