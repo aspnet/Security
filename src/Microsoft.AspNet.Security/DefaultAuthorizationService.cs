@@ -15,16 +15,9 @@ namespace Microsoft.AspNet.Security
         private readonly IList<IAuthorizationHandler> _handlers;
         private readonly AuthorizationOptions _options;
 
-        public DefaultAuthorizationService(IOptions<AuthorizationOptions> options, IEnumerable<IAuthorizationHandler> handlers = null)
+        public DefaultAuthorizationService(IOptions<AuthorizationOptions> options, IEnumerable<IAuthorizationHandler> handlers)
         {
-            if (handlers == null)
-            {
-                _handlers = new List<IAuthorizationHandler>();
-            }
-            else
-            {
-                _handlers = handlers.ToArray();
-            }
+            _handlers = handlers.ToArray();
             _options = options.Options;
         }
 
