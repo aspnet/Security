@@ -573,7 +573,6 @@ namespace Microsoft.AspNet.Security.Test
 
             public bool Succeed { get; set; }
 
-
             public override Task<bool> CheckAsync(AuthorizationContext context, PassThroughRequirement requirement)
             {
                 return Task.FromResult(Succeed);
@@ -602,7 +601,7 @@ namespace Microsoft.AspNet.Security.Test
             Assert.Equal(shouldSucceed, allowed);
         }
 
-        public async Task CanChainPolicies()
+        public async Task CanCombinePolicies()
         {
             // Arrange
             var authorizationService = BuildAuthorizationService(services =>
@@ -610,7 +609,7 @@ namespace Microsoft.AspNet.Security.Test
                 services.ConfigureAuthorization(options =>
                 {
                     var basePolicy = new AuthorizationPolicyBuilder().RequiresClaim("Base", "Value").Build();
-                    options.AddPolicy("Chained", policy => policy.Chain(basePolicy).RequiresClaim("Claim", "Exists"));
+                    options.AddPolicy("Combineed", policy => policy.Combine(basePolicy).RequiresClaim("Claim", "Exists"));
                 });
             });
             var context = SetupContext(
@@ -623,13 +622,13 @@ namespace Microsoft.AspNet.Security.Test
                 );
 
             // Act
-            var allowed = await authorizationService.AuthorizeAsync("Chained", context.Object);
+            var allowed = await authorizationService.AuthorizeAsync("Combined", context.Object);
 
             // Assert
             Assert.True(allowed);
         }
 
-        public async Task ChainPoliciesWillFailIfBasePolicyFails()
+        public async Task CombinePoliciesWillFailIfBasePolicyFails()
         {
             // Arrange
             var authorizationService = BuildAuthorizationService(services =>
@@ -637,7 +636,7 @@ namespace Microsoft.AspNet.Security.Test
                 services.ConfigureAuthorization(options =>
                 {
                     var basePolicy = new AuthorizationPolicyBuilder().RequiresClaim("Base", "Value").Build();
-                    options.AddPolicy("Chained", policy => policy.Chain(basePolicy).RequiresClaim("Claim", "Exists"));
+                    options.AddPolicy("Combined", policy => policy.Combine(basePolicy).RequiresClaim("Claim", "Exists"));
                 });
             });
             var context = SetupContext(
@@ -649,13 +648,13 @@ namespace Microsoft.AspNet.Security.Test
                 );
 
             // Act
-            var allowed = await authorizationService.AuthorizeAsync("Chained", context.Object);
+            var allowed = await authorizationService.AuthorizeAsync("Combined", context.Object);
 
             // Assert
             Assert.False(allowed);
         }
 
-        public async Task ChainPoliciesWillFailIfExtraRequirementFails()
+        public async Task CombinedPoliciesWillFailIfExtraRequirementFails()
         {
             // Arrange
             var authorizationService = BuildAuthorizationService(services =>
@@ -663,7 +662,7 @@ namespace Microsoft.AspNet.Security.Test
                 services.ConfigureAuthorization(options =>
                 {
                     var basePolicy = new AuthorizationPolicyBuilder().RequiresClaim("Base", "Value").Build();
-                    options.AddPolicy("Chained", policy => policy.Chain(basePolicy).RequiresClaim("Claim", "Exists"));
+                    options.AddPolicy("Combined", policy => policy.Combine(basePolicy).RequiresClaim("Claim", "Exists"));
                 });
             });
             var context = SetupContext(
@@ -675,7 +674,7 @@ namespace Microsoft.AspNet.Security.Test
                 );
 
             // Act
-            var allowed = await authorizationService.AuthorizeAsync("Chained", context.Object);
+            var allowed = await authorizationService.AuthorizeAsync("Combined", context.Object);
 
             // Assert
             Assert.False(allowed);

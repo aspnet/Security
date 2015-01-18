@@ -16,7 +16,7 @@ namespace Microsoft.AspNet.Security
 
         public AuthorizationPolicyBuilder(AuthorizationPolicy policy)
         {
-            Chain(policy);
+            Combine(policy);
         }
 
         public IList<IAuthorizationRequirement> Requirements { get; set; } = new List<IAuthorizationRequirement>();
@@ -40,7 +40,7 @@ namespace Microsoft.AspNet.Security
             return this;
         }
 
-        public AuthorizationPolicyBuilder Chain(AuthorizationPolicy policy)
+        public AuthorizationPolicyBuilder Combine(AuthorizationPolicy policy)
         {
             AddAuthenticationTypes(policy.ActiveAuthenticationTypes.ToArray());
             AddRequirements(policy.Requirements.ToArray());
