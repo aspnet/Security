@@ -1,14 +1,14 @@
 {
     "dependencies": {
-        "Microsoft.AspNet.Diagnostics": "1.0.0-*",
-        "Microsoft.AspNet.Security.Cookies": "1.0.0-*",
-        "Microsoft.AspNet.Security.Facebook": "1.0.0-*",
-        "Microsoft.AspNet.Security.Google": "1.0.0-*",
-        "Microsoft.AspNet.Security.MicrosoftAccount": "1.0.0-*",
-        "Microsoft.AspNet.Security.Twitter": "1.0.0-*",
-        "Microsoft.AspNet.Server.IIS": "1.0.0-*",
-        "Microsoft.AspNet.Server.WebListener": "1.0.0-*",
-        "Kestrel": "1.0.0-*"
+        "Microsoft.AspNet.Diagnostics": "1.0.0-beta2",
+        "Microsoft.AspNet.Security.Cookies": "1.0.0-beta2",
+        "Microsoft.AspNet.Security.Facebook": "1.0.0-beta2",
+        "Microsoft.AspNet.Security.Google": "1.0.0-beta2",
+        "Microsoft.AspNet.Security.MicrosoftAccount": "1.0.0-beta2",
+        "Microsoft.AspNet.Security.Twitter": "1.0.0-beta2",
+        "Microsoft.AspNet.Server.IIS": "1.0.0-beta2",
+        "Microsoft.AspNet.Server.WebListener": "1.0.0-beta2",
+        "Kestrel": "1.0.0-beta2"
     },
     "commands": {
         /* Note all servers must use the same address and port because these are pre-registered with the various providers. */
