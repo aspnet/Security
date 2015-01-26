@@ -1,7 +1,6 @@
 // Copyright (c) Microsoft Open Technologies, Inc. All rights reserved.
 // Licensed under the Apache License, Version 2.0. See License.txt in the project root for license information.
 
-using System;
 using System.Linq;
 using System.Threading.Tasks;
 
@@ -18,41 +17,34 @@ namespace Microsoft.AspNet.Security
     public abstract class AuthorizationHandler<TRequirement> : IAuthorizationHandler
         where TRequirement : IAuthorizationRequirement
     {
-        public async Task HandleAsync(AuthorizationContext context)
+        public virtual async Task HandleAsync(AuthorizationContext context)
         {
-            foreach (var req in context.Policy.Requirements.OfType<TRequirement>())
+            foreach (var req in context.Requirements.OfType<TRequirement>())
             {
-                if (await CheckAsync(context, req))
+                await HandleAsync(context, req);
+            }
+        }
+
+        public abstract Task HandleAsync(AuthorizationContext context, TRequirement requirement);
+    }
+
+    public abstract class AuthorizationHandler<TRequirement, TResource> : IAuthorizationHandler
+        where TResource : class
+        where TRequirement : IAuthorizationRequirement
+    {
+        public virtual async Task HandleAsync(AuthorizationContext context)
+        {
+            var resource = context.Resource as TResource;
+            // REVIEW: should we allow null resources?
+            if (resource != null)
+            {
+                foreach (var req in context.Requirements.OfType<TRequirement>())
                 {
-                    context.Succeed(req);
-                }
-                else
-                {
-                    context.Fail();
+                    await HandleAsync(context, req, resource);
                 }
             }
         }
 
-        public abstract Task<bool> CheckAsync(AuthorizationContext context, TRequirement requirement);
+        public abstract Task HandleAsync(AuthorizationContext context, TRequirement requirement, TResource resource);
     }
-
-    // TODO: 
-    //public abstract class AuthorizationHandler<TRequirement, TResource> : AuthorizationHandler<TRequirement>
-    //    where TResource : class
-    //    where TRequirement : IAuthorizationRequirement
-    //{
-    //    public override Task HandleAsync(AuthorizationContext context)
-    //    {
-    //        var resource = context.Resource as TResource;
-    //        if (resource != null)
-    //        {
-    //            return HandleAsync(context, resource);
-    //        }
-
-    //        return Task.FromResult(0);
-
-    //    }
-
-    //    public abstract Task HandleAsync(AuthorizationContext context, TResource resource);
-    //}
 }
