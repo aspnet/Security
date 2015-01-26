@@ -27,25 +27,6 @@ namespace Microsoft.AspNet.Security.Test
             return services.BuildServiceProvider().GetRequiredService<IAuthorizationService>();
         }
 
-        private Mock<HttpContext> SetupContext(params ClaimsIdentity[] ids)
-        {
-            var context = new Mock<HttpContext>();
-            context.SetupProperty(c => c.User);
-            var user = new ClaimsPrincipal();
-            user.AddIdentities(ids);
-            context.Object.User = user;
-            if (ids != null)
-            {
-                var results = new List<AuthenticationResult>();
-                foreach (var id in ids)
-                {
-                    results.Add(new AuthenticationResult(id, new AuthenticationProperties(), new AuthenticationDescription()));
-                }
-                context.Setup(c => c.AuthenticateAsync(It.IsAny<IEnumerable<string>>())).ReturnsAsync(results).Verifiable();
-            }
-            return context;
-        }
-
         [Fact]
         public async Task Authorize_ShouldAllowIfClaimIsPresent()
         {
@@ -57,10 +38,10 @@ namespace Microsoft.AspNet.Security.Test
                     options.AddPolicy("Basic", policy => policy.RequiresClaim("Permission", "CanViewPage"));
                 });
             });
-            var context = SetupContext(new ClaimsIdentity(new Claim[] { new Claim("Permission", "CanViewPage") }, "Basic"));
+            var user = new ClaimsPrincipal(new ClaimsIdentity(new Claim[] { new Claim("Permission", "CanViewPage") }, "Basic"));
 
             // Act
-            var allowed = await authorizationService.AuthorizeAsync("Basic", context.Object);
+            var allowed = await authorizationService.AuthorizeAsync(user, null, "Basic");
 
             // Assert
             Assert.True(allowed);
@@ -77,10 +58,10 @@ namespace Microsoft.AspNet.Security.Test
                     options.AddPolicy("Basic", policy => policy.RequiresClaim("Permission", "CanViewPage"));
                 });
             });
-            var context = SetupContext(new ClaimsIdentity(new Claim[] { new Claim("Permission", "CanViewPage") }, "Basic"));
+            var user = new ClaimsPrincipal(new ClaimsIdentity(new Claim[] { new Claim("Permission", "CanViewPage") }, "Basic"));
 
             // Act
-            var allowed = await authorizationService.AuthorizeAsync("Basic", context.Object);
+            var allowed = await authorizationService.AuthorizeAsync(user, null, "Basic");
 
             // Assert
             Assert.True(allowed);
@@ -97,7 +78,7 @@ namespace Microsoft.AspNet.Security.Test
                     options.AddPolicy("Basic", policy => policy.RequiresClaim("Permission", "CanViewPage", "CanViewAnything"));
                 });
             });
-            var context = SetupContext(
+            var user = new ClaimsPrincipal(
                 new ClaimsIdentity(
                     new Claim[] {
                         new Claim("Permission", "CanViewPage"),
@@ -107,7 +88,7 @@ namespace Microsoft.AspNet.Security.Test
                 );
 
             // Act
-            var allowed = await authorizationService.AuthorizeAsync("Basic", context.Object);
+            var allowed = await authorizationService.AuthorizeAsync(user, null, "Basic");
 
             // Assert
             Assert.True(allowed);
@@ -124,7 +105,7 @@ namespace Microsoft.AspNet.Security.Test
                     options.AddPolicy("Basic", policy => policy.RequiresClaim("Permission", "CanViewPage", "CanViewAnything"));
                 });
             });
-            var context = SetupContext(
+            var user = new ClaimsPrincipal(
                 new ClaimsIdentity(
                     new Claim[] {
                         new Claim("SomethingElse", "CanViewPage"),
@@ -133,7 +114,7 @@ namespace Microsoft.AspNet.Security.Test
                 );
 
             // Act
-            var allowed = await authorizationService.AuthorizeAsync("Basic", context.Object);
+            var allowed = await authorizationService.AuthorizeAsync(user, null, "Basic");
 
             // Assert
             Assert.False(allowed);
@@ -150,7 +131,7 @@ namespace Microsoft.AspNet.Security.Test
                     options.AddPolicy("Basic", policy => policy.RequiresClaim("Permission", "CanViewPage", "CanViewAnything"));
                 });
             });
-            var context = SetupContext(
+            var user = new ClaimsPrincipal(
                 new ClaimsIdentity(
                     new Claim[] {
                         new Claim("SomethingElse", "CanViewPage"),
@@ -159,7 +140,7 @@ namespace Microsoft.AspNet.Security.Test
                 );
 
             // Act
-            var allowed = await authorizationService.AuthorizeAsync("Basic", context.Object);
+            var allowed = await authorizationService.AuthorizeAsync(user, null, "Basic");
 
             // Assert
             Assert.False(allowed);
@@ -176,7 +157,7 @@ namespace Microsoft.AspNet.Security.Test
                     options.AddPolicy("Basic", policy => policy.RequiresClaim("Permission", "CanViewPage"));
                 });
             });
-            var context = SetupContext(
+            var user = new ClaimsPrincipal(
                 new ClaimsIdentity(
                     new Claim[] {
                         new Claim("Permission", "CanViewComment"),
@@ -185,7 +166,7 @@ namespace Microsoft.AspNet.Security.Test
                 );
 
             // Act
-            var allowed = await authorizationService.AuthorizeAsync("Basic", context.Object);
+            var allowed = await authorizationService.AuthorizeAsync(user, null, "Basic");
 
             // Assert
             Assert.False(allowed);
@@ -202,14 +183,14 @@ namespace Microsoft.AspNet.Security.Test
                     options.AddPolicy("Basic", policy => policy.RequiresClaim("Permission", "CanViewPage"));
                 });
             });
-            var context = SetupContext(
+            var user = new ClaimsPrincipal(
                 new ClaimsIdentity(
                     new Claim[0],
                     "Basic")
                 );
 
             // Act
-            var allowed = await authorizationService.AuthorizeAsync("Basic", context.Object);
+            var allowed = await authorizationService.AuthorizeAsync(user, null, "Basic");
 
             // Assert
             Assert.False(allowed);
@@ -226,11 +207,9 @@ namespace Microsoft.AspNet.Security.Test
                     options.AddPolicy("Basic", policy => policy.RequiresClaim("Permission", "CanViewPage"));
                 });
             });
-            var context = SetupContext();
-            context.Object.User = null;
 
             // Act
-            var allowed = await authorizationService.AuthorizeAsync("Basic", context.Object);
+            var allowed = await authorizationService.AuthorizeAsync(null, null, "Basic");
 
             // Assert
             Assert.False(allowed);
@@ -247,10 +226,10 @@ namespace Microsoft.AspNet.Security.Test
                     options.AddPolicy("Basic", policy => policy.RequiresClaim("Permission", "CanViewPage"));
                 });
             });
-            var context = SetupContext(new ClaimsIdentity());
+            var user = new ClaimsPrincipal(new ClaimsIdentity());
 
             // Act
-            var allowed = await authorizationService.AuthorizeAsync("Basic", context.Object);
+            var allowed = await authorizationService.AuthorizeAsync(user, null, "Basic");
 
             // Assert
             Assert.False(allowed);
@@ -267,7 +246,7 @@ namespace Microsoft.AspNet.Security.Test
                     options.AddPolicy("Basic", policy => policy.RequiresClaim("Permission", "CanViewPage"));
                 });
             });
-            var context = SetupContext(
+            var user = new ClaimsPrincipal(
                 new ClaimsIdentity(
                     new Claim[] {
                         new Claim("Permission", "CanViewPage"),
@@ -276,7 +255,7 @@ namespace Microsoft.AspNet.Security.Test
                 );
 
             // Act
-            var allowed = await authorizationService.AuthorizeAsync("Basic", context.Object);
+            var allowed = await authorizationService.AuthorizeAsync(user, null, "Basic");
 
             // Assert
             Assert.True(allowed);
@@ -287,7 +266,7 @@ namespace Microsoft.AspNet.Security.Test
         {
             // Arrange
             var authorizationService = BuildAuthorizationService();
-            var context = SetupContext(
+            var user = new ClaimsPrincipal(
                 new ClaimsIdentity(
                     new Claim[] {
                         new Claim("Permission", "CanViewComment"),
@@ -296,7 +275,7 @@ namespace Microsoft.AspNet.Security.Test
                 );
 
             // Act
-            var allowed = await authorizationService.AuthorizeAsync("Basic", context.Object);
+            var allowed = await authorizationService.AuthorizeAsync(user, null, "Basic");
 
             // Assert
             Assert.False(allowed);
@@ -309,7 +288,7 @@ namespace Microsoft.AspNet.Security.Test
             var policy = new AuthorizationPolicyBuilder().RequiresRole("Administrator")
                 .RequiresClaim(ClaimTypes.Role, "User");
             var authorizationService = BuildAuthorizationService();
-            var context = SetupContext(
+            var user = new ClaimsPrincipal(
                 new ClaimsIdentity(
                     new Claim[] {
                         new Claim(ClaimTypes.Role, "User"),
@@ -319,7 +298,7 @@ namespace Microsoft.AspNet.Security.Test
                 );
 
             // Act
-            var allowed = await authorizationService.AuthorizeAsync(policy.Build(), context.Object);
+            var allowed = await authorizationService.AuthorizeAsync(user, null, policy.Build());
 
             // Assert
             Assert.True(allowed);
@@ -331,7 +310,7 @@ namespace Microsoft.AspNet.Security.Test
             // Arrange
             var policy = new AuthorizationPolicyBuilder().RequiresClaim(ClaimTypes.Role);
             var authorizationService = BuildAuthorizationService();
-            var context = SetupContext(
+            var user = new ClaimsPrincipal(
                 new ClaimsIdentity(
                     new Claim[] {
                         new Claim(ClaimTypes.Role, ""),
@@ -340,7 +319,7 @@ namespace Microsoft.AspNet.Security.Test
                 );
 
             // Act
-            var allowed = await authorizationService.AuthorizeAsync(policy.Build(), context.Object);
+            var allowed = await authorizationService.AuthorizeAsync(user, null, policy.Build());
 
             // Assert
             Assert.True(allowed);
@@ -352,12 +331,12 @@ namespace Microsoft.AspNet.Security.Test
             // Arrange
             var policy = new AuthorizationPolicyBuilder("AuthType").RequiresClaim(ClaimTypes.Name);
             var authorizationService = BuildAuthorizationService();
-            var context = SetupContext(
+            var user = new ClaimsPrincipal(
                 new ClaimsIdentity(new Claim[] { new Claim(ClaimTypes.Name, "Name") }, "AuthType")
                 );
 
             // Act
-            var allowed = await authorizationService.AuthorizeAsync(policy.Build(), context.Object);
+            var allowed = await authorizationService.AuthorizeAsync(user, null, policy.Build());
 
             // Assert
             Assert.True(allowed);
@@ -369,12 +348,12 @@ namespace Microsoft.AspNet.Security.Test
             // Arrange
             var policy = new AuthorizationPolicyBuilder("AuthType").RequiresRole("Admin");
             var authorizationService = BuildAuthorizationService();
-            var context = SetupContext(
+            var user = new ClaimsPrincipal(
                 new ClaimsIdentity(new Claim[] { new Claim(ClaimTypes.Role, "Admin") }, "AuthType")
             );
 
             // Act
-            var allowed = await authorizationService.AuthorizeAsync(policy.Build(), context.Object);
+            var allowed = await authorizationService.AuthorizeAsync(user, null, policy.Build());
 
             // Assert
             Assert.True(allowed);
@@ -386,11 +365,11 @@ namespace Microsoft.AspNet.Security.Test
             // Arrange
             var policy = new AuthorizationPolicyBuilder("AuthType").RequiresRole("Admin", "Users");
             var authorizationService = BuildAuthorizationService();
-            var context = SetupContext(
+            var user = new ClaimsPrincipal(
                 new ClaimsIdentity(new Claim[] { new Claim(ClaimTypes.Role, "Users") }, "AuthType"));
 
             // Act
-            var allowed = await authorizationService.AuthorizeAsync(policy.Build(), context.Object);
+            var allowed = await authorizationService.AuthorizeAsync(user, null, policy.Build());
 
             // Assert
             Assert.True(allowed);
@@ -402,7 +381,7 @@ namespace Microsoft.AspNet.Security.Test
             // Arrange
             var policy = new AuthorizationPolicyBuilder().RequiresClaim("Permission", "CanViewPage");
             var authorizationService = BuildAuthorizationService();
-            var context = SetupContext(
+            var user = new ClaimsPrincipal(
                 new ClaimsIdentity(
                     new Claim[] {
                         new Claim(ClaimTypes.Role, "Nope"),
@@ -411,7 +390,7 @@ namespace Microsoft.AspNet.Security.Test
                 );
 
             // Act
-            var allowed = await authorizationService.AuthorizeAsync(policy.Build(), context.Object);
+            var allowed = await authorizationService.AuthorizeAsync(user, null, policy.Build());
 
             // Assert
             Assert.False(allowed);
@@ -428,7 +407,7 @@ namespace Microsoft.AspNet.Security.Test
                     options.AddPolicy("Basic", policy => policy.RequiresRole("Admin", "Users"));
                 });
             });
-            var context = SetupContext(
+            var user = new ClaimsPrincipal(
                 new ClaimsIdentity(
                     new Claim[] {
                     },
@@ -436,7 +415,7 @@ namespace Microsoft.AspNet.Security.Test
                 );
 
             // Act
-            var allowed = await authorizationService.AuthorizeAsync("Basic", context.Object);
+            var allowed = await authorizationService.AuthorizeAsync(user, null, "Basic");
 
             // Assert
             Assert.False(allowed);
@@ -453,7 +432,7 @@ namespace Microsoft.AspNet.Security.Test
                     options.AddPolicy("Basic", policy => { });
                 });
             });
-            var context = SetupContext(
+            var user = new ClaimsPrincipal(
                 new ClaimsIdentity(
                     new Claim[] {
                         new Claim(ClaimTypes.Name, "Name"),
@@ -462,7 +441,7 @@ namespace Microsoft.AspNet.Security.Test
                 );
 
             // Act
-            var allowed = await authorizationService.AuthorizeAsync("Basic", context.Object);
+            var allowed = await authorizationService.AuthorizeAsync(user, null, "Basic");
 
             // Assert
             Assert.False(allowed);
@@ -479,7 +458,7 @@ namespace Microsoft.AspNet.Security.Test
                     options.AddPolicy("Any", policy => policy.RequireAuthenticatedUser());
                 });
             });
-            var context = SetupContext(
+            var user = new ClaimsPrincipal(
                 new ClaimsIdentity(
                     new Claim[] {
                         new Claim(ClaimTypes.Name, "Name"),
@@ -488,7 +467,7 @@ namespace Microsoft.AspNet.Security.Test
                 );
 
             // Act
-            var allowed = await authorizationService.AuthorizeAsync("Any", context.Object);
+            var allowed = await authorizationService.AuthorizeAsync(user, null, "Any");
 
             // Assert
             Assert.True(allowed);
@@ -505,10 +484,10 @@ namespace Microsoft.AspNet.Security.Test
                     options.AddPolicy("Any", policy => policy.RequireAuthenticatedUser());
                 });
             });
-            var context = SetupContext(new ClaimsIdentity());
+            var user = new ClaimsPrincipal(new ClaimsIdentity());
 
             // Act
-            var allowed = await authorizationService.AuthorizeAsync("Any", context.Object);
+            var allowed = await authorizationService.AuthorizeAsync(user, null, "Any");
 
             // Assert
             Assert.False(allowed);
@@ -517,8 +496,9 @@ namespace Microsoft.AspNet.Security.Test
         public class CustomRequirement : IAuthorizationRequirement { }
         public class CustomHandler : AuthorizationHandler<CustomRequirement>
         {
-            public override Task<bool> CheckAsync(AuthorizationContext context, CustomRequirement requirement)
+            public override Task HandleAsync(AuthorizationContext context, CustomRequirement requirement)
             {
+                context.Succeed(requirement);
                 return Task.FromResult(true);
             }
         }
@@ -534,10 +514,10 @@ namespace Microsoft.AspNet.Security.Test
                     options.AddPolicy("Custom", policy => policy.Requirements.Add(new CustomRequirement()));
                 });
             });
-            var context = SetupContext();
+            var user = new ClaimsPrincipal();
 
             // Act
-            var allowed = await authorizationService.AuthorizeAsync("Custom", context.Object);
+            var allowed = await authorizationService.AuthorizeAsync(user, null, "Custom");
 
             // Assert
             Assert.False(allowed);
@@ -555,10 +535,10 @@ namespace Microsoft.AspNet.Security.Test
                     options.AddPolicy("Custom", policy => policy.Requirements.Add(new CustomRequirement()));
                 });
             });
-            var context = SetupContext();
+            var user = new ClaimsPrincipal();
 
             // Act
-            var allowed = await authorizationService.AuthorizeAsync("Custom", context.Object);
+            var allowed = await authorizationService.AuthorizeAsync(user, null, "Custom");
 
             // Assert
             Assert.True(allowed);
@@ -573,9 +553,12 @@ namespace Microsoft.AspNet.Security.Test
 
             public bool Succeed { get; set; }
 
-            public override Task<bool> CheckAsync(AuthorizationContext context, PassThroughRequirement requirement)
+            public override Task HandleAsync(AuthorizationContext context, PassThroughRequirement requirement)
             {
-                return Task.FromResult(Succeed);
+                if (Succeed) {
+                    context.Succeed(requirement);
+                }
+                return Task.FromResult(0);
             }
         }
 
@@ -592,10 +575,10 @@ namespace Microsoft.AspNet.Security.Test
                     options.AddPolicy("Passthrough", policy => policy.Requirements.Add(new PassThroughRequirement(shouldSucceed)));
                 });
             });
-            var context = SetupContext();
+            var user = new ClaimsPrincipal();
 
             // Act
-            var allowed = await authorizationService.AuthorizeAsync("Passthrough", context.Object);
+            var allowed = await authorizationService.AuthorizeAsync(user, null, "Passthrough");
 
             // Assert
             Assert.Equal(shouldSucceed, allowed);
@@ -609,10 +592,10 @@ namespace Microsoft.AspNet.Security.Test
                 services.ConfigureAuthorization(options =>
                 {
                     var basePolicy = new AuthorizationPolicyBuilder().RequiresClaim("Base", "Value").Build();
-                    options.AddPolicy("Combineed", policy => policy.Combine(basePolicy).RequiresClaim("Claim", "Exists"));
+                    options.AddPolicy("Combined", policy => policy.Combine(basePolicy).RequiresClaim("Claim", "Exists"));
                 });
             });
-            var context = SetupContext(
+            var user = new ClaimsPrincipal(
                 new ClaimsIdentity(
                     new Claim[] {
                         new Claim("Base", "Value"),
@@ -622,7 +605,7 @@ namespace Microsoft.AspNet.Security.Test
                 );
 
             // Act
-            var allowed = await authorizationService.AuthorizeAsync("Combined", context.Object);
+            var allowed = await authorizationService.AuthorizeAsync(user, null, "Combined");
 
             // Assert
             Assert.True(allowed);
@@ -639,7 +622,7 @@ namespace Microsoft.AspNet.Security.Test
                     options.AddPolicy("Combined", policy => policy.Combine(basePolicy).RequiresClaim("Claim", "Exists"));
                 });
             });
-            var context = SetupContext(
+            var user = new ClaimsPrincipal(
                 new ClaimsIdentity(
                     new Claim[] {
                         new Claim("Claim", "Exists")
@@ -648,7 +631,7 @@ namespace Microsoft.AspNet.Security.Test
                 );
 
             // Act
-            var allowed = await authorizationService.AuthorizeAsync("Combined", context.Object);
+            var allowed = await authorizationService.AuthorizeAsync(user, null, "Combined");
 
             // Assert
             Assert.False(allowed);
@@ -665,7 +648,7 @@ namespace Microsoft.AspNet.Security.Test
                     options.AddPolicy("Combined", policy => policy.Combine(basePolicy).RequiresClaim("Claim", "Exists"));
                 });
             });
-            var context = SetupContext(
+            var user = new ClaimsPrincipal(
                 new ClaimsIdentity(
                     new Claim[] {
                         new Claim("Base", "Value"),
@@ -674,7 +657,7 @@ namespace Microsoft.AspNet.Security.Test
                 );
 
             // Act
-            var allowed = await authorizationService.AuthorizeAsync("Combined", context.Object);
+            var allowed = await authorizationService.AuthorizeAsync(user, null, "Combined");
 
             // Assert
             Assert.False(allowed);

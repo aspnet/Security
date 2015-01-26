@@ -10,7 +10,7 @@ namespace Microsoft.AspNet.Security
     {
         public async Task HandleAsync(AuthorizationContext context)
         {
-            foreach (var handler in context.Policy.Requirements.OfType<IAuthorizationHandler>())
+            foreach (var handler in context.Requirements.OfType<IAuthorizationHandler>())
             {
                 await handler.HandleAsync(context);
             }

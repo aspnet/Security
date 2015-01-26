@@ -1,6 +1,7 @@
 // Copyright (c) Microsoft Open Technologies, Inc. All rights reserved.
 // Licensed under the Apache License, Version 2.0. See License.txt in the project root for license information.
 
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Security.Claims;
@@ -21,47 +22,25 @@ namespace Microsoft.AspNet.Security
             _options = options.Options;
         }
 
-        public Task<bool> AuthorizeAsync([NotNull] string policyName, HttpContext context, object resource = null)
+        public async Task<bool> AuthorizeAsync(ClaimsPrincipal user, object resource, params IAuthorizationRequirement[] requirements)
+        {
+            var authContext = new AuthorizationContext(requirements, user, resource);
+
+            foreach (var handler in _handlers)
+            {
+                await handler.HandleAsync(authContext);
+            }
+            return authContext.HasSucceeded;
+        }
+
+        public Task<bool> AuthorizeAsync(ClaimsPrincipal user, object resource, string policyName)
         {
             var policy = _options.GetPolicy(policyName);
             if (policy == null)
             {
                 return Task.FromResult(false);
             }
-            return AuthorizeAsync(policy, context, resource);
-        }
-
-        public async Task<bool> AuthorizeAsync([NotNull] AuthorizationPolicy policy, [NotNull] HttpContext context, object resource = null)
-        {
-            var user = context.User;
-            try
-            {
-                // Generate the user identities if policy specified the AuthTypes
-                if (policy.ActiveAuthenticationTypes != null && policy.ActiveAuthenticationTypes.Any() )
-                {
-                    var principal = new ClaimsPrincipal();
-
-                    var results = await context.AuthenticateAsync(policy.ActiveAuthenticationTypes);
-                    // REVIEW: re requesting the identities fails for MVC currently, so we only request if not found
-                    foreach (var result in results)
-                    {
-                        principal.AddIdentity(result.Identity);
-                    }
-                    context.User = principal;
-                }
-
-                var authContext = new AuthorizationContext(policy, context, resource);
-
-                foreach (var handler in _handlers)
-                {
-                    await handler.HandleAsync(authContext);
-                }
-                return authContext.HasSucceeded;
-            }
-            finally
-            {
-                context.User = user;
-            }
+            return this.AuthorizeAsync(user, resource, policy);
         }
     }
 }
