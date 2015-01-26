@@ -105,16 +105,15 @@ namespace Microsoft.AspNet.Security.OpenIdConnect
                 {
                     Options.ConfigurationManager = new StaticConfigurationManager<OpenIdConnectConfiguration>(Options.Configuration);
                 }
-                else if (!(string.IsNullOrWhiteSpace(Options.MetadataAddress) && string.IsNullOrWhiteSpace(Options.Authority)))
+                else if (!(string.IsNullOrWhiteSpace(Options.MetadataAddress) || !(string.IsNullOrWhiteSpace(Options.Authority))))
                 {
-                    if (string.IsNullOrWhiteSpace(Options.MetadataAddress) && !string.IsNullOrWhiteSpace(Options.Authority))
+                    if (string.IsNullOrWhiteSpace(Options.MetadataAddress))
                     {
                         Options.MetadataAddress = Options.Authority;
                         if (!Options.MetadataAddress.EndsWith("/", StringComparison.Ordinal))
                         {
                             Options.MetadataAddress += "/";
                         }
-
                         Options.MetadataAddress += ".well-known/openid-configuration";
                     }
 
