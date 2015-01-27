@@ -7,40 +7,40 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{4D2B6A51-2F9
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "samples", "samples", "{F8C0AA27-F3FB-4286-8E4C-47EF86B539FF}"
 EndProject
-Project("{8BB2217D-0F2D-49D1-97BC-3654ED321F3B}") = "Microsoft.AspNet.Security", "src\Microsoft.AspNet.Security\Microsoft.AspNet.Security.kproj", "{0F174C63-1898-4024-9A3C-3FDF5CAE5C68}"
+Project("{8BB2217D-0F2D-49D1-97BC-3654ED321F3B}") = "Microsoft.AspNet.Security", "src\Microsoft.AspNet.Security\Microsoft.AspNet.Security.xproj", "{0F174C63-1898-4024-9A3C-3FDF5CAE5C68}"
 EndProject
-Project("{8BB2217D-0F2D-49D1-97BC-3654ED321F3B}") = "Microsoft.AspNet.Security.Cookies", "src\Microsoft.AspNet.Security.Cookies\Microsoft.AspNet.Security.Cookies.kproj", "{15F1211B-B695-4A1C-B730-1AC58FC91090}"
+Project("{8BB2217D-0F2D-49D1-97BC-3654ED321F3B}") = "Microsoft.AspNet.Security.Cookies", "src\Microsoft.AspNet.Security.Cookies\Microsoft.AspNet.Security.Cookies.xproj", "{15F1211B-B695-4A1C-B730-1AC58FC91090}"
 EndProject
-Project("{8BB2217D-0F2D-49D1-97BC-3654ED321F3B}") = "CookieSample", "samples\CookieSample\CookieSample.kproj", "{558C2C2A-AED8-49DE-BB60-D5F8AE06C714}"
+Project("{8BB2217D-0F2D-49D1-97BC-3654ED321F3B}") = "CookieSample", "samples\CookieSample\CookieSample.xproj", "{558C2C2A-AED8-49DE-BB60-D5F8AE06C714}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "test", "test", "{7BF11F3A-60B6-4796-B504-579C67FFBA34}"
 EndProject
-Project("{8BB2217D-0F2D-49D1-97BC-3654ED321F3B}") = "Microsoft.AspNet.Security.Tests", "test\Microsoft.AspNet.Security.Test\Microsoft.AspNet.Security.Tests.kproj", "{8DA26CD1-1302-4CFD-9270-9FA1B7C6138B}"
+Project("{8BB2217D-0F2D-49D1-97BC-3654ED321F3B}") = "Microsoft.AspNet.Security.Tests", "test\Microsoft.AspNet.Security.Test\Microsoft.AspNet.Security.Tests.xproj", "{8DA26CD1-1302-4CFD-9270-9FA1B7C6138B}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{C40A5A3B-ABA3-4819-9C44-D821E6DA1BA1}"
 	ProjectSection(SolutionItems) = preProject
 		global.json = global.json
 	EndProjectSection
 EndProject
-Project("{8BB2217D-0F2D-49D1-97BC-3654ED321F3B}") = "Microsoft.AspNet.Security.Facebook", "src\Microsoft.AspNet.Security.Facebook\Microsoft.AspNet.Security.Facebook.kproj", "{3984651C-FD44-4394-8793-3D14EE348C04}"
+Project("{8BB2217D-0F2D-49D1-97BC-3654ED321F3B}") = "Microsoft.AspNet.Security.Facebook", "src\Microsoft.AspNet.Security.Facebook\Microsoft.AspNet.Security.Facebook.xproj", "{3984651C-FD44-4394-8793-3D14EE348C04}"
 EndProject
-Project("{8BB2217D-0F2D-49D1-97BC-3654ED321F3B}") = "SocialSample", "samples\SocialSample\SocialSample.kproj", "{8C73D216-332D-41D8-BFD0-45BC4BC36552}"
+Project("{8BB2217D-0F2D-49D1-97BC-3654ED321F3B}") = "SocialSample", "samples\SocialSample\SocialSample.xproj", "{8C73D216-332D-41D8-BFD0-45BC4BC36552}"
 EndProject
-Project("{8BB2217D-0F2D-49D1-97BC-3654ED321F3B}") = "Microsoft.AspNet.Security.Google", "src\Microsoft.AspNet.Security.Google\Microsoft.AspNet.Security.Google.kproj", "{89BF8535-A849-458E-868A-A68FCF620486}"
+Project("{8BB2217D-0F2D-49D1-97BC-3654ED321F3B}") = "Microsoft.AspNet.Security.Google", "src\Microsoft.AspNet.Security.Google\Microsoft.AspNet.Security.Google.xproj", "{89BF8535-A849-458E-868A-A68FCF620486}"
 EndProject
-Project("{8BB2217D-0F2D-49D1-97BC-3654ED321F3B}") = "Microsoft.AspNet.Security.Twitter", "src\Microsoft.AspNet.Security.Twitter\Microsoft.AspNet.Security.Twitter.kproj", "{C96B77EA-4078-4C31-BDB2-878F11C5E061}"
+Project("{8BB2217D-0F2D-49D1-97BC-3654ED321F3B}") = "Microsoft.AspNet.Security.Twitter", "src\Microsoft.AspNet.Security.Twitter\Microsoft.AspNet.Security.Twitter.xproj", "{C96B77EA-4078-4C31-BDB2-878F11C5E061}"
 EndProject
-Project("{8BB2217D-0F2D-49D1-97BC-3654ED321F3B}") = "Microsoft.AspNet.Security.MicrosoftAccount", "src\Microsoft.AspNet.Security.MicrosoftAccount\Microsoft.AspNet.Security.MicrosoftAccount.kproj", "{1FCF26C2-A3C7-4308-B698-4AFC3560BC0C}"
+Project("{8BB2217D-0F2D-49D1-97BC-3654ED321F3B}") = "Microsoft.AspNet.Security.MicrosoftAccount", "src\Microsoft.AspNet.Security.MicrosoftAccount\Microsoft.AspNet.Security.MicrosoftAccount.xproj", "{1FCF26C2-A3C7-4308-B698-4AFC3560BC0C}"
 EndProject
-Project("{8BB2217D-0F2D-49D1-97BC-3654ED321F3B}") = "Microsoft.AspNet.Security.OAuth", "src\Microsoft.AspNet.Security.OAuth\Microsoft.AspNet.Security.OAuth.kproj", "{4A636011-68EE-4CE5-836D-EA8E13CF71E4}"
+Project("{8BB2217D-0F2D-49D1-97BC-3654ED321F3B}") = "Microsoft.AspNet.Security.OAuth", "src\Microsoft.AspNet.Security.OAuth\Microsoft.AspNet.Security.OAuth.xproj", "{4A636011-68EE-4CE5-836D-EA8E13CF71E4}"
 EndProject
-Project("{8BB2217D-0F2D-49D1-97BC-3654ED321F3B}") = "CookieSessionSample", "samples\CookieSessionSample\CookieSessionSample.kproj", "{19711880-46DA-4A26-9E0F-9B2E41D27651}"
+Project("{8BB2217D-0F2D-49D1-97BC-3654ED321F3B}") = "CookieSessionSample", "samples\CookieSessionSample\CookieSessionSample.xproj", "{19711880-46DA-4A26-9E0F-9B2E41D27651}"
 EndProject
-Project("{8BB2217D-0F2D-49D1-97BC-3654ED321F3B}") = "OpenIdConnectSample", "samples\OpenIdConnectSample\OpenIdConnectSample.kproj", "{BEF0F5C3-EF4E-4649-9C49-D5E279A3CA2B}"
+Project("{8BB2217D-0F2D-49D1-97BC-3654ED321F3B}") = "OpenIdConnectSample", "samples\OpenIdConnectSample\OpenIdConnectSample.xproj", "{BEF0F5C3-EF4E-4649-9C49-D5E279A3CA2B}"
 EndProject
-Project("{8BB2217D-0F2D-49D1-97BC-3654ED321F3B}") = "Microsoft.AspNet.Security.OAuthBearer", "src\Microsoft.AspNet.Security.OAuthBearer\Microsoft.AspNet.Security.OAuthBearer.kproj", "{2755BFE5-7421-4A31-A644-F817DF5CAA98}"
+Project("{8BB2217D-0F2D-49D1-97BC-3654ED321F3B}") = "Microsoft.AspNet.Security.OAuthBearer", "src\Microsoft.AspNet.Security.OAuthBearer\Microsoft.AspNet.Security.OAuthBearer.xproj", "{2755BFE5-7421-4A31-A644-F817DF5CAA98}"
 EndProject
-Project("{8BB2217D-0F2D-49D1-97BC-3654ED321F3B}") = "Microsoft.AspNet.Security.OpenIdConnect", "src\Microsoft.AspNet.Security.OpenIdConnect\Microsoft.AspNet.Security.OpenIdConnect.kproj", "{674D128E-83BB-481A-A9D9-6D47872E1FC8}"
+Project("{8BB2217D-0F2D-49D1-97BC-3654ED321F3B}") = "Microsoft.AspNet.Security.OpenIdConnect", "src\Microsoft.AspNet.Security.OpenIdConnect\Microsoft.AspNet.Security.OpenIdConnect.xproj", "{674D128E-83BB-481A-A9D9-6D47872E1FC8}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

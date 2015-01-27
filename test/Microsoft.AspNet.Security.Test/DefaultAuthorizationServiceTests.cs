@@ -3,6 +3,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Security.Claims;
 using System.Threading.Tasks;
 using Microsoft.AspNet.Http;
@@ -661,6 +662,86 @@ namespace Microsoft.AspNet.Security.Test
 
             // Assert
             Assert.False(allowed);
+        }
+
+        public class ExpenseReport { }
+
+        public static class Operations
+        {
+            public static OperationAuthorizationRequirement Edit = new OperationAuthorizationRequirement { Name = "Edit" };
+            public static OperationAuthorizationRequirement Create = new OperationAuthorizationRequirement { Name = "Create" };
+            public static OperationAuthorizationRequirement Delete = new OperationAuthorizationRequirement { Name = "Delete" };
+        }
+
+        public class ExpenseReportAuthorizationHandler : AuthorizationHandler<OperationAuthorizationRequirement, ExpenseReport>
+        {
+            public ExpenseReportAuthorizationHandler(IEnumerable<OperationAuthorizationRequirement> authorized)
+            {
+                _allowed = authorized;
+            }
+
+            private IEnumerable<OperationAuthorizationRequirement> _allowed;
+
+            public override Task HandleAsync(AuthorizationContext context, OperationAuthorizationRequirement requirement, ExpenseReport resource)
+            {
+                if (_allowed.Contains(requirement))
+                {
+                    context.Succeed(requirement);
+                }
+                return Task.FromResult(0);
+            }
+        }
+
+        public class SuperUserHandler : AuthorizationHandler<OperationAuthorizationRequirement>
+        {
+            public override Task HandleAsync(AuthorizationContext context, OperationAuthorizationRequirement requirement)
+            {
+                if (context.User.HasClaim("SuperUser", "yes"))
+                {
+                    context.Succeed(requirement);
+                }
+                return Task.FromResult(0);
+            }
+        }
+
+        public async Task CanAuthorizeAllSuperuserOperations()
+        {
+            // Arrange
+            var authorizationService = BuildAuthorizationService(services =>
+            {
+                services.AddInstance<IAuthorizationHandler>(new ExpenseReportAuthorizationHandler(new OperationAuthorizationRequirement[] { Operations.Edit }));
+                services.AddTransient<IAuthorizationHandler, SuperUserHandler>();
+            });
+            var user = new ClaimsPrincipal(
+                new ClaimsIdentity(
+                    new Claim[] {
+                        new Claim("SuperUser", "yes"),
+                    },
+                    "AuthType")
+                );
+
+            // Act
+            // Assert
+            Assert.True(await authorizationService.AuthorizeAsync(user, null, Operations.Edit));
+            Assert.True(await authorizationService.AuthorizeAsync(user, null, Operations.Delete));
+            Assert.True(await authorizationService.AuthorizeAsync(user, null, Operations.Create));
+        }
+
+        public async Task CanAuthorizeOnlyAllowedOperations()
+        {
+            // Arrange
+            var authorizationService = BuildAuthorizationService(services =>
+            {
+                services.AddInstance<IAuthorizationHandler>(new ExpenseReportAuthorizationHandler(new OperationAuthorizationRequirement[] { Operations.Edit }));
+                services.AddTransient<IAuthorizationHandler, SuperUserHandler>();
+            });
+            var user = new ClaimsPrincipal();
+
+            // Act
+            // Assert
+            Assert.True(await authorizationService.AuthorizeAsync(user, null, Operations.Edit));
+            Assert.False(await authorizationService.AuthorizeAsync(user, null, Operations.Delete));
+            Assert.False(await authorizationService.AuthorizeAsync(user, null, Operations.Create));
         }
     }
 }
