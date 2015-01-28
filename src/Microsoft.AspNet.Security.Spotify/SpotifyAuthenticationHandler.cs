@@ -47,9 +47,19 @@ namespace Microsoft.AspNet.Security.Spotify
                 context.Identity.AddClaim(new Claim(ClaimsIdentity.DefaultNameClaimType, context.DisplayName,
                     ClaimValueTypes.String, Options.AuthenticationType));
             }
-            if (!string.IsNullOrEmpty(context.Href))
+            if (!string.IsNullOrEmpty(context.ExternalLink))
             {
-                context.Identity.AddClaim(new Claim("urn:spotify:href", context.Href,
+                context.Identity.AddClaim(new Claim("urn:spotify:externallink", context.ExternalLink,
+                    ClaimValueTypes.String, Options.AuthenticationType));
+            }
+            if (!string.IsNullOrEmpty(context.SpotifyLink))
+            {
+                context.Identity.AddClaim(new Claim("urn:spotify:spotifylink", context.SpotifyLink,
+                    ClaimValueTypes.String, Options.AuthenticationType));
+            }
+            if (!string.IsNullOrEmpty(context.ApiLink))
+            {
+                context.Identity.AddClaim(new Claim("urn:spotify:apilink", context.ApiLink,
                     ClaimValueTypes.String, Options.AuthenticationType));
             }
 

@@ -21,9 +21,12 @@ namespace Microsoft.AspNet.Security.Spotify.Notifications
         {
             Id = TryGetValue(user, "id");
             DisplayName = TryGetValue(user, "display_name");
-            Href = TryGetValue(user, "href");
+            ApiLink = TryGetValue(user, "href");
+            SpotifyLink = TryGetValue(user, "uri");
 
-            //TODO add extra fields   
+            JToken externalUrls;
+            user.TryGetValue("external_urls", out externalUrls);
+            ExternalLink = externalUrls != null ? externalUrls.Value<string>("spotify") : null;
         }
 
         /// <summary>
@@ -32,14 +35,24 @@ namespace Microsoft.AspNet.Security.Spotify.Notifications
         public string Id { get; private set; }
 
         /// <summary>
-        /// Gets the user's name.
+        /// Gets the name displayed on the user's profile.
         /// </summary>
         public string DisplayName { get; private set; }
 
         /// <summary>
-        /// Gets the user's api href.
+        /// Gets the external link for the user
         /// </summary>
-        public string Href { get; private set; }
+        public string ExternalLink { get; private set; }
+
+        /// <summary>
+        /// Gets the user's link to the Web API endpoint
+        /// </summary>
+        public string ApiLink { get; private set; }
+
+        /// <summary>
+        /// Gets the Spotify URI for the user
+        /// </summary>
+        public string SpotifyLink { get; private set; }
 
         private static string TryGetValue(JObject user, string propertyName)
         {
