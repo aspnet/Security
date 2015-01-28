@@ -3,7 +3,6 @@
 
 using Microsoft.AspNet.Http;
 using Microsoft.AspNet.Security.OAuth;
-using Microsoft.AspNet.Security.Spotify.Notifications;
 
 namespace Microsoft.AspNet.Security.Spotify
 {

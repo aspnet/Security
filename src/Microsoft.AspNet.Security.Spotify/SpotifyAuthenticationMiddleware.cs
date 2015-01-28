@@ -9,7 +9,6 @@ using Microsoft.AspNet.Security.Infrastructure;
 using Microsoft.AspNet.Security.OAuth;
 using Microsoft.Framework.Logging;
 using Microsoft.Framework.OptionsModel;
-using Microsoft.AspNet.Security.Spotify.Notifications;
 
 namespace Microsoft.AspNet.Security.Spotify
 {

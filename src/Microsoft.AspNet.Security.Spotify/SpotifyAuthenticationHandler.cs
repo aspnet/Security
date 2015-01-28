@@ -9,7 +9,6 @@ using Microsoft.AspNet.Security.OAuth;
 using Microsoft.AspNet.WebUtilities;
 using Microsoft.Framework.Logging;
 using Newtonsoft.Json.Linq;
-using Microsoft.AspNet.Security.Spotify.Notifications;
 using System.Net.Http.Headers;
 
 namespace Microsoft.AspNet.Security.Spotify
