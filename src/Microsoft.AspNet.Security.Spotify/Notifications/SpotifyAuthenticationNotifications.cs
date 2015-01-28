@@ -5,7 +5,7 @@ using System;
 using System.Threading.Tasks;
 using Microsoft.AspNet.Security.OAuth;
 
-namespace Microsoft.AspNet.Security.Spotify.Notifications
+namespace Microsoft.AspNet.Security.Spotify
 {
     /// <summary>
     /// The default <see cref="ISpotifyAuthenticationNotifications"/> implementation.

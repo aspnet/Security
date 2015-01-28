@@ -6,7 +6,7 @@ using Microsoft.AspNet.Http;
 using Microsoft.AspNet.Security.OAuth;
 using Newtonsoft.Json.Linq;
 
-namespace Microsoft.AspNet.Security.Spotify.Notifications
+namespace Microsoft.AspNet.Security.Spotify
 {
     /// <summary>
     /// Contains information about the login session as well as the user <see cref="System.Security.Claims.ClaimsIdentity"/>.

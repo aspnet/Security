@@ -4,7 +4,7 @@
 using System.Threading.Tasks;
 using Microsoft.AspNet.Security.OAuth;
 
-namespace Microsoft.AspNet.Security.Spotify.Notifications
+namespace Microsoft.AspNet.Security.Spotify
 {
     /// <summary>
     /// Specifies callback methods which the <see cref="SpotifyAuthenticationMiddleware"></see> invokes to enable developer control over the authentication process.
