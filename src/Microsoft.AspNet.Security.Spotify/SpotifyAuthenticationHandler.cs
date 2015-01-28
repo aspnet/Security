@@ -72,7 +72,7 @@ namespace Microsoft.AspNet.Security.Spotify
 
         protected override string BuildChallengeUrl(AuthenticationProperties properties, string redirectUri)
         {
-            return QueryHelpers.AddQueryString(base.BuildChallengeUrl(properties, redirectUri), "showDialog", Options.ForceDialog.ToString());
+            return QueryHelpers.AddQueryString(base.BuildChallengeUrl(properties, redirectUri), "show_dialog", Options.ForceDialog.ToString());
         }
     }
 }
