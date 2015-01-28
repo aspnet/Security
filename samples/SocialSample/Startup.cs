@@ -12,6 +12,7 @@ using Microsoft.AspNet.Security.MicrosoftAccount;
 using Microsoft.AspNet.Security.OAuth;
 using Microsoft.Framework.DependencyInjection;
 using Newtonsoft.Json.Linq;
+using Microsoft.AspNet.Security.Spotify;
 
 namespace CookieSample
 {
@@ -165,6 +166,12 @@ namespace CookieSample
                         context.Identity = identity;
                     },
                 };
+            });
+
+            app.UseSpotifyAuthentication(options =>
+            {
+                options.ClientId = "1ea80471a224466e8b2aedc287d4bc40";
+                options.ClientSecret = "9bd58a0f019844ae833a6ed5a0e7bfad";
             });
 
             // Choose an authentication type
