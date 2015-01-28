@@ -26,11 +26,11 @@ namespace Microsoft.AspNet.Security.Spotify
         {
             if (string.IsNullOrWhiteSpace(Options.ClientId))
             {
-                throw new ArgumentException(string.Format(CultureInfo.CurrentCulture, "", "ClientId"));
+                throw new ArgumentException(string.Format(CultureInfo.CurrentCulture, Resources.Exception_OptionMustBeProvided, "ClientId"));
             }
             if (string.IsNullOrWhiteSpace(Options.ClientSecret))
             {
-                throw new ArgumentException(string.Format(CultureInfo.CurrentCulture, "", "ClientSecret"));
+                throw new ArgumentException(string.Format(CultureInfo.CurrentCulture, Resources.Exception_OptionMustBeProvided, "ClientSecret"));
             }
 
             if (Options.Notifications == null)
