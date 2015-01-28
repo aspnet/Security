@@ -7,10 +7,14 @@ using Microsoft.AspNet.Security.Spotify.Notifications;
 
 namespace Microsoft.AspNet.Security.Spotify
 {
+    /// <summary>
+    /// Configuration options for <see cref="SpotifyAuthenticationMiddleware"/>.
+    /// </summary>
     public class SpotifyAuthenticationOptions : OAuthAuthenticationOptions<SpotifyAuthenticationNotifications>
     {
-        public bool ShowDialog { get; set; }
-
+        /// <summary>
+        /// Initializes a new <see cref="SpotifyAuthenticationOptions"/>.
+        /// </summary>
         public SpotifyAuthenticationOptions()
         {
             AuthenticationType = SpotifyAuthenticationDefaults.AuthenticationType;
@@ -20,5 +24,10 @@ namespace Microsoft.AspNet.Security.Spotify
             TokenEndpoint = SpotifyAuthenticationDefaults.TokenEndpoint;
             UserInformationEndpoint = SpotifyAuthenticationDefaults.UserInformationEndpoint;
         }
+
+        /// <summary>
+        /// Gets or sets whether or not to force the user to approve the app again if they’ve already done so
+        /// </summary>
+        public bool ForceDialog { get; set; }
     }
 }

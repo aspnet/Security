@@ -13,8 +13,18 @@ using Microsoft.AspNet.Security.Spotify.Notifications;
 
 namespace Microsoft.AspNet.Security.Spotify
 {
+    /// <summary>
+    /// An ASP.NET middleware for authenticating users using Spotify.
+    /// </summary>
     public class SpotifyAuthenticationMiddleware : OAuthAuthenticationMiddleware<SpotifyAuthenticationOptions, SpotifyAuthenticationNotifications>
     {
+        /// <summary>
+        /// Initializes a new <see cref="SpotifyAuthenticationMiddleware"/>.
+        /// </summary>
+        /// <param name="next">The next middleware in the application pipeline to invoke.</param>
+        /// <param name="dataProtectionProvider"></param>
+        /// <param name="loggerFactory"></param>
+        /// <param name="options">Configuration options for the middleware.</param>
         public SpotifyAuthenticationMiddleware(RequestDelegate next,
             IServiceProvider services,
             IDataProtectionProvider dataProtectionProvider,
@@ -39,6 +49,10 @@ namespace Microsoft.AspNet.Security.Spotify
             }
         }
 
+        /// <summary>
+        /// Provides the <see cref="AuthenticationHandler"/> object for processing authentication-related requests.
+        /// </summary>
+        /// <returns>An <see cref="AuthenticationHandler"/> configured with the <see cref="SpotifyAuthenticationOptions"/> supplied to the constructor.</returns>
         protected override AuthenticationHandler<SpotifyAuthenticationOptions> CreateHandler()
         {
             return new SpotifyAuthenticationHandler(Backchannel, Logger);

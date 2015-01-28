@@ -7,6 +7,9 @@ using System;
 
 namespace Microsoft.AspNet.Security.Spotify
 {
+    /// <summary>
+    /// Extension methods for using <see cref="SpotifyAuthenticationMiddleware"/>.
+    /// </summary>
     public static class SpotifyAuthenticationExtensions
     {
         /// <summary>

@@ -8,6 +8,9 @@ using Newtonsoft.Json.Linq;
 
 namespace Microsoft.AspNet.Security.Spotify.Notifications
 {
+    /// <summary>
+    /// Contains information about the login session as well as the user <see cref="System.Security.Claims.ClaimsIdentity"/>.
+    /// </summary>
     public class SpotifyAuthenticatedContext : OAuthAuthenticatedContext
     {
         /// <summary>
