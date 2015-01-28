@@ -13,7 +13,7 @@ namespace Microsoft.AspNet.Security.Spotify
     /// </summary>
     public static class SpotifyAuthenticationExtensions
     {
-        public static IServiceCollection ConfigureFacebookAuthentication([NotNull] this IServiceCollection services, [NotNull] Action<SpotifyAuthenticationOptions> configure)
+        public static IServiceCollection ConfigureSpotifyAuthentication([NotNull] this IServiceCollection services, [NotNull] Action<SpotifyAuthenticationOptions> configure)
         {
             return services.Configure(configure);
         }
