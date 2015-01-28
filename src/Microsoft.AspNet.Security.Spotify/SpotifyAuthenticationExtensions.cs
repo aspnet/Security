@@ -2,6 +2,7 @@
 // Licensed under the Apache License, Version 2.0. See License.txt in the project root for license information.
 
 using Microsoft.AspNet.Builder;
+using Microsoft.Framework.DependencyInjection;
 using Microsoft.Framework.OptionsModel;
 using System;
 
@@ -12,6 +13,11 @@ namespace Microsoft.AspNet.Security.Spotify
     /// </summary>
     public static class SpotifyAuthenticationExtensions
     {
+        public static IServiceCollection ConfigureFacebookAuthentication([NotNull] this IServiceCollection services, [NotNull] Action<SpotifyAuthenticationOptions> configure)
+        {
+            return services.Configure(configure);
+        }
+
         /// <summary>
         /// Authenticate users using Spotify.
         /// </summary>
