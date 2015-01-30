@@ -29,6 +29,14 @@ namespace Microsoft.AspNet.Security.Test
         }
 
         [Fact]
+        public void AuthorizeCombineThrowsOnUnknownPolicy()
+        {
+            Assert.Throws<InvalidOperationException>(() => AuthorizationPolicy.Combine(new AuthorizationOptions(), new AuthorizeAttribute[] {
+                new AuthorizeAttribute { Policy = "Wut" }
+            }));
+        }
+
+        [Fact]
         public async Task Authorize_ShouldAllowIfClaimIsPresent()
         {
             // Arrange
