@@ -9,7 +9,7 @@ namespace Microsoft.AspNet.Security
 {
     public class ClaimsAuthorizationHandler : AuthorizationHandler<ClaimsAuthorizationRequirement>
     {
-        public override Task HandleAsync(AuthorizationContext context, ClaimsAuthorizationRequirement requirement)
+        public override void Handle(AuthorizationContext context, ClaimsAuthorizationRequirement requirement)
         {
             if (context.User != null)
             {
@@ -28,7 +28,6 @@ namespace Microsoft.AspNet.Security
                     context.Succeed(requirement);
                 }
             }
-            return Task.FromResult(0);
         }
     }
 }

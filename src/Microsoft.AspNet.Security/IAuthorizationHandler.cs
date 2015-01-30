@@ -8,6 +8,6 @@ namespace Microsoft.AspNet.Security
     public interface IAuthorizationHandler
     {
         Task HandleAsync(AuthorizationContext context);
-        //void Handle(AuthorizationContext context);
+        void Handle(AuthorizationContext context);
     }
 }

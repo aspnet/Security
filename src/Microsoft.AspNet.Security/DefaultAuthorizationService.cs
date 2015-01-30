@@ -20,10 +20,29 @@ namespace Microsoft.AspNet.Security
             _options = options.Options;
         }
 
+        public bool Authorize(ClaimsPrincipal user, object resource, string policyName)
+        {
+            var policy = _options.GetPolicy(policyName);
+            if (policy == null)
+            {
+                return false;
+            }
+            return this.Authorize(user, resource, policy);
+        }
+
+        public bool Authorize(ClaimsPrincipal user, object resource, params IAuthorizationRequirement[] requirements)
+        {
+            var authContext = new AuthorizationContext(requirements, user, resource);
+            foreach (var handler in _handlers)
+            {
+                handler.Handle(authContext);
+            }
+            return authContext.HasSucceeded;
+        }
+
         public async Task<bool> AuthorizeAsync(ClaimsPrincipal user, object resource, params IAuthorizationRequirement[] requirements)
         {
             var authContext = new AuthorizationContext(requirements, user, resource);
-
             foreach (var handler in _handlers)
             {
                 await handler.HandleAsync(authContext);

@@ -6,26 +6,25 @@ using System.Threading.Tasks;
 
 namespace Microsoft.AspNet.Security
 {
-    // Music store use case
-
-    // await AuthorizeAsync<Album>(user, "Edit", albumInstance);
-
-    // No policy name needed because this is auto based on resource (operation is the policy name)
-    //RegisterOperation which auto generates the policy for Authorize<T>
-    //bool AuthorizeAsync<TResource>(ClaimsPrincipal, string operation, TResource instance)
-    //bool AuthorizeAsync<TResource>(IAuthorization, ClaimsPrincipal, string operation, TResource instance)
     public abstract class AuthorizationHandler<TRequirement> : IAuthorizationHandler
         where TRequirement : IAuthorizationRequirement
     {
-        public virtual async Task HandleAsync(AuthorizationContext context)
+        public void Handle(AuthorizationContext context)
         {
             foreach (var req in context.Requirements.OfType<TRequirement>())
             {
-                await HandleAsync(context, req);
+                Handle(context, req);
             }
         }
 
-        public abstract Task HandleAsync(AuthorizationContext context, TRequirement requirement);
+        public virtual Task HandleAsync(AuthorizationContext context)
+        {
+            Handle(context);
+            return Task.FromResult(0);
+        }
+
+        // REVIEW: do we need an async hook too?
+        public abstract void Handle(AuthorizationContext context, TRequirement requirement);
     }
 
     public abstract class AuthorizationHandler<TRequirement, TResource> : IAuthorizationHandler
@@ -45,6 +44,25 @@ namespace Microsoft.AspNet.Security
             }
         }
 
-        public abstract Task HandleAsync(AuthorizationContext context, TRequirement requirement, TResource resource);
+        public virtual Task HandleAsync(AuthorizationContext context, TRequirement requirement, TResource resource)
+        {
+            Handle(context, requirement, resource);
+            return Task.FromResult(0);
+        }
+
+        public virtual void Handle(AuthorizationContext context)
+        {
+            var resource = context.Resource as TResource;
+            // REVIEW: should we allow null resources?
+            if (resource != null)
+            {
+                foreach (var req in context.Requirements.OfType<TRequirement>())
+                {
+                    Handle(context, req, resource);
+                }
+            }
+        }
+
+        public abstract void Handle(AuthorizationContext context, TRequirement requirement, TResource resource);
     }
 }
