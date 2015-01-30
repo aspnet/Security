@@ -91,7 +91,7 @@ namespace Microsoft.AspNet.Security
 
         public AuthorizationPolicy Build()
         {
-            return new AuthorizationPolicy(Requirements, ActiveAuthenticationTypes);
+            return new AuthorizationPolicy(Requirements, ActiveAuthenticationTypes.Distinct());
         }
     }
 }
