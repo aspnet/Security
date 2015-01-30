@@ -34,7 +34,6 @@ namespace Microsoft.AspNet.Security
             return builder.Build();
         }
 
-        // TODO: Add unit tests
         public static AuthorizationPolicy Combine([NotNull] AuthorizationOptions options, [NotNull] IEnumerable<AuthorizeAttribute> attributes)
         {
             var policyBuilder = new AuthorizationPolicyBuilder();
