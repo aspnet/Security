@@ -40,7 +40,7 @@ namespace Microsoft.AspNet.Security
             return this;
         }
 
-        public AuthorizationPolicyBuilder Combine(AuthorizationPolicy policy)
+        public AuthorizationPolicyBuilder Combine([NotNull] AuthorizationPolicy policy)
         {
             AddAuthenticationTypes(policy.ActiveAuthenticationTypes.ToArray());
             AddRequirements(policy.Requirements.ToArray());
@@ -48,6 +48,11 @@ namespace Microsoft.AspNet.Security
         }
 
         public AuthorizationPolicyBuilder RequiresClaim([NotNull] string claimType, params string[] requiredValues)
+        {
+            return RequiresClaim(claimType, (IEnumerable<string>)requiredValues);
+        }
+
+        public AuthorizationPolicyBuilder RequiresClaim([NotNull] string claimType, IEnumerable<string> requiredValues)
         {
             Requirements.Add(new ClaimsAuthorizationRequirement
             {
@@ -68,6 +73,11 @@ namespace Microsoft.AspNet.Security
         }
 
         public AuthorizationPolicyBuilder RequiresRole([NotNull] params string[] roles)
+        {
+            return RequiresRole((IEnumerable<string>)roles);
+        }
+
+        public AuthorizationPolicyBuilder RequiresRole([NotNull] IEnumerable<string> roles)
         {
             RequiresClaim(ClaimTypes.Role, roles);
             return this;
