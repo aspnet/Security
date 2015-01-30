@@ -7,7 +7,7 @@ namespace Microsoft.AspNet.Security
 {
     public class DenyAnonymousAuthorizationHandler : AuthorizationHandler<DenyAnonymousAuthorizationRequirement>
     {
-        public override Task HandleAsync(AuthorizationContext context, DenyAnonymousAuthorizationRequirement requirement)
+        public override void Handle(AuthorizationContext context, DenyAnonymousAuthorizationRequirement requirement)
         {
             var user = context.User;
             var userIsAnonymous =
@@ -18,7 +18,6 @@ namespace Microsoft.AspNet.Security
             {
                 context.Succeed(requirement);
             }
-            return Task.FromResult(0);
         }
     }
 }

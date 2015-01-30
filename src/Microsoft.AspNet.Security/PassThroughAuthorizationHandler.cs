@@ -15,5 +15,13 @@ namespace Microsoft.AspNet.Security
                 await handler.HandleAsync(context);
             }
         }
+
+        public void Handle(AuthorizationContext context)
+        {
+            foreach (var handler in context.Requirements.OfType<IAuthorizationHandler>())
+            {
+                handler.Handle(context);
+            }
+        }
     }
 }

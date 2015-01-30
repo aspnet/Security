@@ -536,10 +536,9 @@ namespace Microsoft.AspNet.Security.Test
         public class CustomRequirement : IAuthorizationRequirement { }
         public class CustomHandler : AuthorizationHandler<CustomRequirement>
         {
-            public override Task HandleAsync(AuthorizationContext context, CustomRequirement requirement)
+            public override void Handle(AuthorizationContext context, CustomRequirement requirement)
             {
                 context.Succeed(requirement);
-                return Task.FromResult(true);
             }
         }
 
@@ -593,12 +592,11 @@ namespace Microsoft.AspNet.Security.Test
 
             public bool Succeed { get; set; }
 
-            public override Task HandleAsync(AuthorizationContext context, PassThroughRequirement requirement)
+            public override void Handle(AuthorizationContext context, PassThroughRequirement requirement)
             {
                 if (Succeed) {
                     context.Succeed(requirement);
                 }
-                return Task.FromResult(0);
             }
         }
 
@@ -721,25 +719,23 @@ namespace Microsoft.AspNet.Security.Test
 
             private IEnumerable<OperationAuthorizationRequirement> _allowed;
 
-            public override Task HandleAsync(AuthorizationContext context, OperationAuthorizationRequirement requirement, ExpenseReport resource)
+            public override void Handle(AuthorizationContext context, OperationAuthorizationRequirement requirement, ExpenseReport resource)
             {
                 if (_allowed.Contains(requirement))
                 {
                     context.Succeed(requirement);
                 }
-                return Task.FromResult(0);
             }
         }
 
         public class SuperUserHandler : AuthorizationHandler<OperationAuthorizationRequirement>
         {
-            public override Task HandleAsync(AuthorizationContext context, OperationAuthorizationRequirement requirement)
+            public override void Handle(AuthorizationContext context, OperationAuthorizationRequirement requirement)
             {
                 if (context.User.HasClaim("SuperUser", "yes"))
                 {
                     context.Succeed(requirement);
                 }
-                return Task.FromResult(0);
             }
         }
 
