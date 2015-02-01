@@ -28,6 +28,7 @@ namespace Microsoft.AspNet.Security.Cookies
         private DateTimeOffset _renewIssuedUtc;
         private DateTimeOffset _renewExpiresUtc;
         private string _sessionKey;
+        private bool _ticketIssued = false;
 
         public CookieAuthenticationHandler([NotNull] ILogger logger)
         {
@@ -106,6 +107,8 @@ namespace Microsoft.AspNet.Security.Cookies
                 var context = new CookieValidateIdentityContext(Context, ticket, Options);
 
                 await Options.Notifications.ValidateIdentity(context);
+
+                _ticketIssued = true;
 
                 return new AuthenticationTicket(context.Identity, context.Properties);
             }
@@ -322,7 +325,19 @@ namespace Microsoft.AspNet.Security.Cookies
 
         protected override void ApplyResponseChallenge()
         {
-            if (Response.StatusCode != 401 || !Options.LoginPath.HasValue )
+            if (Response.StatusCode != 401)
+            {
+                return;
+            }
+
+            // If we issued a ticket and the the status is still 401, this means authorization failed
+            if (_ticketIssued)
+            {
+                Response.StatusCode = 403;
+                return;
+            }
+
+            if (!Options.LoginPath.HasValue)
             {
                 return;
             }
