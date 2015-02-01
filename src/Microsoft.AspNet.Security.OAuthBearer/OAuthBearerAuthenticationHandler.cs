@@ -20,6 +20,7 @@ namespace Microsoft.AspNet.Security.OAuthBearer
     {
         private readonly ILogger _logger;
         private OpenIdConnectConfiguration _configuration;
+        private bool _ticketIssued;
 
         public OAuthBearerAuthenticationHandler(ILogger logger)
         {
@@ -51,6 +52,7 @@ namespace Microsoft.AspNet.Security.OAuthBearer
                 await Options.Notifications.MessageReceived(messageReceivedNotification);
                 if (messageReceivedNotification.HandledResponse)
                 {
+                    _ticketIssued = true;
                     return messageReceivedNotification.AuthenticationTicket;
                 }
 
@@ -95,6 +97,7 @@ namespace Microsoft.AspNet.Security.OAuthBearer
                 await Options.Notifications.SecurityTokenReceived(securityTokenReceivedNotification);
                 if (securityTokenReceivedNotification.HandledResponse)
                 {
+                    _ticketIssued = true;
                     return securityTokenReceivedNotification.AuthenticationTicket;
                 }
 
@@ -139,6 +142,7 @@ namespace Microsoft.AspNet.Security.OAuthBearer
 
                         if (securityTokenReceivedNotification.HandledResponse)
                         {
+                            _ticketIssued = true;
                             return securityTokenValidatedNotification.AuthenticationTicket;
                         }
 
@@ -147,6 +151,7 @@ namespace Microsoft.AspNet.Security.OAuthBearer
                             return null;
                         }
 
+                        _ticketIssued = true;
                         return ticket;
                     }
                 }
@@ -173,6 +178,7 @@ namespace Microsoft.AspNet.Security.OAuthBearer
                 await Options.Notifications.AuthenticationFailed(authenticationFailedNotification);
                 if (authenticationFailedNotification.HandledResponse)
                 {
+                    _ticketIssued = true;
                     return authenticationFailedNotification.AuthenticationTicket;
                 }
 
@@ -192,7 +198,19 @@ namespace Microsoft.AspNet.Security.OAuthBearer
 
         protected override async Task ApplyResponseChallengeAsync()
         {
-            if ((Response.StatusCode != 401) || (ChallengeContext == null))
+            if (Response.StatusCode != 401)
+            {
+                return;
+            }
+
+            // Turn 401 into 403 if a ticket was issued as this means authorization failed
+            if (_ticketIssued)
+            {
+                Response.StatusCode = 403;
+                return;
+            }
+
+            if (ChallengeContext == null)
             {
                 return;
             }
