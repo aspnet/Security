@@ -9,24 +9,25 @@ namespace Microsoft.AspNet.Security
 {
     public class ClaimsAuthorizationHandler : AuthorizationHandler<ClaimsAuthorizationRequirement>
     {
-        public override Task<bool> CheckAsync(AuthorizationContext context, ClaimsAuthorizationRequirement requirement)
+        public override void Handle(AuthorizationContext context, ClaimsAuthorizationRequirement requirement)
         {
-            if (context.Context.User == null)
+            if (context.User != null)
             {
-                return Task.FromResult(false);
+                bool found = false;
+                if (requirement.AllowedValues == null || !requirement.AllowedValues.Any())
+                {
+                    found = context.User.Claims.Any(c => string.Equals(c.Type, requirement.ClaimType, StringComparison.OrdinalIgnoreCase));
+                }
+                else
+                {
+                    found = context.User.Claims.Any(c => string.Equals(c.Type, requirement.ClaimType, StringComparison.OrdinalIgnoreCase)
+                                                        && requirement.AllowedValues.Contains(c.Value, StringComparer.Ordinal));
+                }
+                if (found)
+                {
+                    context.Succeed(requirement);
+                }
             }
-
-            bool found = false;
-            if (requirement.AllowedValues == null || !requirement.AllowedValues.Any())
-            {
-                found = context.Context.User.Claims.Any(c => string.Equals(c.Type, requirement.ClaimType, StringComparison.OrdinalIgnoreCase));
-            }
-            else
-            {
-                found = context.Context.User.Claims.Any(c => string.Equals(c.Type, requirement.ClaimType, StringComparison.OrdinalIgnoreCase)
-                                                    && requirement.AllowedValues.Contains(c.Value, StringComparer.Ordinal));
-            }
-            return Task.FromResult(found);
         }
     }
 }
