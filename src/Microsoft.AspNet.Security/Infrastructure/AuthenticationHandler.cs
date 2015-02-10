@@ -28,6 +28,7 @@ namespace Microsoft.AspNet.Security.Infrastructure
         private Task<AuthenticationTicket> _authenticate;
         private bool _authenticateInitialized;
         private object _authenticateSyncLock;
+        private bool _authenticateCalled;
 
         private Task _applyResponse;
         private bool _applyResponseInitialized;
@@ -161,6 +162,7 @@ namespace Microsoft.AspNet.Security.Infrastructure
                 AuthenticationTicket ticket = Authenticate();
                 if (ticket != null && ticket.Identity != null)
                 {
+                    _authenticateCalled = true;
                     context.Authenticated(ticket.Identity, ticket.Properties.Dictionary, BaseOptions.Description.Dictionary);
                 }
                 else
@@ -182,6 +184,7 @@ namespace Microsoft.AspNet.Security.Infrastructure
                 AuthenticationTicket ticket = await AuthenticateAsync();
                 if (ticket != null && ticket.Identity != null)
                 {
+                    _authenticateCalled = true;
                     context.Authenticated(ticket.Identity, ticket.Properties.Dictionary, BaseOptions.Description.Dictionary);
                 }
                 else
@@ -307,7 +310,18 @@ namespace Microsoft.AspNet.Security.Infrastructure
         protected virtual async Task ApplyResponseCoreAsync()
         {
             await ApplyResponseGrantAsync();
-            await ApplyResponseChallengeAsync();
+
+            // If authenticate was called and the the status is still 401, authZ failed so set 403 and stop
+            // REVIEW: Does this need to ensure that there's the 401 is challenge for this auth type?
+            if (Response.StatusCode == 401 && _authenticateCalled)
+            {
+                Response.StatusCode = 403;
+                return;
+            }
+            else
+            {
+                await ApplyResponseChallengeAsync();
+            }
         }
 
         protected abstract void ApplyResponseGrant();
