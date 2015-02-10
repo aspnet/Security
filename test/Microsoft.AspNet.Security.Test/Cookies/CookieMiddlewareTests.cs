@@ -364,6 +364,23 @@ namespace Microsoft.AspNet.Security.Cookies
             Assert.True(transaction1.SetCookie.Contains("path=/base"));
         }
 
+        [Fact]
+        public async Task CookieTurns401To403IfAuthenticated()
+        {
+            var clock = new TestClock();
+            TestServer server = CreateServer(options =>
+            {
+                options.SystemClock = clock;
+            }, 
+            SignInAsAlice);
+
+            Transaction transaction1 = await SendAsync(server, "http://example.com/testpath");
+
+            Transaction transaction2 = await SendAsync(server, "http://example.com/unauthorized", transaction1.CookieNameValue);
+
+            transaction2.Response.StatusCode.ShouldBe(HttpStatusCode.Forbidden);
+        }
+
         private static string FindClaimValue(Transaction transaction, string claimType)
         {
             XElement claim = transaction.ResponseElement.Elements("claim").SingleOrDefault(elt => elt.Attribute("type").Value == claimType);
@@ -403,6 +420,12 @@ namespace Microsoft.AspNet.Security.Cookies
                     else if (req.Path == new PathString("/protected"))
                     {
                         res.StatusCode = 401;
+                    }
+                    else if (req.Path == new PathString("/unauthorized"))
+                    {
+                        // Simulate Authorization failure 
+                        var result = await context.AuthenticateAsync(CookieAuthenticationDefaults.AuthenticationType);
+                        res.Challenge(CookieAuthenticationDefaults.AuthenticationType);
                     }
                     else if (req.Path == new PathString("/protected/CustomRedirect"))
                     {
