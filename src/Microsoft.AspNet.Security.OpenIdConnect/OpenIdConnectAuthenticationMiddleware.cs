@@ -48,7 +48,7 @@ namespace Microsoft.AspNet.Security.OpenIdConnect
 
             if (string.IsNullOrWhiteSpace(Options.TokenValidationParameters.AuthenticationType))
             {
-                Options.TokenValidationParameters.AuthenticationType = externalOptions.Options.SignInAsAuthenticationScheme;
+                Options.TokenValidationParameters.AuthenticationType = externalOptions.Options.SignInScheme;
             }
 
             if (Options.StateDataFormat == null)

@@ -8,6 +8,6 @@ namespace Microsoft.AspNet.Security
 {
     public class ExternalAuthenticationOptions
     {
-        public string SignInAsAuthenticationScheme { get; set; }
+        public string SignInScheme { get; set; }
     }
 }

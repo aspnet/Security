@@ -92,7 +92,7 @@ namespace Microsoft.AspNet.Security.Twitter
         /// <summary>
         /// Gets or sets the name of another authentication middleware which will be responsible for actually issuing a user <see cref="System.Security.Claims.ClaimsIdentity"/>.
         /// </summary>
-        public string SignInAsAuthenticationScheme { get; set; }
+        public string SignInScheme { get; set; }
 
         /// <summary>
         /// Gets or sets the type used to secure data handled by the middleware.

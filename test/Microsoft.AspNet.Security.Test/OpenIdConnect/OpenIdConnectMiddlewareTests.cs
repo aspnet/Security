@@ -40,7 +40,7 @@ namespace Microsoft.AspNet.Security.Tests.OpenIdConnect
             {
                 options.Authority = "https://login.windows.net/common";
                 options.ClientId = "Test Id";
-                options.SignInAsAuthenticationScheme = OpenIdConnectAuthenticationDefaults.AuthenticationScheme;
+                options.SignInScheme = OpenIdConnectAuthenticationDefaults.AuthenticationScheme;
             });
             var transaction = await SendAsync(server, "https://example.com/challenge");
             transaction.Response.StatusCode.ShouldBe(HttpStatusCode.Redirect);
@@ -85,7 +85,7 @@ namespace Microsoft.AspNet.Security.Tests.OpenIdConnect
             {
                 options.Authority = "https://login.windows.net/common";
                 options.ClientId = "Test Id";
-                options.SignInAsAuthenticationScheme = OpenIdConnectAuthenticationDefaults.AuthenticationScheme;
+                options.SignInScheme = OpenIdConnectAuthenticationDefaults.AuthenticationScheme;
                 options.Scope = "https://www.googleapis.com/auth/plus.login";
                 options.ResponseType = "id_token";
             });
@@ -185,7 +185,7 @@ namespace Microsoft.AspNet.Security.Tests.OpenIdConnect
                     services.AddDataProtection();
                     services.Configure<ExternalAuthenticationOptions>(options =>
                     {
-                        options.SignInAsAuthenticationScheme = CookieAuthenticationDefaults.AuthenticationScheme;
+                        options.SignInScheme = CookieAuthenticationDefaults.AuthenticationScheme;
                     });
                 });
 

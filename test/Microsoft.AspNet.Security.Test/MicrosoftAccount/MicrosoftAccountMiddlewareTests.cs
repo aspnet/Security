@@ -168,7 +168,7 @@ namespace Microsoft.AspNet.Security.Tests.MicrosoftAccount
                     services.AddDataProtection();
                     services.Configure<ExternalAuthenticationOptions>(options =>
                     {
-                        options.SignInAsAuthenticationScheme = "External";
+                        options.SignInScheme = "External";
                     });
                 });
                 app.UseCookieAuthentication(options => options.AuthenticationScheme = "External");

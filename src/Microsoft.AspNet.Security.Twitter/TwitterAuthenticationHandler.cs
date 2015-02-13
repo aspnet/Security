@@ -195,16 +195,16 @@ namespace Microsoft.AspNet.Security.Twitter
 
             var context = new TwitterReturnEndpointContext(Context, model)
             {
-                SignInAsAuthenticationScheme = Options.SignInAsAuthenticationScheme,
+                SignInScheme = Options.SignInScheme,
                 RedirectUri = model.Properties.RedirectUri
             };
             model.Properties.RedirectUri = null;
 
             await Options.Notifications.ReturnEndpoint(context);
 
-            if (context.SignInAsAuthenticationScheme != null && context.Principal != null)
+            if (context.SignInScheme != null && context.Principal != null)
             {
-                Context.Response.SignIn(context.SignInAsAuthenticationScheme, context.Principal, context.Properties);
+                Context.Response.SignIn(context.SignInScheme, context.Principal, context.Properties);
             }
 
             if (!context.IsRequestCompleted && context.RedirectUri != null)

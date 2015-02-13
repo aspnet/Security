@@ -26,7 +26,7 @@ namespace Microsoft.AspNet.Security.Notifications
         public ClaimsPrincipal Principal { get; set; }
         public AuthenticationProperties Properties { get; set; }
 
-        public string SignInAsAuthenticationScheme { get; set; }
+        public string SignInScheme { get; set; }
 
         [SuppressMessage("Microsoft.Design", "CA1056:UriPropertiesShouldNotBeStrings", Justification = "By design")]
         public string RedirectUri { get; set; }
