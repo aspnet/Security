@@ -8,13 +8,13 @@ namespace Microsoft.AspNet.Security.Infrastructure
 {
     public class SignInIdentityContext
     {
-        public SignInIdentityContext(ClaimsIdentity identity, AuthenticationProperties properties)
+        public SignInIdentityContext(ClaimsPrincipal principal, AuthenticationProperties properties)
         {
-            Identity = identity;
+            Principal = principal;
             Properties = properties;
         }
 
-        public ClaimsIdentity Identity { get; private set; }
+        public ClaimsPrincipal Principal { get; private set; }
         public AuthenticationProperties Properties { get; private set; }
     }
 }

@@ -26,7 +26,7 @@ namespace CookieSample
                 services.AddDataProtection();
                 services.Configure<ExternalAuthenticationOptions>(options =>
                 {
-                    options.SignInAsAuthenticationType = CookieAuthenticationDefaults.AuthenticationType;
+                    options.SignInAsAuthenticationScheme = CookieAuthenticationDefaults.AuthenticationScheme;
                 });
             });
 
@@ -136,7 +136,7 @@ namespace CookieSample
                         JObject user = JObject.Parse(text);
 
                         var identity = new ClaimsIdentity(
-                            context.Options.AuthenticationType,
+                            context.Options.AuthenticationScheme,
                             ClaimsIdentity.DefaultNameClaimType,
                             ClaimsIdentity.DefaultRoleClaimType);
 
@@ -144,22 +144,22 @@ namespace CookieSample
                         var id = user.TryGetValue("id", out value) ? value.ToString() : null;
                         if (!string.IsNullOrEmpty(id))
                         {
-                            identity.AddClaim(new Claim(ClaimTypes.NameIdentifier, id, ClaimValueTypes.String, context.Options.AuthenticationType));
+                            identity.AddClaim(new Claim(ClaimTypes.NameIdentifier, id, ClaimValueTypes.String, context.Options.AuthenticationScheme));
                         }
                         var userName = user.TryGetValue("login", out value) ? value.ToString() : null;
                         if (!string.IsNullOrEmpty(userName))
                         {
-                            identity.AddClaim(new Claim(ClaimsIdentity.DefaultNameClaimType, userName, ClaimValueTypes.String, context.Options.AuthenticationType));
+                            identity.AddClaim(new Claim(ClaimsIdentity.DefaultNameClaimType, userName, ClaimValueTypes.String, context.Options.AuthenticationScheme));
                         }
                         var name = user.TryGetValue("name", out value) ? value.ToString() : null;
                         if (!string.IsNullOrEmpty(name))
                         {
-                            identity.AddClaim(new Claim("urn:github:name", name, ClaimValueTypes.String, context.Options.AuthenticationType));
+                            identity.AddClaim(new Claim("urn:github:name", name, ClaimValueTypes.String, context.Options.AuthenticationScheme));
                         }
                         var link = user.TryGetValue("url", out value) ? value.ToString() : null;
                         if (!string.IsNullOrEmpty(link))
                         {
-                            identity.AddClaim(new Claim("urn:github:url", link, ClaimValueTypes.String, context.Options.AuthenticationType));
+                            identity.AddClaim(new Claim("urn:github:url", link, ClaimValueTypes.String, context.Options.AuthenticationScheme));
                         }
 
                         context.Identity = identity;
@@ -184,9 +184,9 @@ namespace CookieSample
                     context.Response.ContentType = "text/html";
                     await context.Response.WriteAsync("<html><body>");
                     await context.Response.WriteAsync("Choose an authentication type: <br>");
-                    foreach (var type in context.GetAuthenticationTypes())
+                    foreach (var type in context.GetAuthenticationSchemes())
                     {
-                        await context.Response.WriteAsync("<a href=\"?authtype=" + type.AuthenticationType + "\">" + (type.Caption ?? "(suppressed)") + "</a><br>");
+                        await context.Response.WriteAsync("<a href=\"?authtype=" + type.AuthenticationScheme + "\">" + (type.Caption ?? "(suppressed)") + "</a><br>");
                     }
                     await context.Response.WriteAsync("</body></html>");
                 });
@@ -197,7 +197,7 @@ namespace CookieSample
             {
                 signoutApp.Run(async context =>
                 {
-                    context.Response.SignOut(CookieAuthenticationDefaults.AuthenticationType);
+                    context.Response.SignOut(CookieAuthenticationDefaults.AuthenticationScheme);
                     context.Response.ContentType = "text/html";
                     await context.Response.WriteAsync("<html><body>");
                     await context.Response.WriteAsync("You have been logged out. Goodbye " + context.User.Identity.Name + "<br>");

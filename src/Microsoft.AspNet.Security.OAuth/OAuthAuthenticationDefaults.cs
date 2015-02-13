@@ -14,23 +14,23 @@ namespace Microsoft.AspNet.Security.OAuth
         {
             // If the developer doesn't specify a user-info callback, just give them the tokens.
             var identity = new ClaimsIdentity(
-                    context.Options.AuthenticationType,
+                    context.Options.AuthenticationScheme,
                     ClaimsIdentity.DefaultNameClaimType,
                     ClaimsIdentity.DefaultRoleClaimType);
 
-            identity.AddClaim(new Claim("access_token", context.AccessToken, ClaimValueTypes.String, context.Options.AuthenticationType));
+            identity.AddClaim(new Claim("access_token", context.AccessToken, ClaimValueTypes.String, context.Options.AuthenticationScheme));
             if (!string.IsNullOrEmpty(context.RefreshToken))
             {
-                identity.AddClaim(new Claim("refresh_token", context.RefreshToken, ClaimValueTypes.String, context.Options.AuthenticationType));
+                identity.AddClaim(new Claim("refresh_token", context.RefreshToken, ClaimValueTypes.String, context.Options.AuthenticationScheme));
             }
             if (!string.IsNullOrEmpty(context.TokenType))
             {
-                identity.AddClaim(new Claim("token_type", context.TokenType, ClaimValueTypes.String, context.Options.AuthenticationType));
+                identity.AddClaim(new Claim("token_type", context.TokenType, ClaimValueTypes.String, context.Options.AuthenticationScheme));
             }
             if (context.ExpiresIn.HasValue)
             {
                 identity.AddClaim(new Claim("expires_in", context.ExpiresIn.Value.TotalSeconds.ToString(CultureInfo.InvariantCulture),
-                    ClaimValueTypes.String, context.Options.AuthenticationType));
+                    ClaimValueTypes.String, context.Options.AuthenticationScheme));
             }
             context.Identity = identity;
             return Task.FromResult(0);

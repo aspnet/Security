@@ -16,8 +16,8 @@ namespace Microsoft.AspNet.Security.MicrosoftAccount
         /// </summary>
         public MicrosoftAccountAuthenticationOptions()
         {
-            AuthenticationType = MicrosoftAccountAuthenticationDefaults.AuthenticationType;
-            Caption = AuthenticationType;
+            AuthenticationScheme = MicrosoftAccountAuthenticationDefaults.AuthenticationScheme;
+            Caption = AuthenticationScheme;
             CallbackPath = new PathString("/signin-microsoft");
             AuthorizationEndpoint = MicrosoftAccountAuthenticationDefaults.AuthorizationEndpoint;
             TokenEndpoint = MicrosoftAccountAuthenticationDefaults.TokenEndpoint;

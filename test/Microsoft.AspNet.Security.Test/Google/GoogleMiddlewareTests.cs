@@ -14,21 +14,19 @@ using System.Xml.Linq;
 using Microsoft.AspNet.Builder;
 using Microsoft.AspNet.Http;
 using Microsoft.AspNet.Http.Security;
-using Microsoft.AspNet.Security.Cookies;
+using Microsoft.AspNet.Security.DataHandler;
+using Microsoft.AspNet.Security.DataProtection;
 using Microsoft.AspNet.TestHost;
+using Microsoft.Framework.DependencyInjection;
 using Newtonsoft.Json;
 using Shouldly;
 using Xunit;
-using Microsoft.Framework.OptionsModel;
-using Microsoft.Framework.DependencyInjection;
-using Microsoft.AspNet.Security.DataProtection;
-using Microsoft.AspNet.Security.DataHandler;
 
 namespace Microsoft.AspNet.Security.Google
 {
     public class GoogleMiddlewareTests
     {
-        private const string CookieAuthenticationType = "Cookie";
+        private const string CookieAuthenticationScheme = "Cookie";
 
         [Fact]
         public async Task ChallengeWillTriggerRedirection()
@@ -470,10 +468,10 @@ namespace Microsoft.AspNet.Security.Google
                     services.AddDataProtection();
                     services.Configure<ExternalAuthenticationOptions>(options =>
                     {
-                        options.SignInAsAuthenticationType = CookieAuthenticationType;
+                        options.SignInAsAuthenticationScheme = CookieAuthenticationScheme;
                     });
                 });
-                app.UseCookieAuthentication(options => options.AuthenticationType = CookieAuthenticationType);
+                app.UseCookieAuthentication(options => options.AuthenticationScheme = CookieAuthenticationScheme);
                 app.UseGoogleAuthentication(configureOptions);
                 app.Use(async (context, next) =>
                 {

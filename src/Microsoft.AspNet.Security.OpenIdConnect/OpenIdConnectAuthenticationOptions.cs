@@ -28,7 +28,7 @@ namespace Microsoft.AspNet.Security.OpenIdConnect
         /// Initializes a new <see cref="OpenIdConnectAuthenticationOptions"/>
         /// </summary>
         public OpenIdConnectAuthenticationOptions()
-            : this(OpenIdConnectAuthenticationDefaults.AuthenticationType)
+            : this(OpenIdConnectAuthenticationDefaults.AuthenticationScheme)
         {
         }
 
@@ -45,15 +45,15 @@ namespace Microsoft.AspNet.Security.OpenIdConnect
         /// <para>RefreshOnIssuerKeyNotFound: true</para>
         /// <para>ResponseType: <see cref="OpenIdConnectResponseTypes.CodeIdToken"/></para>
         /// <para>Scope: <see cref="OpenIdConnectScopes.OpenIdProfile"/>.</para>
-        /// <para>TokenValidationParameters: new <see cref="TokenValidationParameters"/> with AuthenticationType = authenticationType.</para>
+        /// <para>TokenValidationParameters: new <see cref="TokenValidationParameters"/> with AuthenticationScheme = authenticationScheme.</para>
         /// <para>UseTokenLifetime: true.</para>
         /// </remarks>
-        /// <param name="authenticationType"> will be used to when creating the <see cref="System.Security.Claims.ClaimsIdentity"/> for the AuthenticationType property.</param>
+        /// <param name="authenticationScheme"> will be used to when creating the <see cref="System.Security.Claims.ClaimsIdentity"/> for the AuthenticationScheme property.</param>
         [SuppressMessage("Microsoft.Globalization", "CA1303:Do not pass literals as localized parameters", MessageId = "Microsoft.Owin.Security.OpenIdConnect.OpenIdConnectAuthenticationOptions.set_Caption(System.String)", Justification = "Not a LOC field")]
-        public OpenIdConnectAuthenticationOptions(string authenticationType)
+        public OpenIdConnectAuthenticationOptions(string authenticationScheme)
         {
             AuthenticationMode = AuthenticationMode.Active;
-            AuthenticationType = authenticationType;
+            AuthenticationScheme = authenticationScheme;
             BackchannelTimeout = TimeSpan.FromMinutes(1);
             Caption = OpenIdConnectAuthenticationDefaults.Caption;
             ProtocolValidator = new OpenIdConnectProtocolValidator();
@@ -232,9 +232,9 @@ namespace Microsoft.AspNet.Security.OpenIdConnect
         public string Scope { get; set; }
 
         /// <summary>
-        /// Gets or sets the AuthenticationType used when creating the <see cref="System.Security.Claims.ClaimsIdentity"/>.
+        /// Gets or sets the AuthenticationScheme used when creating the <see cref="System.Security.Claims.ClaimsIdentity"/>.
         /// </summary>
-        public string SignInAsAuthenticationType
+        public string SignInAsAuthenticationScheme
         {
             get { return TokenValidationParameters.AuthenticationType; }
             set { TokenValidationParameters.AuthenticationType = value; }

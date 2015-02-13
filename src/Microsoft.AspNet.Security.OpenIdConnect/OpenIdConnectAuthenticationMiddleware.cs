@@ -48,7 +48,7 @@ namespace Microsoft.AspNet.Security.OpenIdConnect
 
             if (string.IsNullOrWhiteSpace(Options.TokenValidationParameters.AuthenticationType))
             {
-                Options.TokenValidationParameters.AuthenticationType = externalOptions.Options.SignInAsAuthenticationType;
+                Options.TokenValidationParameters.AuthenticationType = externalOptions.Options.SignInAsAuthenticationScheme;
             }
 
             if (Options.StateDataFormat == null)
@@ -56,7 +56,7 @@ namespace Microsoft.AspNet.Security.OpenIdConnect
                 var dataProtector = dataProtectionProvider.CreateDataProtector(
                     typeof(OpenIdConnectAuthenticationMiddleware).FullName, 
 					typeof(string).FullName,
-                    Options.AuthenticationType,
+                    Options.AuthenticationScheme,
 					"v1");
 
                 Options.StateDataFormat = new PropertiesDataFormat(dataProtector);
@@ -67,7 +67,7 @@ namespace Microsoft.AspNet.Security.OpenIdConnect
                 var dataProtector = dataProtectionProvider.CreateDataProtector(
                     typeof(OpenIdConnectAuthenticationMiddleware).FullName,
                     typeof(string).FullName,
-                    Options.AuthenticationType,
+                    Options.AuthenticationScheme,
                     "v1");
 
                 Options.StringDataFormat = new SecureDataFormat<string>(new StringSerializer(), dataProtector, TextEncodings.Base64Url);

@@ -9,9 +9,9 @@ namespace Microsoft.AspNet.Security.OpenIdConnect
     public static class OpenIdConnectAuthenticationDefaults
     {
         /// <summary>
-        /// The default value used for OpenIdConnectAuthenticationOptions.AuthenticationType
+        /// The default value used for OpenIdConnectAuthenticationOptions.AuthenticationScheme
         /// </summary>
-        public const string AuthenticationType = "OpenIdConnect";
+        public const string AuthenticationScheme = "OpenIdConnect";
 
         /// <summary>
         /// The prefix used to provide a default OpenIdConnectAuthenticationOptions.CookieName

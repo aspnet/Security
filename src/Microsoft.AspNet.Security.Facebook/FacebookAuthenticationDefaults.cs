@@ -5,7 +5,7 @@ namespace Microsoft.AspNet.Security.Facebook
 {
     public static class FacebookAuthenticationDefaults
     {
-        public const string AuthenticationType = "Facebook";
+        public const string AuthenticationScheme = "Facebook";
 
         public const string AuthorizationEndpoint = "https://www.facebook.com/v2.2/dialog/oauth";
 

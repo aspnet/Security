@@ -52,7 +52,8 @@ namespace Microsoft.AspNet.Security.OAuth
         public bool Validated(ClaimsIdentity identity)
         {
             AuthenticationProperties properties = Ticket != null ? Ticket.Properties : new AuthenticationProperties();
-            return Validated(new AuthenticationTicket(identity, properties));
+            // TODO: Ticket can be null, need to revisit
+            return Validated(new AuthenticationTicket(identity, properties, Ticket.AuthenticationScheme));
         }
     }
 }

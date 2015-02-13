@@ -102,7 +102,7 @@ namespace Microsoft.AspNet.Security.OAuth
         /// <summary>
         /// Gets or sets the name of another authentication middleware which will be responsible for actually issuing a user <see cref="System.Security.Claims.ClaimsIdentity"/>.
         /// </summary>
-        public string SignInAsAuthenticationType { get; set; }
+        public string SignInAsAuthenticationScheme { get; set; }
 
         /// <summary>
         /// Gets or sets the type used to secure data handled by the middleware.

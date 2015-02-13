@@ -130,7 +130,7 @@ namespace Microsoft.AspNet.Security.OAuthBearer
                     if (validator.CanReadToken(token))
                     {
                         ClaimsPrincipal principal = validator.ValidateToken(token, validationParameters, out validatedToken);
-                        AuthenticationTicket ticket = new AuthenticationTicket(principal, new AuthenticationProperties(), Options.AuthenticationType);
+                        AuthenticationTicket ticket = new AuthenticationTicket(principal, new AuthenticationProperties(), Options.AuthenticationScheme);
                         var securityTokenValidatedNotification = new SecurityTokenValidatedNotification<HttpContext, OAuthBearerAuthenticationOptions>(Context, Options)
                         {
                             ProtocolMessage = Context,

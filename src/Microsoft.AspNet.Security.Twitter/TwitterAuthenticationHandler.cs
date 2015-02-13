@@ -72,20 +72,20 @@ namespace Microsoft.AspNet.Security.Twitter
                 if (string.IsNullOrWhiteSpace(returnedToken))
                 {
                     _logger.WriteWarning("Missing oauth_token");
-                    return new AuthenticationTicket(null, properties);
+                    return new AuthenticationTicket((ClaimsPrincipal)null, properties, Options.AuthenticationScheme);
                 }
 
                 if (returnedToken != requestToken.Token)
                 {
                     _logger.WriteWarning("Unmatched token");
-                    return new AuthenticationTicket(null, properties);
+                    return new AuthenticationTicket((ClaimsPrincipal)null, properties, Options.AuthenticationScheme);
                 }
 
                 string oauthVerifier = query.Get("oauth_verifier");
                 if (string.IsNullOrWhiteSpace(oauthVerifier))
                 {
                     _logger.WriteWarning("Missing or blank oauth_verifier");
-                    return new AuthenticationTicket(null, properties);
+                    return new AuthenticationTicket((ClaimsPrincipal)null, properties, Options.AuthenticationScheme);
                 }
 
                 AccessToken accessToken = await ObtainAccessTokenAsync(Options.ConsumerKey, Options.ConsumerSecret, requestToken, oauthVerifier);
@@ -95,12 +95,12 @@ namespace Microsoft.AspNet.Security.Twitter
                 context.Identity = new ClaimsIdentity(
                     new[]
                     {
-                        new Claim(ClaimTypes.NameIdentifier, accessToken.UserId, "http://www.w3.org/2001/XMLSchema#string", Options.AuthenticationType),
-                        new Claim(ClaimTypes.Name, accessToken.ScreenName, "http://www.w3.org/2001/XMLSchema#string", Options.AuthenticationType),
-                        new Claim("urn:twitter:userid", accessToken.UserId, "http://www.w3.org/2001/XMLSchema#string", Options.AuthenticationType),
-                        new Claim("urn:twitter:screenname", accessToken.ScreenName, "http://www.w3.org/2001/XMLSchema#string", Options.AuthenticationType)
+                        new Claim(ClaimTypes.NameIdentifier, accessToken.UserId, "http://www.w3.org/2001/XMLSchema#string", Options.AuthenticationScheme),
+                        new Claim(ClaimTypes.Name, accessToken.ScreenName, "http://www.w3.org/2001/XMLSchema#string", Options.AuthenticationScheme),
+                        new Claim("urn:twitter:userid", accessToken.UserId, "http://www.w3.org/2001/XMLSchema#string", Options.AuthenticationScheme),
+                        new Claim("urn:twitter:screenname", accessToken.ScreenName, "http://www.w3.org/2001/XMLSchema#string", Options.AuthenticationScheme)
                     },
-                    Options.AuthenticationType,
+                    Options.AuthenticationScheme,
                     ClaimsIdentity.DefaultNameClaimType,
                     ClaimsIdentity.DefaultRoleClaimType);
                 context.Properties = requestToken.Properties;
@@ -115,12 +115,12 @@ namespace Microsoft.AspNet.Security.Twitter
 
                 await Options.Notifications.Authenticated(context);
 
-                return new AuthenticationTicket(context.Identity, context.Properties);
+                return new AuthenticationTicket(context.Identity, context.Properties, Options.AuthenticationScheme);
             }
             catch (Exception ex)
             {
                 _logger.WriteError("Authentication failed", ex);
-                return new AuthenticationTicket(null, properties);
+                return new AuthenticationTicket((ClaimsPrincipal)null, properties, Options.AuthenticationScheme);
             }
         }
         protected override void ApplyResponseChallenge()
@@ -195,26 +195,21 @@ namespace Microsoft.AspNet.Security.Twitter
 
             var context = new TwitterReturnEndpointContext(Context, model)
             {
-                SignInAsAuthenticationType = Options.SignInAsAuthenticationType,
+                SignInAsAuthenticationScheme = Options.SignInAsAuthenticationScheme,
                 RedirectUri = model.Properties.RedirectUri
             };
             model.Properties.RedirectUri = null;
 
             await Options.Notifications.ReturnEndpoint(context);
 
-            if (context.SignInAsAuthenticationType != null && context.Identity != null)
+            if (context.SignInAsAuthenticationScheme != null && context.Principal != null)
             {
-                ClaimsIdentity signInIdentity = context.Identity;
-                if (!string.Equals(signInIdentity.AuthenticationType, context.SignInAsAuthenticationType, StringComparison.Ordinal))
-                {
-                    signInIdentity = new ClaimsIdentity(signInIdentity.Claims, context.SignInAsAuthenticationType, signInIdentity.NameClaimType, signInIdentity.RoleClaimType);
-                }
-                Context.Response.SignIn(context.Properties, signInIdentity);
+                Context.Response.SignIn(context.SignInAsAuthenticationScheme, context.Principal, context.Properties);
             }
 
             if (!context.IsRequestCompleted && context.RedirectUri != null)
             {
-                if (context.Identity == null)
+                if (context.Principal == null)
                 {
                     // add a redirect hint that sign-in failed in some way
                     context.RedirectUri = QueryHelpers.AddQueryString(context.RedirectUri, "error", "access_denied");

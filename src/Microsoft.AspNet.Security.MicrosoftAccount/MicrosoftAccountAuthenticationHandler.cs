@@ -36,23 +36,23 @@ namespace Microsoft.AspNet.Security.MicrosoftAccount
             context.Identity = new ClaimsIdentity(
                 new[]
                     {
-                        new Claim(ClaimTypes.NameIdentifier, context.Id, ClaimValueTypes.String, Options.AuthenticationType),
-                        new Claim(ClaimTypes.Name, context.Name, ClaimValueTypes.String, Options.AuthenticationType),
-                        new Claim("urn:microsoftaccount:id", context.Id, ClaimValueTypes.String, Options.AuthenticationType),
-                        new Claim("urn:microsoftaccount:name", context.Name, ClaimValueTypes.String, Options.AuthenticationType)
+                        new Claim(ClaimTypes.NameIdentifier, context.Id, ClaimValueTypes.String, Options.AuthenticationScheme),
+                        new Claim(ClaimTypes.Name, context.Name, ClaimValueTypes.String, Options.AuthenticationScheme),
+                        new Claim("urn:microsoftaccount:id", context.Id, ClaimValueTypes.String, Options.AuthenticationScheme),
+                        new Claim("urn:microsoftaccount:name", context.Name, ClaimValueTypes.String, Options.AuthenticationScheme)
                     },
-                Options.AuthenticationType,
+                Options.AuthenticationScheme,
                 ClaimsIdentity.DefaultNameClaimType,
                 ClaimsIdentity.DefaultRoleClaimType);
 
             if (!string.IsNullOrWhiteSpace(context.Email))
             {
-                context.Identity.AddClaim(new Claim(ClaimTypes.Email, context.Email, ClaimValueTypes.String, Options.AuthenticationType));
+                context.Identity.AddClaim(new Claim(ClaimTypes.Email, context.Email, ClaimValueTypes.String, Options.AuthenticationScheme));
             }
 
             await Options.Notifications.Authenticated(context);
 
-            return new AuthenticationTicket(context.Identity, context.Properties);
+            return new AuthenticationTicket(context.Identity, context.Properties, context.Options.AuthenticationScheme);
         }
     }
 }

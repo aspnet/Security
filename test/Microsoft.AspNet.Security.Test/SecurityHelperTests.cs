@@ -80,7 +80,7 @@ namespace Microsoft.AspNet.Security
         }
 
         [Fact]
-        public void WithChallengesMeansLookupsAreDeterminedOnlyByMatchingAuthenticationType()
+        public void WithChallengesMeansLookupsAreDeterminedOnlyByMatchingAuthenticationScheme()
         {
             HttpContext context = new DefaultHttpContext();
             

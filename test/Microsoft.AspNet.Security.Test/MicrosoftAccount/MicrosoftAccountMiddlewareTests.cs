@@ -168,10 +168,10 @@ namespace Microsoft.AspNet.Security.Tests.MicrosoftAccount
                     services.AddDataProtection();
                     services.Configure<ExternalAuthenticationOptions>(options =>
                     {
-                        options.SignInAsAuthenticationType = "External";
+                        options.SignInAsAuthenticationScheme = "External";
                     });
                 });
-                app.UseCookieAuthentication(options => options.AuthenticationType = "External");
+                app.UseCookieAuthentication(options => options.AuthenticationScheme = "External");
                 app.UseMicrosoftAccountAuthentication(configureOptions);
                 app.Use(async (context, next) =>
                 {

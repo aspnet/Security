@@ -9,9 +9,9 @@ namespace Microsoft.AspNet.Security.OAuthBearer
     public static class OAuthBearerAuthenticationDefaults
     {
         /// <summary>
-        /// Default value for AuthenticationType property in the OAuthBearerAuthenticationOptions and
+        /// Default value for AuthenticationScheme property in the OAuthBearerAuthenticationOptions and
         /// OAuthAuthorizationServerOptions.
         /// </summary>
-        public const string AuthenticationType = "Bearer";
+        public const string AuthenticationScheme = "Bearer";
     }
 }

@@ -5,6 +5,6 @@ namespace Microsoft.AspNet.Security.Twitter
 {
     public static class TwitterAuthenticationDefaults
     {
-        public const string AuthenticationType = "Twitter";
+        public const string AuthenticationScheme = "Twitter";
     }
 }

@@ -75,17 +75,18 @@ namespace Microsoft.AspNet.Security.Infrastructure
 
             await InitializeCoreAsync();
 
-            if (BaseOptions.AuthenticationMode == AuthenticationMode.Active)
-            {
-                AuthenticationTicket ticket = await AuthenticateAsync();
-                if (ticket != null)
-                {
-                    if ( ticket.Identity != null)
-                        SecurityHelper.AddUserIdentity(Context, ticket.Identity);
-                    else if (ticket.Principal != null)
-                        SecurityHelper.AddUserIdentity(Context, ticket.Principal.Identity);
-                }
-            }
+            // TODO: Move to Automatic base class
+            //if (BaseOptions.AuthenticationMode == AuthenticationMode.Active)
+            //{
+            //    AuthenticationTicket ticket = await AuthenticateAsync();
+            //    if (ticket != null)
+            //    {
+            //        if ( ticket.Principal != null)
+            //            SecurityHelper.AddUserIdentity(Context, ticket.Principal);
+            //        else if (ticket.Principal != null)
+            //            SecurityHelper.AddUserIdentity(Context, ticket.Principal.Identity);
+            //    }
+            //}
         }
 
         private static void OnSendingHeaderCallback(object state)
@@ -145,29 +146,29 @@ namespace Microsoft.AspNet.Security.Infrastructure
             return Task.FromResult<bool>(false);
         }
 
-        public virtual void GetDescriptions(IAuthTypeContext authTypeContext)
+        public virtual void GetDescriptions(IDescribeSchemesContext describeContext)
         {
-            authTypeContext.Accept(BaseOptions.Description.Dictionary);
+            describeContext.Accept(BaseOptions.Description.Dictionary);
 
             if (PriorHandler != null)
             {
-                PriorHandler.GetDescriptions(authTypeContext);
+                PriorHandler.GetDescriptions(describeContext);
             }
         }
 
         public virtual void Authenticate(IAuthenticateContext context)
         {
-            if (context.AuthenticationTypes.Contains(BaseOptions.AuthenticationType, StringComparer.Ordinal))
+            if (context.AuthenticationSchemes.Contains(BaseOptions.AuthenticationScheme, StringComparer.Ordinal))
             {
                 AuthenticationTicket ticket = Authenticate();
-                if (ticket != null && ticket.Identity != null)
+                if (ticket != null && ticket.Principal != null)
                 {
                     _authenticateCalled = true;
-                    context.Authenticated(ticket.Identity, ticket.Properties.Dictionary, BaseOptions.Description.Dictionary);
+                    context.Authenticated(ticket.Principal, ticket.Properties.Dictionary, BaseOptions.Description.Dictionary);
                 }
                 else
                 {
-                    context.NotAuthenticated(BaseOptions.AuthenticationType, properties: null, description: BaseOptions.Description.Dictionary);
+                    context.NotAuthenticated(BaseOptions.AuthenticationScheme, properties: null, description: BaseOptions.Description.Dictionary);
                 }
             }
 
@@ -179,17 +180,17 @@ namespace Microsoft.AspNet.Security.Infrastructure
 
         public virtual async Task AuthenticateAsync(IAuthenticateContext context)
         {
-            if (context.AuthenticationTypes.Contains(BaseOptions.AuthenticationType, StringComparer.Ordinal))
+            if (context.AuthenticationSchemes.Contains(BaseOptions.AuthenticationScheme, StringComparer.Ordinal))
             {
                 AuthenticationTicket ticket = await AuthenticateAsync();
-                if (ticket != null && ticket.Identity != null)
+                if (ticket != null && ticket.Principal != null)
                 {
                     _authenticateCalled = true;
-                    context.Authenticated(ticket.Identity, ticket.Properties.Dictionary, BaseOptions.Description.Dictionary);
+                    context.Authenticated(ticket.Principal, ticket.Properties.Dictionary, BaseOptions.Description.Dictionary);
                 }
                 else
                 {
-                    context.NotAuthenticated(BaseOptions.AuthenticationType, properties: null, description: BaseOptions.Description.Dictionary);
+                    context.NotAuthenticated(BaseOptions.AuthenticationScheme, properties: null, description: BaseOptions.Description.Dictionary);
                 }
             }
 
@@ -339,13 +340,9 @@ namespace Microsoft.AspNet.Security.Infrastructure
 
         public virtual void SignIn(ISignInContext context)
         {
-            ClaimsIdentity identity;
-            if (SecurityHelper.LookupSignIn(context.Identities, BaseOptions.AuthenticationType, out identity))
-            {
-                SignInIdentityContext = new SignInIdentityContext(identity, new AuthenticationProperties(context.Properties));
-                SignOutContext = null;
-                context.Accept(BaseOptions.AuthenticationType, BaseOptions.Description.Dictionary);
-            }
+            SignInIdentityContext = new SignInIdentityContext(context.Principal, new AuthenticationProperties(context.Properties));
+            SignOutContext = null;
+            context.Accept(BaseOptions.AuthenticationScheme, BaseOptions.Description.Dictionary);
 
             if (PriorHandler != null)
             {
@@ -355,11 +352,11 @@ namespace Microsoft.AspNet.Security.Infrastructure
 
         public virtual void SignOut(ISignOutContext context)
         {
-            if (SecurityHelper.LookupSignOut(context.AuthenticationTypes, BaseOptions.AuthenticationType, BaseOptions.AuthenticationMode))
+            if (SecurityHelper.LookupSignOut(context.AuthenticationSchemes, BaseOptions.AuthenticationScheme, BaseOptions.AuthenticationMode))
             {
                 SignInIdentityContext = null;
                 SignOutContext = context;
-                context.Accept(BaseOptions.AuthenticationType, BaseOptions.Description.Dictionary);
+                context.Accept(BaseOptions.AuthenticationScheme, BaseOptions.Description.Dictionary);
             }
 
             if (PriorHandler != null)
@@ -370,10 +367,10 @@ namespace Microsoft.AspNet.Security.Infrastructure
 
         public virtual void Challenge(IChallengeContext context)
         {
-            if (SecurityHelper.LookupChallenge(context.AuthenticationTypes, BaseOptions.AuthenticationType, BaseOptions.AuthenticationMode))
+            if (SecurityHelper.LookupChallenge(context.AuthenticationSchemes, BaseOptions.AuthenticationScheme, BaseOptions.AuthenticationMode))
             {
                 ChallengeContext = context;
-                context.Accept(BaseOptions.AuthenticationType, BaseOptions.Description.Dictionary);
+                context.Accept(BaseOptions.AuthenticationScheme, BaseOptions.Description.Dictionary);
             }
 
             if (PriorHandler != null)
@@ -398,7 +395,7 @@ namespace Microsoft.AspNet.Security.Infrastructure
 
         protected void GenerateCorrelationId([NotNull] AuthenticationProperties properties)
         {
-            string correlationKey = Constants.CorrelationPrefix + BaseOptions.AuthenticationType;
+            string correlationKey = Constants.CorrelationPrefix + BaseOptions.AuthenticationScheme;
 
             var nonceBytes = new byte[32];
             CryptoRandom.GetBytes(nonceBytes);
@@ -417,7 +414,7 @@ namespace Microsoft.AspNet.Security.Infrastructure
 
         protected bool ValidateCorrelationId([NotNull] AuthenticationProperties properties, [NotNull] ILogger logger)
         {
-            string correlationKey = Constants.CorrelationPrefix + BaseOptions.AuthenticationType;
+            string correlationKey = Constants.CorrelationPrefix + BaseOptions.AuthenticationScheme;
 
             string correlationCookie = Request.Cookies[correlationKey];
             if (string.IsNullOrWhiteSpace(correlationCookie))

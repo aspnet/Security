@@ -38,26 +38,26 @@ namespace Microsoft.AspNet.Security.Infrastructure
             context.User = newClaimsPrincipal;
         }
 
-        public static bool LookupChallenge(IEnumerable<string> authenticationTypes, string authenticationType, AuthenticationMode authenticationMode)
+        public static bool LookupChallenge(IEnumerable<string> authenticationSchemes, string authenticationScheme, AuthenticationMode authenticationMode)
         {
-            bool challengeHasAuthenticationTypes = authenticationTypes != null && authenticationTypes.Any();
-            if (!challengeHasAuthenticationTypes)
+            bool challengeHasAuthenticationSchemes = authenticationSchemes != null && authenticationSchemes.Any();
+            if (!challengeHasAuthenticationSchemes)
             {
                 return authenticationMode == AuthenticationMode.Active;
             }
-            return authenticationTypes.Contains(authenticationType, StringComparer.Ordinal);
+            return authenticationSchemes.Contains(authenticationScheme, StringComparer.Ordinal);
         }
 
         /// <summary>
         /// Find response sign-in details for a specific authentication middleware
         /// </summary>
-        /// <param name="authenticationType">The authentication type to look for</param>
-        public static bool LookupSignIn(IEnumerable<ClaimsIdentity> identities, string authenticationType, out ClaimsIdentity identity)
+        /// <param name="authenticationScheme">The authentication type to look for</param>
+        public static bool LookupSignIn(IEnumerable<ClaimsIdentity> identities, string authenticationScheme, out ClaimsIdentity identity)
         {
             identity = null;
             foreach (var claimsIdentity in identities)
             {
-                if (string.Equals(authenticationType, claimsIdentity.AuthenticationType, StringComparison.Ordinal))
+                if (string.Equals(authenticationScheme, claimsIdentity.AuthenticationType, StringComparison.Ordinal))
                 {
                     identity = claimsIdentity;
                     return true;
@@ -69,16 +69,16 @@ namespace Microsoft.AspNet.Security.Infrastructure
         /// <summary>
         /// Find response sign-out details for a specific authentication middleware
         /// </summary>
-        /// <param name="authenticationType">The authentication type to look for</param>
+        /// <param name="authenticationScheme">The authentication type to look for</param>
         /// <param name="authenticationMode">The authentication mode the middleware is running under</param>
-        public static bool LookupSignOut(IEnumerable<string> authenticationTypes, string authenticationType, AuthenticationMode authenticationMode)
+        public static bool LookupSignOut(IEnumerable<string> authenticationSchemes, string authenticationScheme, AuthenticationMode authenticationMode)
         {
-            bool singOutHasAuthenticationTypes = authenticationTypes != null && authenticationTypes.Any();
-            if (!singOutHasAuthenticationTypes)
+            bool singOutHasAuthenticationSchemes = authenticationSchemes != null && authenticationSchemes.Any();
+            if (!singOutHasAuthenticationSchemes)
             {
                 return authenticationMode == AuthenticationMode.Active;
             }
-            return authenticationTypes.Contains(authenticationType, StringComparer.Ordinal);            
+            return authenticationSchemes.Contains(authenticationScheme, StringComparer.Ordinal);            
         }
     }
 }

@@ -31,7 +31,7 @@ namespace Microsoft.AspNet.Security.Infrastructure
             _services = services;
         }
 
-        public string AuthenticationType { get; set; }
+        public string AuthenticationScheme { get; set; }
 
         public TOptions Options { get; set; }
 
