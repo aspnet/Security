@@ -234,7 +234,7 @@ namespace Microsoft.AspNet.Security.OpenIdConnect
         /// <summary>
         /// Gets or sets the AuthenticationScheme used when creating the <see cref="System.Security.Claims.ClaimsIdentity"/>.
         /// </summary>
-        public string SignInAsAuthenticationScheme
+        public string SignInScheme
         {
             get { return TokenValidationParameters.AuthenticationType; }
             set { TokenValidationParameters.AuthenticationType = value; }

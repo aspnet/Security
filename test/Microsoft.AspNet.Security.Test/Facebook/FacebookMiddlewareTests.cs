@@ -45,7 +45,7 @@ namespace Microsoft.AspNet.Security.Facebook
                         });
                         services.Configure<ExternalAuthenticationOptions>(options =>
                         {
-                            options.SignInAsAuthenticationScheme = "External";
+                            options.SignInScheme = "External";
                         });
                     });
                     app.UseFacebookAuthentication();
@@ -82,7 +82,7 @@ namespace Microsoft.AspNet.Security.Facebook
                         });
                         services.Configure<ExternalAuthenticationOptions>(options =>
                         {
-                            options.SignInAsAuthenticationScheme = "External";
+                            options.SignInScheme = "External";
                         });
                     });
                     app.UseFacebookAuthentication();

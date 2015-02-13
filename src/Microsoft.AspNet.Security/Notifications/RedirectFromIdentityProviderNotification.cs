@@ -12,7 +12,7 @@ namespace Microsoft.AspNet.Security.Notifications
         {
         }
 
-        public string SignInAsAuthenticationScheme { get; set; }
+        public string SignInScheme { get; set; }
 
         public bool IsRequestCompleted { get; set; }
 

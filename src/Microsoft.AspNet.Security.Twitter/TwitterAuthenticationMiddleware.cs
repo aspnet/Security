@@ -68,13 +68,13 @@ namespace Microsoft.AspNet.Security.Twitter
                     TextEncodings.Base64Url);
             }
 
-            if (string.IsNullOrEmpty(Options.SignInAsAuthenticationScheme))
+            if (string.IsNullOrEmpty(Options.SignInScheme))
             {
-                Options.SignInAsAuthenticationScheme = externalOptions.Options.SignInAsAuthenticationScheme;
+                Options.SignInScheme = externalOptions.Options.SignInScheme;
             }
-            if (string.IsNullOrEmpty(Options.SignInAsAuthenticationScheme))
+            if (string.IsNullOrEmpty(Options.SignInScheme))
             {
-                throw new ArgumentException(string.Format(CultureInfo.CurrentCulture, Resources.Exception_OptionMustBeProvided, "SignInAsAuthenticationScheme"));
+                throw new ArgumentException(string.Format(CultureInfo.CurrentCulture, Resources.Exception_OptionMustBeProvided, "SignInScheme"));
             }
 
             _httpClient = new HttpClient(ResolveHttpMessageHandler(Options));

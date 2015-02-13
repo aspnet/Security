@@ -115,7 +115,7 @@ namespace Microsoft.AspNet.Security.Twitter
                     services.AddDataProtection();
                     services.Configure<ExternalAuthenticationOptions>(options =>
                     {
-                        options.SignInAsAuthenticationScheme = "External";
+                        options.SignInScheme = "External";
                     });
                 });
                 app.UseCookieAuthentication(options =>
