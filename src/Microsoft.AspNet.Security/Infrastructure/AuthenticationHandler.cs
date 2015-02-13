@@ -76,17 +76,14 @@ namespace Microsoft.AspNet.Security.Infrastructure
             await InitializeCoreAsync();
 
             // TODO: Move to Automatic base class
-            //if (BaseOptions.AuthenticationMode == AuthenticationMode.Active)
-            //{
-            //    AuthenticationTicket ticket = await AuthenticateAsync();
-            //    if (ticket != null)
-            //    {
-            //        if ( ticket.Principal != null)
-            //            SecurityHelper.AddUserIdentity(Context, ticket.Principal);
-            //        else if (ticket.Principal != null)
-            //            SecurityHelper.AddUserIdentity(Context, ticket.Principal.Identity);
-            //    }
-            //}
+            if (BaseOptions.AuthenticationMode == AuthenticationMode.Active)
+            {
+                AuthenticationTicket ticket = await AuthenticateAsync();
+                if (ticket != null && ticket.Principal != null)
+                {
+                    SecurityHelper.AddUserPrincipal(Context, ticket.Principal);
+                }
+            }
         }
 
         private static void OnSendingHeaderCallback(object state)

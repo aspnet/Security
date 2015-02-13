@@ -69,9 +69,9 @@ namespace Microsoft.AspNet.Security.Cookies
 
         private Task SignInAsAlice(HttpContext context)
         {
-            context.Response.SignIn(
-                new AuthenticationProperties(),
-                new ClaimsIdentity(new GenericIdentity("Alice", "Cookies")));
+            context.Response.SignIn("Cookies",
+                new ClaimsPrincipal(new ClaimsIdentity(new GenericIdentity("Alice", "Cookies"))),
+                new AuthenticationProperties());
             return Task.FromResult<object>(null);
         }
 
@@ -226,10 +226,10 @@ namespace Microsoft.AspNet.Security.Cookies
             },
             context =>
             {
-                context.Response.SignIn(
-                    new AuthenticationProperties() { ExpiresUtc = clock.UtcNow.Add(TimeSpan.FromMinutes(5)) },
-                    new ClaimsIdentity(new GenericIdentity("Alice", "Cookies")));
-                return Task.FromResult<object>(null);
+                context.Response.SignIn("Cookies",
+                    new ClaimsPrincipal(new ClaimsIdentity(new GenericIdentity("Alice", "Cookies"))),
+                    new AuthenticationProperties() { ExpiresUtc = clock.UtcNow.Add(TimeSpan.FromMinutes(5)) });
+                    return Task.FromResult<object>(null);
             });
 
             Transaction transaction1 = await SendAsync(server, "http://example.com/testpath");
@@ -355,7 +355,8 @@ namespace Microsoft.AspNet.Security.Cookies
             context =>
             {
                 Assert.Equal(new PathString("/base"), context.Request.PathBase);
-                context.Response.SignIn(new ClaimsIdentity(new GenericIdentity("Alice", "Cookies")));
+                context.Response.SignIn("Cookies", 
+                    new ClaimsPrincipal(new ClaimsIdentity(new GenericIdentity("Alice", "Cookies"))));
                 return Task.FromResult<object>(null);
             },
             new Uri("http://example.com/base"));
