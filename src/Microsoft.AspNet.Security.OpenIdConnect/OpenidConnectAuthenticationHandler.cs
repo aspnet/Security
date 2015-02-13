@@ -566,7 +566,7 @@ namespace Microsoft.AspNet.Security.OpenIdConnect
             {
                 if (ticket.Principal != null)
                 {
-                    Request.HttpContext.Response.SignIn(ticket.Properties, ticket.Principal.Identities);
+                    Request.HttpContext.Response.SignIn(ticket.AuthenticationScheme, ticket.Principal, ticket.Properties);
                 }
 
                 // Redirect back to the original secured resource, if any.

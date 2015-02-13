@@ -17,12 +17,12 @@ namespace Microsoft.AspNet.Security.Infrastructure
     public static class SecurityHelper
     {
         /// <summary>
-        /// Add an additional ClaimsIdentity to the ClaimsPrincipal
+        /// Add all ClaimsIdenities from an additional ClaimPrincipal to the ClaimsPrincipal
         /// </summary>
         /// <param name="identity"></param>
-        public static void AddUserIdentity([NotNull] HttpContext context, [NotNull] IIdentity identity)
+        public static void AddUserPrincipal([NotNull] HttpContext context, [NotNull] IPrincipal principal)
         {
-            var newClaimsPrincipal = new ClaimsPrincipal(identity);
+            var newClaimsPrincipal = new ClaimsPrincipal(principal);
 
             ClaimsPrincipal existingPrincipal = context.User;
             if (existingPrincipal != null)

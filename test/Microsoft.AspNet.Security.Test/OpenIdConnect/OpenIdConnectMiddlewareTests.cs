@@ -205,7 +205,8 @@ namespace Microsoft.AspNet.Security.Tests.OpenIdConnect
                     }
                     else if (req.Path == new PathString("/signin"))
                     {
-                        res.SignIn();
+                        // REVIEW: this used to just be res.SignIn()
+                        res.SignIn("OpenIdConnect", new ClaimsPrincipal());
                     }
                     else if (req.Path == new PathString("/signout"))
                     {
