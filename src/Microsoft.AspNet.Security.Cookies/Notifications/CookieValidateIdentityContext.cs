@@ -1,14 +1,10 @@
 // Copyright (c) Microsoft Open Technologies, Inc. All rights reserved.
 // Licensed under the Apache License, Version 2.0. See License.txt in the project root for license information.
 
-
-using System;
 using System.Security.Claims;
 using System.Security.Principal;
 using Microsoft.AspNet.Http;
 using Microsoft.AspNet.Http.Security;
-using Microsoft.AspNet.Http.Interfaces.Security;
-using Microsoft.AspNet.Security.Infrastructure;
 using Microsoft.AspNet.Security.Notifications;
 
 namespace Microsoft.AspNet.Security.Cookies
@@ -27,7 +23,7 @@ namespace Microsoft.AspNet.Security.Cookies
         public CookieValidateIdentityContext([NotNull] HttpContext context, [NotNull] AuthenticationTicket ticket, [NotNull] CookieAuthenticationOptions options)
             : base(context, options)
         {
-            Identity = ticket.Identity;
+            Principal = ticket.Principal;
             Properties = ticket.Properties;
         }
 
@@ -35,7 +31,7 @@ namespace Microsoft.AspNet.Security.Cookies
         /// Contains the claims identity arriving with the request. May be altered to change the 
         /// details of the authenticated user.
         /// </summary>
-        public ClaimsIdentity Identity { get; private set; }
+        public ClaimsPrincipal Principal { get; private set; }
 
         /// <summary>
         /// Contains the extra meta-data arriving with the request ticket. May be altered.
@@ -49,7 +45,7 @@ namespace Microsoft.AspNet.Security.Cookies
         /// <param name="identity">The identity used as the replacement</param>
         public void ReplaceIdentity(IIdentity identity)
         {
-            Identity = new ClaimsIdentity(identity);
+            Principal = new ClaimsPrincipal(new ClaimsIdentity(identity));
         }
 
         /// <summary>
@@ -58,7 +54,7 @@ namespace Microsoft.AspNet.Security.Cookies
         /// </summary>
         public void RejectIdentity()
         {
-            Identity = null;
+            Principal = null;
         }
     }
 }

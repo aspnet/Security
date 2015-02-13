@@ -41,9 +41,9 @@ namespace Microsoft.AspNet.Security.OAuth
             : base(next, services, options, configureOptions)
         {
             // todo: review error handling
-            if (string.IsNullOrWhiteSpace(Options.AuthenticationType))
+            if (string.IsNullOrWhiteSpace(Options.AuthenticationScheme))
             {
-                throw new ArgumentException(string.Format(CultureInfo.CurrentCulture, Resources.Exception_OptionMustBeProvided, "AuthenticationType"));
+                throw new ArgumentException(string.Format(CultureInfo.CurrentCulture, Resources.Exception_OptionMustBeProvided, "AuthenticationScheme"));
             }
 
             if (string.IsNullOrWhiteSpace(Options.ClientId))
@@ -80,13 +80,13 @@ namespace Microsoft.AspNet.Security.OAuth
             Backchannel.Timeout = Options.BackchannelTimeout;
             Backchannel.MaxResponseContentBufferSize = 1024 * 1024 * 10; // 10 MB
 
-            if (string.IsNullOrEmpty(Options.SignInAsAuthenticationType))
+            if (string.IsNullOrEmpty(Options.SignInAsAuthenticationScheme))
             {
-                Options.SignInAsAuthenticationType = externalOptions.Options.SignInAsAuthenticationType;
+                Options.SignInAsAuthenticationScheme = externalOptions.Options.SignInAsAuthenticationScheme;
             }
-            if (string.IsNullOrEmpty(Options.SignInAsAuthenticationType))
+            if (string.IsNullOrEmpty(Options.SignInAsAuthenticationScheme))
             {
-                throw new ArgumentException(string.Format(CultureInfo.CurrentCulture, Resources.Exception_OptionMustBeProvided, "SignInAsAuthenticationType"));
+                throw new ArgumentException(string.Format(CultureInfo.CurrentCulture, Resources.Exception_OptionMustBeProvided, "SignInAsAuthenticationScheme"));
             }
         }
 

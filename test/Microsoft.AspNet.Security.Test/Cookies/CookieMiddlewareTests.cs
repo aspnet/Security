@@ -424,8 +424,8 @@ namespace Microsoft.AspNet.Security.Cookies
                     else if (req.Path == new PathString("/unauthorized"))
                     {
                         // Simulate Authorization failure 
-                        var result = await context.AuthenticateAsync(CookieAuthenticationDefaults.AuthenticationType);
-                        res.Challenge(CookieAuthenticationDefaults.AuthenticationType);
+                        var result = await context.AuthenticateAsync(CookieAuthenticationDefaults.AuthenticationScheme);
+                        res.Challenge(CookieAuthenticationDefaults.AuthenticationScheme);
                     }
                     else if (req.Path == new PathString("/protected/CustomRedirect"))
                     {
@@ -433,7 +433,7 @@ namespace Microsoft.AspNet.Security.Cookies
                     }
                     else if (req.Path == new PathString("/me"))
                     {
-                        Describe(res, new AuthenticationResult(context.User.Identity, new AuthenticationProperties(), new AuthenticationDescription()));
+                        Describe(res, new AuthenticationResult(context.User, new AuthenticationProperties(), new AuthenticationDescription()));
                     }
                     else if (req.Path.StartsWithSegments(new PathString("/me"), out remainder))
                     {
@@ -459,9 +459,9 @@ namespace Microsoft.AspNet.Security.Cookies
             res.StatusCode = 200;
             res.ContentType = "text/xml";
             var xml = new XElement("xml");
-            if (result != null && result.Identity != null)
+            if (result != null && result.Principal != null)
             {
-                xml.Add(result.Identity.Claims.Select(claim => new XElement("claim", new XAttribute("type", claim.Type), new XAttribute("value", claim.Value))));
+                xml.Add(result.Principal.Claims.Select(claim => new XElement("claim", new XAttribute("type", claim.Type), new XAttribute("value", claim.Value))));
             }
             if (result != null && result.Properties != null)
             {

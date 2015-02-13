@@ -41,11 +41,11 @@ namespace Microsoft.AspNet.Security.Facebook
                         });
                         services.ConfigureCookieAuthentication(options =>
                         {
-                            options.AuthenticationType = "External";
+                            options.AuthenticationScheme = "External";
                         });
                         services.Configure<ExternalAuthenticationOptions>(options =>
                         {
-                            options.SignInAsAuthenticationType = "External";
+                            options.SignInAsAuthenticationScheme = "External";
                         });
                     });
                     app.UseFacebookAuthentication();
@@ -78,11 +78,11 @@ namespace Microsoft.AspNet.Security.Facebook
                         });
                         services.ConfigureCookieAuthentication(options =>
                         {
-                            options.AuthenticationType = "External";
+                            options.AuthenticationScheme = "External";
                         });
                         services.Configure<ExternalAuthenticationOptions>(options =>
                         {
-                            options.SignInAsAuthenticationType = "External";
+                            options.SignInAsAuthenticationScheme = "External";
                         });
                     });
                     app.UseFacebookAuthentication();

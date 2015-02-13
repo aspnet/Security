@@ -20,8 +20,8 @@ namespace Microsoft.AspNet.Security.Google
         /// </summary>
         public GoogleAuthenticationOptions()
         {
-            AuthenticationType = GoogleAuthenticationDefaults.AuthenticationType;
-            Caption = AuthenticationType;
+            AuthenticationScheme = GoogleAuthenticationDefaults.AuthenticationScheme;
+            Caption = AuthenticationScheme;
             CallbackPath = new PathString("/signin-google");
             AuthorizationEndpoint = GoogleAuthenticationDefaults.AuthorizationEndpoint;
             TokenEndpoint = GoogleAuthenticationDefaults.TokenEndpoint;

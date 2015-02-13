@@ -40,7 +40,7 @@ namespace Microsoft.AspNet.Security.Tests.OpenIdConnect
             {
                 options.Authority = "https://login.windows.net/common";
                 options.ClientId = "Test Id";
-                options.SignInAsAuthenticationType = OpenIdConnectAuthenticationDefaults.AuthenticationType;
+                options.SignInAsAuthenticationScheme = OpenIdConnectAuthenticationDefaults.AuthenticationScheme;
             });
             var transaction = await SendAsync(server, "https://example.com/challenge");
             transaction.Response.StatusCode.ShouldBe(HttpStatusCode.Redirect);
@@ -85,7 +85,7 @@ namespace Microsoft.AspNet.Security.Tests.OpenIdConnect
             {
                 options.Authority = "https://login.windows.net/common";
                 options.ClientId = "Test Id";
-                options.SignInAsAuthenticationType = OpenIdConnectAuthenticationDefaults.AuthenticationType;
+                options.SignInAsAuthenticationScheme = OpenIdConnectAuthenticationDefaults.AuthenticationScheme;
                 options.Scope = "https://www.googleapis.com/auth/plus.login";
                 options.ResponseType = "id_token";
             });
@@ -185,13 +185,13 @@ namespace Microsoft.AspNet.Security.Tests.OpenIdConnect
                     services.AddDataProtection();
                     services.Configure<ExternalAuthenticationOptions>(options =>
                     {
-                        options.SignInAsAuthenticationType = CookieAuthenticationDefaults.AuthenticationType;
+                        options.SignInAsAuthenticationScheme = CookieAuthenticationDefaults.AuthenticationScheme;
                     });
                 });
 
                 app.UseCookieAuthentication(options =>
                 {
-                    options.AuthenticationType = "OpenIdConnect";
+                    options.AuthenticationScheme = "OpenIdConnect";
                 });
                 app.UseOpenIdConnectAuthentication(configureOptions);
                 app.Use(async (context, next) =>
@@ -209,7 +209,7 @@ namespace Microsoft.AspNet.Security.Tests.OpenIdConnect
                     }
                     else if (req.Path == new PathString("/signout"))
                     {
-                        res.SignOut(OpenIdConnectAuthenticationDefaults.AuthenticationType);
+                        res.SignOut(OpenIdConnectAuthenticationDefaults.AuthenticationScheme);
                     }
                     else if (handler != null)
                     {

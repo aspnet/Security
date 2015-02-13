@@ -31,7 +31,7 @@ namespace Microsoft.AspNet.Security.Cookies
             }
             if (String.IsNullOrEmpty(Options.CookieName))
             {
-                Options.CookieName = CookieAuthenticationDefaults.CookiePrefix + Options.AuthenticationType;
+                Options.CookieName = CookieAuthenticationDefaults.CookiePrefix + Options.AuthenticationScheme;
             }
             if (Options.TicketDataFormat == null)
             {

@@ -19,11 +19,12 @@ namespace Microsoft.AspNet.Security
         /// <returns><value>true</value> when the user fulfills the policy, <value>false</value> otherwise.</returns>
         public static Task<bool> AuthorizeAsync([NotNull] this IAuthorizationService service, ClaimsPrincipal user, object resource, [NotNull] AuthorizationPolicy policy)
         {
-            if (policy.ActiveAuthenticationTypes != null && policy.ActiveAuthenticationTypes.Any() && user != null)
-            {
-                // Filter the user to only contain the active authentication types
-                user = new ClaimsPrincipal(user.Identities.Where(i => policy.ActiveAuthenticationTypes.Contains(i.AuthenticationType)));
-            }
+            // TODO RENABLE
+            //if (policy.ActiveAuthenticationSchemes != null && policy.ActiveAuthenticationSchemes.Any() && user != null)
+            //{
+            //    // Filter the user to only contain the active authentication types
+            //    user = new ClaimsPrincipal(user.Identities.Where(i => policy.ActiveAuthenticationSchemes.Contains(i.AuthenticationScheme)));
+            //}
             return service.AuthorizeAsync(user, resource, policy.Requirements.ToArray());
         }
 
@@ -37,11 +38,12 @@ namespace Microsoft.AspNet.Security
         /// <returns><value>true</value> when the user fulfills the policy, <value>false</value> otherwise.</returns>
         public static bool Authorize([NotNull] this IAuthorizationService service, ClaimsPrincipal user, object resource, [NotNull] AuthorizationPolicy policy)
         {
-            if (policy.ActiveAuthenticationTypes != null && policy.ActiveAuthenticationTypes.Any() && user != null)
-            {
-                // Filter the user to only contain the active authentication types
-                user = new ClaimsPrincipal(user.Identities.Where(i => policy.ActiveAuthenticationTypes.Contains(i.AuthenticationType)));
-            }
+            // TODO: REeanble
+            //if (policy.ActiveAuthenticationSchemes != null && policy.ActiveAuthenticationSchemes.Any() && user != null)
+            //{
+            //    // Filter the user to only contain the active authentication types
+            //    user = new ClaimsPrincipal(user.Identities.Where(i => policy.ActiveAuthenticationSchemes.Contains(i.AuthenticationScheme)));
+            //}
             return service.Authorize(user, resource, policy.Requirements.ToArray());
         }
 

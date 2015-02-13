@@ -19,35 +19,35 @@ namespace Microsoft.AspNet.Security.Cookies
         /// </summary>
         /// <param name="context">The HTTP request context</param>
         /// <param name="options">The middleware options</param>
-        /// <param name="authenticationType">Initializes AuthenticationType property</param>
-        /// <param name="identity">Initializes Identity property</param>
+        /// <param name="authenticationScheme">Initializes AuthenticationScheme property</param>
+        /// <param name="principal">Initializes Principal property</param>
         /// <param name="properties">Initializes Extra property</param>
         /// <param name="cookieOptions">Initializes options for the authentication cookie.</param>
         public CookieResponseSignInContext(
             HttpContext context,
             CookieAuthenticationOptions options,
-            string authenticationType,
-            ClaimsIdentity identity,
+            string authenticationScheme,
+            ClaimsPrincipal principal,
             AuthenticationProperties properties,
             CookieOptions cookieOptions)
             : base(context, options)
         {
-            AuthenticationType = authenticationType;
-            Identity = identity;
+            AuthenticationScheme = authenticationScheme;
+            Principal = principal;
             Properties = properties;
             CookieOptions = cookieOptions;
         }
 
         /// <summary>
-        /// The name of the AuthenticationType creating a cookie
+        /// The name of the AuthenticationScheme creating a cookie
         /// </summary>
-        public string AuthenticationType { get; private set; }
+        public string AuthenticationScheme { get; private set; }
 
         /// <summary>
         /// Contains the claims about to be converted into the outgoing cookie.
         /// May be replaced or altered during the ResponseSignIn call.
         /// </summary>
-        public ClaimsIdentity Identity { get; set; }
+        public ClaimsPrincipal Principal { get; set; }
 
         /// <summary>
         /// Contains the extra data about to be contained in the outgoing cookie.

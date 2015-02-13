@@ -20,6 +20,6 @@ namespace Microsoft.AspNet.Security
         // REVIEW: can we get rid of the , deliminated in Roles/AuthTypes
         public string Roles { get; set; }
 
-        public string ActiveAuthenticationTypes { get; set; }
+        public string ActiveAuthenticationSchemes { get; set; }
     }
 }

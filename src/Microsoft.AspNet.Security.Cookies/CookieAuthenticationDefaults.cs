@@ -13,9 +13,9 @@ namespace Microsoft.AspNet.Security.Cookies
     public static class CookieAuthenticationDefaults
     {
         /// <summary>
-        /// The default value used for CookieAuthenticationOptions.AuthenticationType
+        /// The default value used for CookieAuthenticationOptions.AuthenticationScheme
         /// </summary>
-        public const string AuthenticationType = "Cookies";
+        public const string AuthenticationScheme = "Cookies";
 
         /// <summary>
         /// The prefix used to provide a default CookieAuthenticationOptions.CookieName
