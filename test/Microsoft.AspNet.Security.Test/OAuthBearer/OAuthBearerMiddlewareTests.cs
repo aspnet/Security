@@ -154,6 +154,19 @@ namespace Microsoft.AspNet.Security.OAuthBearer
             return Task.FromResult<object>(null);
         }
 
+        [Fact]
+        public async Task BearerTurns401To403IfAuthenticated()
+        {
+            var server = CreateServer(options =>
+            {
+                options.Notifications.SecurityTokenReceived = SecurityTokenReceived;
+            });
+
+            var response = await SendAsync(server, "http://example.com/unauthorized", "Bearer Token");
+            response.Response.StatusCode.ShouldBe(HttpStatusCode.Forbidden);
+        }
+
+
         class BlobTokenValidator : ISecurityTokenValidator
         {
 
@@ -223,6 +236,12 @@ namespace Microsoft.AspNet.Security.OAuthBearer
                     var res = context.Response;
                     if (req.Path == new PathString("/oauth"))
                     {
+                    }
+                    else if (req.Path == new PathString("/unauthorized"))
+                    {
+                        // Simulate Authorization failure 
+                        var result = await context.AuthenticateAsync(OAuthBearerAuthenticationDefaults.AuthenticationType);
+                        res.Challenge(OAuthBearerAuthenticationDefaults.AuthenticationType);
                     }
                     else
                     {
