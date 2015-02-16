@@ -72,20 +72,20 @@ namespace Microsoft.AspNet.Security.Twitter
                 if (string.IsNullOrWhiteSpace(returnedToken))
                 {
                     _logger.WriteWarning("Missing oauth_token");
-                    return new AuthenticationTicket((ClaimsPrincipal)null, properties, Options.AuthenticationScheme);
+                    return new AuthenticationTicket(properties, Options.AuthenticationScheme);
                 }
 
                 if (returnedToken != requestToken.Token)
                 {
                     _logger.WriteWarning("Unmatched token");
-                    return new AuthenticationTicket((ClaimsPrincipal)null, properties, Options.AuthenticationScheme);
+                    return new AuthenticationTicket(properties, Options.AuthenticationScheme);
                 }
 
                 string oauthVerifier = query.Get("oauth_verifier");
                 if (string.IsNullOrWhiteSpace(oauthVerifier))
                 {
                     _logger.WriteWarning("Missing or blank oauth_verifier");
-                    return new AuthenticationTicket((ClaimsPrincipal)null, properties, Options.AuthenticationScheme);
+                    return new AuthenticationTicket(properties, Options.AuthenticationScheme);
                 }
 
                 AccessToken accessToken = await ObtainAccessTokenAsync(Options.ConsumerKey, Options.ConsumerSecret, requestToken, oauthVerifier);
@@ -120,7 +120,7 @@ namespace Microsoft.AspNet.Security.Twitter
             catch (Exception ex)
             {
                 _logger.WriteError("Authentication failed", ex);
-                return new AuthenticationTicket((ClaimsPrincipal)null, properties, Options.AuthenticationScheme);
+                return new AuthenticationTicket(properties, Options.AuthenticationScheme);
             }
         }
         protected override void ApplyResponseChallenge()

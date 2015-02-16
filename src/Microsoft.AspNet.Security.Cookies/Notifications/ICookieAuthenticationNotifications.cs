@@ -12,12 +12,12 @@ namespace Microsoft.AspNet.Security.Cookies
     public interface ICookieAuthenticationNotifications
     {
         /// <summary>
-        /// Called each time a request identity has been validated by the middleware. By implementing this method the
-        /// application may alter or reject the identity which has arrived with the request.
+        /// Called each time a request principal has been validated by the middleware. By implementing this method the
+        /// application may alter or reject the principal which has arrived with the request.
         /// </summary>
         /// <param name="context">Contains information about the login session as well as the user <see cref="System.Security.Claims.ClaimsIdentity"/>.</param>
         /// <returns>A <see cref="Task"/> representing the completed operation.</returns>
-        Task ValidateIdentity(CookieValidateIdentityContext context);
+        Task ValidatePrincipal(CookieValidatePrincipalContext context);
 
         /// <summary>
         /// Called when an endpoint has provided sign in information before it is converted into a cookie. By

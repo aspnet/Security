@@ -10,9 +10,9 @@ using Microsoft.AspNet.Security.Notifications;
 namespace Microsoft.AspNet.Security.Cookies
 {
     /// <summary>
-    /// Context object passed to the ICookieAuthenticationProvider method ValidateIdentity.
+    /// Context object passed to the ICookieAuthenticationProvider method ValidatePrincipal.
     /// </summary>
-    public class CookieValidateIdentityContext : BaseContext<CookieAuthenticationOptions>
+    public class CookieValidatePrincipalContext : BaseContext<CookieAuthenticationOptions>
     {
         /// <summary>
         /// Creates a new instance of the context object.
@@ -20,7 +20,7 @@ namespace Microsoft.AspNet.Security.Cookies
         /// <param name="context"></param>
         /// <param name="ticket">Contains the initial values for identity and extra data</param>
         /// <param name="options"></param>
-        public CookieValidateIdentityContext([NotNull] HttpContext context, [NotNull] AuthenticationTicket ticket, [NotNull] CookieAuthenticationOptions options)
+        public CookieValidatePrincipalContext([NotNull] HttpContext context, [NotNull] AuthenticationTicket ticket, [NotNull] CookieAuthenticationOptions options)
             : base(context, options)
         {
             Principal = ticket.Principal;
@@ -28,7 +28,7 @@ namespace Microsoft.AspNet.Security.Cookies
         }
 
         /// <summary>
-        /// Contains the claims identity arriving with the request. May be altered to change the 
+        /// Contains the claims principal arriving with the request. May be altered to change the 
         /// details of the authenticated user.
         /// </summary>
         public ClaimsPrincipal Principal { get; private set; }
@@ -39,20 +39,20 @@ namespace Microsoft.AspNet.Security.Cookies
         public AuthenticationProperties Properties { get; private set; }
 
         /// <summary>
-        /// Called to replace the claims identity. The supplied identity will replace the value of the 
-        /// Identity property, which determines the identity of the authenticated request.
+        /// Called to replace the claims principal. The supplied principal will replace the value of the 
+        /// Principal property, which determines the identity of the authenticated request.
         /// </summary>
         /// <param name="identity">The identity used as the replacement</param>
-        public void ReplaceIdentity(IIdentity identity)
+        public void ReplacePrincipal(IPrincipal principal)
         {
-            Principal = new ClaimsPrincipal(new ClaimsIdentity(identity));
+            Principal = new ClaimsPrincipal(principal);
         }
 
         /// <summary>
-        /// Called to reject the incoming identity. This may be done if the application has determined the
+        /// Called to reject the incoming principal. This may be done if the application has determined the
         /// account is no longer active, and the request should be treated as if it was anonymous.
         /// </summary>
-        public void RejectIdentity()
+        public void RejectPrincipal()
         {
             Principal = null;
         }

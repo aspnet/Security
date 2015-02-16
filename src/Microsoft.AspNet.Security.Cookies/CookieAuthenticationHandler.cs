@@ -103,9 +103,9 @@ namespace Microsoft.AspNet.Security.Cookies
                     }
                 }
 
-                var context = new CookieValidateIdentityContext(Context, ticket, Options);
+                var context = new CookieValidatePrincipalContext(Context, ticket, Options);
 
-                await Options.Notifications.ValidateIdentity(context);
+                await Options.Notifications.ValidatePrincipal(context);
 
                 return new AuthenticationTicket(context.Principal, context.Properties, Options.AuthenticationScheme);
             }

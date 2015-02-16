@@ -19,7 +19,7 @@ namespace Microsoft.AspNet.Security.Cookies
         /// </summary>
         public CookieAuthenticationNotifications()
         {
-            OnValidateIdentity = context => Task.FromResult(0);
+            OnValidatePrincipal = context => Task.FromResult(0);
             OnResponseSignIn = context => { };
             OnResponseSignedIn = context => { };
             OnResponseSignOut = context => { };
@@ -30,7 +30,7 @@ namespace Microsoft.AspNet.Security.Cookies
         /// <summary>
         /// A delegate assigned to this property will be invoked when the related method is called
         /// </summary>
-        public Func<CookieValidateIdentityContext, Task> OnValidateIdentity { get; set; }
+        public Func<CookieValidatePrincipalContext, Task> OnValidatePrincipal { get; set; }
 
         /// <summary>
         /// A delegate assigned to this property will be invoked when the related method is called
@@ -62,9 +62,9 @@ namespace Microsoft.AspNet.Security.Cookies
         /// </summary>
         /// <param name="context"></param>
         /// <returns></returns>
-        public virtual Task ValidateIdentity(CookieValidateIdentityContext context)
+        public virtual Task ValidatePrincipal(CookieValidatePrincipalContext context)
         {
-            return OnValidateIdentity.Invoke(context);
+            return OnValidatePrincipal.Invoke(context);
         }
 
         /// <summary>
