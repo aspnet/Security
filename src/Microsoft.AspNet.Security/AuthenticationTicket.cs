@@ -14,6 +14,13 @@ namespace Microsoft.AspNet.Security
         /// <summary>
         /// Initializes a new instance of the <see cref="AuthenticationTicket"/> class
         /// </summary>
+        /// <param name="properties">additional properties that can be consumed by the user or runtime.</param>
+        /// <param name="authenticationScheme">the authentication middleware that was responsible for this ticket.</param>
+        public AuthenticationTicket(AuthenticationProperties properties, string authenticationScheme) : this((ClaimsPrincipal)null, properties, authenticationScheme) { }
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="AuthenticationTicket"/> class
+        /// </summary>
         /// <param name="identity">the <see cref="ClaimsIdentity"/> that represents the authenticated user.</param>
         /// <param name="properties">additional properties that can be consumed by the user or runtime.</param>
         /// <param name="authenticationScheme">the authentication middleware that was responsible for this ticket.</param>

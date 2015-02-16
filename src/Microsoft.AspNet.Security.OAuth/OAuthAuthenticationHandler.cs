@@ -111,13 +111,13 @@ namespace Microsoft.AspNet.Security.OAuth
                 // OAuth2 10.12 CSRF
                 if (!ValidateCorrelationId(properties, Logger))
                 {
-                    return new AuthenticationTicket((ClaimsPrincipal)null, properties, Options.AuthenticationScheme);
+                    return new AuthenticationTicket(properties, Options.AuthenticationScheme);
                 }
 
                 if (string.IsNullOrEmpty(code))
                 {
                     // Null if the remote server returns an error.
-                    return new AuthenticationTicket((ClaimsPrincipal)null, properties, Options.AuthenticationScheme);
+                    return new AuthenticationTicket(properties, Options.AuthenticationScheme);
                 }
 
                 string requestPrefix = Request.Scheme + "://" + Request.Host;
@@ -128,7 +128,7 @@ namespace Microsoft.AspNet.Security.OAuth
                 if (string.IsNullOrWhiteSpace(tokens.AccessToken))
                 {
                     Logger.WriteWarning("Access token was not found");
-                    return new AuthenticationTicket((ClaimsPrincipal)null, properties, Options.AuthenticationScheme);
+                    return new AuthenticationTicket(properties, Options.AuthenticationScheme);
                 }
 
                 return await GetUserInformationAsync(properties, tokens);
@@ -136,7 +136,7 @@ namespace Microsoft.AspNet.Security.OAuth
             catch (Exception ex)
             {
                 Logger.WriteError("Authentication failed", ex);
-                return new AuthenticationTicket((ClaimsPrincipal)null, properties, Options.AuthenticationScheme);
+                return new AuthenticationTicket(properties, Options.AuthenticationScheme);
             }
         }
 
