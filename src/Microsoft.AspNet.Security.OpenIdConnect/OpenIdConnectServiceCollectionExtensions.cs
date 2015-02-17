@@ -12,7 +12,7 @@ namespace Microsoft.Framework.DependencyInjection
     /// </summary>
     public static class OpenIdConnectAuthenticationExtensions
     {
-        public static IServiceCollection ConfigureOpenIdConnectIdAuthentication(this IServiceCollection services, Action<OpenIdConnectAuthenticationOptions> configure)
+        public static IServiceCollection ConfigureOpenIdConnectAuthentication(this IServiceCollection services, Action<OpenIdConnectAuthenticationOptions> configure)
         {
             return services.ConfigureOptions(configure);
         }
