@@ -1,23 +1,17 @@
 // Copyright (c) Microsoft Open Technologies, Inc. All rights reserved.
 // Licensed under the Apache License, Version 2.0. See License.txt in the project root for license information.
 
-using Microsoft.AspNet.Security.Cookies;
-using Microsoft.Framework.DependencyInjection;
-using Microsoft.Framework.OptionsModel;
 using System;
+using Microsoft.AspNet.Security.Cookies;
+using Microsoft.Framework.OptionsModel;
 
 namespace Microsoft.AspNet.Builder
 {
     /// <summary>
     /// Extension methods provided by the cookies authentication middleware
     /// </summary>
-    public static class CookieAuthenticationExtensions
+    public static class CookieAppBuilderExtensions
     {
-        public static IServiceCollection ConfigureCookieAuthentication([NotNull] this IServiceCollection services, [NotNull] Action<CookieAuthenticationOptions> configure)
-        {
-            return services.Configure(configure);
-        }
-
         /// <summary>
         /// Adds a cookie-based authentication middleware to your web application pipeline.
         /// </summary>
