@@ -199,10 +199,11 @@ namespace Microsoft.AspNet.Security.Cookies
                             await Options.SessionStore.RemoveAsync(_sessionKey);
                         }
                         _sessionKey = await Options.SessionStore.StoreAsync(model);
-                        ClaimsIdentity identity = new ClaimsIdentity(
-                            new[] { new Claim(SessionIdClaim, _sessionKey) },
-                            Options.AuthenticationScheme);
-                        model = new AuthenticationTicket(identity, null, Options.AuthenticationScheme);
+                        var principal = new ClaimsPrincipal(
+                            new ClaimsIdentity(
+                                new[] { new Claim(SessionIdClaim, _sessionKey) },
+                                Options.AuthenticationScheme));
+                        model = new AuthenticationTicket(principal, null, Options.AuthenticationScheme);
                     }
                     string cookieValue = Options.TicketDataFormat.Protect(model);
 
@@ -248,10 +249,11 @@ namespace Microsoft.AspNet.Security.Cookies
                     if (Options.SessionStore != null && _sessionKey != null)
                     {
                         await Options.SessionStore.RenewAsync(_sessionKey, model);
-                        ClaimsIdentity identity = new ClaimsIdentity(
-                            new[] { new Claim(SessionIdClaim, _sessionKey) },
-                            Options.AuthenticationScheme);
-                        model = new AuthenticationTicket(identity, null, Options.AuthenticationScheme);
+                        var principal = new ClaimsPrincipal(
+                            new ClaimsIdentity(
+                                new[] { new Claim(SessionIdClaim, _sessionKey) },
+                                Options.AuthenticationScheme));
+                        model = new AuthenticationTicket(principal, null, Options.AuthenticationScheme);
                     }
 
                     string cookieValue = Options.TicketDataFormat.Protect(model);

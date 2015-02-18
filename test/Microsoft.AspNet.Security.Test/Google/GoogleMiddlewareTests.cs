@@ -399,7 +399,7 @@ namespace Microsoft.AspNet.Security.Google
                     OnAuthenticated = context =>
                         {
                             var refreshToken = context.RefreshToken;
-                            context.Identity.AddClaim(new Claim("RefreshToken", refreshToken));
+                            context.Principal.AddIdentity(new ClaimsIdentity(new Claim[] { new Claim("RefreshToken", refreshToken) }));
                             return Task.FromResult<object>(null);
                         }
                 };

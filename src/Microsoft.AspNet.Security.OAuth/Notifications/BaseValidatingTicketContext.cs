@@ -49,11 +49,11 @@ namespace Microsoft.AspNet.Security.OAuth
         /// </summary>
         /// <param name="identity">Assigned to the Ticket.Identity property</param>
         /// <returns>True if the validation has taken effect.</returns>
-        public bool Validated(ClaimsIdentity identity)
+        public bool Validated(ClaimsPrincipal principal)
         {
             AuthenticationProperties properties = Ticket != null ? Ticket.Properties : new AuthenticationProperties();
             // TODO: Ticket can be null, need to revisit
-            return Validated(new AuthenticationTicket(identity, properties, Ticket.AuthenticationScheme));
+            return Validated(new AuthenticationTicket(principal, properties, Ticket.AuthenticationScheme));
         }
     }
 }

@@ -60,7 +60,7 @@ namespace Microsoft.AspNet.Security.OAuthBearer
                     new Claim(ClaimsIdentity.DefaultNameClaimType, "bob"),
                 };
 
-            notification.AuthenticationTicket = new AuthenticationTicket(new ClaimsIdentity(claims), new Http.Security.AuthenticationProperties(), notification.Options.AuthenticationScheme);
+            notification.AuthenticationTicket = new AuthenticationTicket(new ClaimsPrincipal(new ClaimsIdentity(claims)), new Http.Security.AuthenticationProperties(), notification.Options.AuthenticationScheme);
             notification.HandleResponse();
 
             return Task.FromResult<object>(null);
@@ -103,7 +103,7 @@ namespace Microsoft.AspNet.Security.OAuthBearer
                     new Claim(ClaimsIdentity.DefaultNameClaimType, "bob"),
                 };
 
-            notification.AuthenticationTicket = new AuthenticationTicket(new ClaimsIdentity(claims, notification.Options.AuthenticationScheme), new Http.Security.AuthenticationProperties(), notification.Options.AuthenticationScheme);
+            notification.AuthenticationTicket = new AuthenticationTicket(new ClaimsPrincipal(new ClaimsIdentity(claims, notification.Options.AuthenticationScheme)), new Http.Security.AuthenticationProperties(), notification.Options.AuthenticationScheme);
             notification.HandleResponse();
 
             return Task.FromResult<object>(null);
@@ -131,7 +131,7 @@ namespace Microsoft.AspNet.Security.OAuthBearer
                     new Claim(ClaimsIdentity.DefaultNameClaimType, "bob"),
                 };
 
-            notification.AuthenticationTicket = new AuthenticationTicket(new ClaimsIdentity(claims, notification.Options.AuthenticationScheme), new Http.Security.AuthenticationProperties(), notification.Options.AuthenticationScheme);
+            notification.AuthenticationTicket = new AuthenticationTicket(new ClaimsPrincipal(new ClaimsIdentity(claims, notification.Options.AuthenticationScheme)), new Http.Security.AuthenticationProperties(), notification.Options.AuthenticationScheme);
             notification.HandleResponse();
 
             return Task.FromResult<object>(null);

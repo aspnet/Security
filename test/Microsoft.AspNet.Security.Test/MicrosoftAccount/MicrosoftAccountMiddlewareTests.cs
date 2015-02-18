@@ -128,14 +128,14 @@ namespace Microsoft.AspNet.Security.Tests.MicrosoftAccount
                         OnAuthenticated = context =>
                         {
                             var refreshToken = context.RefreshToken;
-                            context.Identity.AddClaim(new Claim("RefreshToken", refreshToken));
+                            context.Principal.AddIdentity(new ClaimsIdentity(new Claim[] { new Claim("RefreshToken", refreshToken) }));
                             return Task.FromResult<object>(null);
                         }
                     };
                 },
                 context =>
                 {
-                    Describe(context.Response, (ClaimsIdentity)context.User.Identity);
+                    Describe(context.Response, context.User);
                     return true;
                 });
             var properties = new AuthenticationProperties();
@@ -218,14 +218,17 @@ namespace Microsoft.AspNet.Security.Tests.MicrosoftAccount
             return res;
         }
 
-        private static void Describe(HttpResponse res, ClaimsIdentity identity)
+        private static void Describe(HttpResponse res, ClaimsPrincipal principal)
         {
             res.StatusCode = 200;
             res.ContentType = "text/xml";
             var xml = new XElement("xml");
-            if (identity != null)
+            if (principal != null)
             {
-                xml.Add(identity.Claims.Select(claim => new XElement("claim", new XAttribute("type", claim.Type), new XAttribute("value", claim.Value))));
+                foreach (var identity in principal.Identities)
+                {
+                    xml.Add(identity.Claims.Select(claim => new XElement("claim", new XAttribute("type", claim.Type), new XAttribute("value", claim.Value))));
+                }
             }
             using (var memory = new MemoryStream())
             {
