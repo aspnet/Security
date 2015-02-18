@@ -163,7 +163,7 @@ namespace CookieSample
                             identity.AddClaim(new Claim("urn:github:url", link, ClaimValueTypes.String, context.Options.ClaimsIssuer));
                         }
 
-                        context.Identity = identity;
+                        context.Principal = new ClaimsPrincipal(identity);
                     },
                 };
             });

@@ -29,6 +29,8 @@ namespace Microsoft.AspNet.Security.Infrastructure
             {
                 foreach (var existingClaimsIdentity in existingPrincipal.Identities)
                 {
+                    // REVIEW: No longer use auth type for anything, so we could remove this check, except for the default one HttpContext.user creates
+                    // REVIEW: Need to ignore any identities that did not come from an authentication scheme?
                     if (existingClaimsIdentity.IsAuthenticated)
                     {
                         newClaimsPrincipal.AddIdentity(existingClaimsIdentity);

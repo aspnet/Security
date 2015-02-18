@@ -32,7 +32,7 @@ namespace Microsoft.AspNet.Security.OAuth
                 identity.AddClaim(new Claim("expires_in", context.ExpiresIn.Value.TotalSeconds.ToString(CultureInfo.InvariantCulture),
                     ClaimValueTypes.String, context.Options.AuthenticationScheme));
             }
-            context.Identity = identity;
+            context.Principal = new ClaimsPrincipal(identity);
             return Task.FromResult(0);
         };
     }

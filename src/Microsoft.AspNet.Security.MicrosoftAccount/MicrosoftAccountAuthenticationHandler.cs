@@ -33,7 +33,7 @@ namespace Microsoft.AspNet.Security.MicrosoftAccount
 
             var context = new MicrosoftAccountAuthenticatedContext(Context, Options, accountInformation, tokens);
             context.Properties = properties;
-            context.Identity = new ClaimsIdentity(
+            var identity = new ClaimsIdentity(
                 new[]
                     {
                         new Claim(ClaimTypes.NameIdentifier, context.Id, ClaimValueTypes.String, Options.AuthenticationScheme),
@@ -47,12 +47,13 @@ namespace Microsoft.AspNet.Security.MicrosoftAccount
 
             if (!string.IsNullOrWhiteSpace(context.Email))
             {
-                context.Identity.AddClaim(new Claim(ClaimTypes.Email, context.Email, ClaimValueTypes.String, Options.AuthenticationScheme));
+                identity.AddClaim(new Claim(ClaimTypes.Email, context.Email, ClaimValueTypes.String, Options.AuthenticationScheme));
             }
+            context.Principal = new ClaimsPrincipal(identity);
 
             await Options.Notifications.Authenticated(context);
 
-            return new AuthenticationTicket(context.Identity, context.Properties, context.Options.AuthenticationScheme);
+            return new AuthenticationTicket(context.Principal, context.Properties, context.Options.AuthenticationScheme);
         }
     }
 }

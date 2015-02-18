@@ -171,7 +171,7 @@ namespace Microsoft.AspNet.Security.OAuth
                 Properties = properties,
             };
             await Options.Notifications.GetUserInformationAsync(context);
-            return new AuthenticationTicket(context.Identity, context.Properties, Options.AuthenticationScheme);
+            return new AuthenticationTicket(context.Principal, context.Properties, Options.AuthenticationScheme);
         }
 
         protected override void ApplyResponseChallenge()
