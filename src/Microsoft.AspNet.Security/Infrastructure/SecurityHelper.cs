@@ -20,10 +20,8 @@ namespace Microsoft.AspNet.Security.Infrastructure
         /// Add all ClaimsIdenities from an additional ClaimPrincipal to the ClaimsPrincipal
         /// </summary>
         /// <param name="identity"></param>
-        public static void AddUserPrincipal([NotNull] HttpContext context, [NotNull] IPrincipal principal)
+        public static void AddUserPrincipal([NotNull] HttpContext context, [NotNull] ClaimsPrincipal principal)
         {
-            var newClaimsPrincipal = new ClaimsPrincipal(principal);
-
             ClaimsPrincipal existingPrincipal = context.User;
             if (existingPrincipal != null)
             {
@@ -33,11 +31,11 @@ namespace Microsoft.AspNet.Security.Infrastructure
                     // REVIEW: Need to ignore any identities that did not come from an authentication scheme?
                     if (existingClaimsIdentity.IsAuthenticated)
                     {
-                        newClaimsPrincipal.AddIdentity(existingClaimsIdentity);
+                        principal.AddIdentity(existingClaimsIdentity);
                     }
                 }
             }
-            context.User = newClaimsPrincipal;
+            context.User = principal;
         }
 
         public static bool LookupChallenge(IEnumerable<string> authenticationSchemes, string authenticationScheme, AuthenticationMode authenticationMode)
@@ -54,19 +52,19 @@ namespace Microsoft.AspNet.Security.Infrastructure
         /// Find response sign-in details for a specific authentication middleware
         /// </summary>
         /// <param name="authenticationScheme">The authentication type to look for</param>
-        public static bool LookupSignIn(IEnumerable<ClaimsIdentity> identities, string authenticationScheme, out ClaimsIdentity identity)
-        {
-            identity = null;
-            foreach (var claimsIdentity in identities)
-            {
-                if (string.Equals(authenticationScheme, claimsIdentity.AuthenticationType, StringComparison.Ordinal))
-                {
-                    identity = claimsIdentity;
-                    return true;
-                }
-            }
-            return false;
-        }
+        //public static bool LookupSignIn(IEnumerable<ClaimsIdentity> identities, string authenticationScheme, out ClaimsIdentity identity)
+        //{
+        //    identity = null;
+        //    foreach (var claimsIdentity in identities)
+        //    {
+        //        if (string.Equals(authenticationScheme, claimsIdentity.AuthenticationType, StringComparison.Ordinal))
+        //        {
+        //            identity = claimsIdentity;
+        //            return true;
+        //        }
+        //    }
+        //    return false;
+        //}
 
         /// <summary>
         /// Find response sign-out details for a specific authentication middleware

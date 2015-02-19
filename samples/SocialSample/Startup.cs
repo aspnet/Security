@@ -6,7 +6,6 @@ using Microsoft.AspNet.Http;
 using Microsoft.AspNet.Http.Security;
 using Microsoft.AspNet.Security;
 using Microsoft.AspNet.Security.Cookies;
-using Microsoft.AspNet.Security.DataProtection;
 using Microsoft.AspNet.Security.Google;
 using Microsoft.AspNet.Security.MicrosoftAccount;
 using Microsoft.AspNet.Security.OAuth;

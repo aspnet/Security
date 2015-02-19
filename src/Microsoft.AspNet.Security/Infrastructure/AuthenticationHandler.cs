@@ -339,7 +339,7 @@ namespace Microsoft.AspNet.Security.Infrastructure
         {
             SignInIdentityContext = new SignInIdentityContext(context.Principal, new AuthenticationProperties(context.Properties));
             SignOutContext = null;
-            context.Accept(BaseOptions.AuthenticationScheme, BaseOptions.Description.Dictionary);
+            context.Accept(BaseOptions.Description.Dictionary);
 
             if (PriorHandler != null)
             {
