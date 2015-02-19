@@ -9,9 +9,9 @@ namespace Microsoft.AspNet.Security
 {
     public class AuthorizationPolicyBuilder
     {
-        public AuthorizationPolicyBuilder(params string[] activeAuthenticationTypes)
+        public AuthorizationPolicyBuilder(params string[] activeAuthenticationSchemes)
         {
-            AddAuthenticationTypes(activeAuthenticationTypes);
+            AddAuthenticationSchemes(activeAuthenticationSchemes);
         }
 
         public AuthorizationPolicyBuilder(AuthorizationPolicy policy)
@@ -20,13 +20,13 @@ namespace Microsoft.AspNet.Security
         }
 
         public IList<IAuthorizationRequirement> Requirements { get; set; } = new List<IAuthorizationRequirement>();
-        public IList<string> ActiveAuthenticationTypes { get; set; } = new List<string>();
+        public IList<string> ActiveAuthenticationSchemes { get; set; } = new List<string>();
 
-        public AuthorizationPolicyBuilder AddAuthenticationTypes(params string[] activeAuthTypes)
+        public AuthorizationPolicyBuilder AddAuthenticationSchemes(params string[] activeAuthTypes)
         {
             foreach (var authType in activeAuthTypes)
             {
-                ActiveAuthenticationTypes.Add(authType);
+                ActiveAuthenticationSchemes.Add(authType);
             }
             return this;
         }
@@ -42,7 +42,7 @@ namespace Microsoft.AspNet.Security
 
         public AuthorizationPolicyBuilder Combine([NotNull] AuthorizationPolicy policy)
         {
-            AddAuthenticationTypes(policy.ActiveAuthenticationTypes.ToArray());
+            AddAuthenticationSchemes(policy.ActiveAuthenticationSchemes.ToArray());
             AddRequirements(policy.Requirements.ToArray());
             return this;
         }
@@ -91,7 +91,7 @@ namespace Microsoft.AspNet.Security
 
         public AuthorizationPolicy Build()
         {
-            return new AuthorizationPolicy(Requirements, ActiveAuthenticationTypes.Distinct());
+            return new AuthorizationPolicy(Requirements, ActiveAuthenticationSchemes.Distinct());
         }
     }
 }

@@ -56,9 +56,9 @@ namespace Microsoft.AspNet.Security.Twitter
         public string AccessTokenSecret { get; private set; }
 
         /// <summary>
-        /// Gets the <see cref="ClaimsIdentity"/> representing the user
+        /// Gets the <see cref="ClaimsPrincipal"/> representing the user
         /// </summary>
-        public ClaimsIdentity Identity { get; set; }
+        public ClaimsPrincipal Principal { get; set; }
 
         /// <summary>
         /// Gets or sets a property bag for common authentication properties

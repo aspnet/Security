@@ -18,15 +18,15 @@ namespace Microsoft.AspNet.Security.Notifications
         {
             if (ticket != null)
             {
-                Identity = ticket.Identity;
+                Principal = ticket.Principal;
                 Properties = ticket.Properties;
             }
         }
 
-        public ClaimsIdentity Identity { get; set; }
+        public ClaimsPrincipal Principal { get; set; }
         public AuthenticationProperties Properties { get; set; }
 
-        public string SignInAsAuthenticationType { get; set; }
+        public string SignInScheme { get; set; }
 
         [SuppressMessage("Microsoft.Design", "CA1056:UriPropertiesShouldNotBeStrings", Justification = "By design")]
         public string RedirectUri { get; set; }

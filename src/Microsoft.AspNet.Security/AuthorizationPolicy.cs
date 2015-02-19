@@ -9,14 +9,14 @@ namespace Microsoft.AspNet.Security
 {
     public class AuthorizationPolicy
     {
-        public AuthorizationPolicy(IEnumerable<IAuthorizationRequirement> requirements, IEnumerable<string> activeAuthenticationTypes)
+        public AuthorizationPolicy(IEnumerable<IAuthorizationRequirement> requirements, IEnumerable<string> activeAuthenticationSchemes)
         {
             Requirements = new List<IAuthorizationRequirement>(requirements).AsReadOnly();
-            ActiveAuthenticationTypes = new List<string>(activeAuthenticationTypes).AsReadOnly();
+            ActiveAuthenticationSchemes = new List<string>(activeAuthenticationSchemes).AsReadOnly();
         }
 
         public IReadOnlyList<IAuthorizationRequirement> Requirements { get; private set; }
-        public IReadOnlyList<string> ActiveAuthenticationTypes { get; private set; }
+        public IReadOnlyList<string> ActiveAuthenticationSchemes { get; private set; }
 
         public static AuthorizationPolicy Combine([NotNull] params AuthorizationPolicy[] policies)
         {
@@ -58,12 +58,12 @@ namespace Microsoft.AspNet.Security
                     policyBuilder.RequiresRole(rolesSplit);
                     requireAnyAuthenticated = false;
                 }
-                string[] authTypesSplit = authorizeAttribute.ActiveAuthenticationTypes?.Split(',');
+                string[] authTypesSplit = authorizeAttribute.ActiveAuthenticationSchemes?.Split(',');
                 if (authTypesSplit != null && authTypesSplit.Any())
                 {
                     foreach (var authType in authTypesSplit)
                     {
-                        policyBuilder.ActiveAuthenticationTypes.Add(authType);
+                        policyBuilder.ActiveAuthenticationSchemes.Add(authType);
                     }
                 }
                 if (requireAnyAuthenticated)

@@ -60,7 +60,7 @@ namespace Microsoft.AspNet.Security.OAuthBearer
                     new Claim(ClaimsIdentity.DefaultNameClaimType, "bob"),
                 };
 
-            notification.AuthenticationTicket = new AuthenticationTicket(new ClaimsIdentity(claims, notification.Options.AuthenticationType), new Http.Security.AuthenticationProperties());
+            notification.AuthenticationTicket = new AuthenticationTicket(new ClaimsPrincipal(new ClaimsIdentity(claims)), new Http.Security.AuthenticationProperties(), notification.Options.AuthenticationScheme);
             notification.HandleResponse();
 
             return Task.FromResult<object>(null);
@@ -103,7 +103,7 @@ namespace Microsoft.AspNet.Security.OAuthBearer
                     new Claim(ClaimsIdentity.DefaultNameClaimType, "bob"),
                 };
 
-            notification.AuthenticationTicket = new AuthenticationTicket(new ClaimsIdentity(claims, notification.Options.AuthenticationType), new Http.Security.AuthenticationProperties());
+            notification.AuthenticationTicket = new AuthenticationTicket(new ClaimsPrincipal(new ClaimsIdentity(claims, notification.Options.AuthenticationScheme)), new Http.Security.AuthenticationProperties(), notification.Options.AuthenticationScheme);
             notification.HandleResponse();
 
             return Task.FromResult<object>(null);
@@ -115,7 +115,7 @@ namespace Microsoft.AspNet.Security.OAuthBearer
             var server = CreateServer(options =>
             {
                 options.Notifications.SecurityTokenValidated = SecurityTokenValidated;
-                options.SecurityTokenValidators = new List<ISecurityTokenValidator>{new BlobTokenValidator(options.AuthenticationType)};
+                options.SecurityTokenValidators = new List<ISecurityTokenValidator>{new BlobTokenValidator(options.AuthenticationScheme)};
             });
 
             var response = await SendAsync(server, "http://example.com/oauth", "Bearer someblob");
@@ -131,7 +131,7 @@ namespace Microsoft.AspNet.Security.OAuthBearer
                     new Claim(ClaimsIdentity.DefaultNameClaimType, "bob"),
                 };
 
-            notification.AuthenticationTicket = new AuthenticationTicket(new ClaimsIdentity(claims, notification.Options.AuthenticationType), new Http.Security.AuthenticationProperties());
+            notification.AuthenticationTicket = new AuthenticationTicket(new ClaimsPrincipal(new ClaimsIdentity(claims, notification.Options.AuthenticationScheme)), new Http.Security.AuthenticationProperties(), notification.Options.AuthenticationScheme);
             notification.HandleResponse();
 
             return Task.FromResult<object>(null);
@@ -154,15 +154,28 @@ namespace Microsoft.AspNet.Security.OAuthBearer
             return Task.FromResult<object>(null);
         }
 
+        [Fact]
+        public async Task BearerTurns401To403IfAuthenticated()
+        {
+            var server = CreateServer(options =>
+            {
+                options.Notifications.SecurityTokenReceived = SecurityTokenReceived;
+            });
+
+            var response = await SendAsync(server, "http://example.com/unauthorized", "Bearer Token");
+            response.Response.StatusCode.ShouldBe(HttpStatusCode.Forbidden);
+        }
+
+
         class BlobTokenValidator : ISecurityTokenValidator
         {
 
-            public BlobTokenValidator(string authenticationType)
+            public BlobTokenValidator(string authenticationScheme)
             {
-                AuthenticationType = authenticationType;
+                AuthenticationScheme = authenticationScheme;
             }
 
-            public string AuthenticationType { get; set; }
+            public string AuthenticationScheme { get; set; }
 
             public bool CanValidateToken
             {
@@ -200,7 +213,7 @@ namespace Microsoft.AspNet.Security.OAuthBearer
                         new Claim(ClaimsIdentity.DefaultNameClaimType, "bob"),
                     };
 
-                return new ClaimsPrincipal(new ClaimsIdentity(claims, AuthenticationType));
+                return new ClaimsPrincipal(new ClaimsIdentity(claims, AuthenticationScheme));
             }
         }
 
@@ -223,6 +236,12 @@ namespace Microsoft.AspNet.Security.OAuthBearer
                     var res = context.Response;
                     if (req.Path == new PathString("/oauth"))
                     {
+                    }
+                    else if (req.Path == new PathString("/unauthorized"))
+                    {
+                        // Simulate Authorization failure 
+                        var result = await context.AuthenticateAsync(OAuthBearerAuthenticationDefaults.AuthenticationScheme);
+                        res.Challenge(OAuthBearerAuthenticationDefaults.AuthenticationScheme);
                     }
                     else
                     {

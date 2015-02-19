@@ -343,7 +343,7 @@ namespace Microsoft.AspNet.Security.OpenIdConnect
                     throw new InvalidOperationException("No SecurityTokenValidator found for token: " + openIdConnectMessage.IdToken);
                 }
 
-                ticket = new AuthenticationTicket(principal, properties, Options.AuthenticationType);
+                ticket = new AuthenticationTicket(principal, properties, Options.AuthenticationScheme);
                 if (!string.IsNullOrWhiteSpace(openIdConnectMessage.SessionState))
                 {
                     ticket.Properties.Dictionary[OpenIdConnectSessionProperties.SessionState] = openIdConnectMessage.SessionState;
@@ -566,7 +566,7 @@ namespace Microsoft.AspNet.Security.OpenIdConnect
             {
                 if (ticket.Principal != null)
                 {
-                    Request.HttpContext.Response.SignIn(ticket.Properties, ticket.Principal.Identities);
+                    Request.HttpContext.Response.SignIn(ticket.AuthenticationScheme, ticket.Principal, ticket.Properties);
                 }
 
                 // Redirect back to the original secured resource, if any.

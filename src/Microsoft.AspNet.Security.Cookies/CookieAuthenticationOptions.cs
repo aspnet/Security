@@ -22,7 +22,7 @@ namespace Microsoft.AspNet.Security.Cookies
         /// </summary>
         public CookieAuthenticationOptions()
         {
-            AuthenticationType = CookieAuthenticationDefaults.AuthenticationType;
+            AuthenticationScheme = CookieAuthenticationDefaults.AuthenticationScheme;
             ReturnUrlParameter = CookieAuthenticationDefaults.ReturnUrlParameter;
             ExpireTimeSpan = TimeSpan.FromDays(14);
             SlidingExpiration = true;
@@ -34,7 +34,7 @@ namespace Microsoft.AspNet.Security.Cookies
 
         /// <summary>
         /// Determines the cookie name used to persist the identity. The default value is ".AspNet.Cookies".
-        /// This value should be changed if you change the name of the AuthenticationType, especially if your
+        /// This value should be changed if you change the name of the AuthenticationScheme, especially if your
         /// system uses the cookie authentication middleware multiple times.
         /// </summary>
         public string CookieName

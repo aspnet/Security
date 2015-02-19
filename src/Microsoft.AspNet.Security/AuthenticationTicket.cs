@@ -14,23 +14,19 @@ namespace Microsoft.AspNet.Security
         /// <summary>
         /// Initializes a new instance of the <see cref="AuthenticationTicket"/> class
         /// </summary>
-        /// <param name="identity"></param>
-        /// <param name="properties"></param>
-        public AuthenticationTicket(ClaimsIdentity identity, AuthenticationProperties properties)
-        {
-            Identity = identity;
-            Properties = properties ?? new AuthenticationProperties();
-        }
+        /// <param name="properties">additional properties that can be consumed by the user or runtime.</param>
+        /// <param name="authenticationScheme">the authentication middleware that was responsible for this ticket.</param>
+        public AuthenticationTicket(AuthenticationProperties properties, string authenticationScheme) : this(null, properties, authenticationScheme) { }
 
         /// <summary>
         /// Initializes a new instance of the <see cref="AuthenticationTicket"/> class
         /// </summary>
-        /// <param name="identity">the <see cref="ClaimsPrincipal"/> that represents the authenticated user.</param>
+        /// <param name="principal">the <see cref="ClaimsPrincipal"/> that represents the authenticated user.</param>
         /// <param name="properties">additional properties that can be consumed by the user or runtime.</param>
-        /// <param name="authenticationType">the authentication middleware that was responsible for this ticket.</param>
-        public AuthenticationTicket(ClaimsPrincipal principal, AuthenticationProperties properties, string authenticationType)
+        /// <param name="authenticationScheme">the authentication middleware that was responsible for this ticket.</param>
+        public AuthenticationTicket(ClaimsPrincipal principal, AuthenticationProperties properties, string authenticationScheme)
         {
-            AuthenticationType = authenticationType;
+            AuthenticationScheme = authenticationScheme;
             Principal = principal;
             Properties = properties ?? new AuthenticationProperties();
         }
@@ -38,12 +34,7 @@ namespace Microsoft.AspNet.Security
         /// <summary>
         /// Gets the authentication type.
         /// </summary>
-        public string AuthenticationType { get; private set; }
-
-        /// <summary>
-        /// Gets the authenticated user identity.
-        /// </summary>
-        public ClaimsIdentity Identity { get; private set; }
+        public string AuthenticationScheme { get; private set; }
 
         /// <summary>
         /// Gets the claims-principal with authenticated user identities.

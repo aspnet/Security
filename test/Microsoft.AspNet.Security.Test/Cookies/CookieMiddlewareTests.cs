@@ -69,9 +69,9 @@ namespace Microsoft.AspNet.Security.Cookies
 
         private Task SignInAsAlice(HttpContext context)
         {
-            context.Response.SignIn(
-                new AuthenticationProperties(),
-                new ClaimsIdentity(new GenericIdentity("Alice", "Cookies")));
+            context.Response.SignIn("Cookies",
+                new ClaimsPrincipal(new ClaimsIdentity(new GenericIdentity("Alice", "Cookies"))),
+                new AuthenticationProperties());
             return Task.FromResult<object>(null);
         }
 
@@ -226,10 +226,10 @@ namespace Microsoft.AspNet.Security.Cookies
             },
             context =>
             {
-                context.Response.SignIn(
-                    new AuthenticationProperties() { ExpiresUtc = clock.UtcNow.Add(TimeSpan.FromMinutes(5)) },
-                    new ClaimsIdentity(new GenericIdentity("Alice", "Cookies")));
-                return Task.FromResult<object>(null);
+                context.Response.SignIn("Cookies",
+                    new ClaimsPrincipal(new ClaimsIdentity(new GenericIdentity("Alice", "Cookies"))),
+                    new AuthenticationProperties() { ExpiresUtc = clock.UtcNow.Add(TimeSpan.FromMinutes(5)) });
+                    return Task.FromResult<object>(null);
             });
 
             Transaction transaction1 = await SendAsync(server, "http://example.com/testpath");
@@ -355,13 +355,31 @@ namespace Microsoft.AspNet.Security.Cookies
             context =>
             {
                 Assert.Equal(new PathString("/base"), context.Request.PathBase);
-                context.Response.SignIn(new ClaimsIdentity(new GenericIdentity("Alice", "Cookies")));
+                context.Response.SignIn("Cookies", 
+                    new ClaimsPrincipal(new ClaimsIdentity(new GenericIdentity("Alice", "Cookies"))));
                 return Task.FromResult<object>(null);
             },
             new Uri("http://example.com/base"));
 
             Transaction transaction1 = await SendAsync(server, "http://example.com/base/testpath");
             Assert.True(transaction1.SetCookie.Contains("path=/base"));
+        }
+
+        [Fact]
+        public async Task CookieTurns401To403IfAuthenticated()
+        {
+            var clock = new TestClock();
+            TestServer server = CreateServer(options =>
+            {
+                options.SystemClock = clock;
+            }, 
+            SignInAsAlice);
+
+            Transaction transaction1 = await SendAsync(server, "http://example.com/testpath");
+
+            Transaction transaction2 = await SendAsync(server, "http://example.com/unauthorized", transaction1.CookieNameValue);
+
+            transaction2.Response.StatusCode.ShouldBe(HttpStatusCode.Forbidden);
         }
 
         private static string FindClaimValue(Transaction transaction, string claimType)
@@ -404,13 +422,19 @@ namespace Microsoft.AspNet.Security.Cookies
                     {
                         res.StatusCode = 401;
                     }
+                    else if (req.Path == new PathString("/unauthorized"))
+                    {
+                        // Simulate Authorization failure 
+                        var result = await context.AuthenticateAsync(CookieAuthenticationDefaults.AuthenticationScheme);
+                        res.Challenge(CookieAuthenticationDefaults.AuthenticationScheme);
+                    }
                     else if (req.Path == new PathString("/protected/CustomRedirect"))
                     {
                         context.Response.Challenge(new AuthenticationProperties() { RedirectUri = "/CustomRedirect" });
                     }
                     else if (req.Path == new PathString("/me"))
                     {
-                        Describe(res, new AuthenticationResult(context.User.Identity, new AuthenticationProperties(), new AuthenticationDescription()));
+                        Describe(res, new AuthenticationResult(context.User, new AuthenticationProperties(), new AuthenticationDescription()));
                     }
                     else if (req.Path.StartsWithSegments(new PathString("/me"), out remainder))
                     {
@@ -436,9 +460,9 @@ namespace Microsoft.AspNet.Security.Cookies
             res.StatusCode = 200;
             res.ContentType = "text/xml";
             var xml = new XElement("xml");
-            if (result != null && result.Identity != null)
+            if (result != null && result.Principal != null)
             {
-                xml.Add(result.Identity.Claims.Select(claim => new XElement("claim", new XAttribute("type", claim.Type), new XAttribute("value", claim.Value))));
+                xml.Add(result.Principal.Claims.Select(claim => new XElement("claim", new XAttribute("type", claim.Type), new XAttribute("value", claim.Value))));
             }
             if (result != null && result.Properties != null)
             {

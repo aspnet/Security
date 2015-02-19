@@ -23,9 +23,9 @@ namespace Microsoft.AspNet.Security.OAuthBearer
         /// </summary>
         public OAuthBearerAuthenticationOptions() : base()
         {
-            AuthenticationType = OAuthBearerAuthenticationDefaults.AuthenticationType;
+            AuthenticationScheme = OAuthBearerAuthenticationDefaults.AuthenticationScheme;
             BackchannelTimeout = TimeSpan.FromMinutes(1);
-            Challenge = OAuthBearerAuthenticationDefaults.AuthenticationType;
+            Challenge = OAuthBearerAuthenticationDefaults.AuthenticationScheme;
             Notifications = new OAuthBearerAuthenticationNotifications();
             RefreshOnIssuerKeyNotFound = true;
             SystemClock = new SystemClock();

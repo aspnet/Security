@@ -52,26 +52,21 @@ namespace Microsoft.AspNet.Security.OAuth
 
             var context = new OAuthReturnEndpointContext(Context, ticket)
             {
-                SignInAsAuthenticationType = Options.SignInAsAuthenticationType,
+                SignInScheme = Options.SignInScheme,
                 RedirectUri = ticket.Properties.RedirectUri,
             };
             ticket.Properties.RedirectUri = null;
 
             await Options.Notifications.ReturnEndpoint(context);
 
-            if (context.SignInAsAuthenticationType != null && context.Identity != null)
+            if (context.SignInScheme != null && context.Principal != null)
             {
-                ClaimsIdentity signInIdentity = context.Identity;
-                if (!string.Equals(signInIdentity.AuthenticationType, context.SignInAsAuthenticationType, StringComparison.Ordinal))
-                {
-                    signInIdentity = new ClaimsIdentity(signInIdentity.Claims, context.SignInAsAuthenticationType, signInIdentity.NameClaimType, signInIdentity.RoleClaimType);
-                }
-                Context.Response.SignIn(context.Properties, signInIdentity);
+                Context.Response.SignIn(context.SignInScheme, context.Principal, context.Properties);
             }
 
             if (!context.IsRequestCompleted && context.RedirectUri != null)
             {
-                if (context.Identity == null)
+                if (context.Principal == null)
                 {
                     // add a redirect hint that sign-in failed in some way
                     context.RedirectUri = QueryHelpers.AddQueryString(context.RedirectUri, "error", "access_denied");
@@ -116,13 +111,13 @@ namespace Microsoft.AspNet.Security.OAuth
                 // OAuth2 10.12 CSRF
                 if (!ValidateCorrelationId(properties, Logger))
                 {
-                    return new AuthenticationTicket(null, properties);
+                    return new AuthenticationTicket(properties, Options.AuthenticationScheme);
                 }
 
                 if (string.IsNullOrEmpty(code))
                 {
                     // Null if the remote server returns an error.
-                    return new AuthenticationTicket(null, properties);
+                    return new AuthenticationTicket(properties, Options.AuthenticationScheme);
                 }
 
                 string requestPrefix = Request.Scheme + "://" + Request.Host;
@@ -133,7 +128,7 @@ namespace Microsoft.AspNet.Security.OAuth
                 if (string.IsNullOrWhiteSpace(tokens.AccessToken))
                 {
                     Logger.WriteWarning("Access token was not found");
-                    return new AuthenticationTicket(null, properties);
+                    return new AuthenticationTicket(properties, Options.AuthenticationScheme);
                 }
 
                 return await GetUserInformationAsync(properties, tokens);
@@ -141,7 +136,7 @@ namespace Microsoft.AspNet.Security.OAuth
             catch (Exception ex)
             {
                 Logger.WriteError("Authentication failed", ex);
-                return new AuthenticationTicket(null, properties);
+                return new AuthenticationTicket(properties, Options.AuthenticationScheme);
             }
         }
 
@@ -176,7 +171,7 @@ namespace Microsoft.AspNet.Security.OAuth
                 Properties = properties,
             };
             await Options.Notifications.GetUserInformationAsync(context);
-            return new AuthenticationTicket(context.Identity, context.Properties);
+            return new AuthenticationTicket(context.Principal, context.Properties, Options.AuthenticationScheme);
         }
 
         protected override void ApplyResponseChallenge()

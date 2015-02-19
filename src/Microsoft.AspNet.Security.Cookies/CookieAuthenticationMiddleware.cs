@@ -31,12 +31,12 @@ namespace Microsoft.AspNet.Security.Cookies
             }
             if (String.IsNullOrEmpty(Options.CookieName))
             {
-                Options.CookieName = CookieAuthenticationDefaults.CookiePrefix + Options.AuthenticationType;
+                Options.CookieName = CookieAuthenticationDefaults.CookiePrefix + Options.AuthenticationScheme;
             }
             if (Options.TicketDataFormat == null)
             {
                 IDataProtector dataProtector = dataProtectionProvider.CreateDataProtector(
-                    typeof(CookieAuthenticationMiddleware).FullName, Options.AuthenticationType, "v2");
+                    typeof(CookieAuthenticationMiddleware).FullName, Options.AuthenticationScheme, "v2");
                 Options.TicketDataFormat = new TicketDataFormat(dataProtector);
             }
             if (Options.CookieManager == null)

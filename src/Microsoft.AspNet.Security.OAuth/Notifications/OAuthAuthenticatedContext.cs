@@ -66,7 +66,7 @@ namespace Microsoft.AspNet.Security.OAuth
         /// <summary>
         /// Gets the <see cref="ClaimsIdentity"/> representing the user.
         /// </summary>
-        public ClaimsIdentity Identity { get; set; }
+        public ClaimsPrincipal Principal { get; set; }
 
         /// <summary>
         /// Gets or sets a property bag for common authentication properties.

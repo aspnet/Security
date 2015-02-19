@@ -65,41 +65,42 @@ namespace Microsoft.AspNet.Security.Facebook
             JObject user = JObject.Parse(text);
 
             var context = new FacebookAuthenticatedContext(Context, Options, user, tokens);
-            context.Identity = new ClaimsIdentity(
-                Options.AuthenticationType,
+            var identity = new ClaimsIdentity(
+                Options.AuthenticationScheme,
                 ClaimsIdentity.DefaultNameClaimType,
                 ClaimsIdentity.DefaultRoleClaimType);
             if (!string.IsNullOrEmpty(context.Id))
             {
-                context.Identity.AddClaim(new Claim(ClaimTypes.NameIdentifier, context.Id, ClaimValueTypes.String, Options.AuthenticationType));
+                identity.AddClaim(new Claim(ClaimTypes.NameIdentifier, context.Id, ClaimValueTypes.String, Options.AuthenticationScheme));
             }
             if (!string.IsNullOrEmpty(context.UserName))
             {
-                context.Identity.AddClaim(new Claim(ClaimsIdentity.DefaultNameClaimType, context.UserName, ClaimValueTypes.String, Options.AuthenticationType));
+                identity.AddClaim(new Claim(ClaimsIdentity.DefaultNameClaimType, context.UserName, ClaimValueTypes.String, Options.AuthenticationScheme));
             }
             if (!string.IsNullOrEmpty(context.Email))
             {
-                context.Identity.AddClaim(new Claim(ClaimTypes.Email, context.Email, ClaimValueTypes.String, Options.AuthenticationType));
+                identity.AddClaim(new Claim(ClaimTypes.Email, context.Email, ClaimValueTypes.String, Options.AuthenticationScheme));
             }
             if (!string.IsNullOrEmpty(context.Name))
             {
-                context.Identity.AddClaim(new Claim("urn:facebook:name", context.Name, ClaimValueTypes.String, Options.AuthenticationType));
+                identity.AddClaim(new Claim("urn:facebook:name", context.Name, ClaimValueTypes.String, Options.AuthenticationScheme));
 
                 // Many Facebook accounts do not set the UserName field.  Fall back to the Name field instead.
                 if (string.IsNullOrEmpty(context.UserName))
                 {
-                    context.Identity.AddClaim(new Claim(ClaimsIdentity.DefaultNameClaimType, context.Name, ClaimValueTypes.String, Options.AuthenticationType));
+                    identity.AddClaim(new Claim(ClaimsIdentity.DefaultNameClaimType, context.Name, ClaimValueTypes.String, Options.AuthenticationScheme));
                 }
             }
             if (!string.IsNullOrEmpty(context.Link))
             {
-                context.Identity.AddClaim(new Claim("urn:facebook:link", context.Link, ClaimValueTypes.String, Options.AuthenticationType));
+                identity.AddClaim(new Claim("urn:facebook:link", context.Link, ClaimValueTypes.String, Options.AuthenticationScheme));
             }
             context.Properties = properties;
+            context.Principal = new ClaimsPrincipal(identity);
 
             await Options.Notifications.Authenticated(context);
 
-            return new AuthenticationTicket(context.Identity, context.Properties);
+            return new AuthenticationTicket(context.Principal, context.Properties, context.Options.AuthenticationScheme);
         }
 
         private string GenerateAppSecretProof(string accessToken)

@@ -61,20 +61,20 @@ namespace Microsoft.AspNet.Security.Twitter
             if (Options.StateDataFormat == null)
             {
                 IDataProtector dataProtector = dataProtectionProvider.CreateDataProtector(
-                    typeof(TwitterAuthenticationMiddleware).FullName, Options.AuthenticationType, "v1");
+                    typeof(TwitterAuthenticationMiddleware).FullName, Options.AuthenticationScheme, "v1");
                 Options.StateDataFormat = new SecureDataFormat<RequestToken>(
                     Serializers.RequestToken,
                     dataProtector,
                     TextEncodings.Base64Url);
             }
 
-            if (string.IsNullOrEmpty(Options.SignInAsAuthenticationType))
+            if (string.IsNullOrEmpty(Options.SignInScheme))
             {
-                Options.SignInAsAuthenticationType = externalOptions.Options.SignInAsAuthenticationType;
+                Options.SignInScheme = externalOptions.Options.SignInScheme;
             }
-            if (string.IsNullOrEmpty(Options.SignInAsAuthenticationType))
+            if (string.IsNullOrEmpty(Options.SignInScheme))
             {
-                throw new ArgumentException(string.Format(CultureInfo.CurrentCulture, Resources.Exception_OptionMustBeProvided, "SignInAsAuthenticationType"));
+                throw new ArgumentException(string.Format(CultureInfo.CurrentCulture, Resources.Exception_OptionMustBeProvided, "SignInScheme"));
             }
 
             _httpClient = new HttpClient(ResolveHttpMessageHandler(Options));

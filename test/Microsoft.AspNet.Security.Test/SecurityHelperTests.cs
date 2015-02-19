@@ -22,7 +22,7 @@ namespace Microsoft.AspNet.Security
             context.User.ShouldNotBe(null);
             context.User.Identity.IsAuthenticated.ShouldBe(false);
 
-            SecurityHelper.AddUserIdentity(context, new GenericIdentity("Test1", "Alpha"));
+            SecurityHelper.AddUserPrincipal(context, new GenericPrincipal(new GenericIdentity("Test1", "Alpha"), new string[0]));
 
             context.User.ShouldNotBe(null);
             context.User.Identity.AuthenticationType.ShouldBe("Alpha");
@@ -43,12 +43,12 @@ namespace Microsoft.AspNet.Security
             context.User.Identity.AuthenticationType.ShouldBe("Alpha");
             context.User.Identity.Name.ShouldBe("Test1");
 
-            SecurityHelper.AddUserIdentity(context, new GenericIdentity("Test2", "Beta"));
+            SecurityHelper.AddUserPrincipal(context, new GenericPrincipal(new GenericIdentity("Test2", "Beta"), new string[0]));
 
             context.User.Identity.AuthenticationType.ShouldBe("Beta");
             context.User.Identity.Name.ShouldBe("Test2");
 
-            SecurityHelper.AddUserIdentity(context, new GenericIdentity("Test3", "Gamma"));
+            SecurityHelper.AddUserPrincipal(context, new GenericPrincipal(new GenericIdentity("Test3", "Gamma"), new string[0]));
 
             context.User.Identity.AuthenticationType.ShouldBe("Gamma");
             context.User.Identity.Name.ShouldBe("Test3");
@@ -80,7 +80,7 @@ namespace Microsoft.AspNet.Security
         }
 
         [Fact]
-        public void WithChallengesMeansLookupsAreDeterminedOnlyByMatchingAuthenticationType()
+        public void WithChallengesMeansLookupsAreDeterminedOnlyByMatchingAuthenticationScheme()
         {
             HttpContext context = new DefaultHttpContext();
             

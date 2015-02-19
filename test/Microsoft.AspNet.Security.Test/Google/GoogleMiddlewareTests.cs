@@ -14,21 +14,19 @@ using System.Xml.Linq;
 using Microsoft.AspNet.Builder;
 using Microsoft.AspNet.Http;
 using Microsoft.AspNet.Http.Security;
-using Microsoft.AspNet.Security.Cookies;
+using Microsoft.AspNet.Security.DataHandler;
+using Microsoft.AspNet.Security.DataProtection;
 using Microsoft.AspNet.TestHost;
+using Microsoft.Framework.DependencyInjection;
 using Newtonsoft.Json;
 using Shouldly;
 using Xunit;
-using Microsoft.Framework.OptionsModel;
-using Microsoft.Framework.DependencyInjection;
-using Microsoft.AspNet.Security.DataProtection;
-using Microsoft.AspNet.Security.DataHandler;
 
 namespace Microsoft.AspNet.Security.Google
 {
     public class GoogleMiddlewareTests
     {
-        private const string CookieAuthenticationType = "Cookie";
+        private const string CookieAuthenticationScheme = "Cookie";
 
         [Fact]
         public async Task ChallengeWillTriggerRedirection()
@@ -400,7 +398,7 @@ namespace Microsoft.AspNet.Security.Google
                     OnAuthenticated = context =>
                         {
                             var refreshToken = context.RefreshToken;
-                            context.Identity.AddClaim(new Claim("RefreshToken", refreshToken));
+                            context.Principal.AddIdentity(new ClaimsIdentity(new Claim[] { new Claim("RefreshToken", refreshToken) }, "Google"));
                             return Task.FromResult<object>(null);
                         }
                 };
@@ -470,10 +468,10 @@ namespace Microsoft.AspNet.Security.Google
                     services.AddDataProtection();
                     services.Configure<ExternalAuthenticationOptions>(options =>
                     {
-                        options.SignInAsAuthenticationType = CookieAuthenticationType;
+                        options.SignInScheme = CookieAuthenticationScheme;
                     });
                 });
-                app.UseCookieAuthentication(options => options.AuthenticationType = CookieAuthenticationType);
+                app.UseCookieAuthentication(options => options.AuthenticationScheme = CookieAuthenticationScheme);
                 app.UseGoogleAuthentication(configureOptions);
                 app.Use(async (context, next) =>
                 {
@@ -486,7 +484,7 @@ namespace Microsoft.AspNet.Security.Google
                     }
                     else if (req.Path == new PathString("/me"))
                     {
-                        Describe(res, (ClaimsIdentity)context.User.Identity);
+                        Describe(res, context.User);
                     }
                     else if (req.Path == new PathString("/401"))
                     {
@@ -504,14 +502,17 @@ namespace Microsoft.AspNet.Security.Google
             });
         }
 
-        private static void Describe(HttpResponse res, ClaimsIdentity identity)
+        private static void Describe(HttpResponse res, ClaimsPrincipal user)
         {
             res.StatusCode = 200;
             res.ContentType = "text/xml";
             var xml = new XElement("xml");
-            if (identity != null)
+            if (user != null)
             {
-                xml.Add(identity.Claims.Select(claim => new XElement("claim", new XAttribute("type", claim.Type), new XAttribute("value", claim.Value))));
+                foreach (var identity in user.Identities)
+                {
+                    xml.Add(identity.Claims.Select(claim => new XElement("claim", new XAttribute("type", claim.Type), new XAttribute("value", claim.Value))));
+                }
             }
             using (var memory = new MemoryStream())
             {

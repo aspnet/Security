@@ -5,7 +5,7 @@ namespace Microsoft.AspNet.Security.MicrosoftAccount
 {
     public static class MicrosoftAccountAuthenticationDefaults
     {
-        public const string AuthenticationType = "Microsoft";
+        public const string AuthenticationScheme = "Microsoft";
 
         public const string AuthorizationEndpoint = "https://login.live.com/oauth20_authorize.srf";
 

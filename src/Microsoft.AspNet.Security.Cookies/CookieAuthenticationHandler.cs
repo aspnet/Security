@@ -60,7 +60,7 @@ namespace Microsoft.AspNet.Security.Cookies
 
                 if (Options.SessionStore != null)
                 {
-                    Claim claim = ticket.Identity.Claims.FirstOrDefault(c => c.Type.Equals(SessionIdClaim));
+                    Claim claim = ticket.Principal.Claims.FirstOrDefault(c => c.Type.Equals(SessionIdClaim));
                     if (claim == null)
                     {
                         _logger.WriteWarning(@"SessionId missing");
@@ -103,11 +103,11 @@ namespace Microsoft.AspNet.Security.Cookies
                     }
                 }
 
-                var context = new CookieValidateIdentityContext(Context, ticket, Options);
+                var context = new CookieValidatePrincipalContext(Context, ticket, Options);
 
-                await Options.Notifications.ValidateIdentity(context);
+                await Options.Notifications.ValidatePrincipal(context);
 
-                return new AuthenticationTicket(context.Identity, context.Properties);
+                return new AuthenticationTicket(context.Principal, context.Properties, Options.AuthenticationScheme);
             }
             catch (Exception exception)
             {
@@ -162,8 +162,8 @@ namespace Microsoft.AspNet.Security.Cookies
                     var signInContext = new CookieResponseSignInContext(
                         Context,
                         Options,
-                        Options.AuthenticationType,
-                        signin.Identity,
+                        Options.AuthenticationScheme,
+                        signin.Principal,
                         signin.Properties,
                         cookieOptions);
 
@@ -191,7 +191,7 @@ namespace Microsoft.AspNet.Security.Cookies
                         signInContext.CookieOptions.Expires = expiresUtc.ToUniversalTime().DateTime;
                     }
 
-                    model = new AuthenticationTicket(signInContext.Identity, signInContext.Properties);
+                    model = new AuthenticationTicket(signInContext.Principal, signInContext.Properties, signInContext.AuthenticationScheme);
                     if (Options.SessionStore != null)
                     {
                         if (_sessionKey != null)
@@ -199,10 +199,11 @@ namespace Microsoft.AspNet.Security.Cookies
                             await Options.SessionStore.RemoveAsync(_sessionKey);
                         }
                         _sessionKey = await Options.SessionStore.StoreAsync(model);
-                        ClaimsIdentity identity = new ClaimsIdentity(
-                            new[] { new Claim(SessionIdClaim, _sessionKey) },
-                            Options.AuthenticationType);
-                        model = new AuthenticationTicket(identity, null);
+                        var principal = new ClaimsPrincipal(
+                            new ClaimsIdentity(
+                                new[] { new Claim(SessionIdClaim, _sessionKey) },
+                                Options.AuthenticationScheme));
+                        model = new AuthenticationTicket(principal, null, Options.AuthenticationScheme);
                     }
                     string cookieValue = Options.TicketDataFormat.Protect(model);
 
@@ -215,8 +216,8 @@ namespace Microsoft.AspNet.Security.Cookies
                     var signedInContext = new CookieResponseSignedInContext(
                         Context,
                         Options,
-                        Options.AuthenticationType,
-                        signInContext.Identity,
+                        Options.AuthenticationScheme,
+                        signInContext.Principal,
                         signInContext.Properties);
 
                     Options.Notifications.ResponseSignedIn(signedInContext);
@@ -248,10 +249,11 @@ namespace Microsoft.AspNet.Security.Cookies
                     if (Options.SessionStore != null && _sessionKey != null)
                     {
                         await Options.SessionStore.RenewAsync(_sessionKey, model);
-                        ClaimsIdentity identity = new ClaimsIdentity(
-                            new[] { new Claim(SessionIdClaim, _sessionKey) },
-                            Options.AuthenticationType);
-                        model = new AuthenticationTicket(identity, null);
+                        var principal = new ClaimsPrincipal(
+                            new ClaimsIdentity(
+                                new[] { new Claim(SessionIdClaim, _sessionKey) },
+                                Options.AuthenticationScheme));
+                        model = new AuthenticationTicket(principal, null, Options.AuthenticationScheme);
                     }
 
                     string cookieValue = Options.TicketDataFormat.Protect(model);

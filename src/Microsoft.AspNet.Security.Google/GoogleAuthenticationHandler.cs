@@ -33,46 +33,47 @@ namespace Microsoft.AspNet.Security.Google
             JObject user = JObject.Parse(text);
 
             var context = new GoogleAuthenticatedContext(Context, Options, user, tokens);
-            context.Identity = new ClaimsIdentity(
-                Options.AuthenticationType,
+            var identity = new ClaimsIdentity(
+                Options.AuthenticationScheme,
                 ClaimsIdentity.DefaultNameClaimType,
                 ClaimsIdentity.DefaultRoleClaimType);
 
             if (!string.IsNullOrEmpty(context.Id))
             {
-                context.Identity.AddClaim(new Claim(ClaimTypes.NameIdentifier, context.Id,
-                    ClaimValueTypes.String, Options.AuthenticationType));
+                identity.AddClaim(new Claim(ClaimTypes.NameIdentifier, context.Id,
+                    ClaimValueTypes.String, Options.AuthenticationScheme));
             }
             if (!string.IsNullOrEmpty(context.GivenName))
             {
-                context.Identity.AddClaim(new Claim(ClaimTypes.GivenName, context.GivenName,
-                    ClaimValueTypes.String, Options.AuthenticationType));
+                identity.AddClaim(new Claim(ClaimTypes.GivenName, context.GivenName,
+                    ClaimValueTypes.String, Options.AuthenticationScheme));
             }
             if (!string.IsNullOrEmpty(context.FamilyName))
             {
-                context.Identity.AddClaim(new Claim(ClaimTypes.Surname, context.FamilyName,
-                    ClaimValueTypes.String, Options.AuthenticationType));
+                identity.AddClaim(new Claim(ClaimTypes.Surname, context.FamilyName,
+                    ClaimValueTypes.String, Options.AuthenticationScheme));
             }
             if (!string.IsNullOrEmpty(context.Name))
             {
-                context.Identity.AddClaim(new Claim(ClaimTypes.Name, context.Name, ClaimValueTypes.String,
-                    Options.AuthenticationType));
+                identity.AddClaim(new Claim(ClaimTypes.Name, context.Name, ClaimValueTypes.String,
+                    Options.AuthenticationScheme));
             }
             if (!string.IsNullOrEmpty(context.Email))
             {
-                context.Identity.AddClaim(new Claim(ClaimTypes.Email, context.Email, ClaimValueTypes.String,
-                    Options.AuthenticationType));
+                identity.AddClaim(new Claim(ClaimTypes.Email, context.Email, ClaimValueTypes.String,
+                    Options.AuthenticationScheme));
             }
             if (!string.IsNullOrEmpty(context.Profile))
             {
-                context.Identity.AddClaim(new Claim("urn:google:profile", context.Profile, ClaimValueTypes.String,
-                    Options.AuthenticationType));
+                identity.AddClaim(new Claim("urn:google:profile", context.Profile, ClaimValueTypes.String,
+                    Options.AuthenticationScheme));
             }
             context.Properties = properties;
+            context.Principal = new ClaimsPrincipal(identity);
 
             await Options.Notifications.Authenticated(context);
 
-            return new AuthenticationTicket(context.Identity, context.Properties);
+            return new AuthenticationTicket(context.Principal, context.Properties, context.Options.AuthenticationScheme);
         }
 
         // TODO: Abstract this properties override pattern into the base class?

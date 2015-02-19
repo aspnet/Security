@@ -17,7 +17,7 @@ namespace OpenIdConnectSample
                 services.AddDataProtection();
                 services.Configure<ExternalAuthenticationOptions>(options =>
                 {
-                    options.SignInAsAuthenticationType = CookieAuthenticationDefaults.AuthenticationType;
+                    options.SignInScheme = CookieAuthenticationDefaults.AuthenticationScheme;
                 });
 
             });
@@ -37,7 +37,7 @@ namespace OpenIdConnectSample
             {
                 if (context.User == null || !context.User.Identity.IsAuthenticated)
                 {
-                    context.Response.Challenge(new AuthenticationProperties { RedirectUri = "/" }, OpenIdConnectAuthenticationDefaults.AuthenticationType);
+                    context.Response.Challenge(new AuthenticationProperties { RedirectUri = "/" }, OpenIdConnectAuthenticationDefaults.AuthenticationScheme);
 
                     context.Response.ContentType = "text/plain";
                     await context.Response.WriteAsync("Hello First timer");

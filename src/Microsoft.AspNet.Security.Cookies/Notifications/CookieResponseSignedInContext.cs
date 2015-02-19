@@ -18,31 +18,31 @@ namespace Microsoft.AspNet.Security.Cookies
         /// </summary>
         /// <param name="context">The HTTP request context</param>
         /// <param name="options">The middleware options</param>
-        /// <param name="authenticationType">Initializes AuthenticationType property</param>
-        /// <param name="identity">Initializes Identity property</param>
+        /// <param name="authenticationScheme">Initializes AuthenticationScheme property</param>
+        /// <param name="principal">Initializes Principal property</param>
         /// <param name="properties">Initializes Properties property</param>
         public CookieResponseSignedInContext(
             HttpContext context,
             CookieAuthenticationOptions options,
-            string authenticationType,
-            ClaimsIdentity identity,
+            string authenticationScheme,
+            ClaimsPrincipal principal,
             AuthenticationProperties properties)
             : base(context, options)
         {
-            AuthenticationType = authenticationType;
-            Identity = identity;
+            AuthenticationScheme = authenticationScheme;
+            Principal = principal;
             Properties = properties;
         }
 
         /// <summary>
-        /// The name of the AuthenticationType creating a cookie
+        /// The name of the AuthenticationScheme creating a cookie
         /// </summary>
-        public string AuthenticationType { get; private set; }
+        public string AuthenticationScheme { get; private set; }
 
         /// <summary>
         /// Contains the claims that were converted into the outgoing cookie.
         /// </summary>
-        public ClaimsIdentity Identity { get; private set; }
+        public ClaimsPrincipal Principal { get; private set; }
 
         /// <summary>
         /// Contains the extra data that was contained in the outgoing cookie.

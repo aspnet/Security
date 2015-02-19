@@ -17,68 +17,68 @@ namespace Microsoft.AspNet.Security.Infrastructure
     public static class SecurityHelper
     {
         /// <summary>
-        /// Add an additional ClaimsIdentity to the ClaimsPrincipal
+        /// Add all ClaimsIdenities from an additional ClaimPrincipal to the ClaimsPrincipal
         /// </summary>
         /// <param name="identity"></param>
-        public static void AddUserIdentity([NotNull] HttpContext context, [NotNull] IIdentity identity)
+        public static void AddUserPrincipal([NotNull] HttpContext context, [NotNull] ClaimsPrincipal principal)
         {
-            var newClaimsPrincipal = new ClaimsPrincipal(identity);
-
             ClaimsPrincipal existingPrincipal = context.User;
             if (existingPrincipal != null)
             {
                 foreach (var existingClaimsIdentity in existingPrincipal.Identities)
                 {
+                    // REVIEW: No longer use auth type for anything, so we could remove this check, except for the default one HttpContext.user creates
+                    // REVIEW: Need to ignore any identities that did not come from an authentication scheme?
                     if (existingClaimsIdentity.IsAuthenticated)
                     {
-                        newClaimsPrincipal.AddIdentity(existingClaimsIdentity);
+                        principal.AddIdentity(existingClaimsIdentity);
                     }
                 }
             }
-            context.User = newClaimsPrincipal;
+            context.User = principal;
         }
 
-        public static bool LookupChallenge(IEnumerable<string> authenticationTypes, string authenticationType, AuthenticationMode authenticationMode)
+        public static bool LookupChallenge(IEnumerable<string> authenticationSchemes, string authenticationScheme, AuthenticationMode authenticationMode)
         {
-            bool challengeHasAuthenticationTypes = authenticationTypes != null && authenticationTypes.Any();
-            if (!challengeHasAuthenticationTypes)
+            bool challengeHasAuthenticationSchemes = authenticationSchemes != null && authenticationSchemes.Any();
+            if (!challengeHasAuthenticationSchemes)
             {
                 return authenticationMode == AuthenticationMode.Active;
             }
-            return authenticationTypes.Contains(authenticationType, StringComparer.Ordinal);
+            return authenticationSchemes.Contains(authenticationScheme, StringComparer.Ordinal);
         }
 
         /// <summary>
         /// Find response sign-in details for a specific authentication middleware
         /// </summary>
-        /// <param name="authenticationType">The authentication type to look for</param>
-        public static bool LookupSignIn(IEnumerable<ClaimsIdentity> identities, string authenticationType, out ClaimsIdentity identity)
-        {
-            identity = null;
-            foreach (var claimsIdentity in identities)
-            {
-                if (string.Equals(authenticationType, claimsIdentity.AuthenticationType, StringComparison.Ordinal))
-                {
-                    identity = claimsIdentity;
-                    return true;
-                }
-            }
-            return false;
-        }
+        /// <param name="authenticationScheme">The authentication type to look for</param>
+        //public static bool LookupSignIn(IEnumerable<ClaimsIdentity> identities, string authenticationScheme, out ClaimsIdentity identity)
+        //{
+        //    identity = null;
+        //    foreach (var claimsIdentity in identities)
+        //    {
+        //        if (string.Equals(authenticationScheme, claimsIdentity.AuthenticationType, StringComparison.Ordinal))
+        //        {
+        //            identity = claimsIdentity;
+        //            return true;
+        //        }
+        //    }
+        //    return false;
+        //}
 
         /// <summary>
         /// Find response sign-out details for a specific authentication middleware
         /// </summary>
-        /// <param name="authenticationType">The authentication type to look for</param>
+        /// <param name="authenticationScheme">The authentication type to look for</param>
         /// <param name="authenticationMode">The authentication mode the middleware is running under</param>
-        public static bool LookupSignOut(IEnumerable<string> authenticationTypes, string authenticationType, AuthenticationMode authenticationMode)
+        public static bool LookupSignOut(IEnumerable<string> authenticationSchemes, string authenticationScheme, AuthenticationMode authenticationMode)
         {
-            bool singOutHasAuthenticationTypes = authenticationTypes != null && authenticationTypes.Any();
-            if (!singOutHasAuthenticationTypes)
+            bool singOutHasAuthenticationSchemes = authenticationSchemes != null && authenticationSchemes.Any();
+            if (!singOutHasAuthenticationSchemes)
             {
                 return authenticationMode == AuthenticationMode.Active;
             }
-            return authenticationTypes.Contains(authenticationType, StringComparer.Ordinal);            
+            return authenticationSchemes.Contains(authenticationScheme, StringComparer.Ordinal);            
         }
     }
 }

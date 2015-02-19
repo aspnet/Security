@@ -332,7 +332,7 @@ namespace Microsoft.AspNet.Security.Test
         }
 
         [Fact]
-        public async Task Authorize_PolicyCanAuthenticationTypeWithNameClaim()
+        public async Task Authorize_PolicyCanAuthenticationSchemeWithNameClaim()
         {
             // Arrange
             var policy = new AuthorizationPolicyBuilder("AuthType").RequiresClaim(ClaimTypes.Name);
@@ -348,8 +348,8 @@ namespace Microsoft.AspNet.Security.Test
             Assert.True(allowed);
         }
 
-        [Fact]
-        public async Task Authorize_PolicyWillFilterAuthenticationType()
+        [Fact(Skip = "Filtering TBD")]
+        public async Task Authorize_PolicyWillFilterAuthenticationScheme()
         {
             // Arrange
             var policy = new AuthorizationPolicyBuilder("Bogus").RequiresClaim(ClaimTypes.Name);
@@ -365,8 +365,8 @@ namespace Microsoft.AspNet.Security.Test
             Assert.False(allowed);
         }
 
-        [Fact]
-        public async Task Authorize_PolicyCanFilterMultipleAuthenticationType()
+        [Fact(Skip = "Filtering TBD")]
+        public async Task Authorize_PolicyCanFilterMultipleAuthenticationScheme()
         {
             // Arrange
             var policy = new AuthorizationPolicyBuilder("One", "Two").RequiresClaim(ClaimTypes.Name, "one").RequiresClaim(ClaimTypes.Name, "two");

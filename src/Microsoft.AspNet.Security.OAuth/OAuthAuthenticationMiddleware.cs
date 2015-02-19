@@ -41,9 +41,9 @@ namespace Microsoft.AspNet.Security.OAuth
             : base(next, services, options, configureOptions)
         {
             // todo: review error handling
-            if (string.IsNullOrWhiteSpace(Options.AuthenticationType))
+            if (string.IsNullOrWhiteSpace(Options.AuthenticationScheme))
             {
-                throw new ArgumentException(string.Format(CultureInfo.CurrentCulture, Resources.Exception_OptionMustBeProvided, "AuthenticationType"));
+                throw new ArgumentException(string.Format(CultureInfo.CurrentCulture, Resources.Exception_OptionMustBeProvided, "AuthenticationScheme"));
             }
 
             if (string.IsNullOrWhiteSpace(Options.ClientId))
@@ -71,7 +71,7 @@ namespace Microsoft.AspNet.Security.OAuth
             if (Options.StateDataFormat == null)
             {
                 IDataProtector dataProtector = dataProtectionProvider.CreateDataProtector(
-                    this.GetType().FullName, Options.AuthenticationType, "v1");
+                    this.GetType().FullName, Options.AuthenticationScheme, "v1");
                 Options.StateDataFormat = new PropertiesDataFormat(dataProtector);
             }
 
@@ -80,13 +80,13 @@ namespace Microsoft.AspNet.Security.OAuth
             Backchannel.Timeout = Options.BackchannelTimeout;
             Backchannel.MaxResponseContentBufferSize = 1024 * 1024 * 10; // 10 MB
 
-            if (string.IsNullOrEmpty(Options.SignInAsAuthenticationType))
+            if (string.IsNullOrEmpty(Options.SignInScheme))
             {
-                Options.SignInAsAuthenticationType = externalOptions.Options.SignInAsAuthenticationType;
+                Options.SignInScheme = externalOptions.Options.SignInScheme;
             }
-            if (string.IsNullOrEmpty(Options.SignInAsAuthenticationType))
+            if (string.IsNullOrEmpty(Options.SignInScheme))
             {
-                throw new ArgumentException(string.Format(CultureInfo.CurrentCulture, Resources.Exception_OptionMustBeProvided, "SignInAsAuthenticationType"));
+                throw new ArgumentException(string.Format(CultureInfo.CurrentCulture, Resources.Exception_OptionMustBeProvided, "SignInScheme"));
             }
         }
 

@@ -33,26 +33,27 @@ namespace Microsoft.AspNet.Security.MicrosoftAccount
 
             var context = new MicrosoftAccountAuthenticatedContext(Context, Options, accountInformation, tokens);
             context.Properties = properties;
-            context.Identity = new ClaimsIdentity(
+            var identity = new ClaimsIdentity(
                 new[]
                     {
-                        new Claim(ClaimTypes.NameIdentifier, context.Id, ClaimValueTypes.String, Options.AuthenticationType),
-                        new Claim(ClaimTypes.Name, context.Name, ClaimValueTypes.String, Options.AuthenticationType),
-                        new Claim("urn:microsoftaccount:id", context.Id, ClaimValueTypes.String, Options.AuthenticationType),
-                        new Claim("urn:microsoftaccount:name", context.Name, ClaimValueTypes.String, Options.AuthenticationType)
+                        new Claim(ClaimTypes.NameIdentifier, context.Id, ClaimValueTypes.String, Options.AuthenticationScheme),
+                        new Claim(ClaimTypes.Name, context.Name, ClaimValueTypes.String, Options.AuthenticationScheme),
+                        new Claim("urn:microsoftaccount:id", context.Id, ClaimValueTypes.String, Options.AuthenticationScheme),
+                        new Claim("urn:microsoftaccount:name", context.Name, ClaimValueTypes.String, Options.AuthenticationScheme)
                     },
-                Options.AuthenticationType,
+                Options.AuthenticationScheme,
                 ClaimsIdentity.DefaultNameClaimType,
                 ClaimsIdentity.DefaultRoleClaimType);
 
             if (!string.IsNullOrWhiteSpace(context.Email))
             {
-                context.Identity.AddClaim(new Claim(ClaimTypes.Email, context.Email, ClaimValueTypes.String, Options.AuthenticationType));
+                identity.AddClaim(new Claim(ClaimTypes.Email, context.Email, ClaimValueTypes.String, Options.AuthenticationScheme));
             }
+            context.Principal = new ClaimsPrincipal(identity);
 
             await Options.Notifications.Authenticated(context);
 
-            return new AuthenticationTicket(context.Identity, context.Properties);
+            return new AuthenticationTicket(context.Principal, context.Properties, context.Options.AuthenticationScheme);
         }
     }
 }
