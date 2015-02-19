@@ -398,7 +398,7 @@ namespace Microsoft.AspNet.Security.Google
                     OnAuthenticated = context =>
                         {
                             var refreshToken = context.RefreshToken;
-                            context.Principal.AddIdentity(new ClaimsIdentity(new Claim[] { new Claim("RefreshToken", refreshToken) }));
+                            context.Principal.AddIdentity(new ClaimsIdentity(new Claim[] { new Claim("RefreshToken", refreshToken) }, "Google"));
                             return Task.FromResult<object>(null);
                         }
                 };
@@ -484,7 +484,7 @@ namespace Microsoft.AspNet.Security.Google
                     }
                     else if (req.Path == new PathString("/me"))
                     {
-                        Describe(res, (ClaimsIdentity)context.User.Identity);
+                        Describe(res, context.User);
                     }
                     else if (req.Path == new PathString("/401"))
                     {
@@ -502,14 +502,17 @@ namespace Microsoft.AspNet.Security.Google
             });
         }
 
-        private static void Describe(HttpResponse res, ClaimsIdentity identity)
+        private static void Describe(HttpResponse res, ClaimsPrincipal user)
         {
             res.StatusCode = 200;
             res.ContentType = "text/xml";
             var xml = new XElement("xml");
-            if (identity != null)
+            if (user != null)
             {
-                xml.Add(identity.Claims.Select(claim => new XElement("claim", new XAttribute("type", claim.Type), new XAttribute("value", claim.Value))));
+                foreach (var identity in user.Identities)
+                {
+                    xml.Add(identity.Claims.Select(claim => new XElement("claim", new XAttribute("type", claim.Type), new XAttribute("value", claim.Value))));
+                }
             }
             using (var memory = new MemoryStream())
             {
