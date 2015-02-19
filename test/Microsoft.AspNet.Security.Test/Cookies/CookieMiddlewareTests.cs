@@ -180,9 +180,6 @@ namespace Microsoft.AspNet.Security.Cookies
 
             Transaction transaction2 = await SendAsync(server, "http://example.com/me/Cookies", transaction1.CookieNameValue);
 
-            Assert.Equal("", transaction2.ResponseElement.ToString());
-
-
             FindClaimValue(transaction2, ClaimTypes.Name).ShouldBe("Alice");
         }
 
