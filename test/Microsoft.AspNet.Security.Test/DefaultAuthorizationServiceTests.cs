@@ -348,7 +348,7 @@ namespace Microsoft.AspNet.Security.Test
             Assert.True(allowed);
         }
 
-        [Fact]
+        [Fact(Skip = "Filtering TBD")]
         public async Task Authorize_PolicyWillFilterAuthenticationScheme()
         {
             // Arrange
