@@ -1,9 +1,9 @@
 ﻿using Microsoft.AspNet.Builder;
 using Microsoft.AspNet.Http;
-using Microsoft.AspNet.Http.Security;
-using Microsoft.AspNet.Security;
-using Microsoft.AspNet.Security.Cookies;
-using Microsoft.AspNet.Security.OpenIdConnect;
+using Microsoft.AspNet.Http.Authentication;
+using Microsoft.AspNet.Authentication;
+using Microsoft.AspNet.Authentication.Cookies;
+using Microsoft.AspNet.Authentication.OpenIdConnect;
 using Microsoft.Framework.DependencyInjection;
 
 namespace OpenIdConnectSample

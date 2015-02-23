@@ -3,12 +3,12 @@ using System.Net.Http.Headers;
 using System.Security.Claims;
 using Microsoft.AspNet.Builder;
 using Microsoft.AspNet.Http;
-using Microsoft.AspNet.Http.Security;
-using Microsoft.AspNet.Security;
-using Microsoft.AspNet.Security.Cookies;
-using Microsoft.AspNet.Security.Google;
-using Microsoft.AspNet.Security.MicrosoftAccount;
-using Microsoft.AspNet.Security.OAuth;
+using Microsoft.AspNet.Http.Authentication;
+using Microsoft.AspNet.Authentication;
+using Microsoft.AspNet.Authentication.Cookies;
+using Microsoft.AspNet.Authentication.Google;
+using Microsoft.AspNet.Authentication.MicrosoftAccount;
+using Microsoft.AspNet.Authentication.OAuth;
 using Microsoft.Framework.DependencyInjection;
 using Newtonsoft.Json.Linq;
 
