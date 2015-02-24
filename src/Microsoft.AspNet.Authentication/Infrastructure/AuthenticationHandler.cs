@@ -12,6 +12,7 @@ using Microsoft.AspNet.Http.Authentication;
 using Microsoft.AspNet.Http.Interfaces.Authentication;
 using Microsoft.AspNet.Authentication.DataHandler.Encoder;
 using Microsoft.Framework.Logging;
+using System.Collections.Generic;
 
 namespace Microsoft.AspNet.Authentication.Infrastructure
 {
@@ -342,7 +343,7 @@ namespace Microsoft.AspNet.Authentication.Infrastructure
 
         public virtual void Challenge(IChallengeContext context)
         {
-            if (SecurityHelper.LookupChallenge(context.AuthenticationSchemes, BaseOptions.AuthenticationScheme))
+            if (ShouldHandleChallenge(context.AuthenticationSchemes))
             {
                 ChallengeContext = context;
                 context.Accept(BaseOptions.AuthenticationScheme, BaseOptions.Description.Dictionary);
@@ -356,12 +357,11 @@ namespace Microsoft.AspNet.Authentication.Infrastructure
 
         protected abstract void ApplyResponseChallenge();
 
-        public virtual bool ShouldHandleChallenge()
+        public virtual bool ShouldHandleChallenge(IEnumerable<string> authenticationSchemes)
         {
-            var authSchemes = ChallengeContext?.AuthenticationSchemes;
-            return authSchemes != null &&
-                authSchemes.Any() &&
-                authSchemes.Contains(BaseOptions.AuthenticationScheme, StringComparer.Ordinal);
+            return authenticationSchemes != null &&
+                authenticationSchemes.Any() &&
+                authenticationSchemes.Contains(BaseOptions.AuthenticationScheme, StringComparer.Ordinal);
         }
 
         public virtual bool ShouldConvertChallengeToForbidden()
@@ -371,7 +371,7 @@ namespace Microsoft.AspNet.Authentication.Infrastructure
             return Response.StatusCode == 401 &&
                 _authenticateCalled &&
                 ChallengeContext != null &&
-                ShouldHandleChallenge();
+                ShouldHandleChallenge(ChallengeContext.AuthenticationSchemes);
         }
 
         /// <summary>

@@ -59,26 +59,5 @@ namespace Microsoft.AspNet.Authentication
             principal.Identities.Skip(1).First().Name.ShouldBe("Test2");
             principal.Identities.Skip(2).First().Name.ShouldBe("Test1");
         }
-
-        [Fact]
-        public void WithChallengesMeansLookupsAreDeterminedOnlyByMatchingAuthenticationScheme()
-        {
-            HttpContext context = new DefaultHttpContext();
-            
-            IEnumerable<string> challengeTypes = new[] { "Beta", "Gamma" };
-
-            bool activeNoMatch = SecurityHelper.LookupChallenge(challengeTypes, "Alpha");
-            bool passiveNoMatch = SecurityHelper.LookupChallenge(challengeTypes, "Alpha");
-
-            challengeTypes = new[] { "Beta", "Alpha" };
-
-            bool activeWithMatch = SecurityHelper.LookupChallenge(challengeTypes, "Alpha");
-            bool passiveWithMatch = SecurityHelper.LookupChallenge(challengeTypes, "Alpha");
-
-            Assert.False(activeNoMatch);
-            Assert.False(passiveNoMatch);
-            Assert.True(activeWithMatch);
-            Assert.True(passiveWithMatch);
-        }
     }
 }
