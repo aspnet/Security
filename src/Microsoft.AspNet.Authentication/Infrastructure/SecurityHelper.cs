@@ -35,12 +35,5 @@ namespace Microsoft.AspNet.Authentication.Infrastructure
             }
             context.User = principal;
         }
-
-        public static bool LookupChallenge(IEnumerable<string> authenticationSchemes, string authenticationScheme)
-        {
-            return authenticationSchemes != null && 
-                authenticationSchemes.Any() &&
-                authenticationSchemes.Contains(authenticationScheme, StringComparer.Ordinal);
-        }
     }
 }

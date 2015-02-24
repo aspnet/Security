@@ -1,7 +1,7 @@
 // Copyright (c) Microsoft Open Technologies, Inc. All rights reserved.
 // Licensed under the Apache License, Version 2.0. See License.txt in the project root for license information.
 
-
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNet.Http.Interfaces.Authentication;
@@ -56,15 +56,15 @@ namespace Microsoft.AspNet.Authentication.Infrastructure
         /// Automatic Authentication Handlers can handle empty authentication schemes
         /// </summary>
         /// <returns></returns>
-        public override bool ShouldHandleChallenge()
+        public override bool ShouldHandleChallenge(IEnumerable<string> authenticationSchemes)
         {
-            if (base.ShouldHandleChallenge())
+            if (base.ShouldHandleChallenge(authenticationSchemes))
             {
                 return true;
             }
 
             return Options.AutomaticAuthentication &&
-                (ChallengeContext?.AuthenticationSchemes == null || !ChallengeContext.AuthenticationSchemes.Any());
+                (authenticationSchemes == null || !authenticationSchemes.Any());
         }
     }
 }
