@@ -4,7 +4,7 @@
 
 using System;
 
-namespace Microsoft.AspNet.Authentication.Infrastructure
+namespace Microsoft.AspNet.Authentication
 {
     /// <summary>
     /// Provides access to the normal system clock.

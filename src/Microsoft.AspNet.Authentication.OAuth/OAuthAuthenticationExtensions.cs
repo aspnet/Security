@@ -4,7 +4,7 @@
 using System;
 using System.Globalization;
 using Microsoft.AspNet.Authentication.OAuth;
-using Microsoft.AspNet.Authentication.Infrastructure;
+using Microsoft.AspNet.Authentication;
 using Microsoft.Framework.OptionsModel;
 
 namespace Microsoft.AspNet.Builder

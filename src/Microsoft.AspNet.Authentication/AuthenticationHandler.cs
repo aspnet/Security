@@ -13,7 +13,7 @@ using Microsoft.AspNet.Http.Authentication;
 using Microsoft.AspNet.Http.Interfaces.Authentication;
 using Microsoft.Framework.Logging;
 
-namespace Microsoft.AspNet.Authentication.Infrastructure
+namespace Microsoft.AspNet.Authentication
 {
     /// <summary>
     /// Base class for the per-request work performed by most authentication middleware.

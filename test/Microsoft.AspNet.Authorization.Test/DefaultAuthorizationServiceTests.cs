@@ -41,7 +41,7 @@ namespace Microsoft.AspNet.Authorization.Test
             {
                 services.ConfigureAuthorization(options =>
                 {
-                    options.AddPolicy("Basic", policy => policy.RequiresClaim("Permission", "CanViewPage"));
+                    options.AddPolicy("Basic", policy => policy.RequireClaim("Permission", "CanViewPage"));
                 });
             });
             var user = new ClaimsPrincipal(new ClaimsIdentity(new Claim[] { new Claim("Permission", "CanViewPage") }, "Basic"));
@@ -61,7 +61,7 @@ namespace Microsoft.AspNet.Authorization.Test
             {
                 services.ConfigureAuthorization(options =>
                 {
-                    options.AddPolicy("Basic", policy => policy.RequiresClaim("Permission", "CanViewPage"));
+                    options.AddPolicy("Basic", policy => policy.RequireClaim("Permission", "CanViewPage"));
                 });
             });
             var user = new ClaimsPrincipal(new ClaimsIdentity(new Claim[] { new Claim("Permission", "CanViewPage") }, "Basic"));
@@ -81,7 +81,7 @@ namespace Microsoft.AspNet.Authorization.Test
             {
                 services.ConfigureAuthorization(options =>
                 {
-                    options.AddPolicy("Basic", policy => policy.RequiresClaim("Permission", "CanViewPage", "CanViewAnything"));
+                    options.AddPolicy("Basic", policy => policy.RequireClaim("Permission", "CanViewPage", "CanViewAnything"));
                 });
             });
             var user = new ClaimsPrincipal(
@@ -108,7 +108,7 @@ namespace Microsoft.AspNet.Authorization.Test
             {
                 services.ConfigureAuthorization(options =>
                 {
-                    options.AddPolicy("Basic", policy => policy.RequiresClaim("Permission", "CanViewPage", "CanViewAnything"));
+                    options.AddPolicy("Basic", policy => policy.RequireClaim("Permission", "CanViewPage", "CanViewAnything"));
                 });
             });
             var user = new ClaimsPrincipal(
@@ -134,7 +134,7 @@ namespace Microsoft.AspNet.Authorization.Test
             {
                 services.ConfigureAuthorization(options =>
                 {
-                    options.AddPolicy("Basic", policy => policy.RequiresClaim("Permission", "CanViewPage", "CanViewAnything"));
+                    options.AddPolicy("Basic", policy => policy.RequireClaim("Permission", "CanViewPage", "CanViewAnything"));
                 });
             });
             var user = new ClaimsPrincipal(
@@ -160,7 +160,7 @@ namespace Microsoft.AspNet.Authorization.Test
             {
                 services.ConfigureAuthorization(options =>
                 {
-                    options.AddPolicy("Basic", policy => policy.RequiresClaim("Permission", "CanViewPage"));
+                    options.AddPolicy("Basic", policy => policy.RequireClaim("Permission", "CanViewPage"));
                 });
             });
             var user = new ClaimsPrincipal(
@@ -186,7 +186,7 @@ namespace Microsoft.AspNet.Authorization.Test
             {
                 services.ConfigureAuthorization(options =>
                 {
-                    options.AddPolicy("Basic", policy => policy.RequiresClaim("Permission", "CanViewPage"));
+                    options.AddPolicy("Basic", policy => policy.RequireClaim("Permission", "CanViewPage"));
                 });
             });
             var user = new ClaimsPrincipal(
@@ -210,7 +210,7 @@ namespace Microsoft.AspNet.Authorization.Test
             {
                 services.ConfigureAuthorization(options =>
                 {
-                    options.AddPolicy("Basic", policy => policy.RequiresClaim("Permission", "CanViewPage"));
+                    options.AddPolicy("Basic", policy => policy.RequireClaim("Permission", "CanViewPage"));
                 });
             });
 
@@ -229,7 +229,7 @@ namespace Microsoft.AspNet.Authorization.Test
             {
                 services.ConfigureAuthorization(options =>
                 {
-                    options.AddPolicy("Basic", policy => policy.RequiresClaim("Permission", "CanViewPage"));
+                    options.AddPolicy("Basic", policy => policy.RequireClaim("Permission", "CanViewPage"));
                 });
             });
             var user = new ClaimsPrincipal(new ClaimsIdentity());
@@ -249,7 +249,7 @@ namespace Microsoft.AspNet.Authorization.Test
             {
                 services.ConfigureAuthorization(options =>
                 {
-                    options.AddPolicy("Basic", policy => policy.RequiresClaim("Permission", "CanViewPage"));
+                    options.AddPolicy("Basic", policy => policy.RequireClaim("Permission", "CanViewPage"));
                 });
             });
             var user = new ClaimsPrincipal(
@@ -291,8 +291,8 @@ namespace Microsoft.AspNet.Authorization.Test
         public async Task Authorize_CustomRolePolicy()
         {
             // Arrange
-            var policy = new AuthorizationPolicyBuilder().RequiresRole("Administrator")
-                .RequiresClaim(ClaimTypes.Role, "User");
+            var policy = new AuthorizationPolicyBuilder().RequireRole("Administrator")
+                .RequireClaim(ClaimTypes.Role, "User");
             var authorizationService = BuildAuthorizationService();
             var user = new ClaimsPrincipal(
                 new ClaimsIdentity(
@@ -314,7 +314,7 @@ namespace Microsoft.AspNet.Authorization.Test
         public async Task Authorize_HasAnyClaimOfTypePolicy()
         {
             // Arrange
-            var policy = new AuthorizationPolicyBuilder().RequiresClaim(ClaimTypes.Role);
+            var policy = new AuthorizationPolicyBuilder().RequireClaim(ClaimTypes.Role);
             var authorizationService = BuildAuthorizationService();
             var user = new ClaimsPrincipal(
                 new ClaimsIdentity(
@@ -335,7 +335,7 @@ namespace Microsoft.AspNet.Authorization.Test
         public async Task Authorize_PolicyCanAuthenticationSchemeWithNameClaim()
         {
             // Arrange
-            var policy = new AuthorizationPolicyBuilder("AuthType").RequiresClaim(ClaimTypes.Name);
+            var policy = new AuthorizationPolicyBuilder("AuthType").RequireClaim(ClaimTypes.Name);
             var authorizationService = BuildAuthorizationService();
             var user = new ClaimsPrincipal(
                 new ClaimsIdentity(new Claim[] { new Claim(ClaimTypes.Name, "Name") }, "AuthType")
@@ -352,7 +352,7 @@ namespace Microsoft.AspNet.Authorization.Test
         public async Task Authorize_PolicyWillFilterAuthenticationScheme()
         {
             // Arrange
-            var policy = new AuthorizationPolicyBuilder("Bogus").RequiresClaim(ClaimTypes.Name);
+            var policy = new AuthorizationPolicyBuilder("Bogus").RequireClaim(ClaimTypes.Name);
             var authorizationService = BuildAuthorizationService();
             var user = new ClaimsPrincipal(
                 new ClaimsIdentity(new Claim[] { new Claim(ClaimTypes.Name, "Name") }, "AuthType")
@@ -369,7 +369,7 @@ namespace Microsoft.AspNet.Authorization.Test
         public async Task Authorize_PolicyCanFilterMultipleAuthenticationScheme()
         {
             // Arrange
-            var policy = new AuthorizationPolicyBuilder("One", "Two").RequiresClaim(ClaimTypes.Name, "one").RequiresClaim(ClaimTypes.Name, "two");
+            var policy = new AuthorizationPolicyBuilder("One", "Two").RequireClaim(ClaimTypes.Name, "one").RequireClaim(ClaimTypes.Name, "two");
             var authorizationService = BuildAuthorizationService();
             var user = new ClaimsPrincipal();
             user.AddIdentity(new ClaimsIdentity(new Claim[] { new Claim(ClaimTypes.Name, "one") }, "One"));
@@ -386,7 +386,7 @@ namespace Microsoft.AspNet.Authorization.Test
         public async Task RolePolicyCanRequireSingleRole()
         {
             // Arrange
-            var policy = new AuthorizationPolicyBuilder("AuthType").RequiresRole("Admin");
+            var policy = new AuthorizationPolicyBuilder("AuthType").RequireRole("Admin");
             var authorizationService = BuildAuthorizationService();
             var user = new ClaimsPrincipal(
                 new ClaimsIdentity(new Claim[] { new Claim(ClaimTypes.Role, "Admin") }, "AuthType")
@@ -403,7 +403,7 @@ namespace Microsoft.AspNet.Authorization.Test
         public async Task RolePolicyCanRequireOneOfManyRoles()
         {
             // Arrange
-            var policy = new AuthorizationPolicyBuilder("AuthType").RequiresRole("Admin", "Users");
+            var policy = new AuthorizationPolicyBuilder("AuthType").RequireRole("Admin", "Users");
             var authorizationService = BuildAuthorizationService();
             var user = new ClaimsPrincipal(
                 new ClaimsIdentity(new Claim[] { new Claim(ClaimTypes.Role, "Users") }, "AuthType"));
@@ -419,7 +419,7 @@ namespace Microsoft.AspNet.Authorization.Test
         public async Task RolePolicyCanBlockWrongRole()
         {
             // Arrange
-            var policy = new AuthorizationPolicyBuilder().RequiresClaim("Permission", "CanViewPage");
+            var policy = new AuthorizationPolicyBuilder().RequireClaim("Permission", "CanViewPage");
             var authorizationService = BuildAuthorizationService();
             var user = new ClaimsPrincipal(
                 new ClaimsIdentity(
@@ -444,7 +444,7 @@ namespace Microsoft.AspNet.Authorization.Test
             {
                 services.ConfigureAuthorization(options =>
                 {
-                    options.AddPolicy("Basic", policy => policy.RequiresRole("Admin", "Users"));
+                    options.AddPolicy("Basic", policy => policy.RequireRole("Admin", "Users"));
                 });
             });
             var user = new ClaimsPrincipal(
@@ -495,7 +495,7 @@ namespace Microsoft.AspNet.Authorization.Test
             {
                 services.ConfigureAuthorization(options =>
                 {
-                    options.AddPolicy("Hao", policy => policy.RequiresUserName("Hao"));
+                    options.AddPolicy("Hao", policy => policy.RequireUserName("Hao"));
                 });
             });
             var user = new ClaimsPrincipal(
@@ -521,7 +521,7 @@ namespace Microsoft.AspNet.Authorization.Test
             {
                 services.ConfigureAuthorization(options =>
                 {
-                    options.AddPolicy("Hao", policy => policy.RequiresUserName("Hao"));
+                    options.AddPolicy("Hao", policy => policy.RequireUserName("Hao"));
                 });
             });
             var user = new ClaimsPrincipal(
@@ -547,7 +547,7 @@ namespace Microsoft.AspNet.Authorization.Test
             {
                 services.ConfigureAuthorization(options =>
                 {
-                    options.AddPolicy("Any", policy => policy.RequiresAuthenticatedUser());
+                    options.AddPolicy("Any", policy => policy.RequireAuthenticatedUser());
                 });
             });
             var user = new ClaimsPrincipal(
@@ -573,7 +573,7 @@ namespace Microsoft.AspNet.Authorization.Test
             {
                 services.ConfigureAuthorization(options =>
                 {
-                    options.AddPolicy("Any", policy => policy.RequiresAuthenticatedUser());
+                    options.AddPolicy("Any", policy => policy.RequireAuthenticatedUser());
                 });
             });
             var user = new ClaimsPrincipal(new ClaimsIdentity());
@@ -681,8 +681,8 @@ namespace Microsoft.AspNet.Authorization.Test
             {
                 services.ConfigureAuthorization(options =>
                 {
-                    var basePolicy = new AuthorizationPolicyBuilder().RequiresClaim("Base", "Value").Build();
-                    options.AddPolicy("Combined", policy => policy.Combine(basePolicy).RequiresClaim("Claim", "Exists"));
+                    var basePolicy = new AuthorizationPolicyBuilder().RequireClaim("Base", "Value").Build();
+                    options.AddPolicy("Combined", policy => policy.Combine(basePolicy).RequireClaim("Claim", "Exists"));
                 });
             });
             var user = new ClaimsPrincipal(
@@ -708,8 +708,8 @@ namespace Microsoft.AspNet.Authorization.Test
             {
                 services.ConfigureAuthorization(options =>
                 {
-                    var basePolicy = new AuthorizationPolicyBuilder().RequiresClaim("Base", "Value").Build();
-                    options.AddPolicy("Combined", policy => policy.Combine(basePolicy).RequiresClaim("Claim", "Exists"));
+                    var basePolicy = new AuthorizationPolicyBuilder().RequireClaim("Base", "Value").Build();
+                    options.AddPolicy("Combined", policy => policy.Combine(basePolicy).RequireClaim("Claim", "Exists"));
                 });
             });
             var user = new ClaimsPrincipal(
@@ -734,8 +734,8 @@ namespace Microsoft.AspNet.Authorization.Test
             {
                 services.ConfigureAuthorization(options =>
                 {
-                    var basePolicy = new AuthorizationPolicyBuilder().RequiresClaim("Base", "Value").Build();
-                    options.AddPolicy("Combined", policy => policy.Combine(basePolicy).RequiresClaim("Claim", "Exists"));
+                    var basePolicy = new AuthorizationPolicyBuilder().RequireClaim("Base", "Value").Build();
+                    options.AddPolicy("Combined", policy => policy.Combine(basePolicy).RequireClaim("Claim", "Exists"));
                 });
             });
             var user = new ClaimsPrincipal(

@@ -10,7 +10,7 @@ using System.Threading.Tasks;
 using Microsoft.AspNet.Http;
 using Microsoft.AspNet.Http.Extensions;
 using Microsoft.AspNet.Http.Authentication;
-using Microsoft.AspNet.Authentication.Infrastructure;
+using Microsoft.AspNet.Authentication;
 using Microsoft.AspNet.WebUtilities;
 using Microsoft.Framework.Logging;
 using Newtonsoft.Json.Linq;
