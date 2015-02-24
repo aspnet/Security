@@ -1,7 +1,6 @@
 // Copyright (c) Microsoft Open Technologies, Inc. All rights reserved.
 // Licensed under the Apache License, Version 2.0. See License.txt in the project root for license information.
 
-
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -35,7 +34,7 @@ namespace Microsoft.AspNet.Authentication.Infrastructure
         private AuthenticationOptions _baseOptions;
 
         protected IChallengeContext ChallengeContext { get; set; }
-        protected SignInIdentityContext SignInIdentityContext { get; set; }
+        protected SignInContext SignInContext { get; set; }
         protected ISignOutContext SignOutContext { get; set; }
 
         protected HttpContext Context { get; private set; }
@@ -314,7 +313,7 @@ namespace Microsoft.AspNet.Authentication.Infrastructure
 
         public virtual void SignIn(ISignInContext context)
         {
-            SignInIdentityContext = new SignInIdentityContext(context.Principal, new AuthenticationProperties(context.Properties));
+            SignInContext = new SignInContext(context.Principal, new AuthenticationProperties(context.Properties));
             SignOutContext = null;
             context.Accept(BaseOptions.Description.Dictionary);
 
@@ -330,7 +329,7 @@ namespace Microsoft.AspNet.Authentication.Infrastructure
             bool canSignOut = !string.IsNullOrWhiteSpace(context.AuthenticationScheme);
             if (canSignOut)
             {
-                SignInIdentityContext = null;
+                SignInContext = null;
                 SignOutContext = context;
                 context.Accept();
             }

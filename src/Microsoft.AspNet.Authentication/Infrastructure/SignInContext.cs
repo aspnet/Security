@@ -6,9 +6,9 @@ using Microsoft.AspNet.Http.Authentication;
 
 namespace Microsoft.AspNet.Authentication.Infrastructure
 {
-    public class SignInIdentityContext
+    public class SignInContext
     {
-        public SignInIdentityContext(ClaimsPrincipal principal, AuthenticationProperties properties)
+        public SignInContext(ClaimsPrincipal principal, AuthenticationProperties properties)
         {
             Principal = principal;
             Properties = properties;
