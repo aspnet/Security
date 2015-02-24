@@ -3,16 +3,16 @@
 
 
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Security.Cryptography;
 using System.Threading;
 using System.Threading.Tasks;
+using Microsoft.AspNet.Authentication.DataHandler.Encoder;
 using Microsoft.AspNet.Http;
 using Microsoft.AspNet.Http.Authentication;
 using Microsoft.AspNet.Http.Interfaces.Authentication;
-using Microsoft.AspNet.Authentication.DataHandler.Encoder;
 using Microsoft.Framework.Logging;
-using System.Collections.Generic;
 
 namespace Microsoft.AspNet.Authentication.Infrastructure
 {
@@ -26,7 +26,7 @@ namespace Microsoft.AspNet.Authentication.Infrastructure
         private Task<AuthenticationTicket> _authenticate;
         private bool _authenticateInitialized;
         private object _authenticateSyncLock;
-        internal bool _authenticateCalled;
+        private bool _authenticateCalled;
 
         private Task _applyResponse;
         private bool _applyResponseInitialized;
