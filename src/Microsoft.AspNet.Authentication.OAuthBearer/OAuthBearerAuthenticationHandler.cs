@@ -16,7 +16,7 @@ using Microsoft.IdentityModel.Protocols;
 
 namespace Microsoft.AspNet.Authentication.OAuthBearer
 {
-    public class OAuthBearerAuthenticationHandler : AuthenticationHandler<OAuthBearerAuthenticationOptions>
+    public class OAuthBearerAuthenticationHandler : AutomaticAuthenticationHandler<OAuthBearerAuthenticationOptions>
     {
         private readonly ILogger _logger;
         private OpenIdConnectConfiguration _configuration;
@@ -192,6 +192,11 @@ namespace Microsoft.AspNet.Authentication.OAuthBearer
 
         protected override async Task ApplyResponseChallengeAsync()
         {
+            if (ShouldConvertChallengeToForbidden())
+            {
+                Response.StatusCode = 403;
+            }
+
             if ((Response.StatusCode != 401) || (ChallengeContext == null))
             {
                 return;

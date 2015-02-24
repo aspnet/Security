@@ -20,7 +20,6 @@ namespace Microsoft.AspNet.Authentication.OAuth
         /// </summary>
         public OAuthAuthenticationOptions()
         {
-            AuthenticationMode = AuthenticationMode.Passive;
             Scope = new List<string>();
             BackchannelTimeout = TimeSpan.FromSeconds(60);
         }

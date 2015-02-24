@@ -13,7 +13,7 @@ namespace Microsoft.AspNet.Authentication.OAuthBearer
     /// <summary>
     /// Options class provides information needed to control Bearer Authentication middleware behavior
     /// </summary>
-    public class OAuthBearerAuthenticationOptions : AuthenticationOptions
+    public class OAuthBearerAuthenticationOptions : AutomaticAuthenticationOptions
     {
         private ICollection<ISecurityTokenValidator> _securityTokenValidators;
         private TokenValidationParameters _tokenValidationParameters;

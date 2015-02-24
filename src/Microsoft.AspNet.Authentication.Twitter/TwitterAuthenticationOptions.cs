@@ -21,7 +21,6 @@ namespace Microsoft.AspNet.Authentication.Twitter
             AuthenticationScheme = TwitterAuthenticationDefaults.AuthenticationScheme;
             Caption = AuthenticationScheme;
             CallbackPath = new PathString("/signin-twitter");
-            AuthenticationMode = AuthenticationMode.Passive;
             BackchannelTimeout = TimeSpan.FromSeconds(60);
 #if ASPNET50
             // Twitter lists its valid Subject Key Identifiers at https://dev.twitter.com/docs/security/using-ssl
