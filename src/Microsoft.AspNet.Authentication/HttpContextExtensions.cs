@@ -5,7 +5,7 @@ using Microsoft.AspNet.Http;
 using Microsoft.AspNet.Http.Core.Authentication;
 using Microsoft.AspNet.Http.Interfaces.Authentication;
 
-namespace Microsoft.AspNet.Authentication.Infrastructure
+namespace Microsoft.AspNet.Authentication
 {
     internal static class HttpContextExtensions
     {

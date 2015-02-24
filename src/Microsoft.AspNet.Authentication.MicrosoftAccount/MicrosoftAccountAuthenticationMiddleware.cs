@@ -3,10 +3,10 @@
 
 using System;
 using System.Globalization;
+using Microsoft.AspNet.Authentication;
+using Microsoft.AspNet.Authentication.OAuth;
 using Microsoft.AspNet.Builder;
 using Microsoft.AspNet.DataProtection;
-using Microsoft.AspNet.Authentication.Infrastructure;
-using Microsoft.AspNet.Authentication.OAuth;
 using Microsoft.Framework.Logging;
 using Microsoft.Framework.OptionsModel;
 

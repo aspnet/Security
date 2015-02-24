@@ -6,13 +6,8 @@ using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.IdentityModel.Tokens;
 using System.Net.Http;
+using Microsoft.AspNet.Authentication;
 using Microsoft.AspNet.Builder;
-<<<<<<< HEAD:src/Microsoft.AspNet.Security.OAuthBearer/OAuthBearerAuthenticationMiddleware.cs
-using Microsoft.AspNet.Security.Infrastructure;
-=======
-using Microsoft.AspNet.Security.DataProtection;
-using Microsoft.AspNet.Authentication.Infrastructure;
->>>>>>> Authentication -> Authorization:src/Microsoft.AspNet.Authentication.OAuthBearer/OAuthBearerAuthenticationMiddleware.cs
 using Microsoft.Framework.Logging;
 using Microsoft.Framework.OptionsModel;
 using Microsoft.IdentityModel.Protocols;

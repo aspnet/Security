@@ -4,7 +4,7 @@
 using System.Security.Claims;
 using Microsoft.AspNet.Http.Authentication;
 
-namespace Microsoft.AspNet.Authentication.Infrastructure
+namespace Microsoft.AspNet.Authentication
 {
     public class SignInContext
     {

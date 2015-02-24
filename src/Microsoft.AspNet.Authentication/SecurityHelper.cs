@@ -7,7 +7,7 @@ using System.Linq;
 using System.Security.Claims;
 using Microsoft.AspNet.Http;
 
-namespace Microsoft.AspNet.Authentication.Infrastructure
+namespace Microsoft.AspNet.Authentication
 {
     /// <summary>
     /// Helper code used when implementing authentication middleware
