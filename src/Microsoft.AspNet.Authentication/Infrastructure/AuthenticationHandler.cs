@@ -25,7 +25,7 @@ namespace Microsoft.AspNet.Authentication.Infrastructure
         private Task<AuthenticationTicket> _authenticate;
         private bool _authenticateInitialized;
         private object _authenticateSyncLock;
-        private bool _authenticateCalled;
+        internal bool _authenticateCalled;
 
         private Task _applyResponse;
         private bool _applyResponseInitialized;
@@ -71,16 +71,6 @@ namespace Microsoft.AspNet.Authentication.Infrastructure
             Response.OnSendingHeaders(OnSendingHeaderCallback, this);
 
             await InitializeCoreAsync();
-
-            // TODO: Move to Automatic base class
-            if (BaseOptions.AuthenticationMode == AuthenticationMode.Active)
-            {
-                AuthenticationTicket ticket = await AuthenticateAsync();
-                if (ticket != null && ticket.Principal != null)
-                {
-                    SecurityHelper.AddUserPrincipal(Context, ticket.Principal);
-                }
-            }
         }
 
         private static void OnSendingHeaderCallback(object state)
@@ -305,18 +295,7 @@ namespace Microsoft.AspNet.Authentication.Infrastructure
         protected virtual async Task ApplyResponseCoreAsync()
         {
             await ApplyResponseGrantAsync();
-
-            // If authenticate was called and the the status is still 401, authZ failed so set 403 and stop
-            // REVIEW: Does this need to ensure that there's the 401 is challenge for this auth type?
-            if (Response.StatusCode == 401 && _authenticateCalled)
-            {
-                Response.StatusCode = 403;
-                return;
-            }
-            else
-            {
-                await ApplyResponseChallengeAsync();
-            }
+            await ApplyResponseChallengeAsync();
         }
 
         protected abstract void ApplyResponseGrant();
@@ -346,9 +325,8 @@ namespace Microsoft.AspNet.Authentication.Infrastructure
 
         public virtual void SignOut(ISignOutContext context)
         {
-            // Empty auth scheme is allowed only for Active -- TODO: remove this and move to derived handler that is active aware
-            bool canSignOut = !string.IsNullOrWhiteSpace(context.AuthenticationScheme) ||
-                BaseOptions.AuthenticationMode == AuthenticationMode.Active;
+            // Empty auth scheme is allowed only for automatic authentication
+            bool canSignOut = !string.IsNullOrWhiteSpace(context.AuthenticationScheme);
             if (canSignOut)
             {
                 SignInIdentityContext = null;
@@ -364,7 +342,7 @@ namespace Microsoft.AspNet.Authentication.Infrastructure
 
         public virtual void Challenge(IChallengeContext context)
         {
-            if (SecurityHelper.LookupChallenge(context.AuthenticationSchemes, BaseOptions.AuthenticationScheme, BaseOptions.AuthenticationMode))
+            if (SecurityHelper.LookupChallenge(context.AuthenticationSchemes, BaseOptions.AuthenticationScheme))
             {
                 ChallengeContext = context;
                 context.Accept(BaseOptions.AuthenticationScheme, BaseOptions.Description.Dictionary);
@@ -378,6 +356,24 @@ namespace Microsoft.AspNet.Authentication.Infrastructure
 
         protected abstract void ApplyResponseChallenge();
 
+        public virtual bool ShouldHandleChallenge()
+        {
+            var authSchemes = ChallengeContext?.AuthenticationSchemes;
+            return authSchemes != null &&
+                authSchemes.Any() &&
+                authSchemes.Contains(BaseOptions.AuthenticationScheme, StringComparer.Ordinal);
+        }
+
+        public virtual bool ShouldConvertChallengeToForbidden()
+        {
+            // Return 403 iff 401 and this handler's authenticate was called
+            // and the challenge is for the authentication type
+            return Response.StatusCode == 401 &&
+                _authenticateCalled &&
+                ChallengeContext != null &&
+                ShouldHandleChallenge();
+        }
+
         /// <summary>
         /// Override this method to deal with 401 challenge concerns, if an authentication scheme in question
         /// deals an authentication interaction as part of it's request flow. (like adding a response header, or
@@ -386,7 +382,16 @@ namespace Microsoft.AspNet.Authentication.Infrastructure
         /// <returns></returns>
         protected virtual Task ApplyResponseChallengeAsync()
         {
-            ApplyResponseChallenge();
+            // If authenticate was called and the the status is still 401, authZ failed so set 403 and stop
+            // REVIEW: Does this need to ensure that there's the 401 is challenge for this auth type?
+            if (ShouldConvertChallengeToForbidden())
+            {
+                Response.StatusCode = 403;
+            }
+            else
+            {
+                ApplyResponseChallenge();
+            }
             return Task.FromResult(0);
         }
 

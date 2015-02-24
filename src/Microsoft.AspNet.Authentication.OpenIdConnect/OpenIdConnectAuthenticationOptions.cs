@@ -52,7 +52,8 @@ namespace Microsoft.AspNet.Authentication.OpenIdConnect
         [SuppressMessage("Microsoft.Globalization", "CA1303:Do not pass literals as localized parameters", MessageId = "Microsoft.Owin.Security.OpenIdConnect.OpenIdConnectAuthenticationOptions.set_Caption(System.String)", Justification = "Not a LOC field")]
         public OpenIdConnectAuthenticationOptions(string authenticationScheme)
         {
-            AuthenticationMode = AuthenticationMode.Active;
+            // REVIEW: why was this active by default??
+            //AuthenticationMode = AuthenticationMode.Active;
             AuthenticationScheme = authenticationScheme;
             BackchannelTimeout = TimeSpan.FromMinutes(1);
             Caption = OpenIdConnectAuthenticationDefaults.Caption;

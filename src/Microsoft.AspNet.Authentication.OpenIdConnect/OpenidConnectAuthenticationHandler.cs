@@ -123,8 +123,8 @@ namespace Microsoft.AspNet.Authentication.OpenIdConnect
                 return;
             }
 
-            // Active middleware should redirect on 401 even if there wasn't an explicit challenge.
-            if (ChallengeContext == null && Options.AuthenticationMode == AuthenticationMode.Passive)
+            // Only redirect on challenges
+            if (ChallengeContext == null)
             {
                 return;
             }

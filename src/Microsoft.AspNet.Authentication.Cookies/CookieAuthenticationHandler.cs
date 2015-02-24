@@ -13,7 +13,7 @@ using Microsoft.Framework.Logging;
 
 namespace Microsoft.AspNet.Authentication.Cookies
 {
-    internal class CookieAuthenticationHandler : AuthenticationHandler<CookieAuthenticationOptions>
+    internal class CookieAuthenticationHandler : AutomaticAuthenticationHandler<CookieAuthenticationOptions>
     {
         private const string HeaderNameCacheControl = "Cache-Control";
         private const string HeaderNamePragma = "Pragma";
@@ -329,8 +329,8 @@ namespace Microsoft.AspNet.Authentication.Cookies
                 return;
             }
 
-            // Active middleware should redirect on 401 even if there wasn't an explicit challenge.
-            if (ChallengeContext == null && Options.AuthenticationMode == AuthenticationMode.Passive)
+            // Automatic middleware should redirect on 401 even if there wasn't an explicit challenge.
+            if (ChallengeContext == null && !Options.AutomaticAuthentication)
             {
                 return;
             }
