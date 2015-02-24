@@ -31,7 +31,7 @@ namespace Microsoft.AspNet.Authentication.Infrastructure
             // Empty or null auth scheme is allowed for automatic Authentication
             if (Options.AutomaticAuthentication && string.IsNullOrWhiteSpace(context.AuthenticationScheme))
             {
-                SignInIdentityContext = null;
+                SignInContext = null;
                 SignOutContext = context;
                 context.Accept();
             }

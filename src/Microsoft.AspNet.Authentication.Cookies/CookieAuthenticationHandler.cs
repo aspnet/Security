@@ -129,7 +129,7 @@ namespace Microsoft.AspNet.Authentication.Cookies
 
         protected override async Task ApplyResponseGrantAsync()
         {
-            var signin = SignInIdentityContext;
+            var signin = SignInContext;
             bool shouldSignin = signin != null;
             var signout = SignOutContext;
             bool shouldSignout = signout != null;
