@@ -55,7 +55,7 @@ namespace Microsoft.AspNet.Authorization
                 var rolesSplit = authorizeAttribute.Roles?.Split(',');
                 if (rolesSplit != null && rolesSplit.Any())
                 {
-                    policyBuilder.RequiresRole(rolesSplit);
+                    policyBuilder.RequireRole(rolesSplit);
                     requireAnyAuthenticated = false;
                 }
                 string[] authTypesSplit = authorizeAttribute.ActiveAuthenticationSchemes?.Split(',');
@@ -68,7 +68,7 @@ namespace Microsoft.AspNet.Authorization
                 }
                 if (requireAnyAuthenticated)
                 {
-                    policyBuilder.RequiresAuthenticatedUser();
+                    policyBuilder.RequireAuthenticatedUser();
                 }
             }
             return any ? policyBuilder.Build() : null;

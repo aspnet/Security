@@ -20,8 +20,8 @@ namespace Microsoft.AspNet.Authroization.Test
                 new AuthorizeAttribute { Roles = "r1,r2", ActiveAuthenticationSchemes = "roles" },
             };
             var options = new AuthorizationOptions();
-            options.AddPolicy("1", policy => policy.RequiresClaim("1"));
-            options.AddPolicy("2", policy => policy.RequiresClaim("2"));
+            options.AddPolicy("1", policy => policy.RequireClaim("1"));
+            options.AddPolicy("2", policy => policy.RequireClaim("2"));
 
             // Act
             var combined = AuthorizationPolicy.Combine(options, attributes);

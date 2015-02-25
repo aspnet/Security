@@ -12,7 +12,7 @@ using System.Threading.Tasks;
 using Microsoft.AspNet.Http;
 using Microsoft.AspNet.Http.Core.Collections;
 using Microsoft.AspNet.Http.Authentication;
-using Microsoft.AspNet.Authentication.Infrastructure;
+using Microsoft.AspNet.Authentication;
 using Microsoft.AspNet.Authentication.Twitter.Messages;
 using Microsoft.AspNet.WebUtilities;
 using Microsoft.Framework.Logging;
@@ -136,8 +136,8 @@ namespace Microsoft.AspNet.Authentication.Twitter
                 return;
             }
 
-            // Active middleware should redirect on 401 even if there wasn't an explicit challenge.
-            if (ChallengeContext == null && Options.AuthenticationMode == AuthenticationMode.Passive)
+            // Only redirect on challenges
+            if (ChallengeContext == null)
             {
                 return;
             }

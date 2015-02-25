@@ -10,7 +10,7 @@ using System.Threading.Tasks;
 using Microsoft.AspNet.Http;
 using Microsoft.AspNet.Http.Extensions;
 using Microsoft.AspNet.Http.Authentication;
-using Microsoft.AspNet.Authentication.Infrastructure;
+using Microsoft.AspNet.Authentication;
 using Microsoft.AspNet.WebUtilities;
 using Microsoft.Framework.Logging;
 using Newtonsoft.Json.Linq;
@@ -181,8 +181,8 @@ namespace Microsoft.AspNet.Authentication.OAuth
                 return;
             }
 
-            // Active middleware should redirect on 401 even if there wasn't an explicit challenge.
-            if (ChallengeContext == null && Options.AuthenticationMode == AuthenticationMode.Passive)
+            // Only redirect on challenges
+            if (ChallengeContext == null)
             {
                 return;
             }

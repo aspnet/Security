@@ -13,7 +13,7 @@ using Microsoft.AspNet.Authentication.DataHandler;
 using Microsoft.AspNet.Authentication.DataHandler.Encoder;
 using Microsoft.AspNet.Authentication.DataHandler.Serializer;
 using Microsoft.AspNet.Security.DataProtection;
-using Microsoft.AspNet.Authentication.Infrastructure;
+using Microsoft.AspNet.Authentication;
 using Microsoft.Framework.Logging;
 using Microsoft.Framework.OptionsModel;
 using Microsoft.IdentityModel.Protocols;

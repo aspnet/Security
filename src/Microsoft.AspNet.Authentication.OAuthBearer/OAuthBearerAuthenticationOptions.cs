@@ -5,7 +5,7 @@ using System;
 using System.Collections.Generic;
 using System.IdentityModel.Tokens;
 using System.Net.Http;
-using Microsoft.AspNet.Authentication.Infrastructure;
+using Microsoft.AspNet.Authentication;
 using Microsoft.IdentityModel.Protocols;
 
 namespace Microsoft.AspNet.Authentication.OAuthBearer
@@ -13,7 +13,7 @@ namespace Microsoft.AspNet.Authentication.OAuthBearer
     /// <summary>
     /// Options class provides information needed to control Bearer Authentication middleware behavior
     /// </summary>
-    public class OAuthBearerAuthenticationOptions : AuthenticationOptions
+    public class OAuthBearerAuthenticationOptions : AutomaticAuthenticationOptions
     {
         private ICollection<ISecurityTokenValidator> _securityTokenValidators;
         private TokenValidationParameters _tokenValidationParameters;

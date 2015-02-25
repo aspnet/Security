@@ -4,7 +4,7 @@
 using Microsoft.AspNet.Builder;
 using Microsoft.AspNet.Authentication.DataHandler;
 using Microsoft.AspNet.Security.DataProtection;
-using Microsoft.AspNet.Authentication.Infrastructure;
+using Microsoft.AspNet.Authentication;
 using Microsoft.Framework.Logging;
 using Microsoft.Framework.OptionsModel;
 using System;

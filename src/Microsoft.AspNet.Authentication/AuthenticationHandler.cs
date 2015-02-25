@@ -1,19 +1,19 @@
 // Copyright (c) Microsoft Open Technologies, Inc. All rights reserved.
 // Licensed under the Apache License, Version 2.0. See License.txt in the project root for license information.
 
-
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Security.Cryptography;
 using System.Threading;
 using System.Threading.Tasks;
+using Microsoft.AspNet.Authentication.DataHandler.Encoder;
 using Microsoft.AspNet.Http;
 using Microsoft.AspNet.Http.Authentication;
 using Microsoft.AspNet.Http.Interfaces.Authentication;
-using Microsoft.AspNet.Authentication.DataHandler.Encoder;
 using Microsoft.Framework.Logging;
 
-namespace Microsoft.AspNet.Authentication.Infrastructure
+namespace Microsoft.AspNet.Authentication
 {
     /// <summary>
     /// Base class for the per-request work performed by most authentication middleware.
@@ -25,7 +25,6 @@ namespace Microsoft.AspNet.Authentication.Infrastructure
         private Task<AuthenticationTicket> _authenticate;
         private bool _authenticateInitialized;
         private object _authenticateSyncLock;
-        private bool _authenticateCalled;
 
         private Task _applyResponse;
         private bool _applyResponseInitialized;
@@ -34,7 +33,7 @@ namespace Microsoft.AspNet.Authentication.Infrastructure
         private AuthenticationOptions _baseOptions;
 
         protected IChallengeContext ChallengeContext { get; set; }
-        protected SignInIdentityContext SignInIdentityContext { get; set; }
+        protected SignInContext SignInContext { get; set; }
         protected ISignOutContext SignOutContext { get; set; }
 
         protected HttpContext Context { get; private set; }
@@ -56,6 +55,8 @@ namespace Microsoft.AspNet.Authentication.Infrastructure
             get { return _baseOptions; }
         }
 
+        internal bool AuthenticateCalled { get; set; }
+
         public IAuthenticationHandler PriorHandler { get; set; }
 
         public bool Faulted { get; set; }
@@ -71,16 +72,6 @@ namespace Microsoft.AspNet.Authentication.Infrastructure
             Response.OnSendingHeaders(OnSendingHeaderCallback, this);
 
             await InitializeCoreAsync();
-
-            // TODO: Move to Automatic base class
-            if (BaseOptions.AuthenticationMode == AuthenticationMode.Active)
-            {
-                AuthenticationTicket ticket = await AuthenticateAsync();
-                if (ticket != null && ticket.Principal != null)
-                {
-                    SecurityHelper.AddUserPrincipal(Context, ticket.Principal);
-                }
-            }
         }
 
         private static void OnSendingHeaderCallback(object state)
@@ -157,7 +148,7 @@ namespace Microsoft.AspNet.Authentication.Infrastructure
                 AuthenticationTicket ticket = Authenticate();
                 if (ticket != null && ticket.Principal != null)
                 {
-                    _authenticateCalled = true;
+                    AuthenticateCalled = true;
                     context.Authenticated(ticket.Principal, ticket.Properties.Dictionary, BaseOptions.Description.Dictionary);
                 }
                 else
@@ -179,7 +170,7 @@ namespace Microsoft.AspNet.Authentication.Infrastructure
                 AuthenticationTicket ticket = await AuthenticateAsync();
                 if (ticket != null && ticket.Principal != null)
                 {
-                    _authenticateCalled = true;
+                    AuthenticateCalled = true;
                     context.Authenticated(ticket.Principal, ticket.Properties.Dictionary, BaseOptions.Description.Dictionary);
                 }
                 else
@@ -305,18 +296,7 @@ namespace Microsoft.AspNet.Authentication.Infrastructure
         protected virtual async Task ApplyResponseCoreAsync()
         {
             await ApplyResponseGrantAsync();
-
-            // If authenticate was called and the the status is still 401, authZ failed so set 403 and stop
-            // REVIEW: Does this need to ensure that there's the 401 is challenge for this auth type?
-            if (Response.StatusCode == 401 && _authenticateCalled)
-            {
-                Response.StatusCode = 403;
-                return;
-            }
-            else
-            {
-                await ApplyResponseChallengeAsync();
-            }
+            await ApplyResponseChallengeAsync();
         }
 
         protected abstract void ApplyResponseGrant();
@@ -334,7 +314,7 @@ namespace Microsoft.AspNet.Authentication.Infrastructure
 
         public virtual void SignIn(ISignInContext context)
         {
-            SignInIdentityContext = new SignInIdentityContext(context.Principal, new AuthenticationProperties(context.Properties));
+            SignInContext = new SignInContext(context.Principal, new AuthenticationProperties(context.Properties));
             SignOutContext = null;
             context.Accept(BaseOptions.Description.Dictionary);
 
@@ -346,12 +326,11 @@ namespace Microsoft.AspNet.Authentication.Infrastructure
 
         public virtual void SignOut(ISignOutContext context)
         {
-            // Empty auth scheme is allowed only for Active -- TODO: remove this and move to derived handler that is active aware
-            bool canSignOut = !string.IsNullOrWhiteSpace(context.AuthenticationScheme) ||
-                BaseOptions.AuthenticationMode == AuthenticationMode.Active;
+            // Empty auth scheme is allowed only for automatic authentication
+            bool canSignOut = !string.IsNullOrWhiteSpace(context.AuthenticationScheme);
             if (canSignOut)
             {
-                SignInIdentityContext = null;
+                SignInContext = null;
                 SignOutContext = context;
                 context.Accept();
             }
@@ -364,7 +343,7 @@ namespace Microsoft.AspNet.Authentication.Infrastructure
 
         public virtual void Challenge(IChallengeContext context)
         {
-            if (SecurityHelper.LookupChallenge(context.AuthenticationSchemes, BaseOptions.AuthenticationScheme, BaseOptions.AuthenticationMode))
+            if (ShouldHandleChallenge(context.AuthenticationSchemes))
             {
                 ChallengeContext = context;
                 context.Accept(BaseOptions.AuthenticationScheme, BaseOptions.Description.Dictionary);
@@ -377,6 +356,13 @@ namespace Microsoft.AspNet.Authentication.Infrastructure
         }
 
         protected abstract void ApplyResponseChallenge();
+
+        public virtual bool ShouldHandleChallenge(IEnumerable<string> authenticationSchemes)
+        {
+            return authenticationSchemes != null &&
+                authenticationSchemes.Any() &&
+                authenticationSchemes.Contains(BaseOptions.AuthenticationScheme, StringComparer.Ordinal);
+        }
 
         /// <summary>
         /// Override this method to deal with 401 challenge concerns, if an authentication scheme in question

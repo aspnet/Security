@@ -47,12 +47,12 @@ namespace Microsoft.AspNet.Authorization
             return this;
         }
 
-        public AuthorizationPolicyBuilder RequiresClaim([NotNull] string claimType, params string[] requiredValues)
+        public AuthorizationPolicyBuilder RequireClaim([NotNull] string claimType, params string[] requiredValues)
         {
-            return RequiresClaim(claimType, (IEnumerable<string>)requiredValues);
+            return RequireClaim(claimType, (IEnumerable<string>)requiredValues);
         }
 
-        public AuthorizationPolicyBuilder RequiresClaim([NotNull] string claimType, IEnumerable<string> requiredValues)
+        public AuthorizationPolicyBuilder RequireClaim([NotNull] string claimType, IEnumerable<string> requiredValues)
         {
             Requirements.Add(new ClaimsAuthorizationRequirement
             {
@@ -62,7 +62,7 @@ namespace Microsoft.AspNet.Authorization
             return this;
         }
 
-        public AuthorizationPolicyBuilder RequiresClaim([NotNull] string claimType)
+        public AuthorizationPolicyBuilder RequireClaim([NotNull] string claimType)
         {
             Requirements.Add(new ClaimsAuthorizationRequirement
             {
@@ -72,24 +72,24 @@ namespace Microsoft.AspNet.Authorization
             return this;
         }
 
-        public AuthorizationPolicyBuilder RequiresRole([NotNull] params string[] roles)
+        public AuthorizationPolicyBuilder RequireRole([NotNull] params string[] roles)
         {
-            return RequiresRole((IEnumerable<string>)roles);
+            return RequireRole((IEnumerable<string>)roles);
         }
 
-        public AuthorizationPolicyBuilder RequiresRole([NotNull] IEnumerable<string> roles)
+        public AuthorizationPolicyBuilder RequireRole([NotNull] IEnumerable<string> roles)
         {
-            RequiresClaim(ClaimTypes.Role, roles);
+            RequireClaim(ClaimTypes.Role, roles);
             return this;
         }
 
-        public AuthorizationPolicyBuilder RequiresUserName([NotNull] string userName)
+        public AuthorizationPolicyBuilder RequireUserName([NotNull] string userName)
         {
-            RequiresClaim(ClaimTypes.Name, userName);
+            RequireClaim(ClaimTypes.Name, userName);
             return this;
         }
 
-        public AuthorizationPolicyBuilder RequiresAuthenticatedUser()
+        public AuthorizationPolicyBuilder RequireAuthenticatedUser()
         {
             Requirements.Add(new DenyAnonymousAuthorizationRequirement());
             return this;

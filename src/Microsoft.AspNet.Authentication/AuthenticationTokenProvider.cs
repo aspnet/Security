@@ -5,7 +5,7 @@
 using System;
 using System.Threading.Tasks;
 
-namespace Microsoft.AspNet.Authentication.Infrastructure
+namespace Microsoft.AspNet.Authentication
 {
     public class AuthenticationTokenProvider : IAuthenticationTokenProvider
     {

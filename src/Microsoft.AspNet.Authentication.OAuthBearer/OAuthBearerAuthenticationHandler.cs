@@ -9,14 +9,14 @@ using System.Security.Claims;
 using System.Threading.Tasks;
 using Microsoft.AspNet.Http;
 using Microsoft.AspNet.Http.Authentication;
-using Microsoft.AspNet.Authentication.Infrastructure;
+using Microsoft.AspNet.Authentication;
 using Microsoft.AspNet.Authentication.Notifications;
 using Microsoft.Framework.Logging;
 using Microsoft.IdentityModel.Protocols;
 
 namespace Microsoft.AspNet.Authentication.OAuthBearer
 {
-    public class OAuthBearerAuthenticationHandler : AuthenticationHandler<OAuthBearerAuthenticationOptions>
+    public class OAuthBearerAuthenticationHandler : AutomaticAuthenticationHandler<OAuthBearerAuthenticationOptions>
     {
         private readonly ILogger _logger;
         private OpenIdConnectConfiguration _configuration;
@@ -192,6 +192,11 @@ namespace Microsoft.AspNet.Authentication.OAuthBearer
 
         protected override async Task ApplyResponseChallengeAsync()
         {
+            if (ShouldConvertChallengeToForbidden())
+            {
+                Response.StatusCode = 403;
+            }
+
             if ((Response.StatusCode != 401) || (ChallengeContext == null))
             {
                 return;

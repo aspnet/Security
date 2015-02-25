@@ -7,7 +7,7 @@ using System.Security.Claims;
 using System.Security.Principal;
 using Microsoft.AspNet.Http;
 using Microsoft.AspNet.Http.Core;
-using Microsoft.AspNet.Authentication.Infrastructure;
+using Microsoft.AspNet.Authentication;
 using Shouldly;
 using Xunit;
 
@@ -58,46 +58,6 @@ namespace Microsoft.AspNet.Authentication
             principal.Identities.Skip(0).First().Name.ShouldBe("Test3");
             principal.Identities.Skip(1).First().Name.ShouldBe("Test2");
             principal.Identities.Skip(2).First().Name.ShouldBe("Test1");
-        }
-
-        [Fact]
-        public void NoChallengesMeansLookupsAreDeterminedOnlyByActiveOrPassiveMode()
-        {
-            HttpContext context = new DefaultHttpContext();
-
-            bool activeNoChallenge = SecurityHelper.LookupChallenge(new string[0], "Alpha", AuthenticationMode.Active);
-            bool passiveNoChallenge = SecurityHelper.LookupChallenge(new string[0], "Alpha", AuthenticationMode.Passive);
-
-            context.Response.StatusCode = 401;
-
-            bool activeEmptyChallenge = SecurityHelper.LookupChallenge(new string[0], "Alpha", AuthenticationMode.Active);
-            bool passiveEmptyChallenge = SecurityHelper.LookupChallenge(new string[0], "Alpha", AuthenticationMode.Passive);
-
-            Assert.True(activeNoChallenge);
-            Assert.False(passiveNoChallenge);
-            Assert.True(activeEmptyChallenge);
-            Assert.False(passiveEmptyChallenge);
-        }
-
-        [Fact]
-        public void WithChallengesMeansLookupsAreDeterminedOnlyByMatchingAuthenticationScheme()
-        {
-            HttpContext context = new DefaultHttpContext();
-            
-            IEnumerable<string> challengeTypes = new[] { "Beta", "Gamma" };
-
-            bool activeNoMatch = SecurityHelper.LookupChallenge(challengeTypes, "Alpha", AuthenticationMode.Active);
-            bool passiveNoMatch = SecurityHelper.LookupChallenge(challengeTypes, "Alpha", AuthenticationMode.Passive);
-
-            challengeTypes = new[] { "Beta", "Alpha" };
-
-            bool activeWithMatch = SecurityHelper.LookupChallenge(challengeTypes, "Alpha", AuthenticationMode.Active);
-            bool passiveWithMatch = SecurityHelper.LookupChallenge(challengeTypes, "Alpha", AuthenticationMode.Passive);
-
-            Assert.False(activeNoMatch);
-            Assert.False(passiveNoMatch);
-            Assert.True(activeWithMatch);
-            Assert.True(passiveWithMatch);
         }
     }
 }

@@ -4,7 +4,7 @@
 
 using System;
 
-namespace Microsoft.AspNet.Authentication.Infrastructure
+namespace Microsoft.AspNet.Authentication
 {
     /// <summary>
     /// Abstracts the system clock to facilitate testing.

@@ -1,13 +1,11 @@
 // Copyright (c) Microsoft Open Technologies, Inc. All rights reserved.
 // Licensed under the Apache License, Version 2.0. See License.txt in the project root for license information.
 
-
 using System;
-using Microsoft.AspNet.Builder;
 using Microsoft.AspNet.Authentication.Cookies.Infrastructure;
 using Microsoft.AspNet.Authentication.DataHandler;
+using Microsoft.AspNet.Builder;
 using Microsoft.AspNet.Security.DataProtection;
-using Microsoft.AspNet.Authentication.Infrastructure;
 using Microsoft.Framework.Logging;
 using Microsoft.Framework.OptionsModel;
 

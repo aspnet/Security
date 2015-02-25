@@ -6,7 +6,7 @@ using System;
 using Microsoft.AspNet.Http;
 using Microsoft.AspNet.Authentication.Notifications;
 
-namespace Microsoft.AspNet.Authentication.Infrastructure
+namespace Microsoft.AspNet.Authentication
 {
     public class AuthenticationTokenCreateContext : BaseContext
     {
