@@ -14,6 +14,16 @@ namespace Microsoft.AspNet.Authentication
     /// <typeparam name="TOptions">Specifies which type for of AutomaticAuthenticationOptions property</typeparam>
     public abstract class AutomaticAuthenticationHandler<TOptions> : AuthenticationHandler<TOptions> where TOptions : AutomaticAuthenticationOptions
     {
+        public virtual bool ShouldConvertChallengeToForbidden()
+        {
+            // Return 403 iff 401 and this handler's authenticate was called
+            // and the challenge is for the authentication type
+            return Response.StatusCode == 401 &&
+                AuthenticateCalled &&
+                ChallengeContext != null &&
+                ShouldHandleChallenge(ChallengeContext.AuthenticationSchemes);
+        }
+
         protected async override Task InitializeCoreAsync()
         {
             if (Options.AutomaticAuthentication)
@@ -66,5 +76,23 @@ namespace Microsoft.AspNet.Authentication
             return Options.AutomaticAuthentication &&
                 (authenticationSchemes == null || !authenticationSchemes.Any());
         }
+
+        /// <summary>
+        /// Override this method to deal with 401 challenge concerns, if an authentication scheme in question
+        /// deals an authentication interaction as part of it's request flow. (like adding a response header, or
+        /// changing the 401 result to 302 of a login page or external sign-in location.)
+        /// </summary>
+        /// <returns></returns>
+        protected override Task ApplyResponseChallengeAsync()
+        {
+            // If authenticate was called and the the status is still 401, authZ failed so set 403 and stop
+            if (ShouldConvertChallengeToForbidden())
+            {
+                Response.StatusCode = 403;
+                return Task.FromResult(0);
+            }
+            return base.ApplyResponseChallengeAsync();
+        }
+
     }
 }

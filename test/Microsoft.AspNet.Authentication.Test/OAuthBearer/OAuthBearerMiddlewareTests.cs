@@ -167,6 +167,18 @@ namespace Microsoft.AspNet.Authentication.OAuthBearer
         }
 
 
+        [Fact]
+        public async Task BearerDoesNothingTo401IfNotAuthenticated()
+        {
+            var server = CreateServer(options =>
+            {
+                options.Notifications.SecurityTokenReceived = SecurityTokenReceived;
+            });
+
+            var response = await SendAsync(server, "http://example.com/unauthorized");
+            response.Response.StatusCode.ShouldBe(HttpStatusCode.Unauthorized);
+        }
+
         class BlobTokenValidator : ISecurityTokenValidator
         {
 

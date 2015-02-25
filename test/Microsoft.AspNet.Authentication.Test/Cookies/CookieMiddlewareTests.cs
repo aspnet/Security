@@ -382,6 +382,22 @@ namespace Microsoft.AspNet.Authentication.Cookies
             transaction2.Response.StatusCode.ShouldBe(HttpStatusCode.Forbidden);
         }
 
+        [Fact]
+        public async Task CookieDoesNothingTo401IfNotAuthenticated()
+        {
+            var clock = new TestClock();
+            TestServer server = CreateServer(options =>
+            {
+                options.SystemClock = clock;
+            });
+
+            Transaction transaction1 = await SendAsync(server, "http://example.com/testpath");
+
+            Transaction transaction2 = await SendAsync(server, "http://example.com/unauthorized", transaction1.CookieNameValue);
+
+            transaction2.Response.StatusCode.ShouldBe(HttpStatusCode.Unauthorized);
+        }
+
         private static string FindClaimValue(Transaction transaction, string claimType)
         {
             XElement claim = transaction.ResponseElement.Elements("claim").SingleOrDefault(elt => elt.Attribute("type").Value == claimType);
