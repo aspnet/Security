@@ -25,7 +25,6 @@ namespace Microsoft.AspNet.Authentication
         private Task<AuthenticationTicket> _authenticate;
         private bool _authenticateInitialized;
         private object _authenticateSyncLock;
-        private bool _authenticateCalled;
 
         private Task _applyResponse;
         private bool _applyResponseInitialized;
@@ -55,6 +54,8 @@ namespace Microsoft.AspNet.Authentication
         {
             get { return _baseOptions; }
         }
+
+        internal bool AuthenticateCalled { get; set; }
 
         public IAuthenticationHandler PriorHandler { get; set; }
 
@@ -147,7 +148,7 @@ namespace Microsoft.AspNet.Authentication
                 AuthenticationTicket ticket = Authenticate();
                 if (ticket != null && ticket.Principal != null)
                 {
-                    _authenticateCalled = true;
+                    AuthenticateCalled = true;
                     context.Authenticated(ticket.Principal, ticket.Properties.Dictionary, BaseOptions.Description.Dictionary);
                 }
                 else
@@ -169,7 +170,7 @@ namespace Microsoft.AspNet.Authentication
                 AuthenticationTicket ticket = await AuthenticateAsync();
                 if (ticket != null && ticket.Principal != null)
                 {
-                    _authenticateCalled = true;
+                    AuthenticateCalled = true;
                     context.Authenticated(ticket.Principal, ticket.Properties.Dictionary, BaseOptions.Description.Dictionary);
                 }
                 else
@@ -363,16 +364,6 @@ namespace Microsoft.AspNet.Authentication
                 authenticationSchemes.Contains(BaseOptions.AuthenticationScheme, StringComparer.Ordinal);
         }
 
-        public virtual bool ShouldConvertChallengeToForbidden()
-        {
-            // Return 403 iff 401 and this handler's authenticate was called
-            // and the challenge is for the authentication type
-            return Response.StatusCode == 401 &&
-                _authenticateCalled &&
-                ChallengeContext != null &&
-                ShouldHandleChallenge(ChallengeContext.AuthenticationSchemes);
-        }
-
         /// <summary>
         /// Override this method to deal with 401 challenge concerns, if an authentication scheme in question
         /// deals an authentication interaction as part of it's request flow. (like adding a response header, or
@@ -381,16 +372,7 @@ namespace Microsoft.AspNet.Authentication
         /// <returns></returns>
         protected virtual Task ApplyResponseChallengeAsync()
         {
-            // If authenticate was called and the the status is still 401, authZ failed so set 403 and stop
-            // REVIEW: Does this need to ensure that there's the 401 is challenge for this auth type?
-            if (ShouldConvertChallengeToForbidden())
-            {
-                Response.StatusCode = 403;
-            }
-            else
-            {
-                ApplyResponseChallenge();
-            }
+            ApplyResponseChallenge();
             return Task.FromResult(0);
         }
 
