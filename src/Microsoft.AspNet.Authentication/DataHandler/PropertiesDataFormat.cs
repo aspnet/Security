@@ -2,11 +2,9 @@
 // Licensed under the Apache License, Version 2.0. See License.txt in the project root for license information.
 
 using Microsoft.AspNet.DataProtection;
-using Microsoft.AspNet.Http.Security;
 using Microsoft.AspNet.Http.Authentication;
 using Microsoft.AspNet.Authentication.DataHandler.Encoder;
 using Microsoft.AspNet.Authentication.DataHandler.Serializer;
-using Microsoft.AspNet.Security.DataProtection;
 
 namespace Microsoft.AspNet.Authentication.DataHandler
 {
