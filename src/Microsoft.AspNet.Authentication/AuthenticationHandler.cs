@@ -314,9 +314,12 @@ namespace Microsoft.AspNet.Authentication
 
         public virtual void SignIn(ISignInContext context)
         {
-            SignInContext = new SignInContext(context.Principal, new AuthenticationProperties(context.Properties));
-            SignOutContext = null;
-            context.Accept(BaseOptions.Description.Dictionary);
+            if (ShouldHandleScheme(context.AuthenticationScheme))
+            {
+                SignInContext = new SignInContext(context.Principal, new AuthenticationProperties(context.Properties));
+                SignOutContext = null;
+                context.Accept(BaseOptions.Description.Dictionary);
+            }
 
             if (PriorHandler != null)
             {
@@ -326,9 +329,7 @@ namespace Microsoft.AspNet.Authentication
 
         public virtual void SignOut(ISignOutContext context)
         {
-            // Empty auth scheme is allowed only for automatic authentication
-            bool canSignOut = !string.IsNullOrWhiteSpace(context.AuthenticationScheme);
-            if (canSignOut)
+            if (ShouldHandleScheme(context.AuthenticationScheme))
             {
                 SignInContext = null;
                 SignOutContext = context;
@@ -343,7 +344,7 @@ namespace Microsoft.AspNet.Authentication
 
         public virtual void Challenge(IChallengeContext context)
         {
-            if (ShouldHandleChallenge(context.AuthenticationSchemes))
+            if (ShouldHandleScheme(context.AuthenticationSchemes))
             {
                 ChallengeContext = context;
                 context.Accept(BaseOptions.AuthenticationScheme, BaseOptions.Description.Dictionary);
@@ -357,11 +358,16 @@ namespace Microsoft.AspNet.Authentication
 
         protected abstract void ApplyResponseChallenge();
 
-        public virtual bool ShouldHandleChallenge(IEnumerable<string> authenticationSchemes)
+        public virtual bool ShouldHandleScheme(IEnumerable<string> authenticationSchemes)
         {
             return authenticationSchemes != null &&
                 authenticationSchemes.Any() &&
                 authenticationSchemes.Contains(BaseOptions.AuthenticationScheme, StringComparer.Ordinal);
+        }
+
+        public virtual bool ShouldHandleScheme(string authenticationScheme)
+        {
+            return string.Equals(BaseOptions.AuthenticationScheme, authenticationScheme, StringComparison.Ordinal);
         }
 
         /// <summary>

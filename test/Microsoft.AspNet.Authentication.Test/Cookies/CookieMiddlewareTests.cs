@@ -75,6 +75,20 @@ namespace Microsoft.AspNet.Authentication.Cookies
             return Task.FromResult<object>(null);
         }
 
+        private Task SignInAsWrong(HttpContext context)
+        {
+            context.Response.SignIn("Oops",
+                new ClaimsPrincipal(new ClaimsIdentity(new GenericIdentity("Alice", "Cookies"))),
+                new AuthenticationProperties());
+            return Task.FromResult<object>(null);
+        }
+
+        private Task SignOutAsWrong(HttpContext context)
+        {
+            context.Response.SignOut("Oops");
+            return Task.FromResult<object>(null);
+        }
+
         [Fact]
         public async Task SignInCausesDefaultCookieToBeCreated()
         {
@@ -93,6 +107,30 @@ namespace Microsoft.AspNet.Authentication.Cookies
             setCookie.ShouldNotContain("; expires=");
             setCookie.ShouldNotContain("; domain=");
             setCookie.ShouldNotContain("; secure");
+        }
+
+        [Fact]
+        public async Task SignInWrongAuthTypeThrows()
+        {
+            TestServer server = CreateServer(options =>
+            {
+                options.LoginPath = new PathString("/login");
+                options.CookieName = "TestCookie";
+            }, SignInAsWrong);
+
+            await Assert.ThrowsAsync<InvalidOperationException>(async () => await SendAsync(server, "http://example.com/testpath"));
+        }
+
+        [Fact]
+        public async Task SignOutWrongAuthTypeThrows()
+        {
+            TestServer server = CreateServer(options =>
+            {
+                options.LoginPath = new PathString("/login");
+                options.CookieName = "TestCookie";
+            }, SignOutAsWrong);
+
+            await Assert.ThrowsAsync<InvalidOperationException>(async () => await SendAsync(server, "http://example.com/testpath"));
         }
 
         [Theory]

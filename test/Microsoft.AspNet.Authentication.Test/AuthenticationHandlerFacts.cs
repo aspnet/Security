@@ -11,15 +11,15 @@ namespace Microsoft.AspNet.Authentication
     public class AuthenticationHandlerFacts
     {
         [Fact]
-        public void WithChallengesMeansLookupsAreDeterminedOnlyByMatchingAuthenticationScheme()
+        public void ShouldHandleSchemeAreDeterminedOnlyByMatchingAuthenticationScheme()
         {
             var handler = new TestHandler("Alpha");
 
-            bool passiveNoMatch = handler.ShouldHandleChallenge(new[] { "Beta", "Gamma" });
+            bool passiveNoMatch = handler.ShouldHandleScheme(new[] { "Beta", "Gamma" });
 
             handler = new TestHandler("Alpha");
 
-            bool passiveWithMatch = handler.ShouldHandleChallenge(new[] { "Beta", "Alpha" });
+            bool passiveWithMatch = handler.ShouldHandleScheme(new[] { "Beta", "Alpha" });
 
             Assert.False(passiveNoMatch);
             Assert.True(passiveWithMatch);
@@ -29,28 +29,28 @@ namespace Microsoft.AspNet.Authentication
         public void AutomaticHandlerInAutomaticModeHandlesEmptyChallenges()
         {
             var handler = new TestAutoHandler("ignored", true);
-            Assert.True(handler.ShouldHandleChallenge(new string[0]));
+            Assert.True(handler.ShouldHandleScheme(new string[0]));
         }
 
         [Fact]
-        public void AutomaticHandlerShouldHandleChallengeWhenSchemeMatches()
+        public void AutomaticHandlerShouldHandleSchemeWhenSchemeMatches()
         {
             var handler = new TestAutoHandler("Alpha", true);
-            Assert.True(handler.ShouldHandleChallenge(new string[] { "Alpha" }));
+            Assert.True(handler.ShouldHandleScheme(new string[] { "Alpha" }));
         }
 
         [Fact]
         public void AutomaticHandlerShouldNotHandleChallengeWhenSchemeDoesNotMatches()
         {
             var handler = new TestAutoHandler("Dog", true);
-            Assert.False(handler.ShouldHandleChallenge(new string[] { "Alpha" }));
+            Assert.False(handler.ShouldHandleScheme(new string[] { "Alpha" }));
         }
 
         [Fact]
         public void AutomaticHandlerShouldNotHandleChallengeWhenSchemesNotEmpty()
         {
             var handler = new TestAutoHandler(null, true);
-            Assert.False(handler.ShouldHandleChallenge(new string[] { "Alpha" }));
+            Assert.False(handler.ShouldHandleScheme(new string[] { "Alpha" }));
         }
 
         private class TestHandler : AuthenticationHandler<AuthenticationOptions>

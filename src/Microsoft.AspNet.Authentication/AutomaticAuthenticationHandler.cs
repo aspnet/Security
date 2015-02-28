@@ -21,7 +21,7 @@ namespace Microsoft.AspNet.Authentication
             return Response.StatusCode == 401 &&
                 AuthenticateCalled &&
                 ChallengeContext != null &&
-                ShouldHandleChallenge(ChallengeContext.AuthenticationSchemes);
+                ShouldHandleScheme(ChallengeContext.AuthenticationSchemes);
         }
 
         protected async override Task InitializeCoreAsync()
@@ -66,15 +66,29 @@ namespace Microsoft.AspNet.Authentication
         /// Automatic Authentication Handlers can handle empty authentication schemes
         /// </summary>
         /// <returns></returns>
-        public override bool ShouldHandleChallenge(IEnumerable<string> authenticationSchemes)
+        public override bool ShouldHandleScheme(IEnumerable<string> authenticationSchemes)
         {
-            if (base.ShouldHandleChallenge(authenticationSchemes))
+            if (base.ShouldHandleScheme(authenticationSchemes))
             {
                 return true;
             }
 
             return Options.AutomaticAuthentication &&
                 (authenticationSchemes == null || !authenticationSchemes.Any());
+        }
+
+        /// <summary>
+        /// Automatic Authentication Handlers can handle empty authentication schemes
+        /// </summary>
+        /// <returns></returns>
+        public override bool ShouldHandleScheme(string authenticationScheme)
+        {
+            if (base.ShouldHandleScheme(authenticationScheme))
+            {
+                return true;
+            }
+
+            return Options.AutomaticAuthentication && string.IsNullOrWhiteSpace(authenticationScheme);
         }
 
         /// <summary>
