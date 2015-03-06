@@ -4,6 +4,7 @@
 using Microsoft.AspNet.Authentication.Facebook;
 using Microsoft.Framework.OptionsModel;
 using System;
+using Microsoft.Framework.ConfigurationModel;
 
 namespace Microsoft.Framework.DependencyInjection
 {
@@ -14,7 +15,22 @@ namespace Microsoft.Framework.DependencyInjection
     {
         public static IServiceCollection ConfigureFacebookAuthentication([NotNull] this IServiceCollection services, [NotNull] Action<FacebookAuthenticationOptions> configure)
         {
-            return services.Configure(configure);
+            return services.ConfigureFacebookAuthentication(configure, optionsName: "");
+        }
+
+        public static IServiceCollection ConfigureFacebookAuthentication([NotNull] this IServiceCollection services, [NotNull] Action<FacebookAuthenticationOptions> configure, string optionsName)
+        {
+            return services.Configure(configure, optionsName);
+        }
+
+        public static IServiceCollection ConfigureFacebookAuthentication([NotNull] this IServiceCollection services, [NotNull] IConfiguration config)
+        {
+            return services.ConfigureFacebookAuthentication(config, optionsName: "");
+        }
+
+        public static IServiceCollection ConfigureFacebookAuthentication([NotNull] this IServiceCollection services, [NotNull] IConfiguration config, string optionsName)
+        {
+            return services.Configure<FacebookAuthenticationOptions>(config, optionsName);
         }
     }
 }
