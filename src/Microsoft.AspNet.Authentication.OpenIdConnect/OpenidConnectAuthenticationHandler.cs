@@ -8,10 +8,9 @@ using System.IO;
 using System.Linq;
 using System.Security.Claims;
 using System.Threading.Tasks;
+using Microsoft.AspNet.Authentication.Notifications;
 using Microsoft.AspNet.Http;
 using Microsoft.AspNet.Http.Authentication;
-using Microsoft.AspNet.Authentication;
-using Microsoft.AspNet.Authentication.Notifications;
 using Microsoft.Framework.Logging;
 using Microsoft.IdentityModel.Protocols;
 
@@ -77,7 +76,7 @@ namespace Microsoft.AspNet.Authentication.OpenIdConnect
                 // Set End_Session_Endpoint in order:
                 // 1. properties.Redirect
                 // 2. Options.Wreply
-                AuthenticationProperties properties = new AuthenticationProperties();
+                var properties = new AuthenticationProperties(signout.Properties);
                 if (properties != null && !string.IsNullOrEmpty(properties.RedirectUri))
                 {
                     openIdConnectMessage.PostLogoutRedirectUri = properties.RedirectUri;
@@ -220,7 +219,7 @@ namespace Microsoft.AspNet.Authentication.OpenIdConnect
             }
 
             OpenIdConnectMessage openIdConnectMessage = null;
-            
+
             // assumption: if the ContentType is "application/x-www-form-urlencoded" it should be safe to read as it is small.
             if (string.Equals(Request.Method, "POST", StringComparison.OrdinalIgnoreCase)
               && !string.IsNullOrWhiteSpace(Request.ContentType)
