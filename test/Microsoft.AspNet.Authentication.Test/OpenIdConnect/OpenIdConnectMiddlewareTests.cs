@@ -154,6 +154,22 @@ namespace Microsoft.AspNet.Authentication.Tests.OpenIdConnect
         }
 
         [Fact]
+        public async Task SignOutWith_Specifi_RedirectUri_From_Authentication_Properites()
+        {
+            var stateFormat = new PropertiesDataFormat(new EphemeralDataProtectionProvider().CreateProtector("OpenIdConnectTest"));
+            var server = CreateServer(options =>
+            {
+                options.Authority = "https://login.windows.net/common";
+                options.ClientId = "Test Id";
+                options.PostLogoutRedirectUri = "https://example.com/logout";
+            });
+
+            var transaction = await SendAsync(server, "https://example.com/signout_with_specific_redirect_uri");
+            transaction.Response.StatusCode.ShouldBe(HttpStatusCode.Redirect);
+            transaction.Response.Headers.Location.AbsoluteUri.ShouldContain(Uri.EscapeDataString("http://www.example.com/specific_redirect_uri"));
+        }
+
+        [Fact]
         // Test Cases for calculating the expiration time of cookie from cookie name
         public void NonceCookieExpirationTime()
         {
@@ -211,6 +227,12 @@ namespace Microsoft.AspNet.Authentication.Tests.OpenIdConnect
                     else if (req.Path == new PathString("/signout"))
                     {
                         res.SignOut(OpenIdConnectAuthenticationDefaults.AuthenticationScheme);
+                    }
+                    else if (req.Path == new PathString("/signout_with_specific_redirect_uri"))
+                    {
+                        res.SignOut(
+                            OpenIdConnectAuthenticationDefaults.AuthenticationScheme, 
+                            new AuthenticationProperties() { RedirectUri = "http://www.example.com/specific_redirect_uri" });
                     }
                     else if (handler != null)
                     {

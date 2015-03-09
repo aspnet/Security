@@ -77,7 +77,7 @@ namespace Microsoft.AspNet.Authentication.OpenIdConnect
                 // 1. properties.Redirect
                 // 2. Options.Wreply
                 var properties = new AuthenticationProperties(signout.Properties);
-                if (properties != null && !string.IsNullOrEmpty(properties.RedirectUri))
+                if (!string.IsNullOrEmpty(properties.RedirectUri))
                 {
                     openIdConnectMessage.PostLogoutRedirectUri = properties.RedirectUri;
                 }
