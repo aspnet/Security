@@ -125,7 +125,6 @@ namespace Microsoft.AspNet.Authentication.Tests.OpenIdConnect
         [Fact]
         public async Task SignOutWithDefaultRedirectUri()
         {
-            ISecureDataFormat<AuthenticationProperties> stateFormat = new PropertiesDataFormat(new EphemeralDataProtectionProvider().CreateProtector("GoogleTest"));
             var server = CreateServer(options =>
             {
                 options.Authority = "https://login.windows.net/common";
@@ -140,7 +139,6 @@ namespace Microsoft.AspNet.Authentication.Tests.OpenIdConnect
         [Fact]
         public async Task SignOutWithCustomRedirectUri()
         {
-            ISecureDataFormat<AuthenticationProperties> stateFormat = new PropertiesDataFormat(new EphemeralDataProtectionProvider().CreateProtector("GoogleTest"));
             var server = CreateServer(options =>
             {
                 options.Authority = "https://login.windows.net/common";
@@ -154,9 +152,8 @@ namespace Microsoft.AspNet.Authentication.Tests.OpenIdConnect
         }
 
         [Fact]
-        public async Task SignOutWith_Specifi_RedirectUri_From_Authentication_Properites()
+        public async Task SignOutWith_Specific_RedirectUri_From_Authentication_Properites()
         {
-            var stateFormat = new PropertiesDataFormat(new EphemeralDataProtectionProvider().CreateProtector("OpenIdConnectTest"));
             var server = CreateServer(options =>
             {
                 options.Authority = "https://login.windows.net/common";
