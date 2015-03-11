@@ -25,14 +25,15 @@ namespace Microsoft.AspNet.Authentication.Facebook
         /// <param name="loggerFactory"></param>
         /// <param name="options">Configuration options for the middleware.</param>
         public FacebookAuthenticationMiddleware(
-            RequestDelegate next,
-            IServiceProvider services,
-            IDataProtectionProvider dataProtectionProvider,
-            ILoggerFactory loggerFactory,
-            IOptions<ExternalAuthenticationOptions> externalOptions,
-            IOptions<FacebookAuthenticationOptions> options,
+            [NotNull] RequestDelegate next,
+            [NotNull] IServiceProvider services,
+            [NotNull] IDataProtectionProvider dataProtectionProvider,
+            [NotNull] ILoggerFactory loggerFactory,
+            [NotNull] IOptions<ClaimsTransformationOptions> transformOptions,
+            [NotNull] IOptions<ExternalAuthenticationOptions> externalOptions,
+            [NotNull] IOptions<FacebookAuthenticationOptions> options,
             ConfigureOptions<FacebookAuthenticationOptions> configureOptions = null)
-            : base(next, services, dataProtectionProvider, loggerFactory, externalOptions, options, configureOptions)
+            : base(next, services, dataProtectionProvider, loggerFactory, transformOptions, externalOptions, options, configureOptions)
         {
             if (string.IsNullOrWhiteSpace(Options.AppId))
             {

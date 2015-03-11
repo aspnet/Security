@@ -100,7 +100,8 @@ namespace Microsoft.AspNet.Authentication.Facebook
 
             await Options.Notifications.Authenticated(context);
 
-            return new AuthenticationTicket(context.Principal, context.Properties, context.Options.AuthenticationScheme);
+            var transformed = await ApplyClaimsTransformation(context.Principal);
+            return new AuthenticationTicket(transformed, context.Properties, context.Options.AuthenticationScheme);
         }
 
         private string GenerateAppSecretProof(string accessToken)

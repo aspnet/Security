@@ -29,12 +29,13 @@ namespace Microsoft.AspNet.Authentication.OAuthBearer
         /// extension method.
         /// </summary>
         public OAuthBearerAuthenticationMiddleware(
-            RequestDelegate next,
-            IServiceProvider services,
-            ILoggerFactory loggerFactory,
-            IOptions<OAuthBearerAuthenticationOptions> options,
+            [NotNull] RequestDelegate next,
+            [NotNull] IServiceProvider services,
+            [NotNull] ILoggerFactory loggerFactory,
+            [NotNull] IOptions<ClaimsTransformationOptions> transformOptions,
+            [NotNull] IOptions<OAuthBearerAuthenticationOptions> options,
             ConfigureOptions<OAuthBearerAuthenticationOptions> configureOptions)
-            : base(next, services, options, configureOptions)
+            : base(next, services, transformOptions, options, configureOptions)
         {
             _logger = loggerFactory.CreateLogger<OAuthBearerAuthenticationMiddleware>();
             if (Options.Notifications == null)

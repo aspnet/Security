@@ -20,10 +20,10 @@ namespace Microsoft.AspNet.Authentication
         /// <param name="options">The original options passed by the application control behavior</param>
         /// <param name="context">The utility object to observe the current request and response</param>
         /// <returns>async completion</returns>
-        public Task Initialize(TOptions options, HttpContext context)
+        public Task Initialize(TOptions options, ClaimsTransformationOptions transformationOptions, HttpContext context)
         {
             Options = options;
-            return BaseInitializeAsync(options, context);
+            return BaseInitializeAsync(options, transformationOptions, context);
         }
     }
 }

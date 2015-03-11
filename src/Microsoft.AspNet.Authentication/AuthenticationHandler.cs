@@ -4,6 +4,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Security.Claims;
 using System.Security.Cryptography;
 using System.Threading;
 using System.Threading.Tasks;
@@ -54,17 +55,20 @@ namespace Microsoft.AspNet.Authentication
             get { return _baseOptions; }
         }
 
+        protected ClaimsTransformationOptions ClaimsTransformationOptions { get; set; }
+
         internal bool AuthenticateCalled { get; set; }
 
         public IAuthenticationHandler PriorHandler { get; set; }
 
         public bool Faulted { get; set; }
 
-        protected async Task BaseInitializeAsync(AuthenticationOptions options, HttpContext context)
+        protected async Task BaseInitializeAsync(AuthenticationOptions options, ClaimsTransformationOptions transformationOptions, HttpContext context)
         {
             _baseOptions = options;
             Context = context;
             RequestPathBase = Request.PathBase;
+            ClaimsTransformationOptions = transformationOptions;
 
             RegisterAuthenticationHandler();
 
@@ -162,6 +166,13 @@ namespace Microsoft.AspNet.Authentication
             }
         }
 
+        public virtual async Task<ClaimsPrincipal> ApplyClaimsTransformation(ClaimsPrincipal principal)
+        {
+            return ClaimsTransformationOptions?.TransformAsync == null
+                ? principal
+                : await ClaimsTransformationOptions.TransformAsync(principal);
+        }
+
         public virtual async Task AuthenticateAsync(IAuthenticateContext context)
         {
             if (context.AuthenticationSchemes.Contains(BaseOptions.AuthenticationScheme, StringComparer.Ordinal))
@@ -170,7 +181,8 @@ namespace Microsoft.AspNet.Authentication
                 if (ticket != null && ticket.Principal != null)
                 {
                     AuthenticateCalled = true;
-                    context.Authenticated(ticket.Principal, ticket.Properties.Dictionary, BaseOptions.Description.Dictionary);
+                    var transformed = await ApplyClaimsTransformation(ticket.Principal);
+                    context.Authenticated(transformed, ticket.Properties.Dictionary, BaseOptions.Description.Dictionary);
                 }
                 else
                 {

@@ -2,6 +2,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Net;
@@ -233,6 +234,9 @@ namespace Microsoft.AspNet.Authentication.Google
             transaction.FindClaimValue(ClaimTypes.GivenName).ShouldBe("Test Given Name");
             transaction.FindClaimValue(ClaimTypes.Surname).ShouldBe("Test Family Name");
             transaction.FindClaimValue(ClaimTypes.Email).ShouldBe("Test email");
+
+            // Ensure claims transformation 
+            transaction.FindClaimValue("xform").ShouldBe("yup");
         }
 
         [Fact]
@@ -421,6 +425,14 @@ namespace Microsoft.AspNet.Authentication.Google
                     {
                         options.SignInScheme = CookieAuthenticationScheme;
                     });
+                    services.ConfigureClaimsTransformation(options =>
+                        options.TransformAsync = p =>
+                        {
+                            var id = new ClaimsIdentity("xform");
+                            id.AddClaim(new Claim("xform", "yup"));
+                            p.AddIdentity(id);
+                            return Task.FromResult(p);
+                        });
                 });
                 app.UseCookieAuthentication(options => options.AuthenticationScheme = CookieAuthenticationScheme);
                 app.UseGoogleAuthentication(configureOptions);
