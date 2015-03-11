@@ -342,6 +342,7 @@ namespace Microsoft.AspNet.Authentication.OpenIdConnect
                     throw new InvalidOperationException("No SecurityTokenValidator found for token: " + openIdConnectMessage.IdToken);
                 }
 
+                var transformed = await ApplyClaimsTransformation(principal);
                 ticket = new AuthenticationTicket(principal, properties, Options.AuthenticationScheme);
                 if (!string.IsNullOrWhiteSpace(openIdConnectMessage.SessionState))
                 {

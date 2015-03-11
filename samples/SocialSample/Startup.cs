@@ -28,6 +28,16 @@ namespace CookieSample
                 {
                     options.SignInScheme = CookieAuthenticationDefaults.AuthenticationScheme;
                 });
+                services.ConfigureClaimsTransformation(options =>
+                {
+                    options.TransformAsync = p =>
+                    {
+                        var id = new ClaimsIdentity("xform");
+                        id.AddClaim(new Claim("ClaimsTransformation", "TransformAddedClaim"));
+                        p.AddIdentity(id);
+                        return Task.FromResult(p);
+                    };
+                });
             });
 
             app.UseCookieAuthentication(options =>
