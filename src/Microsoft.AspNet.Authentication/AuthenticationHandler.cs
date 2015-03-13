@@ -4,6 +4,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Security.Claims;
 using System.Security.Cryptography;
 using System.Threading;
 using System.Threading.Tasks;
@@ -142,7 +143,7 @@ namespace Microsoft.AspNet.Authentication
 
         public virtual void Authenticate(IAuthenticateContext context)
         {
-            if (context.AuthenticationSchemes.Contains(BaseOptions.AuthenticationScheme, StringComparer.Ordinal))
+            if (ShouldHandleScheme(context.AuthenticationScheme))
             {
                 AuthenticationTicket ticket = Authenticate();
                 if (ticket != null && ticket.Principal != null)
@@ -152,7 +153,7 @@ namespace Microsoft.AspNet.Authentication
                 }
                 else
                 {
-                    context.NotAuthenticated(BaseOptions.AuthenticationScheme, properties: null, description: BaseOptions.Description.Dictionary);
+                    context.NotAuthenticated();
                 }
             }
 
@@ -164,7 +165,7 @@ namespace Microsoft.AspNet.Authentication
 
         public virtual async Task AuthenticateAsync(IAuthenticateContext context)
         {
-            if (context.AuthenticationSchemes.Contains(BaseOptions.AuthenticationScheme, StringComparer.Ordinal))
+            if (ShouldHandleScheme(context.AuthenticationScheme))
             {
                 AuthenticationTicket ticket = await AuthenticateAsync();
                 if (ticket != null && ticket.Principal != null)
@@ -174,7 +175,7 @@ namespace Microsoft.AspNet.Authentication
                 }
                 else
                 {
-                    context.NotAuthenticated(BaseOptions.AuthenticationScheme, properties: null, description: BaseOptions.Description.Dictionary);
+                    context.NotAuthenticated();
                 }
             }
 
@@ -452,3 +453,4 @@ namespace Microsoft.AspNet.Authentication
         }
     }
 }
+

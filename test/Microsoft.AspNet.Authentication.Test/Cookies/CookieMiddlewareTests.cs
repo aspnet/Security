@@ -2,6 +2,7 @@
 // Licensed under the Apache License, Version 2.0. See License.txt in the project root for license information.
 
 using System;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Net;
@@ -15,6 +16,7 @@ using System.Xml.Linq;
 using Microsoft.AspNet.Builder;
 using Microsoft.AspNet.Http;
 using Microsoft.AspNet.Http.Authentication;
+using Microsoft.AspNet.Http.Core.Authentication;
 using Microsoft.AspNet.TestHost;
 using Microsoft.Framework.DependencyInjection;
 using Shouldly;
@@ -219,6 +221,37 @@ namespace Microsoft.AspNet.Authentication.Cookies
             Transaction transaction2 = await SendAsync(server, "http://example.com/me/Cookies", transaction1.CookieNameValue);
 
             FindClaimValue(transaction2, ClaimTypes.Name).ShouldBe("Alice");
+        }
+
+        [Fact]
+        public async Task CookieAppliesClaimsTransform()
+        {
+            var clock = new TestClock();
+            TestServer server = CreateServer(options =>
+            {
+                options.SystemClock = clock;
+            }, 
+            SignInAsAlice, 
+            baseAddress: null, 
+            claimsTransform: o => o.Transformation = (p =>
+            {
+                if (!p.Identities.Any(i => i.AuthenticationType == "xform"))
+                {
+                    // REVIEW: Xform runs twice, once on Authenticate, and then once from the middleware
+                    var id = new ClaimsIdentity("xform");
+                    id.AddClaim(new Claim("xform", "yup"));
+                    p.AddIdentity(id);
+                }
+                return p;
+            }));
+
+            Transaction transaction1 = await SendAsync(server, "http://example.com/testpath");
+
+            Transaction transaction2 = await SendAsync(server, "http://example.com/me/Cookies", transaction1.CookieNameValue);
+
+            FindClaimValue(transaction2, ClaimTypes.Name).ShouldBe("Alice");
+            FindClaimValue(transaction2, "xform").ShouldBe("yup");
+
         }
 
         [Fact]
@@ -478,12 +511,26 @@ namespace Microsoft.AspNet.Authentication.Cookies
             return me;
         }
 
-        private static TestServer CreateServer(Action<CookieAuthenticationOptions> configureOptions, Func<HttpContext, Task> testpath = null, Uri baseAddress = null)
+        private static TestServer CreateServer(Action<CookieAuthenticationOptions> configureOptions, Func<HttpContext, Task> testpath = null, Uri baseAddress = null, Action<ClaimsTransformationOptions> claimsTransform = null)
         {
             var server = TestServer.Create(app =>
             {
-                app.UseServices(services => services.AddDataProtection());
+                if (claimsTransform != null)
+                {
+                    app.UseServices(services => {
+                        services.AddDataProtection();
+                        services.ConfigureClaimsTransformation(claimsTransform);
+                    });
+                }
+                else
+                {
+                    app.UseServices(services => services.AddDataProtection());
+                }
                 app.UseCookieAuthentication(configureOptions);
+                if (claimsTransform != null)
+                {
+                    app.UseClaimsTransformation();
+                }
                 app.Use(async (context, next) =>
                 {
                     var req = context.Request;
