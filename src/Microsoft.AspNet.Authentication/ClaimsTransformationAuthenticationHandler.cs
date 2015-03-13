@@ -28,13 +28,14 @@ namespace Microsoft.AspNet.Authentication
         {
             if (_transform != null)
             {
+                // REVIEW: this cast seems really bad (missing interface way to get the result back out?)
                 var authContext = context as AuthenticateContext;
                 if (context != null)
                 {
-                    authContext.Result = new AuthenticationResult(
+                    context.Authenticated(
                         _transform.Invoke(authContext.Result.Principal),
-                        authContext.Result.Properties,
-                        authContext.Result.Description);
+                        authContext.Result.Properties.Dictionary,
+                        authContext.Result.Description.Dictionary);
                 }
             }
 
