@@ -35,11 +35,10 @@ namespace Microsoft.AspNet.Authentication.OAuth
             [NotNull] IServiceProvider services,
             [NotNull] IDataProtectionProvider dataProtectionProvider,
             [NotNull] ILoggerFactory loggerFactory,
-            [NotNull] IOptions<ClaimsTransformationOptions> transformOptions,
             [NotNull] IOptions<ExternalAuthenticationOptions> externalOptions,
             [NotNull] IOptions<TOptions> options,
             ConfigureOptions<TOptions> configureOptions = null)
-            : base(next, services, transformOptions, options, configureOptions)
+            : base(next, services, options, configureOptions)
         {
             // todo: review error handling
             if (string.IsNullOrWhiteSpace(Options.AuthenticationScheme))

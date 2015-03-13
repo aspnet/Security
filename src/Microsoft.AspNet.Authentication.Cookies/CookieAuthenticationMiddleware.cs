@@ -20,10 +20,9 @@ namespace Microsoft.AspNet.Authentication.Cookies
             [NotNull] IServiceProvider services,
             [NotNull] IDataProtectionProvider dataProtectionProvider,
             [NotNull] ILoggerFactory loggerFactory,
-            [NotNull] IOptions<ClaimsTransformationOptions> transformOptions,
             [NotNull] IOptions<CookieAuthenticationOptions> options,
             ConfigureOptions<CookieAuthenticationOptions> configureOptions)
-            : base(next, services, transformOptions, options, configureOptions)
+            : base(next, services, options, configureOptions)
         {
             if (Options.Notifications == null)
             {

@@ -29,15 +29,12 @@ namespace CookieSample
                 {
                     options.SignInScheme = CookieAuthenticationDefaults.AuthenticationScheme;
                 });
-                services.ConfigureClaimsTransformation(options =>
+                services.ConfigureClaimsTransformation(p =>
                 {
-                    options.TransformAsync = p =>
-                    {
-                        var id = new ClaimsIdentity("xform");
-                        id.AddClaim(new Claim("ClaimsTransformation", "TransformAddedClaim"));
-                        p.AddIdentity(id);
-                        return Task.FromResult(p);
-                    };
+                    var id = new ClaimsIdentity("xform");
+                    id.AddClaim(new Claim("ClaimsTransformation", "TransformAddedClaim"));
+                    p.AddIdentity(id);
+                    return p;
                 });
             });
 

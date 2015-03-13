@@ -29,11 +29,10 @@ namespace Microsoft.AspNet.Authentication.Facebook
             [NotNull] IServiceProvider services,
             [NotNull] IDataProtectionProvider dataProtectionProvider,
             [NotNull] ILoggerFactory loggerFactory,
-            [NotNull] IOptions<ClaimsTransformationOptions> transformOptions,
             [NotNull] IOptions<ExternalAuthenticationOptions> externalOptions,
             [NotNull] IOptions<FacebookAuthenticationOptions> options,
             ConfigureOptions<FacebookAuthenticationOptions> configureOptions = null)
-            : base(next, services, dataProtectionProvider, loggerFactory, transformOptions, externalOptions, options, configureOptions)
+            : base(next, services, dataProtectionProvider, loggerFactory, externalOptions, options, configureOptions)
         {
             if (string.IsNullOrWhiteSpace(Options.AppId))
             {

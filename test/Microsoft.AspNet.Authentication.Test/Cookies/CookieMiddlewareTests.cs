@@ -16,6 +16,7 @@ using System.Xml.Linq;
 using Microsoft.AspNet.Builder;
 using Microsoft.AspNet.Http;
 using Microsoft.AspNet.Http.Authentication;
+using Microsoft.AspNet.Http.Core.Authentication;
 using Microsoft.AspNet.TestHost;
 using Microsoft.Framework.DependencyInjection;
 using Shouldly;
@@ -232,13 +233,17 @@ namespace Microsoft.AspNet.Authentication.Cookies
             }, 
             SignInAsAlice, 
             baseAddress: null, 
-            claimsTransform: o => o.TransformAsync = p =>
+            claimsTransform: o => o.Transformation = (p =>
             {
-                var id = new ClaimsIdentity("xform");
-                id.AddClaim(new Claim("xform", "yup"));
-                p.AddIdentity(id);
-                return Task.FromResult(p);
-            });
+                if (!p.Identities.Any(i => i.AuthenticationType == "xform"))
+                {
+                    // REVIEW: Xform runs twice, once on Authenticate, and then once from the middleware
+                    var id = new ClaimsIdentity("xform");
+                    id.AddClaim(new Claim("xform", "yup"));
+                    p.AddIdentity(id);
+                }
+                return p;
+            }));
 
             Transaction transaction1 = await SendAsync(server, "http://example.com/testpath");
 
@@ -522,6 +527,10 @@ namespace Microsoft.AspNet.Authentication.Cookies
                     app.UseServices(services => services.AddDataProtection());
                 }
                 app.UseCookieAuthentication(configureOptions);
+                if (claimsTransform != null)
+                {
+                    app.UseClaimsTransformation();
+                }
                 app.Use(async (context, next) =>
                 {
                     var req = context.Request;

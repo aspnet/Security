@@ -39,11 +39,10 @@ namespace Microsoft.AspNet.Authentication.OpenIdConnect
             [NotNull] IServiceProvider services,
             [NotNull] IDataProtectionProvider dataProtectionProvider,
             [NotNull] ILoggerFactory loggerFactory,
-            [NotNull] IOptions<ClaimsTransformationOptions> transformOptions,
             [NotNull] IOptions<ExternalAuthenticationOptions> externalOptions,
             [NotNull] IOptions<OpenIdConnectAuthenticationOptions> options,
             ConfigureOptions<OpenIdConnectAuthenticationOptions> configureOptions)
-            : base(next, services, transformOptions, options, configureOptions)
+            : base(next, services, options, configureOptions)
         {
             _logger = loggerFactory.CreateLogger<OpenIdConnectAuthenticationMiddleware>();
 

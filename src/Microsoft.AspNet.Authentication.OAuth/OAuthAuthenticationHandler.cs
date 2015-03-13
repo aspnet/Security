@@ -171,8 +171,7 @@ namespace Microsoft.AspNet.Authentication.OAuth
                 Properties = properties,
             };
             await Options.Notifications.GetUserInformationAsync(context);
-            var transformed = await ApplyClaimsTransformation(context.Principal);
-            return new AuthenticationTicket(transformed, context.Properties, Options.AuthenticationScheme);
+            return new AuthenticationTicket(context.Principal, context.Properties, Options.AuthenticationScheme);
         }
 
         protected override void ApplyResponseChallenge()

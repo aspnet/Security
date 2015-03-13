@@ -55,20 +55,17 @@ namespace Microsoft.AspNet.Authentication
             get { return _baseOptions; }
         }
 
-        protected ClaimsTransformationOptions ClaimsTransformationOptions { get; set; }
-
         internal bool AuthenticateCalled { get; set; }
 
         public IAuthenticationHandler PriorHandler { get; set; }
 
         public bool Faulted { get; set; }
 
-        protected async Task BaseInitializeAsync(AuthenticationOptions options, ClaimsTransformationOptions transformationOptions, HttpContext context)
+        protected async Task BaseInitializeAsync(AuthenticationOptions options, HttpContext context)
         {
             _baseOptions = options;
             Context = context;
             RequestPathBase = Request.PathBase;
-            ClaimsTransformationOptions = transformationOptions;
 
             RegisterAuthenticationHandler();
 
@@ -146,7 +143,7 @@ namespace Microsoft.AspNet.Authentication
 
         public virtual void Authenticate(IAuthenticateContext context)
         {
-            if (context.AuthenticationSchemes.Contains(BaseOptions.AuthenticationScheme, StringComparer.Ordinal))
+            if (ShouldHandleScheme(context.AuthenticationScheme))
             {
                 AuthenticationTicket ticket = Authenticate();
                 if (ticket != null && ticket.Principal != null)
@@ -156,7 +153,7 @@ namespace Microsoft.AspNet.Authentication
                 }
                 else
                 {
-                    context.NotAuthenticated(BaseOptions.AuthenticationScheme, properties: null, description: BaseOptions.Description.Dictionary);
+                    context.NotAuthenticated();
                 }
             }
 
@@ -166,27 +163,19 @@ namespace Microsoft.AspNet.Authentication
             }
         }
 
-        public virtual async Task<ClaimsPrincipal> ApplyClaimsTransformation(ClaimsPrincipal principal)
-        {
-            return ClaimsTransformationOptions?.TransformAsync == null
-                ? principal
-                : await ClaimsTransformationOptions.TransformAsync(principal);
-        }
-
         public virtual async Task AuthenticateAsync(IAuthenticateContext context)
         {
-            if (context.AuthenticationSchemes.Contains(BaseOptions.AuthenticationScheme, StringComparer.Ordinal))
+            if (ShouldHandleScheme(context.AuthenticationScheme))
             {
                 AuthenticationTicket ticket = await AuthenticateAsync();
                 if (ticket != null && ticket.Principal != null)
                 {
                     AuthenticateCalled = true;
-                    var transformed = await ApplyClaimsTransformation(ticket.Principal);
-                    context.Authenticated(transformed, ticket.Properties.Dictionary, BaseOptions.Description.Dictionary);
+                    context.Authenticated(ticket.Principal, ticket.Properties.Dictionary, BaseOptions.Description.Dictionary);
                 }
                 else
                 {
-                    context.NotAuthenticated(BaseOptions.AuthenticationScheme, properties: null, description: BaseOptions.Description.Dictionary);
+                    context.NotAuthenticated();
                 }
             }
 
@@ -464,3 +453,4 @@ namespace Microsoft.AspNet.Authentication
         }
     }
 }
+

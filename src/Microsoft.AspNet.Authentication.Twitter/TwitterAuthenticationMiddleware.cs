@@ -37,11 +37,10 @@ namespace Microsoft.AspNet.Authentication.Twitter
             [NotNull] IServiceProvider services,
             [NotNull] IDataProtectionProvider dataProtectionProvider,
             [NotNull] ILoggerFactory loggerFactory,
-            [NotNull] IOptions<ClaimsTransformationOptions> transformOptions,
             [NotNull] IOptions<ExternalAuthenticationOptions> externalOptions,
             [NotNull] IOptions<TwitterAuthenticationOptions> options,
             ConfigureOptions<TwitterAuthenticationOptions> configureOptions = null)
-            : base(next, services, transformOptions, options, configureOptions)
+            : base(next, services, options, configureOptions)
         {
             if (string.IsNullOrWhiteSpace(Options.ConsumerSecret))
             {

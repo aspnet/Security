@@ -116,8 +116,7 @@ namespace Microsoft.AspNet.Authentication.Twitter
 
                 await Options.Notifications.Authenticated(context);
 
-                var transformed = await ApplyClaimsTransformation(context.Principal);
-                return new AuthenticationTicket(transformed, context.Properties, Options.AuthenticationScheme);
+                return new AuthenticationTicket(context.Principal, context.Properties, Options.AuthenticationScheme);
             }
             catch (Exception ex)
             {

@@ -32,10 +32,9 @@ namespace Microsoft.AspNet.Authentication.OAuthBearer
             [NotNull] RequestDelegate next,
             [NotNull] IServiceProvider services,
             [NotNull] ILoggerFactory loggerFactory,
-            [NotNull] IOptions<ClaimsTransformationOptions> transformOptions,
             [NotNull] IOptions<OAuthBearerAuthenticationOptions> options,
             ConfigureOptions<OAuthBearerAuthenticationOptions> configureOptions)
-            : base(next, services, transformOptions, options, configureOptions)
+            : base(next, services, options, configureOptions)
         {
             _logger = loggerFactory.CreateLogger<OAuthBearerAuthenticationMiddleware>();
             if (Options.Notifications == null)

@@ -425,17 +425,17 @@ namespace Microsoft.AspNet.Authentication.Google
                     {
                         options.SignInScheme = CookieAuthenticationScheme;
                     });
-                    services.ConfigureClaimsTransformation(options =>
-                        options.TransformAsync = p =>
-                        {
-                            var id = new ClaimsIdentity("xform");
-                            id.AddClaim(new Claim("xform", "yup"));
-                            p.AddIdentity(id);
-                            return Task.FromResult(p);
-                        });
+                    services.ConfigureClaimsTransformation(p =>
+                    {
+                        var id = new ClaimsIdentity("xform");
+                        id.AddClaim(new Claim("xform", "yup"));
+                        p.AddIdentity(id);
+                        return p;
+                    });
                 });
                 app.UseCookieAuthentication(options => options.AuthenticationScheme = CookieAuthenticationScheme);
                 app.UseGoogleAuthentication(configureOptions);
+                app.UseClaimsTransformation();
                 app.Use(async (context, next) =>
                 {
                     var req = context.Request;

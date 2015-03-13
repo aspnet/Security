@@ -18,7 +18,6 @@ namespace Microsoft.AspNet.Authentication
         protected AuthenticationMiddleware(
             [NotNull] RequestDelegate next, 
             [NotNull] IServiceProvider services, 
-            [NotNull] IOptions<ClaimsTransformationOptions> transformOptions, 
             [NotNull] IOptions<TOptions> options, 
             ConfigureOptions<TOptions> configureOptions)
         {
@@ -33,21 +32,18 @@ namespace Microsoft.AspNet.Authentication
             }
             _next = next;
             _services = services;
-            ClaimsTransformationOptions = transformOptions.Options;
         }
 
         public string AuthenticationScheme { get; set; }
 
         public TOptions Options { get; set; }
 
-        public ClaimsTransformationOptions ClaimsTransformationOptions { get; set; }
-
         public async Task Invoke(HttpContext context)
         {
             using (RequestServicesContainer.EnsureRequestServices(context, _services))
             {
                 AuthenticationHandler<TOptions> handler = CreateHandler();
-                await handler.Initialize(Options, ClaimsTransformationOptions, context);
+                await handler.Initialize(Options, context);
                 try
                 {
                     if (!await handler.InvokeAsync())

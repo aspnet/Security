@@ -3,12 +3,11 @@
 
 using System;
 using System.Security.Claims;
-using System.Threading.Tasks;
 
 namespace Microsoft.AspNet.Authentication
 {
     public class ClaimsTransformationOptions
     {
-        public Func<ClaimsPrincipal, Task<ClaimsPrincipal>> TransformAsync { get; set; }
+        public Func<ClaimsPrincipal, ClaimsPrincipal> Transformation { get; set; }
     }
 }

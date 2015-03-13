@@ -30,11 +30,10 @@ namespace Microsoft.AspNet.Authentication.MicrosoftAccount
             [NotNull] IServiceProvider services,
             [NotNull] IDataProtectionProvider dataProtectionProvider,
             [NotNull] ILoggerFactory loggerFactory,
-            [NotNull] IOptions<ClaimsTransformationOptions> transformOptions,
             [NotNull] IOptions<ExternalAuthenticationOptions> externalOptions,
             [NotNull] IOptions<MicrosoftAccountAuthenticationOptions> options,
             ConfigureOptions<MicrosoftAccountAuthenticationOptions> configureOptions = null)
-            : base(next, services, dataProtectionProvider, loggerFactory, transformOptions, externalOptions, options, configureOptions)
+            : base(next, services, dataProtectionProvider, loggerFactory, externalOptions, options, configureOptions)
         {
             if (Options.Notifications == null)
             {
