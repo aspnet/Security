@@ -30,7 +30,7 @@ namespace Microsoft.AspNet.Authentication
             {
                 // REVIEW: this cast seems really bad (missing interface way to get the result back out?)
                 var authContext = context as AuthenticateContext;
-                if (context != null)
+                if (authContext != null && authContext.Result?.Principal != null)
                 {
                     context.Authenticated(
                         _transform.Invoke(authContext.Result.Principal),

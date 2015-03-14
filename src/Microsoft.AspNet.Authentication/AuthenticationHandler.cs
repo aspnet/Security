@@ -72,6 +72,15 @@ namespace Microsoft.AspNet.Authentication
             Response.OnSendingHeaders(OnSendingHeaderCallback, this);
 
             await InitializeCoreAsync();
+
+            if (BaseOptions.AutomaticAuthentication)
+            {
+                AuthenticationTicket ticket = await AuthenticateAsync();
+                if (ticket != null && ticket.Principal != null)
+                {
+                    SecurityHelper.AddUserPrincipal(Context, ticket.Principal);
+                }
+            }
         }
 
         private static void OnSendingHeaderCallback(object state)
@@ -360,14 +369,26 @@ namespace Microsoft.AspNet.Authentication
 
         public virtual bool ShouldHandleScheme(IEnumerable<string> authenticationSchemes)
         {
-            return authenticationSchemes != null &&
-                authenticationSchemes.Any() &&
-                authenticationSchemes.Contains(BaseOptions.AuthenticationScheme, StringComparer.Ordinal);
+            // If there are any schemes asked for, need to match, otherwise automatic authentication matches
+            return authenticationSchemes != null && authenticationSchemes.Any()
+                ? authenticationSchemes.Contains(BaseOptions.AuthenticationScheme, StringComparer.Ordinal)
+                : BaseOptions.AutomaticAuthentication;
         }
 
         public virtual bool ShouldHandleScheme(string authenticationScheme)
         {
-            return string.Equals(BaseOptions.AuthenticationScheme, authenticationScheme, StringComparison.Ordinal);
+            return string.Equals(BaseOptions.AuthenticationScheme, authenticationScheme, StringComparison.Ordinal) ||
+                (BaseOptions.AutomaticAuthentication && string.IsNullOrWhiteSpace(authenticationScheme));
+        }
+
+        public virtual bool ShouldConvertChallengeToForbidden()
+        {
+            // Return 403 iff 401 and this handler's authenticate was called
+            // and the challenge is for the authentication type
+            return Response.StatusCode == 401 &&
+                AuthenticateCalled &&
+                ChallengeContext != null &&
+                ShouldHandleScheme(ChallengeContext.AuthenticationSchemes);
         }
 
         /// <summary>

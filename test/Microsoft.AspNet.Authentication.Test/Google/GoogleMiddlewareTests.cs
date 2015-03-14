@@ -52,6 +52,25 @@ namespace Microsoft.AspNet.Authentication.Google
         }
 
         [Fact]
+        public async Task Challenge401WillTriggerRedirection()
+        {
+            var server = CreateServer(options =>
+            {
+                options.ClientId = "Test Id";
+                options.ClientSecret = "Test Secret";
+                options.AutomaticAuthentication = true;
+            });
+            var transaction = await SendAsync(server, "https://example.com/401");
+            transaction.Response.StatusCode.ShouldBe(HttpStatusCode.Redirect);
+            var location = transaction.Response.Headers.Location.ToString();
+            location.ShouldContain("https://accounts.google.com/o/oauth2/auth?response_type=code");
+            location.ShouldContain("&client_id=");
+            location.ShouldContain("&redirect_uri=");
+            location.ShouldContain("&scope=");
+            location.ShouldContain("&state=");
+        }
+
+        [Fact]
         public async Task ChallengeWillSetCorrelationCookie()
         {
             var server = CreateServer(options =>
@@ -65,6 +84,20 @@ namespace Microsoft.AspNet.Authentication.Google
         }
 
         [Fact]
+        public async Task Challenge401WillSetCorrelationCookie()
+        {
+            var server = CreateServer(options =>
+            {
+                options.ClientId = "Test Id";
+                options.ClientSecret = "Test Secret";
+                options.AutomaticAuthentication = true;
+            });
+            var transaction = await SendAsync(server, "https://example.com/401");
+            Console.WriteLine(transaction.SetCookie);
+            transaction.SetCookie.Single().ShouldContain(".AspNet.Correlation.Google=");
+        }
+
+        [Fact]
         public async Task ChallengeWillSetDefaultScope()
         {
             var server = CreateServer(options =>
@@ -73,6 +106,21 @@ namespace Microsoft.AspNet.Authentication.Google
                 options.ClientSecret = "Test Secret";
             });
             var transaction = await SendAsync(server, "https://example.com/challenge");
+            transaction.Response.StatusCode.ShouldBe(HttpStatusCode.Redirect);
+            var query = transaction.Response.Headers.Location.Query;
+            query.ShouldContain("&scope=" + Uri.EscapeDataString("openid profile email"));
+        }
+
+        [Fact]
+        public async Task Challenge401WillSetDefaultScope()
+        {
+            var server = CreateServer(options =>
+            {
+                options.ClientId = "Test Id";
+                options.ClientSecret = "Test Secret";
+                options.AutomaticAuthentication = true;
+            });
+            var transaction = await SendAsync(server, "https://example.com/401");
             transaction.Response.StatusCode.ShouldBe(HttpStatusCode.Redirect);
             var query = transaction.Response.Headers.Location.Query;
             query.ShouldContain("&scope=" + Uri.EscapeDataString("openid profile email"));
@@ -108,7 +156,7 @@ namespace Microsoft.AspNet.Authentication.Google
                     if (req.Path == new PathString("/challenge2"))
                     {
                         res.Challenge(new AuthenticationProperties(
-                            new Dictionary<string, string>() 
+                            new Dictionary<string, string>()
                             {
                                 { "scope", "https://www.googleapis.com/auth/plus.login" },
                                 { "access_type", "offline" },
@@ -149,6 +197,35 @@ namespace Microsoft.AspNet.Authentication.Google
             var query = transaction.Response.Headers.Location.Query;
             query.ShouldContain("custom=test");
         }
+
+        // TODO: Fix these tests to path (Need some test logic for Authenticate("Google") to return a ticket still
+        //[Fact]
+        //public async Task GoogleTurns401To403WhenAuthenticated()
+        //{
+        //    TestServer server = CreateServer(options =>
+        //    {
+        //        options.ClientId = "Test Id";
+        //        options.ClientSecret = "Test Secret";
+        //    });
+
+        //    Transaction transaction1 = await SendAsync(server, "http://example.com/unauthorized");
+        //    transaction1.Response.StatusCode.ShouldBe(HttpStatusCode.Forbidden);
+        //}
+
+        //[Fact]
+        //public async Task GoogleTurns401To403WhenAutomatic()
+        //{
+        //    TestServer server = CreateServer(options =>
+        //    {
+        //        options.ClientId = "Test Id";
+        //        options.ClientSecret = "Test Secret";
+        //        options.AutomaticAuthentication = true;
+        //    });
+
+        //    Debugger.Launch();
+        //    Transaction transaction1 = await SendAsync(server, "http://example.com/unauthorizedAuto");
+        //    transaction1.Response.StatusCode.ShouldBe(HttpStatusCode.Forbidden);
+        //}
 
         [Fact]
         public async Task ReplyPathWithoutStateQueryStringWillBeRejected()
@@ -217,7 +294,7 @@ namespace Microsoft.AspNet.Authentication.Google
             properties.Dictionary.Add(correlationKey, correlationValue);
             properties.RedirectUri = "/me";
             var state = stateFormat.Protect(properties);
-            var transaction = await SendAsync(server, 
+            var transaction = await SendAsync(server,
                 "https://example.com/signin-google?code=TestCode&state=" + Uri.EscapeDataString(state),
                 correlationKey + "=" + correlationValue);
             transaction.Response.StatusCode.ShouldBe(HttpStatusCode.Redirect);
@@ -433,7 +510,10 @@ namespace Microsoft.AspNet.Authentication.Google
                         return p;
                     });
                 });
-                app.UseCookieAuthentication(options => options.AuthenticationScheme = CookieAuthenticationScheme);
+                app.UseCookieAuthentication(options => {
+                    options.AuthenticationScheme = CookieAuthenticationScheme;
+                    options.AutomaticAuthentication = true;
+                });
                 app.UseGoogleAuthentication(configureOptions);
                 app.UseClaimsTransformation();
                 app.Use(async (context, next) =>
@@ -448,6 +528,18 @@ namespace Microsoft.AspNet.Authentication.Google
                     else if (req.Path == new PathString("/me"))
                     {
                         Describe(res, context.User);
+                    }
+                    else if (req.Path == new PathString("/unauthorized"))
+                    {
+                        // Simulate Authorization failure 
+                        var result = await context.AuthenticateAsync("Google");
+                        res.Challenge("Google");
+                    }
+                    else if (req.Path == new PathString("/unauthorizedAuto"))
+                    {
+                        var result = await context.AuthenticateAsync("Google");
+                        res.StatusCode = 401;
+                        res.Challenge();
                     }
                     else if (req.Path == new PathString("/401"))
                     {
