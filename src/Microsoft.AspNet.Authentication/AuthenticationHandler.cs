@@ -4,7 +4,6 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Security.Claims;
 using System.Security.Cryptography;
 using System.Threading;
 using System.Threading.Tasks;
@@ -76,7 +75,7 @@ namespace Microsoft.AspNet.Authentication
             if (BaseOptions.AutomaticAuthentication)
             {
                 AuthenticationTicket ticket = await AuthenticateAsync();
-                if (ticket != null && ticket.Principal != null)
+                if (ticket?.Principal != null)
                 {
                     SecurityHelper.AddUserPrincipal(Context, ticket.Principal);
                 }
@@ -137,7 +136,7 @@ namespace Microsoft.AspNet.Authentication
         /// pipeline.</returns>
         public virtual Task<bool> InvokeAsync()
         {
-            return Task.FromResult<bool>(false);
+            return Task.FromResult(false);
         }
 
         public virtual void GetDescriptions(IDescribeSchemesContext describeContext)
@@ -155,7 +154,7 @@ namespace Microsoft.AspNet.Authentication
             if (ShouldHandleScheme(context.AuthenticationScheme))
             {
                 AuthenticationTicket ticket = Authenticate();
-                if (ticket != null && ticket.Principal != null)
+                if (ticket?.Principal != null)
                 {
                     AuthenticateCalled = true;
                     context.Authenticated(ticket.Principal, ticket.Properties.Dictionary, BaseOptions.Description.Dictionary);
@@ -177,7 +176,7 @@ namespace Microsoft.AspNet.Authentication
             if (ShouldHandleScheme(context.AuthenticationScheme))
             {
                 AuthenticationTicket ticket = await AuthenticateAsync();
-                if (ticket != null && ticket.Principal != null)
+                if (ticket?.Principal != null)
                 {
                     AuthenticateCalled = true;
                     context.Authenticated(ticket.Principal, ticket.Properties.Dictionary, BaseOptions.Description.Dictionary);
@@ -405,11 +404,11 @@ namespace Microsoft.AspNet.Authentication
 
         protected void GenerateCorrelationId([NotNull] AuthenticationProperties properties)
         {
-            string correlationKey = Constants.CorrelationPrefix + BaseOptions.AuthenticationScheme;
+            var correlationKey = Constants.CorrelationPrefix + BaseOptions.AuthenticationScheme;
 
             var nonceBytes = new byte[32];
             CryptoRandom.GetBytes(nonceBytes);
-            string correlationId = TextEncodings.Base64Url.Encode(nonceBytes);
+            var correlationId = TextEncodings.Base64Url.Encode(nonceBytes);
 
             var cookieOptions = new CookieOptions
             {
@@ -424,9 +423,8 @@ namespace Microsoft.AspNet.Authentication
 
         protected bool ValidateCorrelationId([NotNull] AuthenticationProperties properties, [NotNull] ILogger logger)
         {
-            string correlationKey = Constants.CorrelationPrefix + BaseOptions.AuthenticationScheme;
-
-            string correlationCookie = Request.Cookies[correlationKey];
+            var correlationKey = Constants.CorrelationPrefix + BaseOptions.AuthenticationScheme;
+            var correlationCookie = Request.Cookies[correlationKey];
             if (string.IsNullOrWhiteSpace(correlationCookie))
             {
                 logger.LogWarning("{0} cookie not found.", correlationKey);
