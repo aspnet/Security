@@ -2,7 +2,6 @@
 // Licensed under the Apache License, Version 2.0. See License.txt in the project root for license information.
 
 using System;
-using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Net;
@@ -16,7 +15,6 @@ using System.Xml.Linq;
 using Microsoft.AspNet.Builder;
 using Microsoft.AspNet.Http;
 using Microsoft.AspNet.Http.Authentication;
-using Microsoft.AspNet.Http.Core.Authentication;
 using Microsoft.AspNet.TestHost;
 using Microsoft.Framework.DependencyInjection;
 using Shouldly;
@@ -36,37 +34,47 @@ namespace Microsoft.AspNet.Authentication.Cookies
             response.StatusCode.ShouldBe(HttpStatusCode.OK);
         }
 
-        [Fact]
-        public async Task ProtectedRequestShouldRedirectToLogin()
+        [Theory]
+        [InlineData(true)]
+        [InlineData(false)]
+        public async Task ProtectedRequestShouldRedirectToLoginOnlyWhenAutomatic(bool auto)
         {
             TestServer server = CreateServer(options =>
             {
                 options.LoginPath = new PathString("/login");
+                options.AutomaticAuthentication = auto;
             });
 
             Transaction transaction = await SendAsync(server, "http://example.com/protected");
 
-            transaction.Response.StatusCode.ShouldBe(HttpStatusCode.Redirect);
-
-            Uri location = transaction.Response.Headers.Location;
-            location.LocalPath.ShouldBe("/login");
-            location.Query.ShouldBe("?ReturnUrl=%2Fprotected");
+            transaction.Response.StatusCode.ShouldBe(auto ? HttpStatusCode.Redirect : HttpStatusCode.Unauthorized);
+            if (auto)
+            {
+                Uri location = transaction.Response.Headers.Location;
+                location.LocalPath.ShouldBe("/login");
+                location.Query.ShouldBe("?ReturnUrl=%2Fprotected");
+            }
         }
 
-        [Fact]
-        public async Task ProtectedCustomRequestShouldRedirectToCustomLogin()
+        [Theory]
+        [InlineData(true)]
+        [InlineData(false)]
+        public async Task ProtectedCustomRequestShouldRedirectToCustomLogin(bool auto)
         {
             TestServer server = CreateServer(options =>
             {
                 options.LoginPath = new PathString("/login");
+                options.AutomaticAuthentication = auto;
             });
 
             Transaction transaction = await SendAsync(server, "http://example.com/protected/CustomRedirect");
 
-            transaction.Response.StatusCode.ShouldBe(HttpStatusCode.Redirect);
-
-            Uri location = transaction.Response.Headers.Location;
-            location.ToString().ShouldBe("/CustomRedirect");
+            transaction.Response.StatusCode.ShouldBe(auto ? HttpStatusCode.Redirect : HttpStatusCode.Unauthorized);
+            if (auto)
+            {
+                Uri location = transaction.Response.Headers.Location;
+                location.ToString().ShouldBe("/CustomRedirect");
+            }
         }
 
         private Task SignInAsAlice(HttpContext context)
@@ -405,6 +413,7 @@ namespace Microsoft.AspNet.Authentication.Cookies
             TestServer server = CreateServer(options =>
             {
                 options.LoginPath = new PathString("/login");
+                options.AutomaticAuthentication = true;
             });
 
             Transaction transaction = await SendAsync(server, "http://example.com/protected", ajaxRequest: true);
