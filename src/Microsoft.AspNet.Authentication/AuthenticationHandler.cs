@@ -153,7 +153,7 @@ namespace Microsoft.AspNet.Authentication
         {
             if (ShouldHandleScheme(context.AuthenticationScheme))
             {
-                AuthenticationTicket ticket = Authenticate();
+                var ticket = Authenticate();
                 if (ticket?.Principal != null)
                 {
                     AuthenticateCalled = true;
@@ -175,7 +175,7 @@ namespace Microsoft.AspNet.Authentication
         {
             if (ShouldHandleScheme(context.AuthenticationScheme))
             {
-                AuthenticationTicket ticket = await AuthenticateAsync();
+                var ticket = await AuthenticateAsync();
                 if (ticket?.Principal != null)
                 {
                     AuthenticateCalled = true;
