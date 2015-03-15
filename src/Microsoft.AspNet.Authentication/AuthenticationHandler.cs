@@ -74,7 +74,7 @@ namespace Microsoft.AspNet.Authentication
 
             if (BaseOptions.AutomaticAuthentication)
             {
-                AuthenticationTicket ticket = await AuthenticateAsync();
+                var ticket = await AuthenticateAsync();
                 if (ticket?.Principal != null)
                 {
                     SecurityHelper.AddUserPrincipal(Context, ticket.Principal);
