@@ -169,7 +169,8 @@ namespace Microsoft.AspNet.Authentication.Tests.MicrosoftAccount
                         options.SignInScheme = "External";
                     });
                 });
-                app.UseCookieAuthentication(options => {
+                app.UseCookieAuthentication(options =>
+                {
                     options.AuthenticationScheme = "External";
                     options.AutomaticAuthentication = true;
                 });

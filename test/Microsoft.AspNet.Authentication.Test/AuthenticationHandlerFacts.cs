@@ -78,8 +78,10 @@ namespace Microsoft.AspNet.Authentication
 
         private class TestOptions : AuthenticationOptions { }
 
-        private class TestAutoOptions : AuthenticationOptions {
-            public TestAutoOptions() {
+        private class TestAutoOptions : AuthenticationOptions
+        {
+            public TestAutoOptions()
+            {
                 AutomaticAuthentication = true;
             }
         }

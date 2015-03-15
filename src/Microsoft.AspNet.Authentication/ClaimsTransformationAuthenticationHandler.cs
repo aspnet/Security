@@ -4,7 +4,6 @@
 using System;
 using System.Security.Claims;
 using System.Threading.Tasks;
-using Microsoft.AspNet.Http;
 using Microsoft.AspNet.Http.Authentication;
 using Microsoft.AspNet.Http.Core.Authentication;
 
@@ -30,7 +29,7 @@ namespace Microsoft.AspNet.Authentication
             {
                 // REVIEW: this cast seems really bad (missing interface way to get the result back out?)
                 var authContext = context as AuthenticateContext;
-                if (authContext != null && authContext.Result?.Principal != null)
+                if (authContext?.Result?.Principal != null)
                 {
                     context.Authenticated(
                         _transform.Invoke(authContext.Result.Principal),
