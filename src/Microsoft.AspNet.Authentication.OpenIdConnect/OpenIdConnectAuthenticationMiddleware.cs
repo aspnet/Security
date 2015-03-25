@@ -1,4 +1,4 @@
-// Copyright (c) .NET Foundation. All rights reserved.
+﻿// Copyright (c) .NET Foundation. All rights reserved.
 // Licensed under the Apache License, Version 2.0. See License.txt in the project root for license information.
 
 using System;
@@ -47,7 +47,15 @@ namespace Microsoft.AspNet.Authentication.OpenIdConnect
             ConfigureOptions<OpenIdConnectAuthenticationOptions> configureOptions = null)
             : base(next, options, loggerFactory, encoder, configureOptions)
         {
+<<<<<<< HEAD
             if (string.IsNullOrEmpty(Options.SignInScheme) && !string.IsNullOrEmpty(externalOptions.Options.SignInScheme))
+=======
+            _logger = loggerFactory.CreateLogger<OpenIdConnectAuthenticationMiddleware>();
+            DefaultLoggingListener eventListener = new DefaultLoggingListener(_logger);
+            eventListener.EnableEvents(WilsonEventSource.Logger, EventLevel.Informational);
+
+            if (string.IsNullOrWhiteSpace(Options.TokenValidationParameters.AuthenticationType))
+>>>>>>> Adding logging draft.
             {
                 Options.SignInScheme = externalOptions.Options.SignInScheme;
             }
