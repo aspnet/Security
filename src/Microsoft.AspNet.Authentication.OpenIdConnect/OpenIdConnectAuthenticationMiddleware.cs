@@ -51,8 +51,16 @@ namespace Microsoft.AspNet.Authentication.OpenIdConnect
             if (string.IsNullOrEmpty(Options.SignInScheme) && !string.IsNullOrEmpty(externalOptions.Options.SignInScheme))
 =======
             _logger = loggerFactory.CreateLogger<OpenIdConnectAuthenticationMiddleware>();
-            DefaultLoggingListener eventListener = new DefaultLoggingListener(_logger);
-            eventListener.EnableEvents(WilsonEventSource.Logger, EventLevel.Informational);
+
+            if (Options.WilsonEventSourceListener != null)
+            {
+                Options.WilsonEventSourceListener.EnableEvents(WilsonEventSource.Logger, EventLevel.Informational);
+            }
+            else
+            {
+                DefaultLoggingListener eventListener = new DefaultLoggingListener(_logger);
+                eventListener.EnableEvents(WilsonEventSource.Logger, EventLevel.Error);
+            }
 
             if (string.IsNullOrWhiteSpace(Options.TokenValidationParameters.AuthenticationType))
 >>>>>>> Adding logging draft.

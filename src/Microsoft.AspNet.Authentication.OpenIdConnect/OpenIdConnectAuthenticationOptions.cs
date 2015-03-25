@@ -4,6 +4,7 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
+using System.Diagnostics.Tracing;
 using System.IdentityModel.Tokens;
 using System.Net.Http;
 using Microsoft.AspNet.Http;
@@ -337,5 +338,7 @@ namespace Microsoft.AspNet.Authentication.OpenIdConnect
             get;
             set;
         }
+
+        public EventListener WilsonEventSourceListener { get; set; }
     }
 }
