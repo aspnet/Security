@@ -5,8 +5,10 @@ namespace Microsoft.AspNet.Authentication.OpenIdConnect
 {
     public interface INonceCache
     {
-        string AddNonce(string nonce);
+        bool TryAddNonce(string nonce);
+
         bool TryRemoveNonce(string nonce);
+
         bool HasNonce(string nonce);
     }
 }

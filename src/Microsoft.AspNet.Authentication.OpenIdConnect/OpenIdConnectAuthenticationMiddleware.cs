@@ -38,18 +38,11 @@ namespace Microsoft.AspNet.Authentication.OpenIdConnect
             [NotNull] RequestDelegate next,
             [NotNull] IDataProtectionProvider dataProtectionProvider,
             [NotNull] ILoggerFactory loggerFactory,
-            [NotNull] IOptions<ExternalAuthenticationOptions> externalOptions,
             [NotNull] IOptions<OpenIdConnectAuthenticationOptions> options,
             ConfigureOptions<OpenIdConnectAuthenticationOptions> configureOptions)
             : base(next, options, configureOptions)
         {
             _logger = loggerFactory.CreateLogger<OpenIdConnectAuthenticationMiddleware>();
-
-            if (string.IsNullOrWhiteSpace(Options.TokenValidationParameters.AuthenticationType))
-            {
-                Options.TokenValidationParameters.AuthenticationType = externalOptions.Options.SignInScheme;
-            }
-
             if (Options.StateDataFormat == null)
             {
                 var dataProtector = dataProtectionProvider.CreateProtector(
@@ -147,7 +140,7 @@ namespace Microsoft.AspNet.Authentication.OpenIdConnect
                 var webRequestHandler = handler as WebRequestHandler;
                 if (webRequestHandler == null)
                 {
-                    throw new InvalidOperationException(Resources.Exception_ValidatorHandlerMismatch);
+                    throw new InvalidOperationException(Resources.OIDCH_0102_ExceptionValidatorHandlerMismatch);
                 }
                 webRequestHandler.ServerCertificateValidationCallback = options.BackchannelCertificateValidator.Validate;
             }
