@@ -157,7 +157,7 @@ namespace Microsoft.AspNet.Authentication.OpenIdConnect
             {
                 if (logLevelDebug)
                 {
-                    _logger.LogDebug(Resources.OIDCH_0029_ChallengContextEqualsNull);
+                    _logger.LogDebug(Resources.OIDCH_0029_ChallengeContextEqualsNull);
                 }
 
                 return;
@@ -264,7 +264,7 @@ namespace Microsoft.AspNet.Authentication.OpenIdConnect
             {
                 if (logLevelInformational)
                 {
-                    _logger.LogInformation(Resources.OIDCH_0034_RedirectHandledResponse);
+                    _logger.LogInformation(Resources.OIDCH_0034_RedirectToIdentityProviderNotificationHandledResponse);
                 }
 
                 return;
@@ -273,7 +273,7 @@ namespace Microsoft.AspNet.Authentication.OpenIdConnect
             {
                 if (logLevelInformational)
                 {
-                    _logger.LogInformation(Resources.OIDCH_0035_RedirectSkipped);
+                    _logger.LogInformation(Resources.OIDCH_0035_RedirectToIdentityProviderNotificationSkipped);
                 }
 
                 return;
@@ -355,7 +355,7 @@ namespace Microsoft.AspNet.Authentication.OpenIdConnect
                 {
                     if (logLevelInformational)
                     {
-                        _logger.LogInformation(Resources.OIDCH_0002_MessageHandledResponse);
+                        _logger.LogInformation(Resources.OIDCH_0002_MessageReceivedNotificationHandledResponse);
                     }
 
                     return messageReceivedNotification.AuthenticationTicket;
@@ -365,7 +365,7 @@ namespace Microsoft.AspNet.Authentication.OpenIdConnect
                 {
                     if (logLevelInformational)
                     {
-                        _logger.LogInformation(Resources.OIDCH_0003_MessageSkipped);
+                        _logger.LogInformation(Resources.OIDCH_0003_MessageReceivedNotificationSkipped);
                     }
 
                     return null;
@@ -374,7 +374,11 @@ namespace Microsoft.AspNet.Authentication.OpenIdConnect
                 // runtime always adds state, if we don't find it OR we failed to 'unprotect' it this is not a message we should process.
                 if (string.IsNullOrWhiteSpace(message.State))
                 {
-                    _logger.LogError(Resources.OIDCH_0004_MessageStateIsNullOrWhiteSpace);
+                    if (logLevelError)
+                    {
+                        _logger.LogError(Resources.OIDCH_0004_MessageStateIsNullOrWhiteSpace);
+                    }
+
                     return null;
                 }
 
@@ -383,8 +387,9 @@ namespace Microsoft.AspNet.Authentication.OpenIdConnect
                 {
                     if (logLevelError)
                     {
-                        _logger.LogError(Resources.OIDCH_0005_MessageStateIsInValid);
+                        _logger.LogError(Resources.OIDCH_0005_MessageStateIsInvalid);
                     }
+
                     return null;
                 }
 
@@ -416,6 +421,11 @@ namespace Microsoft.AspNet.Authentication.OpenIdConnect
                 // OpenIdConnect protocol allows a Code to be received without the id_token
                 if (!string.IsNullOrWhiteSpace(message.IdToken))
                 {
+                    if (logLevelDebug)
+                    {
+                        _logger.LogDebug(string.Format(CultureInfo.CurrentCulture, Resources.OIDCH_0020_IdTokenReceived, message.IdToken));
+                    }
+
                     var securityTokenReceivedNotification =
                         new SecurityTokenReceivedNotification<OpenIdConnectMessage, OpenIdConnectAuthenticationOptions>(Context, Options)
                         {
@@ -427,7 +437,7 @@ namespace Microsoft.AspNet.Authentication.OpenIdConnect
                     {
                         if (logLevelInformational)
                         {
-                            _logger.LogInformation(Resources.OIDCH_0008_TokenReceivedHandledResponse);
+                            _logger.LogInformation(Resources.OIDCH_0008_SecurityTokenReceivedNotificationHandledResponse);
                         }
 
                         return securityTokenReceivedNotification.AuthenticationTicket;
@@ -437,7 +447,7 @@ namespace Microsoft.AspNet.Authentication.OpenIdConnect
                     {
                         if (logLevelInformational)
                         {
-                            _logger.LogInformation(Resources.OIDCH_0009_TokenReceivedNotificationSkipped);
+                            _logger.LogInformation(Resources.OIDCH_0009_SecurityTokenReceivedNotificationSkipped);
                         }
 
                         return null;
@@ -530,7 +540,7 @@ namespace Microsoft.AspNet.Authentication.OpenIdConnect
                     {
                         if (logLevelInformational)
                         {
-                            _logger.LogInformation(Resources.OIDCH_0012_TokenValidatedHandledResponse);
+                            _logger.LogInformation(Resources.OIDCH_0012_SecurityTokenValidatedNotificationHandledResponse);
                         }
 
                         return securityTokenValidatedNotification.AuthenticationTicket;
@@ -540,7 +550,7 @@ namespace Microsoft.AspNet.Authentication.OpenIdConnect
                     {
                         if (logLevelInformational)
                         {
-                            _logger.LogInformation(Resources.OIDCH_0013_TokenValidatedNotificationSkipped);
+                            _logger.LogInformation(Resources.OIDCH_0013_SecurityTokenValidatedNotificationSkipped);
                         }
 
                         return null;
@@ -571,7 +581,10 @@ namespace Microsoft.AspNet.Authentication.OpenIdConnect
 
                 if (message.Code != null)
                 {
-                    _logger.LogDebug(string.Format(CultureInfo.CurrentCulture, Resources.OIDCH_0014_CodeReceived, message.Code));
+                    if (logLevelDebug)
+                    {
+                        _logger.LogDebug(string.Format(CultureInfo.CurrentCulture, Resources.OIDCH_0014_CodeReceived, message.Code));
+                    }
 
                     if (ticket == null)
                     {
@@ -593,7 +606,7 @@ namespace Microsoft.AspNet.Authentication.OpenIdConnect
                     {
                         if (logLevelInformational)
                         {
-                            _logger.LogInformation(Resources.OIDCH_0015_CodeReceivedHandledResponse);
+                            _logger.LogInformation(Resources.OIDCH_0015_CodeReceivedNotificationHandledResponse);
                         }
 
                         return authorizationCodeReceivedNotification.AuthenticationTicket;
@@ -603,7 +616,7 @@ namespace Microsoft.AspNet.Authentication.OpenIdConnect
                     {
                         if (logLevelInformational)
                         {
-                            _logger.LogInformation(Resources.OIDCH_0016_CodeReceivedSkipped);
+                            _logger.LogInformation(Resources.OIDCH_0016_CodeReceivedNotificationSkipped);
                         }
 
                         return null;
@@ -637,7 +650,7 @@ namespace Microsoft.AspNet.Authentication.OpenIdConnect
                 {
                     if (logLevelInformational)
                     {
-                        _logger.LogInformation(Resources.OIDCH_0018_AuthenticationFailedHandledResponse);
+                        _logger.LogInformation(Resources.OIDCH_0018_AuthenticationFailedNotificationHandledResponse);
                     }
 
                     return authenticationFailedNotification.AuthenticationTicket;
@@ -647,7 +660,7 @@ namespace Microsoft.AspNet.Authentication.OpenIdConnect
                 {
                     if (logLevelInformational)
                     {
-                        _logger.LogInformation(Resources.OIDCH_0019_AuthenticationFailedSkipped);
+                        _logger.LogInformation(Resources.OIDCH_0019_AuthenticationFailedNotificationSkipped);
                     }
 
                     return null;

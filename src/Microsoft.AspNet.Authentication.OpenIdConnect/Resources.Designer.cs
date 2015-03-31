@@ -111,9 +111,9 @@ namespace Microsoft.AspNet.Authentication.OpenIdConnect
         /// <summary>
         /// OIDCH_0029: ChallengeContext == null AND !Options.AutomaticAuthentication
         /// </summary>
-        internal static string OIDCH_0029_ChallengContextEqualsNull
+        internal static string OIDCH_0029_ChallengeContextEqualsNull
         {
-            get { return ResourceManager.GetString("OIDCH_0029_ChallengContextEqualsNull"); }
+            get { return ResourceManager.GetString("OIDCH_0029_ChallengeContextEqualsNull"); }
         }
 
         /// <summary>
@@ -151,17 +151,17 @@ namespace Microsoft.AspNet.Authentication.OpenIdConnect
         /// <summary>
         /// OIDCH_0034: redirectToIdentityProviderNotification.HandledResponse
         /// </summary>
-        internal static string OIDCH_0034_RedirectHandledResponse
+        internal static string OIDCH_0034_RedirectToIdentityProviderNotificationHandledResponse
         {
-            get { return ResourceManager.GetString("OIDCH_0034_RedirectHandledResponse"); }
+            get { return ResourceManager.GetString("OIDCH_0034_RedirectToIdentityProviderNotificationHandledResponse"); }
         }
 
         /// <summary>
         /// OIDCH_0035: redirectToIdentityProviderNotification.Skipped
         /// </summary>
-        internal static string OIDCH_0035_RedirectSkipped
+        internal static string OIDCH_0035_RedirectToIdentityProviderNotificationSkipped
         {
-            get { return ResourceManager.GetString("OIDCH_0035_RedirectSkipped"); }
+            get { return ResourceManager.GetString("OIDCH_0035_RedirectToIdentityProviderNotificationSkipped"); }
         }
 
         /// <summary>
@@ -199,17 +199,17 @@ namespace Microsoft.AspNet.Authentication.OpenIdConnect
         /// <summary>
         /// OIDCH_0002: messageReceivedNotification.HandledResponse
         /// </summary>
-        internal static string OIDCH_0002_MessageHandledResponse
+        internal static string OIDCH_0002_MessageReceivedNotificationHandledResponse
         {
-            get { return ResourceManager.GetString("OIDCH_0002_MessageHandledResponse"); }
+            get { return ResourceManager.GetString("OIDCH_0002_MessageReceivedNotificationHandledResponse"); }
         }
 
         /// <summary>
         /// OIDCH_0003: messageReceivedNotification.Skipped
         /// </summary>
-        internal static string OIDCH_0003_MessageSkipped
+        internal static string OIDCH_0003_MessageReceivedNotificationSkipped
         {
-            get { return ResourceManager.GetString("OIDCH_0003_MessageSkipped"); }
+            get { return ResourceManager.GetString("OIDCH_0003_MessageReceivedNotificationSkipped"); }
         }
 
         /// <summary>
@@ -223,9 +223,9 @@ namespace Microsoft.AspNet.Authentication.OpenIdConnect
         /// <summary>
         /// OIDCH_0005: unable to unprotect the message.State
         /// </summary>
-        internal static string OIDCH_0005_MessageStateIsInValid
+        internal static string OIDCH_0005_MessageStateIsInvalid
         {
-            get { return ResourceManager.GetString("OIDCH_0005_MessageStateIsInValid"); }
+            get { return ResourceManager.GetString("OIDCH_0005_MessageStateIsInvalid"); }
         }
 
         /// <summary>
@@ -237,7 +237,7 @@ namespace Microsoft.AspNet.Authentication.OpenIdConnect
         }
 
         /// <summary>
-        /// OIDCH_0007: updating configuration"
+        /// OIDCH_0007: updating configuration
         /// </summary>
         internal static string OIDCH_0007_UpdatingConfiguration
         {
@@ -245,19 +245,19 @@ namespace Microsoft.AspNet.Authentication.OpenIdConnect
         }
 
         /// <summary>
-        /// "OIDCH_0008: securityTokenReceivedNotification.HandledResponse":
+        /// OIDCH_0008: securityTokenReceivedNotification.HandledResponse
         /// </summary>
-        internal static string OIDCH_0008_TokenReceivedHandledResponse
+        internal static string OIDCH_0008_SecurityTokenReceivedNotificationHandledResponse
         {
-            get { return ResourceManager.GetString("OIDCH_0008_TokenReceivedHandledResponse"); }
+            get { return ResourceManager.GetString("OIDCH_0008_SecurityTokenReceivedNotificationHandledResponse"); }
         }
 
         /// <summary>
         /// OIDCH_0009: securityTokenReceivedNotification.Skipped
         /// </summary>
-        internal static string OIDCH_0009_TokenReceivedNotificationSkipped
+        internal static string OIDCH_0009_SecurityTokenReceivedNotificationSkipped
         {
-            get { return ResourceManager.GetString("OIDCH_0009_TokenReceivedNotificationSkipped:"); }
+            get { return ResourceManager.GetString("OIDCH_0009_SecurityTokenReceivedNotificationSkipped:"); }
         }
 
         /// <summary>
@@ -279,17 +279,17 @@ namespace Microsoft.AspNet.Authentication.OpenIdConnect
         /// <summary>
         /// OIDCH_0012: securityTokenValidatedNotification.HandledResponse
         /// </summary>
-        internal static string OIDCH_0012_TokenValidatedHandledResponse
+        internal static string OIDCH_0012_SecurityTokenValidatedNotificationHandledResponse
         {
-            get { return ResourceManager.GetString("OIDCH_0012_TokenValidatedHandledResponse"); }
+            get { return ResourceManager.GetString("OIDCH_0012_SecurityTokenValidatedNotificationHandledResponse"); }
         }
 
         /// <summary>
         /// OIDCH_0013: securityTokenValidatedNotification.Skipped
         /// </summary>
-        internal static string OIDCH_0013_TokenValidatedNotificationSkipped
+        internal static string OIDCH_0013_SecurityTokenValidatedNotificationSkipped
         {
-            get { return ResourceManager.GetString("OIDCH_0013_TokenValidatedNotificationSkipped"); }
+            get { return ResourceManager.GetString("OIDCH_0013_SecurityTokenValidatedNotificationSkipped"); }
         }
 
         /// <summary>
@@ -301,19 +301,19 @@ namespace Microsoft.AspNet.Authentication.OpenIdConnect
         }
 
         /// <summary>
-        /// OIDCH_0015: authorizationCodeReceivedNotification.HandledResponse")
+        /// OIDCH_0015: codeReceivedNotification.HandledResponse")
         /// </summary>
-        internal static string OIDCH_0015_CodeReceivedHandledResponse
+        internal static string OIDCH_0015_CodeReceivedNotificationHandledResponse
         {
-            get { return ResourceManager.GetString("OIDCH_0015_CodeReceivedHandledResponse"); }
+            get { return ResourceManager.GetString("OIDCH_0015_CodeReceivedNotificationHandledResponse"); }
         }
 
         /// <summary>
-        /// OIDCH_0016: authorizationCodeReceivedNotification.Skipped
+        /// OIDCH_0016: codeReceivedNotification.Skipped
         /// </summary>
-        internal static string OIDCH_0016_CodeReceivedSkipped
+        internal static string OIDCH_0016_CodeReceivedNotificationSkipped
         {
-            get { return ResourceManager.GetString("OIDCH_0016_CodeReceivedSkipped"); }
+            get { return ResourceManager.GetString("OIDCH_0016_CodeReceivedNotificationSkipped"); }
         }
 
         /// <summary>
@@ -327,17 +327,25 @@ namespace Microsoft.AspNet.Authentication.OpenIdConnect
         /// <summary>
         /// OIDCH_0018: authenticationFailedNotification.HandledResponse
         /// </summary>
-        internal static string OIDCH_0018_AuthenticationFailedHandledResponse
+        internal static string OIDCH_0018_AuthenticationFailedNotificationHandledResponse
         {
-            get { return ResourceManager.GetString("OIDCH_0018_AuthenticationFailedHandledResponse"); }
+            get { return ResourceManager.GetString("OIDCH_0018_AuthenticationFailedNotificationHandledResponse"); }
         }
 
         /// <summary>
         /// OIDCH_0019: authenticationFailedNotification.Skipped
         /// </summary>
-        internal static string OIDCH_0019_AuthenticationFailedSkipped
+        internal static string OIDCH_0019_AuthenticationFailedNotificationSkipped
         {
-            get { return ResourceManager.GetString("OIDCH_0019_AuthenticationFailedSkipped"); }
+            get { return ResourceManager.GetString("OIDCH_0019_AuthenticationFailedNotificationSkipped"); }
+        }
+
+        /// <summary>
+        /// OIDCH_0020: 'id_token' received: '{0}'
+        /// </summary>
+        internal static string OIDCH_0020_IdTokenReceived
+        {
+            get { return ResourceManager.GetString("OIDCH_0020_IdTokenReceived"); }
         }
     }
 }

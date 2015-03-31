@@ -133,7 +133,7 @@
     <value>OIDCH_0027: converted 401 to 403.</value>
   </data>
   <data name="OIDCH_0028_StatusCodeNot401" xml:space="preserve">
-    <value>OIDCH_0028: Response.StatusCode != 401, StatusCode: '{0}'."</value>
+    <value>OIDCH_0028: Response.StatusCode != 401, StatusCode: '{0}'.</value>
   </data>
   <data name="OIDCH_0029_ChallengContextEqualsNull" xml:space="preserve">
     <value>OIDCH_0029: ChallengeContext == null AND !Options.AutomaticAuthentication</value>
@@ -150,10 +150,10 @@
   <data name="OIDCH_0033_TryAddNonceFailed" xml:space="preserve">
     <value>OIDCH_0033: ProtocolValidator.RequireNonce == true. Options.NonceCache.TryAddNonce returned false. This usually indicates the nonce is not unique or has been used. The nonce is: '{0}'.</value>
   </data>
-  <data name="OIDCH_0034_RedirectHandledResponse" xml:space="preserve">
+  <data name="OIDCH_0034_RedirectToIdentityProviderNotificationHandledResponse" xml:space="preserve">
     <value>OIDCH_0034: redirectToIdentityProviderNotification.HandledResponse</value>
   </data>
-  <data name="OIDCH_0035_RedirectSkipped" xml:space="preserve">
+  <data name="OIDCH_0035_RedirectToIdentityProviderNotificationSkipped" xml:space="preserve">
     <value>OIDCH_0035: redirectToIdentityProviderNotification.Skipped</value>
   </data>
   <data name="OIDCH_0036_UriIsNotWellFormed" xml:space="preserve">
@@ -165,10 +165,10 @@
   <data name="OIDCH_0001_MessageReceived" xml:space="preserve">
     <value>OIDCH_0001: MessageReceived: '{0}'.</value>
   </data>
-  <data name="OIDCH_0002_MessageHandledResponse" xml:space="preserve">
+  <data name="OIDCH_0002_MessageReceivedNotificationHandledResponse" xml:space="preserve">
     <value>OIDCH_0002: messageReceivedNotification.HandledResponse</value>
   </data>
-  <data name="OIDCH_0003_MessageSkipped" xml:space="preserve">
+  <data name="OIDCH_0003_MessageReceivedNotificationSkipped" xml:space="preserve">
     <value>OIDCH_0003: messageReceivedNotification.Skipped</value>
   </data>
   <data name="OIDCH_0004_MessageStateIsNullOrWhiteSpace" xml:space="preserve">
@@ -181,12 +181,12 @@
     <value>OIDCH_0006_MessageErrorNotNull: '{0}'.</value>
   </data>
   <data name="OIDCH_0007_UpdatingConfiguration" xml:space="preserve">
-    <value>OIDCH_0007: updating configuration"</value>
+    <value>OIDCH_0007: updating configuration</value>
   </data>
-  <data name="OIDCH_0008_TokenReceivedHandledResponse" xml:space="preserve">
-    <value>"OIDCH_0008: securityTokenReceivedNotification.HandledResponse":</value>
+  <data name="OIDCH_0008_SecurityTokenReceivedNotificationHandledResponse" xml:space="preserve">
+    <value>OIDCH_0008: securityTokenReceivedNotification.HandledResponse</value>
   </data>
-  <data name="OIDCH_0009_TokenReceivedNotificationSkipped:" xml:space="preserve">
+  <data name="OIDCH_0009_SecurityTokenReceivedNotificationSkipped:" xml:space="preserve">
     <value>OIDCH_0009: securityTokenReceivedNotification.Skipped</value>
   </data>
   <data name="OIDCH_0010_ValidatedSecurityTokenNotJwt" xml:space="preserve">
@@ -195,28 +195,31 @@
   <data name="OIDCH_0011_UnableToValidateToken" xml:space="preserve">
     <value>OIDCH_0011: Unable to validate the 'id_token', no suitable ISecurityTokenValidator was found for: {0}."</value>
   </data>
-  <data name="OIDCH_0012_TokenValidatedHandledResponse" xml:space="preserve">
+  <data name="OIDCH_0012_SecurityTokenValidatedNotificationHandledResponse" xml:space="preserve">
     <value>OIDCH_0012: securityTokenValidatedNotification.HandledResponse</value>
   </data>
-  <data name="OIDCH_0013_TokenValidatedNotificationSkipped" xml:space="preserve">
+  <data name="OIDCH_0013_SecurityTokenValidatedNotificationSkipped" xml:space="preserve">
     <value>OIDCH_0013: securityTokenValidatedNotification.Skipped</value>
   </data>
   <data name="OIDCH_0014_CodeReceived" xml:space="preserve">
     <value>OIDCH_0014: 'code' received: '{0}'</value>
   </data>
-  <data name="OIDCH_0015_CodeReceivedHandledResponse" xml:space="preserve">
-    <value>OIDCH_0015: authorizationCodeReceivedNotification.HandledResponse")</value>
+  <data name="OIDCH_0015_CodeReceivedNotificationHandledResponse" xml:space="preserve">
+    <value>OIDCH_0015: codeReceivedNotification.HandledResponse")</value>
   </data>
-  <data name="OIDCH_0016_CodeReceivedSkipped" xml:space="preserve">
-    <value>OIDCH_0016: authorizationCodeReceivedNotification.Skipped</value>
+  <data name="OIDCH_0016_CodeReceivedNotificationSkipped" xml:space="preserve">
+    <value>OIDCH_0016: codeReceivedNotification.Skipped</value>
   </data>
   <data name="OIDCH_0017: Exception occurred while processing message" xml:space="preserve">
     <value>OIDCH_0017: Exception occurred while processing message</value>
   </data>
-  <data name="OIDCH_0018_AuthenticationFailedHandledResponse" xml:space="preserve">
+  <data name="OIDCH_0018_AuthenticationFailedNotificationHandledResponse" xml:space="preserve">
     <value>OIDCH_0018: authenticationFailedNotification.HandledResponse</value>
   </data>
-  <data name="OIDCH_0019_AuthenticationFailedSkipped" xml:space="preserve">
+  <data name="OIDCH_0019_AuthenticationNotificationFailedSkipped" xml:space="preserve">
     <value>OIDCH_0019: authenticationFailedNotification.Skipped</value>
+  </data>
+  <data name="OIDCH_0020_IdTokenReceived" xml:space="preserve">
+    <value>OIDCH_0020: 'id_token' received: '{0}'</value>
   </data>
 </root>
