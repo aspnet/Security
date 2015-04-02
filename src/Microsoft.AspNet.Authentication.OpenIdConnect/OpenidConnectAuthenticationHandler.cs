@@ -125,10 +125,7 @@ namespace Microsoft.AspNet.Authentication.OpenIdConnect
 
             if (logLevelDebug)
             {
-                if (logLevelDebug)
-                {
-                    _logger.LogDebug(string.Format(CultureInfo.CurrentCulture, Resources.OIDCH_0026_ApplyResponseChallengeAsync, this.GetType().ToString()));
-                }
+                _logger.LogDebug(string.Format(CultureInfo.CurrentCulture, Resources.OIDCH_0026_ApplyResponseChallengeAsync, this.GetType().ToString()));
             }
 
             if (ShouldConvertChallengeToForbidden())

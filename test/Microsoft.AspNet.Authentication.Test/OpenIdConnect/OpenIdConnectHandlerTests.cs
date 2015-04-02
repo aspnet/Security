@@ -26,15 +26,14 @@ using Xunit;
 namespace Microsoft.AspNet.Authentication.Tests.OpenIdConnect
 {
     /// <summary>
-    /// These tests are designed to test inbound flows that contain identities.
-    /// id_token, id_token + code, code flows are tested.
+    /// These tests are designed to test OpenIdConnectAuthenticationHandler.
     /// </summary>
-    public class OpenIdConnectIdentityFlowTests
+    public class OpenIdConnectHandlerTests
     {
         static List<LogEntry> CompleteLogEntries;
         static Dictionary<string, LogLevel> LogEntries;
 
-        static OpenIdConnectIdentityFlowTests()
+        static OpenIdConnectHandlerTests()
         {
             LogEntries =
                 new Dictionary<string, LogLevel>()
@@ -429,6 +428,10 @@ namespace Microsoft.AspNet.Authentication.Tests.OpenIdConnect
         }
     }
 
+    /// <summary>
+    /// This type is used to call 'protected' methods on OpenIdConnectAuthenticationHandler.
+    /// Makes writing comprehensive tests easier
+    /// </summary>
     public class OpenIdConnectAuthenticationHandlerPublic : OpenIdConnectAuthenticationHandler
     {
         public OpenIdConnectAuthenticationHandlerPublic(ILogger logger)
@@ -466,6 +469,10 @@ namespace Microsoft.AspNet.Authentication.Tests.OpenIdConnect
         }
     }
 
+    /// <summary>
+    /// This type is used to call 'protected' methods on OpenIdConnectAuthenticationMiddleware.
+    /// Makes writing comprehensive tests easier
+    /// </summary>
     public class OpenIdConnectAuthenticationMiddlewarePublic : OpenIdConnectAuthenticationMiddleware
     {
         public static IDataProtectionProvider DataProtectionProvider;
