@@ -25,6 +25,7 @@ namespace Microsoft.AspNet.Authentication.Tests.OpenIdConnect
 
             if (obj1.GetType() != obj2.GetType())
             {
+                Console.WriteLine("obj1.GetType(): " + obj1.GetType().ToString() + ", obj2.GetType(): " + obj2.GetType().ToString());
                 return false;
             }
 
@@ -69,7 +70,7 @@ namespace Microsoft.AspNet.Authentication.Tests.OpenIdConnect
                 return false;
             }
 
-            if (!AreEqual<string>(logEntry1.State, logEntry2.State, IsLogStateEqual))
+            if (!AreEqual<string>(logEntry1.State.ToString(), logEntry2.State.ToString(), IsLogStateEqual))
             {
                 return false;
             }

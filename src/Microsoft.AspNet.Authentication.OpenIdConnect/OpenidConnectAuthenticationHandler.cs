@@ -118,45 +118,28 @@ namespace Microsoft.AspNet.Authentication.OpenIdConnect
         /// <remarks>Uses log id's OIDCH-0026 - OIDCH-0050, next num: 37</remarks>
         protected override async Task ApplyResponseChallengeAsync()
         {
-            bool logLevelError = _logger.IsEnabled(LogLevel.Error);
-            bool logLevelDebug = _logger.IsEnabled(LogLevel.Debug);
-            bool logLevelInformational = _logger.IsEnabled(LogLevel.Information);
-            bool logLevelWarning = _logger.IsEnabled(LogLevel.Warning);
-
-            if (logLevelDebug)
+            if (_logger.IsEnabled(LogLevel.Debug))
             {
-                _logger.LogDebug(string.Format(CultureInfo.CurrentCulture, Resources.OIDCH_0026_ApplyResponseChallengeAsync, this.GetType().ToString()));
+                _logger.LogDebug(format: Resources.OIDCH_0026_ApplyResponseChallengeAsync, args: this.GetType().ToString());
             }
 
             if (ShouldConvertChallengeToForbidden())
             {
-                if (logLevelDebug)
-                {
-                    _logger.LogDebug(Resources.OIDCH_0027_401_ConvertedTo_403);
-                }
-
+                _logger.LogDebug(data: Resources.OIDCH_0027_401_ConvertedTo_403);
                 Response.StatusCode = 403;
                 return;
             }
 
             if (Response.StatusCode != 401)
             {
-                if (logLevelDebug)
-                {
-                    _logger.LogDebug(string.Format(CultureInfo.CurrentCulture, Resources.OIDCH_0028_StatusCodeNot401, Response.StatusCode.ToString()));
-                }
-
+                _logger.LogDebug(format: Resources.OIDCH_0028_StatusCodeNot401, args: Response.StatusCode.ToString());
                 return;
             }
 
             // When Automatic should redirect on 401 even if there wasn't an explicit challenge.
             if (ChallengeContext == null && !Options.AutomaticAuthentication)
             {
-                if (logLevelDebug)
-                {
-                    _logger.LogDebug(Resources.OIDCH_0029_ChallengeContextEqualsNull);
-                }
-
+                _logger.LogDebug(data: Resources.OIDCH_0029_ChallengeContextEqualsNull);
                 return;
             }
 
@@ -164,7 +147,6 @@ namespace Microsoft.AspNet.Authentication.OpenIdConnect
             // 1. challenge.Properties.RedirectUri
             // 2. Options.RedirectUri
             // 3. CurrentUri if Options.DefaultToCurrentUriOnRedirect is true)
-
             AuthenticationProperties properties;
             if (ChallengeContext == null)
             {
@@ -178,29 +160,17 @@ namespace Microsoft.AspNet.Authentication.OpenIdConnect
             string redirectToUse = null;
             if (!string.IsNullOrWhiteSpace(properties.RedirectUri))
             {
-                if (logLevelDebug)
-                {
-                    _logger.LogDebug(string.Format(CultureInfo.CurrentCulture, Resources.OIDCH_0030_Using_Properties_RedirectUri, properties.RedirectUri));
-                }
-
+                _logger.LogDebug(format: Resources.OIDCH_0030_Using_Properties_RedirectUri, args: properties.RedirectUri);
                 redirectToUse = properties.RedirectUri;
             }
             else if (!string.IsNullOrWhiteSpace(Options.RedirectUri))
             {
-                if (logLevelDebug)
-                {
-                    _logger.LogDebug(string.Format(CultureInfo.CurrentCulture, Resources.OIDCH_0031_Using_Options_RedirectUri, Options.RedirectUri));
-                }
-
+                _logger.LogDebug(format: Resources.OIDCH_0031_Using_Options_RedirectUri, args: Options.RedirectUri);
                 redirectToUse = Options.RedirectUri;
             }
             else if (Options.DefaultToCurrentUriOnRedirect)
             {
-                if (logLevelDebug)
-                {
-                    _logger.LogDebug(string.Format(CultureInfo.CurrentCulture, Resources.OIDCH_0032_UsingCurrentUriRedirectUri, CurrentUri));
-                }
-
+                _logger.LogDebug(format: Resources.OIDCH_0032_UsingCurrentUriRedirectUri, args: CurrentUri);
                 redirectToUse = CurrentUri;
             }
 
@@ -236,18 +206,13 @@ namespace Microsoft.AspNet.Authentication.OpenIdConnect
                 {
                     if (!Options.NonceCache.TryAddNonce(message.Nonce))
                     {
-                        string msg = string.Format(CultureInfo.CurrentCulture, Resources.OIDCH_0033_TryAddNonceFailed, message.Nonce);
-                        if (logLevelError)
-                        {
-                            _logger.LogError(msg);
-                        }
-
-                        throw new OpenIdConnectProtocolException(msg);
+                        _logger.LogError(format: Resources.OIDCH_0033_TryAddNonceFailed, args: message.Nonce);
+                        throw new OpenIdConnectProtocolException(string.Format(CultureInfo.InvariantCulture, Resources.OIDCH_0033_TryAddNonceFailed, message.Nonce));
                     }
                 }
                 else
                 {
-                    RememberNonce(message.Nonce);
+                    WriteNonceCookie(message.Nonce);
                 }
             }
 
@@ -259,30 +224,19 @@ namespace Microsoft.AspNet.Authentication.OpenIdConnect
             await Options.Notifications.RedirectToIdentityProvider(redirectToIdentityProviderNotification);
             if (redirectToIdentityProviderNotification.HandledResponse)
             {
-                if (logLevelInformational)
-                {
-                    _logger.LogInformation(Resources.OIDCH_0034_RedirectToIdentityProviderNotificationHandledResponse);
-                }
-
+                _logger.LogInformation(message: Resources.OIDCH_0034_RedirectToIdentityProviderNotificationHandledResponse);
                 return;
             }
             else if (redirectToIdentityProviderNotification.Skipped)
             {
-                if (logLevelInformational)
-                {
-                    _logger.LogInformation(Resources.OIDCH_0035_RedirectToIdentityProviderNotificationSkipped);
-                }
-
+                _logger.LogInformation(message: Resources.OIDCH_0035_RedirectToIdentityProviderNotificationSkipped);
                 return;
             }
 
             string redirectUri = redirectToIdentityProviderNotification.ProtocolMessage.CreateAuthenticationRequestUrl();
             if (!Uri.IsWellFormedUriString(redirectUri, UriKind.Absolute))
             {
-                if (logLevelWarning)
-                {
-                    _logger.LogWarning(string.Format(CultureInfo.CurrentCulture, Resources.OIDCH_0036_UriIsNotWellFormed, (redirectUri ?? "null")));
-                }
+                _logger.LogWarning(format: Resources.OIDCH_0036_UriIsNotWellFormed, args: (redirectUri ?? "null"));
             }
 
             Response.Redirect(redirectUri);
@@ -300,13 +254,9 @@ namespace Microsoft.AspNet.Authentication.OpenIdConnect
         /// <remarks>Uses log id's OIDCH-0000 - OIDCH-0025</remarks>
         protected override async Task<AuthenticationTicket> AuthenticateCoreAsync()
         {
-            bool logLevelDebug = _logger.IsEnabled(LogLevel.Debug);
-            bool logLevelError = _logger.IsEnabled(LogLevel.Error);
-            bool logLevelInformational = _logger.IsEnabled(LogLevel.Information);
-
-            if (logLevelDebug)
+            if (_logger.IsEnabled(LogLevel.Debug))
             {
-                _logger.LogDebug(string.Format(CultureInfo.CurrentCulture, Resources.OIDCH_0000_AuthenticateCoreAsync, this.GetType().ToString()));
+                _logger.LogDebug(format: Resources.OIDCH_0000_AuthenticateCoreAsync, args: this.GetType().ToString());
             }
 
             // Allow login to be constrained to a specific path. Need to make this runtime configurable.
@@ -336,9 +286,9 @@ namespace Microsoft.AspNet.Authentication.OpenIdConnect
 
             try
             {
-                if (logLevelDebug)
+                if (_logger.IsEnabled(LogLevel.Debug))
                 {
-                    _logger.LogDebug(string.Format(CultureInfo.CurrentCulture, Resources.OIDCH_0001_MessageReceived, message.BuildRedirectUrl()));
+                    _logger.LogDebug(format: Resources.OIDCH_0001_MessageReceived, args: message.BuildRedirectUrl());
                 }
 
                 var messageReceivedNotification =
@@ -350,56 +300,35 @@ namespace Microsoft.AspNet.Authentication.OpenIdConnect
                 await Options.Notifications.MessageReceived(messageReceivedNotification);
                 if (messageReceivedNotification.HandledResponse)
                 {
-                    if (logLevelInformational)
-                    {
-                        _logger.LogInformation(Resources.OIDCH_0002_MessageReceivedNotificationHandledResponse);
-                    }
-
+                    _logger.LogInformation(message: Resources.OIDCH_0002_MessageReceivedNotificationHandledResponse);
                     return messageReceivedNotification.AuthenticationTicket;
                 }
 
                 if (messageReceivedNotification.Skipped)
                 {
-                    if (logLevelInformational)
-                    {
-                        _logger.LogInformation(Resources.OIDCH_0003_MessageReceivedNotificationSkipped);
-                    }
-
+                    _logger.LogInformation(message: Resources.OIDCH_0003_MessageReceivedNotificationSkipped);
                     return null;
                 }
 
                 // runtime always adds state, if we don't find it OR we failed to 'unprotect' it this is not a message we should process.
                 if (string.IsNullOrWhiteSpace(message.State))
                 {
-                    if (logLevelError)
-                    {
-                        _logger.LogError(Resources.OIDCH_0004_MessageStateIsNullOrWhiteSpace);
-                    }
-
+                    _logger.LogError(message: Resources.OIDCH_0004_MessageStateIsNullOrWhiteSpace);
                     return null;
                 }
 
                 AuthenticationProperties properties = GetPropertiesFromState(message.State);
                 if (properties == null)
                 {
-                    if (logLevelError)
-                    {
-                        _logger.LogError(Resources.OIDCH_0005_MessageStateIsInvalid);
-                    }
-
+                    _logger.LogError(message: Resources.OIDCH_0005_MessageStateIsInvalid);
                     return null;
                 }
 
                 // devs will need to hook AuthenticationFailedNotification to avoid having 'raw' runtime errors displayed to users.
                 if (!string.IsNullOrWhiteSpace(message.Error))
                 {
-                    string msg = string.Format(CultureInfo.CurrentCulture, Resources.OIDCH_0006_MessageErrorNotNull, message.Error);
-                    if (logLevelError)
-                    {
-                        _logger.LogError(msg);
-                    }
-
-                    throw new OpenIdConnectProtocolException(msg);
+                   _logger.LogError(format: Resources.OIDCH_0006_MessageErrorNotNull, args: message.Error);
+                    throw new OpenIdConnectProtocolException(string.Format(CultureInfo.InvariantCulture, Resources.OIDCH_0006_MessageErrorNotNull, message.Error));
                 }
 
                 AuthenticationTicket ticket = null;
@@ -407,22 +336,14 @@ namespace Microsoft.AspNet.Authentication.OpenIdConnect
 
                 if (_configuration == null && Options.ConfigurationManager != null)
                 {
-                    if (logLevelDebug)
-                    {
-                        _logger.LogDebug(Resources.OIDCH_0007_UpdatingConfiguration);
-                    }
-
+                    _logger.LogDebug(data: Resources.OIDCH_0007_UpdatingConfiguration);
                     _configuration = await Options.ConfigurationManager.GetConfigurationAsync(Context.RequestAborted);
                 }
 
                 // OpenIdConnect protocol allows a Code to be received without the id_token
                 if (!string.IsNullOrWhiteSpace(message.IdToken))
                 {
-                    if (logLevelDebug)
-                    {
-                        _logger.LogDebug(string.Format(CultureInfo.CurrentCulture, Resources.OIDCH_0020_IdTokenReceived, message.IdToken));
-                    }
-
+                    _logger.LogDebug(format: Resources.OIDCH_0020_IdTokenReceived, args: message.IdToken);
                     var securityTokenReceivedNotification =
                         new SecurityTokenReceivedNotification<OpenIdConnectMessage, OpenIdConnectAuthenticationOptions>(Context, Options)
                         {
@@ -432,21 +353,13 @@ namespace Microsoft.AspNet.Authentication.OpenIdConnect
                     await Options.Notifications.SecurityTokenReceived(securityTokenReceivedNotification);
                     if (securityTokenReceivedNotification.HandledResponse)
                     {
-                        if (logLevelInformational)
-                        {
-                            _logger.LogInformation(Resources.OIDCH_0008_SecurityTokenReceivedNotificationHandledResponse);
-                        }
-
+                        _logger.LogInformation(message: Resources.OIDCH_0008_SecurityTokenReceivedNotificationHandledResponse);
                         return securityTokenReceivedNotification.AuthenticationTicket;
                     }
 
                     if (securityTokenReceivedNotification.Skipped)
                     {
-                        if (logLevelInformational)
-                        {
-                            _logger.LogInformation(Resources.OIDCH_0009_SecurityTokenReceivedNotificationSkipped);
-                        }
-
+                        _logger.LogInformation(message: Resources.OIDCH_0009_SecurityTokenReceivedNotificationSkipped);
                         return null;
                     }
 
@@ -476,26 +389,16 @@ namespace Microsoft.AspNet.Authentication.OpenIdConnect
                             jwt = validatedToken as JwtSecurityToken;
                             if (jwt == null)
                             {
-                                string msg = string.Format(CultureInfo.CurrentCulture, Resources.OIDCH_0010_ValidatedSecurityTokenNotJwt, (validatedToken == null ? "null" : validatedToken.GetType().ToString()));
-                                if (logLevelError)
-                                {
-                                    _logger.LogError(msg);
-                                }
-
-                                throw new InvalidOperationException(msg);
+                                _logger.LogError(format: Resources.OIDCH_0010_ValidatedSecurityTokenNotJwt, args: (validatedToken == null ? "null" : validatedToken.GetType().ToString()));
+                                throw new InvalidOperationException(string.Format(CultureInfo.InvariantCulture, Resources.OIDCH_0010_ValidatedSecurityTokenNotJwt, (validatedToken == null ? "null" : validatedToken.GetType().ToString())));
                             }
                         }
                     }
 
                     if (validatedToken == null)
                     {
-                        string msg = string.Format(CultureInfo.CurrentCulture, Resources.OIDCH_0011_UnableToValidateToken, message.IdToken);
-                        if (logLevelError)
-                        {
-                            _logger.LogError(msg);
-                        }
-
-                        throw new InvalidOperationException(msg);
+                        _logger.LogError(format: Resources.OIDCH_0011_UnableToValidateToken, args: message.IdToken);
+                        throw new InvalidOperationException(string.Format(CultureInfo.InvariantCulture, Resources.OIDCH_0011_UnableToValidateToken, message.IdToken));
                     }
 
                     ticket = new AuthenticationTicket(principal, properties, Options.AuthenticationScheme);
@@ -535,21 +438,13 @@ namespace Microsoft.AspNet.Authentication.OpenIdConnect
                     await Options.Notifications.SecurityTokenValidated(securityTokenValidatedNotification);
                     if (securityTokenValidatedNotification.HandledResponse)
                     {
-                        if (logLevelInformational)
-                        {
-                            _logger.LogInformation(Resources.OIDCH_0012_SecurityTokenValidatedNotificationHandledResponse);
-                        }
-
+                        _logger.LogInformation(message: Resources.OIDCH_0012_SecurityTokenValidatedNotificationHandledResponse);
                         return securityTokenValidatedNotification.AuthenticationTicket;
                     }
 
                     if (securityTokenValidatedNotification.Skipped)
                     {
-                        if (logLevelInformational)
-                        {
-                            _logger.LogInformation(Resources.OIDCH_0013_SecurityTokenValidatedNotificationSkipped);
-                        }
-
+                        _logger.LogInformation(message: Resources.OIDCH_0013_SecurityTokenValidatedNotificationSkipped);
                         return null;
                     }
 
@@ -564,7 +459,7 @@ namespace Microsoft.AspNet.Authentication.OpenIdConnect
                     }
                     else
                     {
-                        nonce = RetrieveNonce(nonce);
+                        nonce = ReadNonceCookie(nonce);
                     }
 
                     var protocolValidationContext = new OpenIdConnectProtocolValidationContext
@@ -578,11 +473,7 @@ namespace Microsoft.AspNet.Authentication.OpenIdConnect
 
                 if (message.Code != null)
                 {
-                    if (logLevelDebug)
-                    {
-                        _logger.LogDebug(string.Format(CultureInfo.CurrentCulture, Resources.OIDCH_0014_CodeReceived, message.Code));
-                    }
-
+                    _logger.LogDebug(format: Resources.OIDCH_0014_CodeReceived, args: message.Code);
                     if (ticket == null)
                     {
                         ticket = new AuthenticationTicket(properties, Options.AuthenticationScheme);
@@ -601,21 +492,13 @@ namespace Microsoft.AspNet.Authentication.OpenIdConnect
                     await Options.Notifications.AuthorizationCodeReceived(authorizationCodeReceivedNotification);
                     if (authorizationCodeReceivedNotification.HandledResponse)
                     {
-                        if (logLevelInformational)
-                        {
-                            _logger.LogInformation(Resources.OIDCH_0015_CodeReceivedNotificationHandledResponse);
-                        }
-
+                        _logger.LogInformation(message: Resources.OIDCH_0015_CodeReceivedNotificationHandledResponse);
                         return authorizationCodeReceivedNotification.AuthenticationTicket;
                     }
 
                     if (authorizationCodeReceivedNotification.Skipped)
                     {
-                        if (logLevelInformational)
-                        {
-                            _logger.LogInformation(Resources.OIDCH_0016_CodeReceivedNotificationSkipped);
-                        }
-
+                        _logger.LogInformation(message: Resources.OIDCH_0016_CodeReceivedNotificationSkipped);
                         return null;
                     }
                 }
@@ -624,10 +507,7 @@ namespace Microsoft.AspNet.Authentication.OpenIdConnect
             }
             catch (Exception exception)
             {
-                if (logLevelError)
-                {
-                    _logger.LogError(Resources.OIDCH_0017_ExceptionOccurredWhileProcessingMessage, exception);
-                }
+                _logger.LogError(message: Resources.OIDCH_0017_ExceptionOccurredWhileProcessingMessage, error: exception);
 
                 // Refresh the configuration for exceptions that may be caused by key rollovers. The user can also request a refresh in the notification.
                 if (Options.RefreshOnIssuerKeyNotFound && exception.GetType().Equals(typeof(SecurityTokenSignatureKeyNotFoundException)))
@@ -645,21 +525,13 @@ namespace Microsoft.AspNet.Authentication.OpenIdConnect
                 await Options.Notifications.AuthenticationFailed(authenticationFailedNotification);
                 if (authenticationFailedNotification.HandledResponse)
                 {
-                    if (logLevelInformational)
-                    {
-                        _logger.LogInformation(Resources.OIDCH_0018_AuthenticationFailedNotificationHandledResponse);
-                    }
-
+                    _logger.LogInformation(message: Resources.OIDCH_0018_AuthenticationFailedNotificationHandledResponse);
                     return authenticationFailedNotification.AuthenticationTicket;
                 }
 
                 if (authenticationFailedNotification.Skipped)
                 {
-                    if (logLevelInformational)
-                    {
-                        _logger.LogInformation(Resources.OIDCH_0019_AuthenticationFailedNotificationSkipped);
-                    }
-
+                    _logger.LogInformation(message: Resources.OIDCH_0019_AuthenticationFailedNotificationSkipped);
                     return null;
                 }
 
@@ -673,7 +545,7 @@ namespace Microsoft.AspNet.Authentication.OpenIdConnect
         /// <param name="nonce">the nonce to remember.</param>
         /// <remarks><see cref="HttpResponse.Cookies.Append"/>is called to add a cookie with the name: 'OpenIdConnectAuthenticationDefaults.Nonce + <see cref="OpenIdConnectAuthenticationOptions.StringDataFormat.Protect"/>(nonce)'.
         /// The value of the cookie is: "N".</remarks>
-        private void RememberNonce(string nonce)
+        private void WriteNonceCookie(string nonce)
         {
             if (string.IsNullOrWhiteSpace(nonce))
             {
@@ -697,7 +569,7 @@ namespace Microsoft.AspNet.Authentication.OpenIdConnect
         /// <returns>echos 'nonce' if a cookie is found that matches, null otherwise.</returns>
         /// <remarks>Examine <see cref="HttpRequest.Cookies.Keys"/> that start with the prefix: 'OpenIdConnectAuthenticationDefaults.Nonce'. 
         /// <see cref="OpenIdConnectAuthenticationOptions.StringDataFormat.Unprotect"/> is used to obtain the actual 'nonce'. If the nonce is found, then <see cref="HttpResponse.Cookies.Delete"/> is called.</remarks>
-        private string RetrieveNonce(string nonce)
+        private string ReadNonceCookie(string nonce)
         {
             if (nonce == null)
             {

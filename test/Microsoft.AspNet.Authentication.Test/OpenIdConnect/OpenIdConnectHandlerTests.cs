@@ -2,7 +2,7 @@
 // Licensed under the Apache License, Version 2.0. See License.txt in the project root for license information.
 
 // uncomment to see detail written to console out.
-//#define _Verbose
+// #define _Verbose
 
 using System;
 using System.Collections.Generic;
@@ -568,7 +568,7 @@ namespace Microsoft.AspNet.Authentication.Tests.OpenIdConnect
 
         List<LogEntry> logEntries = new List<LogEntry>();
 
-        public IDisposable BeginScope(object state)
+        public IDisposable BeginScopeImpl(object state)
         {
             return this;
         }
