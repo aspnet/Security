@@ -317,7 +317,7 @@ namespace Microsoft.AspNet.Authentication.OpenIdConnect
                     return null;
                 }
 
-                AuthenticationProperties properties = GetPropertiesFromState(message.State);
+                var properties = GetPropertiesFromState(message.State);
                 if (properties == null)
                 {
                     _logger.LogError(message: Resources.OIDCH_0005_MessageStateIsInvalid);
@@ -576,31 +576,28 @@ namespace Microsoft.AspNet.Authentication.OpenIdConnect
                 return null;
             }
 
-            else
+            foreach (var nonceKey in Request.Cookies.Keys)
             {
-                foreach (var nonceKey in Request.Cookies.Keys)
+                if (nonceKey.StartsWith(OpenIdConnectAuthenticationDefaults.CookieNoncePrefix))
                 {
-                    if (nonceKey.StartsWith(OpenIdConnectAuthenticationDefaults.CookieNoncePrefix))
+                    try
                     {
-                        try
+                        string nonceDecodedValue = Options.StringDataFormat.Unprotect(nonceKey.Substring(OpenIdConnectAuthenticationDefaults.CookieNoncePrefix.Length, nonceKey.Length - OpenIdConnectAuthenticationDefaults.CookieNoncePrefix.Length));
+                        if (nonceDecodedValue == nonce)
                         {
-                            string nonceDecodedValue = Options.StringDataFormat.Unprotect(nonceKey.Substring(OpenIdConnectAuthenticationDefaults.CookieNoncePrefix.Length, nonceKey.Length - OpenIdConnectAuthenticationDefaults.CookieNoncePrefix.Length));
-                            if (nonceDecodedValue == nonce)
+                            var cookieOptions = new CookieOptions
                             {
-                                var cookieOptions = new CookieOptions
-                                {
-                                    HttpOnly = true,
-                                    Secure = Request.IsHttps
-                                };
+                                HttpOnly = true,
+                                Secure = Request.IsHttps
+                            };
 
-                                Response.Cookies.Delete(nonceKey, cookieOptions);
-                                return nonce;
-                            }
+                            Response.Cookies.Delete(nonceKey, cookieOptions);
+                            return nonce;
                         }
-                        catch (Exception ex)
-                        {
-                            _logger.LogWarning("Failed to un-protect the nonce cookie.", ex);
-                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        _logger.LogWarning("Failed to un-protect the nonce cookie.", ex);
                     }
                 }
             }
