@@ -158,11 +158,9 @@ namespace Microsoft.AspNet.Authentication.OpenIdConnect
         public IConfigurationManager<OpenIdConnectConfiguration> ConfigurationManager { get; set; }
 
         /// <summary>
-        /// Gets or sets a value controlling if 'redirect_uri' should be set to the 'CurrentUri'
-        /// when creating an OpenIdConnectRequest.
+        /// Gets or sets a value controlling if the 'CurrentUri' should be used as the 'local redirect' post authentication
+        /// if AuthenticationProperties.RedirectUri is null or empty.
         /// </summary>
-        /// <remarks>Some IDP will require that the 'redirect_uri' to be registered to successfully process a request. The protocol does not 
-        /// require the 'redirect_uri' to be set. When the 'redirect_uri' is not set, the IDP selects one.</remarks>
         public bool DefaultToCurrentUriOnRedirect { get; set; }
 
         /// <summary>
@@ -232,7 +230,7 @@ namespace Microsoft.AspNet.Authentication.OpenIdConnect
         /// <summary>
         /// Gets or sets the 'response_mode'.
         /// </summary>
-        public string ResponseMode { get; set; }
+        public string ResponseMode { get; private set; }
 
         /// <summary>
         /// Gets or sets the 'response_type'.

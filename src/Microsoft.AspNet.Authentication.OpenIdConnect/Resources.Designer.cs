@@ -117,7 +117,7 @@ namespace Microsoft.AspNet.Authentication.OpenIdConnect
         }
 
         /// <summary>
-        /// OIDCH_0030: using properties.RedirectUri for 'redirect_uri': '{0}'.
+        /// OIDCH_0030: using properties.RedirectUri for 'local redirect' post authentication: '{0}'.
         /// </summary>
         internal static string OIDCH_0030_Using_Properties_RedirectUri
         {
@@ -133,7 +133,7 @@ namespace Microsoft.AspNet.Authentication.OpenIdConnect
         }
 
         /// <summary>
-        /// OIDCH_0032: using CurrentUri for 'redirect_uri': '{0}'.
+        /// OIDCH_0032: using the CurrentUri for 'local redirect' post authentication: '{0}'.
         /// </summary>
         internal static string OIDCH_0032_UsingCurrentUriRedirectUri
         {

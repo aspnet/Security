@@ -139,13 +139,13 @@
     <value>OIDCH_0029: ChallengeContext == null AND !Options.AutomaticAuthentication</value>
   </data>
   <data name="OIDCH_0030_Using_Properties_RedirectUri" xml:space="preserve">
-    <value>OIDCH_0030: using properties.RedirectUri for 'redirect_uri': '{0}'.</value>
+    <value>OIDCH_0030: using properties.RedirectUri for 'local redirect' post authentication: '{0}'.</value>
   </data>
   <data name="OIDCH_0031_Using_Options_RedirectUri" xml:space="preserve">
     <value>OIDCH_0031: using Options.RedirectUri for 'redirect_uri': '{0}'.</value>
   </data>
   <data name="OIDCH_0032_UsingCurrentUriRedirectUri" xml:space="preserve">
-    <value>OIDCH_0032: using CurrentUri for 'redirect_uri': '{0}'.</value>
+    <value>OIDCH_0032: using the CurrentUri for 'local redirect' post authentication: '{0}'.</value>
   </data>
   <data name="OIDCH_0033_TryAddNonceFailed" xml:space="preserve">
     <value>OIDCH_0033: ProtocolValidator.RequireNonce == true. Options.NonceCache.TryAddNonce returned false. This usually indicates the nonce is not unique or has been used. The nonce is: '{0}'.</value>

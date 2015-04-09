@@ -143,10 +143,9 @@ namespace Microsoft.AspNet.Authentication.OpenIdConnect
                 return;
             }
 
-            // order for redirect_uri
+            // order for local RedirectUri
             // 1. challenge.Properties.RedirectUri
-            // 2. Options.RedirectUri
-            // 3. CurrentUri if Options.DefaultToCurrentUriOnRedirect is true)
+            // 2. CurrentUri if Options.DefaultToCurrentUriOnRedirect is true)
             AuthenticationProperties properties;
             if (ChallengeContext == null)
             {
@@ -157,27 +156,25 @@ namespace Microsoft.AspNet.Authentication.OpenIdConnect
                 properties = new AuthenticationProperties(ChallengeContext.Properties);
             }
 
-            string redirectToUse = null;
             if (!string.IsNullOrWhiteSpace(properties.RedirectUri))
             {
                 _logger.LogDebug(format: Resources.OIDCH_0030_Using_Properties_RedirectUri, args: properties.RedirectUri);
-                redirectToUse = properties.RedirectUri;
-            }
-            else if (!string.IsNullOrWhiteSpace(Options.RedirectUri))
-            {
-                _logger.LogDebug(format: Resources.OIDCH_0031_Using_Options_RedirectUri, args: Options.RedirectUri);
-                redirectToUse = Options.RedirectUri;
             }
             else if (Options.DefaultToCurrentUriOnRedirect)
             {
                 _logger.LogDebug(format: Resources.OIDCH_0032_UsingCurrentUriRedirectUri, args: CurrentUri);
-                redirectToUse = CurrentUri;
+                properties.RedirectUri = CurrentUri;
+            }
+
+            if (!string.IsNullOrWhiteSpace(Options.RedirectUri))
+            {
+                _logger.LogDebug(format: Resources.OIDCH_0031_Using_Options_RedirectUri, args: Options.RedirectUri);
             }
 
             // When redeeming a 'code' for an AccessToken, this value is needed
-            if (!string.IsNullOrWhiteSpace(redirectToUse))
+            if (!string.IsNullOrWhiteSpace(Options.RedirectUri))
             {
-                properties.Dictionary.Add(OpenIdConnectAuthenticationDefaults.RedirectUriUsedForCodeKey, redirectToUse);
+                properties.Dictionary.Add(OpenIdConnectAuthenticationDefaults.RedirectUriUsedForCodeKey, Options.RedirectUri);
             }
 
             if (_configuration == null && Options.ConfigurationManager != null)
@@ -188,8 +185,8 @@ namespace Microsoft.AspNet.Authentication.OpenIdConnect
             var message = new OpenIdConnectMessage
             {
                 ClientId = Options.ClientId,
-                IssuerAddress = _configuration == null ? string.Empty : (_configuration.AuthorizationEndpoint ?? string.Empty),
-                RedirectUri = redirectToUse,
+                IssuerAddress = _configuration?.AuthorizationEndpoint ?? string.Empty,
+                RedirectUri = Options.RedirectUri,
                 // [brentschmaltz] - this should be a property on RedirectToIdentityProviderNotification not on the OIDCMessage.
                 RequestType = OpenIdConnectRequestType.AuthenticationRequest,
                 Resource = Options.Resource,
@@ -236,7 +233,7 @@ namespace Microsoft.AspNet.Authentication.OpenIdConnect
             string redirectUri = redirectToIdentityProviderNotification.ProtocolMessage.CreateAuthenticationRequestUrl();
             if (!Uri.IsWellFormedUriString(redirectUri, UriKind.Absolute))
             {
-                _logger.LogWarning(format: Resources.OIDCH_0036_UriIsNotWellFormed, args: (redirectUri ?? "null"));
+                _logger.LogWarning(format: Resources.OIDCH_0036_UriIsNotWellFormed, args: redirectUri);
             }
 
             Response.Redirect(redirectUri);
@@ -373,10 +370,10 @@ namespace Microsoft.AspNet.Authentication.OpenIdConnect
                         }
                         else if (!string.IsNullOrWhiteSpace(_configuration.Issuer))
                         {
-                            validationParameters.ValidIssuers = (validationParameters.ValidIssuers == null ? new[] { _configuration.Issuer } : validationParameters.ValidIssuers.Concat(new[] { _configuration.Issuer }));
+                            validationParameters.ValidIssuers = validationParameters.ValidIssuers?.Concat(new[] { _configuration.Issuer }) ?? new[] { _configuration.Issuer };
                         }
 
-                        validationParameters.IssuerSigningKeys = (validationParameters.IssuerSigningKeys == null ? _configuration.SigningKeys : validationParameters.IssuerSigningKeys.Concat(_configuration.SigningKeys));
+                        validationParameters.IssuerSigningKeys = validationParameters.IssuerSigningKeys?.Concat(_configuration.SigningKeys) ?? _configuration.SigningKeys;
                     }
 
                     SecurityToken validatedToken = null;
@@ -389,8 +386,8 @@ namespace Microsoft.AspNet.Authentication.OpenIdConnect
                             jwt = validatedToken as JwtSecurityToken;
                             if (jwt == null)
                             {
-                                _logger.LogError(format: Resources.OIDCH_0010_ValidatedSecurityTokenNotJwt, args: (validatedToken == null ? "null" : validatedToken.GetType().ToString()));
-                                throw new InvalidOperationException(string.Format(CultureInfo.InvariantCulture, Resources.OIDCH_0010_ValidatedSecurityTokenNotJwt, (validatedToken == null ? "null" : validatedToken.GetType().ToString())));
+                                _logger.LogError(format: Resources.OIDCH_0010_ValidatedSecurityTokenNotJwt, args: validatedToken?.GetType().ToString() ?? null);
+                                throw new InvalidOperationException(string.Format(CultureInfo.InvariantCulture, Resources.OIDCH_0010_ValidatedSecurityTokenNotJwt, validatedToken?.GetType().ToString() ?? null));
                             }
                         }
                     }

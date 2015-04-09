@@ -8,7 +8,5 @@ namespace Microsoft.AspNet.Authentication.OpenIdConnect
         bool TryAddNonce(string nonce);
 
         bool TryRemoveNonce(string nonce);
-
-        bool HasNonce(string nonce);
     }
 }
