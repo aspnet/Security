@@ -52,14 +52,15 @@ namespace Microsoft.AspNet.Authentication.OpenIdConnect
 =======
             _logger = loggerFactory.CreateLogger<OpenIdConnectAuthenticationMiddleware>();
 
-            if (Options.WilsonEventSourceListener != null)
+            if (Options.IdentityModelEventSourceListener != null)
             {
-                Options.WilsonEventSourceListener.EnableEvents(WilsonEventSource.Logger, EventLevel.Informational);
+                Options.IdentityModelEventSourceListener.EnableEvents(IdentityModelEventSource.Logger, EventLevel.Informational);
             }
             else
             {
                 DefaultLoggingListener eventListener = new DefaultLoggingListener(_logger);
-                eventListener.EnableEvents(WilsonEventSource.Logger, EventLevel.Error);
+                IdentityModelEventSource.LogLevel = EventLevel.Informational;
+                eventListener.EnableEvents(IdentityModelEventSource.Logger, EventLevel.Informational);
             }
 
             if (string.IsNullOrWhiteSpace(Options.TokenValidationParameters.AuthenticationType))
@@ -169,7 +170,9 @@ namespace Microsoft.AspNet.Authentication.OpenIdConnect
                 }
                 webRequestHandler.ServerCertificateValidationCallback = options.BackchannelCertificateValidator.Validate;
             }
-#else
+#endif
+
+#if DNXCORE50
                 new WinHttpHandler();
 #endif
             return handler;
