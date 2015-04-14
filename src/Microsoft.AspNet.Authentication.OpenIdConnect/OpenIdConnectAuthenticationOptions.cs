@@ -245,13 +245,7 @@ namespace Microsoft.AspNet.Authentication.OpenIdConnect
         /// <summary>
         /// Gets or sets the SignInScheme which will be used to set the <see cref="System.Security.Claims.ClaimsIdentity.AuthenticationType"/>.
         /// </summary>
-        public string SignInScheme
-        {
-            // [brentschmaltz] - it is not clear to me why we need both AuthenticationScheme and SignInScheme.
-            // and, why this maps to AuthenticationType.
-            get { return TokenValidationParameters.AuthenticationType; }
-            set { TokenValidationParameters.AuthenticationType = value; }
-        }
+        public string SignInScheme { get; set; }
 
         /// <summary>
         /// Gets or sets the type used to secure data handled by the middleware.

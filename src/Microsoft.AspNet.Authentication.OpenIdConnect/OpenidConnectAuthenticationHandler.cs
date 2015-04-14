@@ -120,7 +120,7 @@ namespace Microsoft.AspNet.Authentication.OpenIdConnect
         {
             if (_logger.IsEnabled(LogLevel.Debug))
             {
-                _logger.LogDebug(Resources.OIDCH_0026_ApplyResponseChallengeAsync, this.GetType().ToString());
+                _logger.LogDebug(Resources.OIDCH_0026_ApplyResponseChallengeAsync, this.GetType());
             }
 
             if (ShouldConvertChallengeToForbidden())
@@ -132,7 +132,7 @@ namespace Microsoft.AspNet.Authentication.OpenIdConnect
 
             if (Response.StatusCode != 401)
             {
-                _logger.LogDebug(Resources.OIDCH_0028_StatusCodeNot401, Response.StatusCode.ToString());
+                _logger.LogDebug(Resources.OIDCH_0028_StatusCodeNot401, Response.StatusCode);
                 return;
             }
 
@@ -253,7 +253,7 @@ namespace Microsoft.AspNet.Authentication.OpenIdConnect
         {
             if (_logger.IsEnabled(LogLevel.Debug))
             {
-                _logger.LogDebug(Resources.OIDCH_0000_AuthenticateCoreAsync, this.GetType().ToString());
+                _logger.LogDebug(Resources.OIDCH_0000_AuthenticateCoreAsync, this.GetType());
             }
 
             // Allow login to be constrained to a specific path. Need to make this runtime configurable.
@@ -386,8 +386,8 @@ namespace Microsoft.AspNet.Authentication.OpenIdConnect
                             jwt = validatedToken as JwtSecurityToken;
                             if (jwt == null)
                             {
-                                _logger.LogError(Resources.OIDCH_0010_ValidatedSecurityTokenNotJwt, validatedToken?.GetType().ToString());
-                                throw new InvalidOperationException(string.Format(CultureInfo.InvariantCulture, Resources.OIDCH_0010_ValidatedSecurityTokenNotJwt, validatedToken?.GetType().ToString()));
+                                _logger.LogError(Resources.OIDCH_0010_ValidatedSecurityTokenNotJwt, validatedToken?.GetType());
+                                throw new InvalidOperationException(string.Format(CultureInfo.InvariantCulture, Resources.OIDCH_0010_ValidatedSecurityTokenNotJwt, validatedToken?.GetType()));
                             }
                         }
                     }

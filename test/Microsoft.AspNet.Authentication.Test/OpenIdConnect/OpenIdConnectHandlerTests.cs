@@ -332,6 +332,7 @@ namespace Microsoft.AspNet.Authentication.Tests.OpenIdConnect
 
         private static void DefaultOptions(OpenIdConnectAuthenticationOptions options)
         {
+            options.AuthenticationScheme = "OpenIdConnectHandlerTest";
             options.ConfigurationManager = ConfigurationManager.DefaultStaticConfigurationManager;
             options.StateDataFormat = new AuthenticationPropertiesFormater();
         }
@@ -605,10 +606,11 @@ namespace Microsoft.AspNet.Authentication.Tests.OpenIdConnect
             RequestDelegate next,
             IDataProtectionProvider dataProtectionProvider,
             ILoggerFactory loggerFactory,
+            IOptions<ExternalAuthenticationOptions> externalOptions,
             IOptions<OpenIdConnectAuthenticationOptions> options,
             ConfigureOptions<OpenIdConnectAuthenticationOptions> configureOptions = null
             )
-        : base(next, dataProtectionProvider, loggerFactory, options, configureOptions)
+        : base(next, dataProtectionProvider, loggerFactory, externalOptions, options, configureOptions)
         {
             Logger = (loggerFactory as CustomLoggerFactory).Logger;
         }
