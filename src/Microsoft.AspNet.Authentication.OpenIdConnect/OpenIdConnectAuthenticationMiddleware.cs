@@ -30,16 +30,20 @@ namespace Microsoft.AspNet.Authentication.OpenIdConnect
         /// <summary>
         /// Initializes a <see cref="OpenIdConnectAuthenticationMiddleware"/>
         /// </summary>
-        /// <param name="next">The next middleware in the ASP.NET pipeline to invoke</param>
-        /// <param name="app">The ASP.NET application</param>
-        /// <param name="options">Configuration options for the middleware</param>
+        /// <param name="next">The next middleware in the ASP.NET pipeline to invoke.</param>
+        /// <param name="dataProtectionProvider"> provider for creating a data protector.</param>
+        /// <param name="loggerFactory">factory for creating a <see cref="ILogger"/>.</param>
+        /// <param name="options">a <see cref="IOptions{OpenIdConnectAuthenticationOptions}"/> instance that will supply <see cref="OpenIdConnectAuthenticationOptions"/> 
+        /// if configureOptions is null.</param>
+        /// <param name="configureOptions">a <see cref="ConfigureOptions{OpenIdConnectAuthenticationOptions}"/> instance that will be passed to an instance of <see cref="OpenIdConnectAuthenticationOptions"/>
+        /// that is retrieved by calling <see cref="IOptions{OpenIdConnectAuthenticationOptions}.GetNamedOptions(string)"/> where string == <see cref="ConfigureOptions{OpenIdConnectAuthenticationOptions}.Name"/> provides runtime configuration.</param>
         [SuppressMessage("Microsoft.Reliability", "CA2000:Dispose objects before losing scope", Justification = "Managed by caller")]
         public OpenIdConnectAuthenticationMiddleware(
             [NotNull] RequestDelegate next,
             [NotNull] IDataProtectionProvider dataProtectionProvider,
             [NotNull] ILoggerFactory loggerFactory,
             [NotNull] IOptions<OpenIdConnectAuthenticationOptions> options,
-            ConfigureOptions<OpenIdConnectAuthenticationOptions> configureOptions)
+            ConfigureOptions<OpenIdConnectAuthenticationOptions> configureOptions = null)
             : base(next, options, configureOptions)
         {
             _logger = loggerFactory.CreateLogger<OpenIdConnectAuthenticationMiddleware>();

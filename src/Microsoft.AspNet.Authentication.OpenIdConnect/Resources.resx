@@ -205,7 +205,7 @@
     <value>OIDCH_0014: 'code' received: '{0}'</value>
   </data>
   <data name="OIDCH_0015_CodeReceivedNotificationHandledResponse" xml:space="preserve">
-    <value>OIDCH_0015: codeReceivedNotification.HandledResponse")</value>
+    <value>OIDCH_0015: codeReceivedNotification.HandledResponse</value>
   </data>
   <data name="OIDCH_0016_CodeReceivedNotificationSkipped" xml:space="preserve">
     <value>OIDCH_0016: codeReceivedNotification.Skipped</value>

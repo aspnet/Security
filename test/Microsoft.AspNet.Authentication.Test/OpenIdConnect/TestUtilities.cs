@@ -25,7 +25,6 @@ namespace Microsoft.AspNet.Authentication.Tests.OpenIdConnect
 
             if (obj1.GetType() != obj2.GetType())
             {
-                Console.WriteLine("obj1.GetType(): " + obj1.GetType().ToString() + ", obj2.GetType(): " + obj2.GetType().ToString());
                 return false;
             }
 
@@ -70,23 +69,25 @@ namespace Microsoft.AspNet.Authentication.Tests.OpenIdConnect
                 return false;
             }
 
-            if (!AreEqual<string>(logEntry1.State.ToString(), logEntry2.State.ToString(), IsLogStateEqual))
+            if (logEntry1.State == null && logEntry2.State == null)
+            {
+                return true;
+            }
+
+            if (logEntry1.State == null)
             {
                 return false;
             }
 
-            return true;
-        }
+            if (logEntry2.State == null)
+            {
+                return false;
+            }
 
-        /// <summary>
-        /// Never call this method directly, call AreObjectsEqual, as it deals with nulls and types"/>
-        /// </summary>
-        /// <param name="exception1"></param>
-        /// <param name="exception2"></param>
-        /// <returns></returns>
-        private static bool IsLogStateEqual(object string1, object string2)
-        {
-            return (string2 as string).StartsWith((string1 as string)) || (string1 as string).StartsWith((string2 as string));
+            string logValue1 = logEntry1.Formatter == null ? logEntry1.State.ToString() : logEntry1.Formatter(logEntry1.State, logEntry1.Exception);
+            string logValue2 = logEntry2.Formatter == null ? logEntry2.State.ToString() : logEntry2.Formatter(logEntry2.State, logEntry2.Exception);
+
+            return (logValue1.StartsWith(logValue2) || (logValue2.StartsWith(logValue1)));
         }
 
         /// <summary>
