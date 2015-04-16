@@ -120,7 +120,7 @@ namespace Microsoft.AspNet.Authentication.OpenIdConnect
                         Options.MetadataAddress += ".well-known/openid-configuration";
                     }
 
-                    HttpClient httpClient = new HttpClient(ResolveHttpMessageHandler(Options));
+                    var httpClient = new HttpClient(ResolveHttpMessageHandler(Options));
                     httpClient.Timeout = Options.BackchannelTimeout;
                     httpClient.MaxResponseContentBufferSize = 1024 * 1024 * 10; // 10 MB
                     Options.ConfigurationManager = new ConfigurationManager<OpenIdConnectConfiguration>(Options.MetadataAddress, httpClient);
@@ -140,7 +140,7 @@ namespace Microsoft.AspNet.Authentication.OpenIdConnect
         [SuppressMessage("Microsoft.Reliability", "CA2000:Dispose objects before losing scope", Justification = "Managed by caller")]
         private static HttpMessageHandler ResolveHttpMessageHandler(OpenIdConnectAuthenticationOptions options)
         {
-            HttpMessageHandler handler = options.BackchannelHttpHandler ??
+            var handler = options.BackchannelHttpHandler ??
 #if DNX451
                 new WebRequestHandler();
             // If they provided a validator, apply it or fail.

@@ -67,7 +67,7 @@ namespace Microsoft.AspNet.Authentication.OpenIdConnect
                     _configuration = await Options.ConfigurationManager.GetConfigurationAsync(Context.RequestAborted);
                 }
 
-                OpenIdConnectMessage openIdConnectMessage = new OpenIdConnectMessage()
+                var openIdConnectMessage = new OpenIdConnectMessage()
                 {
                     IssuerAddress = _configuration == null ? string.Empty : (_configuration.EndSessionEndpoint ?? string.Empty),
                     RequestType = OpenIdConnectRequestType.LogoutRequest,
@@ -95,7 +95,7 @@ namespace Microsoft.AspNet.Authentication.OpenIdConnect
 
                 if (!notification.HandledResponse)
                 {
-                    string redirectUri = notification.ProtocolMessage.CreateLogoutRequestUrl();
+                    var redirectUri = notification.ProtocolMessage.CreateLogoutRequestUrl();
                     if (!Uri.IsWellFormedUriString(redirectUri, UriKind.Absolute))
                     {
                         _logger.LogWarning(Resources.OIDCH_0051_RedirectUriLogoutIsNotWellFormed, redirectUri);
@@ -118,10 +118,7 @@ namespace Microsoft.AspNet.Authentication.OpenIdConnect
         /// <remarks>Uses log id's OIDCH-0026 - OIDCH-0050, next num: 37</remarks>
         protected override async Task ApplyResponseChallengeAsync()
         {
-            if (_logger.IsEnabled(LogLevel.Debug))
-            {
-                _logger.LogDebug(Resources.OIDCH_0026_ApplyResponseChallengeAsync, this.GetType());
-            }
+            _logger.LogDebug(Resources.OIDCH_0026_ApplyResponseChallengeAsync, this.GetType());
 
             if (ShouldConvertChallengeToForbidden())
             {
@@ -230,7 +227,7 @@ namespace Microsoft.AspNet.Authentication.OpenIdConnect
                 return;
             }
 
-            string redirectUri = redirectToIdentityProviderNotification.ProtocolMessage.CreateAuthenticationRequestUrl();
+            var redirectUri = redirectToIdentityProviderNotification.ProtocolMessage.CreateAuthenticationRequestUrl();
             if (!Uri.IsWellFormedUriString(redirectUri, UriKind.Absolute))
             {
                 _logger.LogWarning(Resources.OIDCH_0036_UriIsNotWellFormed, redirectUri);
@@ -251,10 +248,7 @@ namespace Microsoft.AspNet.Authentication.OpenIdConnect
         /// <remarks>Uses log id's OIDCH-0000 - OIDCH-0025</remarks>
         protected override async Task<AuthenticationTicket> AuthenticateCoreAsync()
         {
-            if (_logger.IsEnabled(LogLevel.Debug))
-            {
-                _logger.LogDebug(Resources.OIDCH_0000_AuthenticateCoreAsync, this.GetType());
-            }
+            _logger.LogDebug(Resources.OIDCH_0000_AuthenticateCoreAsync, this.GetType());
 
             // Allow login to be constrained to a specific path. Need to make this runtime configurable.
             if (Options.CallbackPath.HasValue && Options.CallbackPath != (Request.PathBase + Request.Path))
@@ -271,7 +265,7 @@ namespace Microsoft.AspNet.Authentication.OpenIdConnect
               && Request.ContentType.StartsWith("application/x-www-form-urlencoded", StringComparison.OrdinalIgnoreCase)
               && Request.Body.CanRead)
             {
-                IFormCollection form = await Request.ReadFormAsync();
+                var form = await Request.ReadFormAsync();
                 Request.Body.Seek(0, SeekOrigin.Begin);
                 message = new OpenIdConnectMessage(form);
             }
@@ -361,7 +355,7 @@ namespace Microsoft.AspNet.Authentication.OpenIdConnect
                     }
 
                     // Copy and augment to avoid cross request race conditions for updated configurations.
-                    TokenValidationParameters validationParameters = Options.TokenValidationParameters.Clone();
+                    var validationParameters = Options.TokenValidationParameters.Clone();
                     if (_configuration != null)
                     {
                         if (string.IsNullOrWhiteSpace(validationParameters.ValidIssuer))
@@ -412,13 +406,13 @@ namespace Microsoft.AspNet.Authentication.OpenIdConnect
                     // Rename?
                     if (Options.UseTokenLifetime)
                     {
-                        DateTime issued = validatedToken.ValidFrom;
+                        var issued = validatedToken.ValidFrom;
                         if (issued != DateTime.MinValue)
                         {
                             ticket.Properties.IssuedUtc = issued;
                         }
 
-                        DateTime expires = validatedToken.ValidTo;
+                        var expires = validatedToken.ValidTo;
                         if (expires != DateTime.MinValue)
                         {
                             ticket.Properties.ExpiresUtc = expires;
@@ -579,7 +573,7 @@ namespace Microsoft.AspNet.Authentication.OpenIdConnect
                 {
                     try
                     {
-                        string nonceDecodedValue = Options.StringDataFormat.Unprotect(nonceKey.Substring(OpenIdConnectAuthenticationDefaults.CookieNoncePrefix.Length, nonceKey.Length - OpenIdConnectAuthenticationDefaults.CookieNoncePrefix.Length));
+                        var nonceDecodedValue = Options.StringDataFormat.Unprotect(nonceKey.Substring(OpenIdConnectAuthenticationDefaults.CookieNoncePrefix.Length, nonceKey.Length - OpenIdConnectAuthenticationDefaults.CookieNoncePrefix.Length));
                         if (nonceDecodedValue == nonce)
                         {
                             var cookieOptions = new CookieOptions
@@ -605,13 +599,13 @@ namespace Microsoft.AspNet.Authentication.OpenIdConnect
         private AuthenticationProperties GetPropertiesFromState(string state)
         {
             // assume a well formed query string: <a=b&>OpenIdConnectAuthenticationDefaults.AuthenticationPropertiesKey=kasjd;fljasldkjflksdj<&c=d>
-            int startIndex = 0;
+            var startIndex = 0;
             if (string.IsNullOrWhiteSpace(state) || (startIndex = state.IndexOf(OpenIdConnectAuthenticationDefaults.AuthenticationPropertiesKey, StringComparison.Ordinal)) == -1)
             {
                 return null;
             }
 
-            int authenticationIndex = startIndex + OpenIdConnectAuthenticationDefaults.AuthenticationPropertiesKey.Length;
+            var authenticationIndex = startIndex + OpenIdConnectAuthenticationDefaults.AuthenticationPropertiesKey.Length;
             if (authenticationIndex == -1 || authenticationIndex == state.Length || state[authenticationIndex] != '=')
             {
                 return null;
@@ -619,7 +613,7 @@ namespace Microsoft.AspNet.Authentication.OpenIdConnect
 
             // scan rest of string looking for '&'
             authenticationIndex++;
-            int endIndex = state.Substring(authenticationIndex, state.Length - authenticationIndex).IndexOf("&", StringComparison.Ordinal);
+            var endIndex = state.Substring(authenticationIndex, state.Length - authenticationIndex).IndexOf("&", StringComparison.Ordinal);
 
             // -1 => no other parameters are after the AuthenticationPropertiesKey
             if (endIndex == -1)
@@ -643,8 +637,7 @@ namespace Microsoft.AspNet.Authentication.OpenIdConnect
 
         private async Task<bool> InvokeReplyPathAsync()
         {
-            AuthenticationTicket ticket = await AuthenticateAsync();
-
+            var ticket = await AuthenticateAsync();
             if (ticket != null)
             {
                 if (ticket.Principal != null)
