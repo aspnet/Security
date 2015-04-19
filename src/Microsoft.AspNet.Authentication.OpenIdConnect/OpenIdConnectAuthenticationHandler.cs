@@ -187,18 +187,39 @@ namespace Microsoft.AspNet.Authentication.OpenIdConnect
                 ClientId = Options.ClientId,
                 IssuerAddress = _configuration?.AuthorizationEndpoint ?? string.Empty,
                 RedirectUri = Options.RedirectUri,
-                // [brentschmaltz] - this should be a property on RedirectToIdentityProviderNotification not on the OIDCMessage.
+                // [brentschmaltz] - #215 this should be a property on RedirectToIdentityProviderNotification not on the OIDCMessage.
                 RequestType = OpenIdConnectRequestType.AuthenticationRequest,
                 Resource = Options.Resource,
                 ResponseMode = Options.ResponseMode,
                 ResponseType = Options.ResponseType,
                 Scope = Options.Scope,
-                State = OpenIdConnectAuthenticationDefaults.AuthenticationPropertiesKey + "=" + Uri.EscapeDataString(Options.StateDataFormat.Protect(properties))
             };
 
             if (Options.ProtocolValidator.RequireNonce)
             {
                 message.Nonce = Options.ProtocolValidator.GenerateNonce();
+            }
+
+            var redirectToIdentityProviderNotification = new RedirectToIdentityProviderNotification<OpenIdConnectMessage, OpenIdConnectAuthenticationOptions>(Context, Options)
+            {
+                AuthenticationProperties = properties,
+                ProtocolMessage = message
+            };
+
+            await Options.Notifications.RedirectToIdentityProvider(redirectToIdentityProviderNotification);
+            if (redirectToIdentityProviderNotification.HandledResponse)
+            {
+                _logger.LogInformation(Resources.OIDCH_0034_RedirectToIdentityProviderNotificationHandledResponse);
+                return;
+            }
+            else if (redirectToIdentityProviderNotification.Skipped)
+            {
+                _logger.LogInformation(Resources.OIDCH_0035_RedirectToIdentityProviderNotificationSkipped);
+                return;
+            }
+
+            if (!string.IsNullOrWhiteSpace(message.Nonce))
+            {
                 if (Options.NonceCache != null)
                 {
                     if (!Options.NonceCache.TryAddNonce(message.Nonce))
@@ -213,21 +234,10 @@ namespace Microsoft.AspNet.Authentication.OpenIdConnect
                 }
             }
 
-            var redirectToIdentityProviderNotification = new RedirectToIdentityProviderNotification<OpenIdConnectMessage, OpenIdConnectAuthenticationOptions>(Context, Options)
+            // if user set 'state', do nothing
+            if (string.IsNullOrWhiteSpace(redirectToIdentityProviderNotification.ProtocolMessage.State))
             {
-                ProtocolMessage = message
-            };
-
-            await Options.Notifications.RedirectToIdentityProvider(redirectToIdentityProviderNotification);
-            if (redirectToIdentityProviderNotification.HandledResponse)
-            {
-                _logger.LogInformation(Resources.OIDCH_0034_RedirectToIdentityProviderNotificationHandledResponse);
-                return;
-            }
-            else if (redirectToIdentityProviderNotification.Skipped)
-            {
-                _logger.LogInformation(Resources.OIDCH_0035_RedirectToIdentityProviderNotificationSkipped);
-                return;
+                redirectToIdentityProviderNotification.ProtocolMessage.State = OpenIdConnectAuthenticationDefaults.AuthenticationPropertiesKey + "=" + Uri.EscapeDataString(Options.StateDataFormat.Protect(properties));
             }
 
             string redirectUri = redirectToIdentityProviderNotification.ProtocolMessage.CreateAuthenticationRequestUrl();
