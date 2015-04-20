@@ -45,7 +45,7 @@ namespace Microsoft.AspNet.Authentication.OpenIdConnect
             [NotNull] IOptions<ExternalAuthenticationOptions> externalOptions,
             [NotNull] IOptions<OpenIdConnectAuthenticationOptions> options,
             ConfigureOptions<OpenIdConnectAuthenticationOptions> configureOptions = null)
-            : base(next, options, configureOptions)
+            : base(next, options, loggerFactory, configureOptions)
         {
             _logger = loggerFactory.CreateLogger<OpenIdConnectAuthenticationMiddleware>();
             if (string.IsNullOrEmpty(Options.SignInScheme) && !string.IsNullOrEmpty(externalOptions.Options.SignInScheme))

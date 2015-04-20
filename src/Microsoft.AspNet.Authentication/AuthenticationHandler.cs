@@ -50,6 +50,8 @@ namespace Microsoft.AspNet.Authentication
 
         protected PathString RequestPathBase { get; private set; }
 
+        protected ILogger Logger { get; private set; }
+
         internal AuthenticationOptions BaseOptions
         {
             get { return _baseOptions; }
@@ -61,11 +63,12 @@ namespace Microsoft.AspNet.Authentication
 
         public bool Faulted { get; set; }
 
-        protected async Task BaseInitializeAsync(AuthenticationOptions options, HttpContext context)
+        protected async Task BaseInitializeAsync(AuthenticationOptions options, HttpContext context, ILogger logger)
         {
             _baseOptions = options;
             Context = context;
             RequestPathBase = Request.PathBase;
+            Logger = logger;
 
             RegisterAuthenticationHandler();
 
@@ -79,6 +82,8 @@ namespace Microsoft.AspNet.Authentication
                 if (ticket?.Principal != null)
                 {
                     SecurityHelper.AddUserPrincipal(Context, ticket.Principal);
+                    await context.Response.WriteAsync("Auto");
+
                 }
             }
         }

@@ -12,7 +12,6 @@ using System.Threading.Tasks;
 using Microsoft.AspNet.Http;
 using Microsoft.AspNet.Http.Collections;
 using Microsoft.AspNet.Http.Authentication;
-using Microsoft.AspNet.Authentication;
 using Microsoft.AspNet.Authentication.Twitter.Messages;
 using Microsoft.AspNet.WebUtilities;
 using Microsoft.Framework.Logging;
@@ -28,12 +27,10 @@ namespace Microsoft.AspNet.Authentication.Twitter
         private const string AccessTokenEndpoint = "https://api.twitter.com/oauth/access_token";
 
         private readonly HttpClient _httpClient;
-        private readonly ILogger _logger;
 
-        public TwitterAuthenticationHandler(HttpClient httpClient, ILogger logger)
+        public TwitterAuthenticationHandler(HttpClient httpClient)
         {
             _httpClient = httpClient;
-            _logger = logger;
         }
 
         public override async Task<bool> InvokeAsync()
@@ -62,7 +59,7 @@ namespace Microsoft.AspNet.Authentication.Twitter
 
                 if (requestToken == null)
                 {
-                    _logger.LogWarning("Invalid state");
+                    Logger.LogWarning("Invalid state");
                     return null;
                 }
 
@@ -71,20 +68,20 @@ namespace Microsoft.AspNet.Authentication.Twitter
                 string returnedToken = query.Get("oauth_token");
                 if (string.IsNullOrWhiteSpace(returnedToken))
                 {
-                    _logger.LogWarning("Missing oauth_token");
+                    Logger.LogWarning("Missing oauth_token");
                     return new AuthenticationTicket(properties, Options.AuthenticationScheme);
                 }
 
                 if (returnedToken != requestToken.Token)
                 {
-                    _logger.LogWarning("Unmatched token");
+                    Logger.LogWarning("Unmatched token");
                     return new AuthenticationTicket(properties, Options.AuthenticationScheme);
                 }
 
                 string oauthVerifier = query.Get("oauth_verifier");
                 if (string.IsNullOrWhiteSpace(oauthVerifier))
                 {
-                    _logger.LogWarning("Missing or blank oauth_verifier");
+                    Logger.LogWarning("Missing or blank oauth_verifier");
                     return new AuthenticationTicket(properties, Options.AuthenticationScheme);
                 }
 
@@ -120,7 +117,7 @@ namespace Microsoft.AspNet.Authentication.Twitter
             }
             catch (Exception ex)
             {
-                _logger.LogError("Authentication failed", ex);
+                Logger.LogError("Authentication failed", ex);
                 return new AuthenticationTicket(properties, Options.AuthenticationScheme);
             }
         }
@@ -186,7 +183,7 @@ namespace Microsoft.AspNet.Authentication.Twitter
             }
             else
             {
-                _logger.LogError("requestToken CallbackConfirmed!=true");
+                Logger.LogError("requestToken CallbackConfirmed!=true");
             }
         }
 
@@ -195,7 +192,7 @@ namespace Microsoft.AspNet.Authentication.Twitter
             AuthenticationTicket model = await AuthenticateAsync();
             if (model == null)
             {
-                _logger.LogWarning("Invalid return state, unable to redirect.");
+                Logger.LogWarning("Invalid return state, unable to redirect.");
                 Response.StatusCode = 500;
                 return true;
             }
@@ -230,7 +227,7 @@ namespace Microsoft.AspNet.Authentication.Twitter
 
         private async Task<RequestToken> ObtainRequestTokenAsync(string consumerKey, string consumerSecret, string callBackUri, AuthenticationProperties properties)
         {
-            _logger.LogVerbose("ObtainRequestToken");
+            Logger.LogVerbose("ObtainRequestToken");
 
             string nonce = Guid.NewGuid().ToString("N");
 
@@ -291,7 +288,7 @@ namespace Microsoft.AspNet.Authentication.Twitter
         {
             // https://dev.twitter.com/docs/api/1/post/oauth/access_token
 
-            _logger.LogVerbose("ObtainAccessToken");
+            Logger.LogVerbose("ObtainAccessToken");
 
             string nonce = Guid.NewGuid().ToString("N");
 
@@ -348,7 +345,7 @@ namespace Microsoft.AspNet.Authentication.Twitter
 
             if (!response.IsSuccessStatusCode)
             {
-                _logger.LogError("AccessToken request failed with a status code of " + response.StatusCode);
+                Logger.LogError("AccessToken request failed with a status code of " + response.StatusCode);
                 response.EnsureSuccessStatusCode(); // throw
             }
 

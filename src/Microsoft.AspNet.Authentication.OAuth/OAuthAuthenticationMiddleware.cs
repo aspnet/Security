@@ -36,7 +36,7 @@ namespace Microsoft.AspNet.Authentication.OAuth
             [NotNull] IOptions<ExternalAuthenticationOptions> externalOptions,
             [NotNull] IOptions<TOptions> options,
             ConfigureOptions<TOptions> configureOptions = null)
-            : base(next, options, configureOptions)
+            : base(next, options, loggerFactory, configureOptions)
         {
             // todo: review error handling
             if (string.IsNullOrWhiteSpace(Options.AuthenticationScheme))
@@ -64,8 +64,6 @@ namespace Microsoft.AspNet.Authentication.OAuth
                 throw new ArgumentException(string.Format(CultureInfo.CurrentCulture, Resources.Exception_OptionMustBeProvided, "TokenEndpoint"));
             }
 
-            Logger = loggerFactory.CreateLogger(this.GetType().FullName);
-
             if (Options.StateDataFormat == null)
             {
                 IDataProtector dataProtector = dataProtectionProvider.CreateProtector(
@@ -89,8 +87,6 @@ namespace Microsoft.AspNet.Authentication.OAuth
         }
 
         protected HttpClient Backchannel { get; private set; }
-
-        protected ILogger Logger { get; private set; }
 
         /// <summary>
         /// Provides the <see cref="AuthenticationHandler"/> object for processing authentication-related requests.

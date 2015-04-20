@@ -3,6 +3,7 @@
 
 using System;
 using Microsoft.AspNet.Http;
+using Microsoft.Framework.Logging;
 using Xunit;
 
 namespace Microsoft.AspNet.Authentication
@@ -56,7 +57,7 @@ namespace Microsoft.AspNet.Authentication
         {
             public TestHandler(string scheme)
             {
-                Initialize(new TestOptions(), new DefaultHttpContext());
+                Initialize(new TestOptions(), new DefaultHttpContext(), new LoggerFactory().CreateLogger("TestHandler"));
                 Options.AuthenticationScheme = scheme;
             }
 
@@ -90,7 +91,7 @@ namespace Microsoft.AspNet.Authentication
         {
             public TestAutoHandler(string scheme, bool auto)
             {
-                Initialize(new TestAutoOptions(), new DefaultHttpContext());
+                Initialize(new TestAutoOptions(), new DefaultHttpContext(), new LoggerFactory().CreateLogger("TestHandler"));
                 Options.AuthenticationScheme = scheme;
                 Options.AutomaticAuthentication = auto;
             }

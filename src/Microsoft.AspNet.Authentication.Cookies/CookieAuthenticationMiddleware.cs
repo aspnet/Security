@@ -24,7 +24,7 @@ namespace Microsoft.AspNet.Authentication.Cookies
             [NotNull] IUrlEncoder urlEncoder,
             [NotNull] IOptions<CookieAuthenticationOptions> options,
             ConfigureOptions<CookieAuthenticationOptions> configureOptions)
-            : base(next, options, configureOptions)
+            : base(next, options, loggerFactory, configureOptions)
         {
             if (Options.Notifications == null)
             {
@@ -44,8 +44,6 @@ namespace Microsoft.AspNet.Authentication.Cookies
             {
                 Options.CookieManager = new ChunkingCookieManager(urlEncoder);
             }
-
-            _logger = loggerFactory.CreateLogger(typeof(CookieAuthenticationMiddleware).FullName);
         }
 
         protected override AuthenticationHandler<CookieAuthenticationOptions> CreateHandler()

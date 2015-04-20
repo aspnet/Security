@@ -570,9 +570,9 @@ namespace Microsoft.AspNet.Authentication.Tests.OpenIdConnect
         {
         }
 
-        public async Task BaseInitializeAsyncPublic(AuthenticationOptions options, HttpContext context)
+        public async Task BaseInitializeAsyncPublic(AuthenticationOptions options, HttpContext context, ILogger logger)
         {
-            await base.BaseInitializeAsync(options, context);
+            await base.BaseInitializeAsync(options, context, logger);
         }
 
         public override bool ShouldHandleScheme(string authenticationScheme)

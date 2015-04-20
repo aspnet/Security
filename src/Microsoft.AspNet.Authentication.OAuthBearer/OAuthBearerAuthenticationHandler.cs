@@ -17,13 +17,7 @@ namespace Microsoft.AspNet.Authentication.OAuthBearer
 {
     public class OAuthBearerAuthenticationHandler : AuthenticationHandler<OAuthBearerAuthenticationOptions>
     {
-        private readonly ILogger _logger;
         private OpenIdConnectConfiguration _configuration;
-
-        public OAuthBearerAuthenticationHandler(ILogger logger)
-        {
-            _logger = logger;
-        }
 
         protected override AuthenticationTicket AuthenticateCore()
         {
@@ -155,7 +149,7 @@ namespace Microsoft.AspNet.Authentication.OAuthBearer
             }
             catch (Exception ex)
             {
-                _logger.LogError("Exception occurred while processing message", ex);
+                Logger.LogError("Exception occurred while processing message", ex);
 
                 // Refresh the configuration for exceptions that may be caused by key rollovers. The user can also request a refresh in the notification.
                 if (Options.RefreshOnIssuerKeyNotFound && ex.GetType().Equals(typeof(SecurityTokenSignatureKeyNotFoundException)))
