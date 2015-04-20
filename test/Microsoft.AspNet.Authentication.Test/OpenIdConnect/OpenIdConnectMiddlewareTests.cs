@@ -13,15 +13,15 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Xml;
 using System.Xml.Linq;
+
 using Microsoft.AspNet.Authentication.Cookies;
-using Microsoft.AspNet.Authentication.DataHandler;
 using Microsoft.AspNet.Authentication.OpenIdConnect;
 using Microsoft.AspNet.Builder;
-using Microsoft.AspNet.DataProtection;
 using Microsoft.AspNet.Http;
 using Microsoft.AspNet.Http.Authentication;
 using Microsoft.AspNet.TestHost;
 using Microsoft.Framework.DependencyInjection;
+using Microsoft.IdentityModel.Protocols;
 using Newtonsoft.Json;
 using Shouldly;
 using Xunit;
@@ -56,7 +56,6 @@ namespace Microsoft.AspNet.Authentication.Tests.OpenIdConnect
         [Fact]
         public async Task ChallengeWillSetNonceCookie()
         {
-            System.Diagnostics.Debugger.Launch();
             var server = CreateServer(options =>
             {
                 options.Authority = "https://login.windows.net/common";
@@ -82,46 +81,70 @@ namespace Microsoft.AspNet.Authentication.Tests.OpenIdConnect
         [Fact]
         public async Task ChallengeWillUseOptionsProperties()
         {
+            var queryValues = new ExpectedQueryValues("https://login.windows.net/common");
+
             var server = CreateServer(options =>
             {
-                options.Authority = "https://login.windows.net/common";
-                options.ClientId = "Test Id";
-                options.SignInScheme = OpenIdConnectAuthenticationDefaults.AuthenticationScheme;
-                options.Scope = "https://www.googleapis.com/auth/plus.login";
-                options.ResponseType = "id_token";
+                options.Authority = queryValues.Authority;
+                options.ClientId = queryValues.ClientId;
+                options.RedirectUri = queryValues.RedirectUri;
+                options.Resource = queryValues.Resource;
+                options.Scope = queryValues.Scope;
             });
+
             var transaction = await SendAsync(server, "https://example.com/challenge");
             transaction.Response.StatusCode.ShouldBe(HttpStatusCode.Redirect);
-            var query = transaction.Response.Headers.Location.Query;
-            query.ShouldContain("scope=" + Uri.EscapeDataString("https://www.googleapis.com/auth/plus.login"));
-            query.ShouldContain("response_type=" + Uri.EscapeDataString("id_token"));
+            queryValues.CheckValues(
+                transaction.Response.Headers.Location.AbsoluteUri,
+                new string[]
+                {
+                    OpenIdConnectParameterNames.ClientId,
+                    OpenIdConnectParameterNames.RedirectUri,
+                    OpenIdConnectParameterNames.Resource,
+                    OpenIdConnectParameterNames.ResponseMode,
+                    OpenIdConnectParameterNames.Scope
+                });
         }
 
         [Fact]
         public async Task ChallengeWillUseNotifications()
         {
-            ISecureDataFormat<AuthenticationProperties> stateFormat = new PropertiesDataFormat(new EphemeralDataProtectionProvider().CreateProtector("GoogleTest"));
+            System.Diagnostics.Debugger.Launch();
+            var queryValues = new ExpectedQueryValues("https://login.windows.net/common");
+            var queryValuesSetInNotification = new ExpectedQueryValues("https://login.windows.net/common");
             var server = CreateServer(options =>
             {
-                options.Authority = "https://login.windows.net/common";
-                options.ClientId = "Test Id";
+                options.Authority = queryValues.Authority;
+                options.ClientId = queryValues.ClientId;
+                options.RedirectUri = queryValues.RedirectUri;
+                options.Resource = queryValues.Resource;
+                options.Scope = queryValues.Scope;
                 options.Notifications = new OpenIdConnectAuthenticationNotifications
                 {
-                    MessageReceived = notification =>
-                        {
-                            notification.ProtocolMessage.Scope = "test openid profile";
-                            notification.HandleResponse();
-                            return Task.FromResult<object>(null);
-                        }
+                    RedirectToIdentityProvider = notification =>
+                    {
+                        notification.ProtocolMessage.ClientId = queryValuesSetInNotification.ClientId;
+                        notification.ProtocolMessage.RedirectUri = queryValuesSetInNotification.RedirectUri;
+                        notification.ProtocolMessage.Resource = queryValuesSetInNotification.Resource;
+                        notification.ProtocolMessage.Scope = queryValuesSetInNotification.Scope;
+                        return Task.FromResult<object>(null);
+                    }
                 };
             });
 
-            var properties = new AuthenticationProperties();
-            var state = stateFormat.Protect(properties);
             var transaction = await SendAsync(server,"https://example.com/challenge");
             transaction.Response.StatusCode.ShouldBe(HttpStatusCode.Redirect);
+            queryValuesSetInNotification.CheckValues(
+                transaction.Response.Headers.Location.AbsoluteUri,
+                new string[]
+                {
+                    OpenIdConnectParameterNames.ClientId,
+                    OpenIdConnectParameterNames.RedirectUri,
+                    OpenIdConnectParameterNames.Resource,
+                    OpenIdConnectParameterNames.ResponseMode,
+                    OpenIdConnectParameterNames.Scope
+                });
         }
-
 
         [Fact]
         public async Task SignOutWithDefaultRedirectUri()

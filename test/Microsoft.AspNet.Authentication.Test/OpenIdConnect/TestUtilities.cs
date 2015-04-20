@@ -1,8 +1,10 @@
 ﻿// Copyright (c) Microsoft Open Technologies, Inc. All rights reserved.
 // Licensed under the Apache License, Version 2.0. See License.txt in the project root for license information.
 
-using Microsoft.IdentityModel.Protocols;
 using System;
+using System.Collections.Generic;
+using Microsoft.IdentityModel.Protocols;
+using Xunit;
 
 namespace Microsoft.AspNet.Authentication.Tests.OpenIdConnect
 {
@@ -104,6 +106,95 @@ namespace Microsoft.AspNet.Authentication.Tests.OpenIdConnect
             }
 
             return AreEqual<Exception>(exception1.InnerException, exception2.InnerException);
+        }
+    }
+
+    /// <summary>
+    /// This helper class is used to check that query string parameters are as expected.
+    /// </summary>
+    public class ExpectedQueryValues
+    {
+        public ExpectedQueryValues(string authority)
+        {
+            Authority = authority;
+        }
+
+        public void CheckValues(string query, string[] parameters)
+        {
+            var errors = new List<string>();
+            if (!query.StartsWith(Authority))
+            {
+                errors.Add("authority: " + Authority);
+            }
+
+            foreach(var str in parameters)
+            {
+                if (str == OpenIdConnectParameterNames.ClientId && !query.Contains(ExpectedClientId))
+                {
+                    errors.Add(ExpectedClientId);
+                }
+                else if (str == OpenIdConnectParameterNames.RedirectUri && !query.Contains(ExpectedRedirectUri))
+                {
+                    errors.Add(ExpectedRedirectUri);
+                }
+                else if (str == OpenIdConnectParameterNames.Resource && !query.Contains(ExpectedResource))
+                {
+                    errors.Add(ExpectedResource);
+                }
+                else if (str == OpenIdConnectParameterNames.ResponseMode && !query.Contains(ExpectedResponseMode))
+                {
+                    errors.Add(ExpectedResponseMode);
+                }
+                else if (str == OpenIdConnectParameterNames.Scope && !query.Contains(ExpectedScope))
+                {
+                    errors.Add(ExpectedScope);
+                }
+            }
+
+            if (errors.Count > 0)
+            {
+                Console.WriteLine("query string not as expected: " + Environment.NewLine + query + Environment.NewLine);
+                foreach (var str in errors)
+                {
+                    Console.WriteLine(str);
+                }
+
+                Console.WriteLine(Environment.NewLine);
+                Assert.True(false);
+            }
+        }
+
+        public string Authority { get; set; }
+        public string ClientId { get; set; } = Guid.NewGuid().ToString();
+        public string RedirectUri { get; set; } = Guid.NewGuid().ToString();
+        public string Resource { get; set; } = Guid.NewGuid().ToString();
+        public string ResponseMode { get; set; } = OpenIdConnectResponseModes.FormPost;
+        public string ResponseType { get; set; } = Guid.NewGuid().ToString();
+        public string Scope { get; set; } = Guid.NewGuid().ToString();
+
+        public string ExpectedClientId
+        {
+            get { return OpenIdConnectParameterNames.ClientId + "=" + ClientId; }
+        }
+
+        public string ExpectedRedirectUri
+        {
+            get { return OpenIdConnectParameterNames.RedirectUri + "=" + RedirectUri; }
+        }
+
+        public string ExpectedResource
+        {
+            get { return OpenIdConnectParameterNames.Resource + "=" + Resource; }
+        }
+
+        public string ExpectedResponseMode
+        {
+            get { return OpenIdConnectParameterNames.ResponseMode + "=" + ResponseMode; }
+        }
+
+        public string ExpectedScope
+        {
+            get { return OpenIdConnectParameterNames.Scope + "=" + Scope; }
         }
     }
 }
