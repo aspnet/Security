@@ -14,12 +14,10 @@ namespace Microsoft.AspNet.Authentication
         public void ShouldHandleSchemeAreDeterminedOnlyByMatchingAuthenticationScheme()
         {
             var handler = new TestHandler("Alpha");
-
-            bool passiveNoMatch = handler.ShouldHandleScheme("Beta");
+            var passiveNoMatch = handler.ShouldHandleScheme("Beta");
 
             handler = new TestHandler("Alpha");
-
-            bool passiveWithMatch = handler.ShouldHandleScheme("Alpha");
+            var passiveWithMatch = handler.ShouldHandleScheme("Alpha");
 
             Assert.False(passiveNoMatch);
             Assert.True(passiveWithMatch);

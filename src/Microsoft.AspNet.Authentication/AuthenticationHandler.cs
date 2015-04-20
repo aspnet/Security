@@ -466,4 +466,3 @@ namespace Microsoft.AspNet.Authentication
         }
     }
 }
-
