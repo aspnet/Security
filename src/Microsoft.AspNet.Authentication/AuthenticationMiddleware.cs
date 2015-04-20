@@ -39,7 +39,7 @@ namespace Microsoft.AspNet.Authentication
 
         public TOptions Options { get; set; }
 
-        protected ILogger Logger { get; private set; }
+        public ILogger Logger { get; set; }
 
         public async Task Invoke(HttpContext context)
         {

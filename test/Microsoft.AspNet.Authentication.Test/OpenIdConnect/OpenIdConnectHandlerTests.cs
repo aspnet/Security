@@ -565,11 +565,6 @@ namespace Microsoft.AspNet.Authentication.Tests.OpenIdConnect
     /// </summary>
     public class CustomOpenIdConnectAuthenticationHandler : OpenIdConnectAuthenticationHandler
     {
-        public CustomOpenIdConnectAuthenticationHandler(ILogger logger)
-            : base(logger)
-        {
-        }
-
         public async Task BaseInitializeAsyncPublic(AuthenticationOptions options, HttpContext context, ILogger logger)
         {
             await base.BaseInitializeAsync(options, context, logger);
@@ -619,13 +614,7 @@ namespace Microsoft.AspNet.Authentication.Tests.OpenIdConnect
 
         protected override AuthenticationHandler<OpenIdConnectAuthenticationOptions> CreateHandler()
         {
-            return new CustomOpenIdConnectAuthenticationHandler(Logger);
-        }
-
-        public ILogger Logger
-        {
-            get;
-            set;
+            return new CustomOpenIdConnectAuthenticationHandler();
         }
     }
 

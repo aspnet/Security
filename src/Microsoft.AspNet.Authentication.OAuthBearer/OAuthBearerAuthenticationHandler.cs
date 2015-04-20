@@ -57,7 +57,7 @@ namespace Microsoft.AspNet.Authentication.OAuthBearer
 
                 if (string.IsNullOrEmpty(token))
                 {
-                    string authorization = Request.Headers.Get("Authorization");
+                    var authorization = Request.Headers.Get("Authorization");
 
                     // If no authorization header found, nothing to process further
                     if (string.IsNullOrEmpty(authorization))

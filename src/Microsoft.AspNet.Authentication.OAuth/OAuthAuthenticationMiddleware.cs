@@ -94,7 +94,7 @@ namespace Microsoft.AspNet.Authentication.OAuth
         /// <returns>An <see cref="AuthenticationHandler"/> configured with the <see cref="OAuthAuthenticationOptions"/> supplied to the constructor.</returns>
         protected override AuthenticationHandler<TOptions> CreateHandler()
         {
-            return new OAuthAuthenticationHandler<TOptions, TNotifications>(Backchannel, Logger);
+            return new OAuthAuthenticationHandler<TOptions, TNotifications>(Backchannel);
         }
 
         [SuppressMessage("Microsoft.Reliability", "CA2000:Dispose objects before losing scope", Justification = "Managed by caller")]

@@ -17,8 +17,8 @@ namespace Microsoft.AspNet.Authentication.Google
 {
     internal class GoogleAuthenticationHandler : OAuthAuthenticationHandler<GoogleAuthenticationOptions, IGoogleAuthenticationNotifications>
     {
-        public GoogleAuthenticationHandler(HttpClient httpClient, ILogger logger)
-            : base(httpClient, logger)
+        public GoogleAuthenticationHandler(HttpClient httpClient)
+            : base(httpClient)
         {
         }
 

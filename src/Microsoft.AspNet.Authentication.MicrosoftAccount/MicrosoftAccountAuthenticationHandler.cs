@@ -17,8 +17,8 @@ namespace Microsoft.AspNet.Authentication.MicrosoftAccount
 {
     internal class MicrosoftAccountAuthenticationHandler : OAuthAuthenticationHandler<MicrosoftAccountAuthenticationOptions, IMicrosoftAccountAuthenticationNotifications>
     {
-        public MicrosoftAccountAuthenticationHandler(HttpClient httpClient, ILogger logger)
-            : base(httpClient, logger)
+        public MicrosoftAccountAuthenticationHandler(HttpClient httpClient)
+            : base(httpClient)
         {
         }
 

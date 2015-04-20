@@ -15,8 +15,6 @@ namespace Microsoft.AspNet.Authentication.Cookies
 {
     public class CookieAuthenticationMiddleware : AuthenticationMiddleware<CookieAuthenticationOptions>
     {
-        private readonly ILogger _logger;
-
         public CookieAuthenticationMiddleware(
             [NotNull] RequestDelegate next,
             [NotNull] IDataProtectionProvider dataProtectionProvider,
@@ -48,7 +46,7 @@ namespace Microsoft.AspNet.Authentication.Cookies
 
         protected override AuthenticationHandler<CookieAuthenticationOptions> CreateHandler()
         {
-            return new CookieAuthenticationHandler(_logger);
+            return new CookieAuthenticationHandler();
         }
     }
 }

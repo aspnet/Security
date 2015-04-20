@@ -21,8 +21,8 @@ namespace Microsoft.AspNet.Authentication.Facebook
 {
     internal class FacebookAuthenticationHandler : OAuthAuthenticationHandler<FacebookAuthenticationOptions, IFacebookAuthenticationNotifications>
     {
-        public FacebookAuthenticationHandler(HttpClient httpClient, ILogger logger)
-            : base(httpClient, logger)
+        public FacebookAuthenticationHandler(HttpClient httpClient)
+            : base(httpClient)
         {
         }
 
