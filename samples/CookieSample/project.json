@@ -4,7 +4,6 @@
         "Microsoft.AspNet.Server.WebListener": "1.0.0-*",
         "Microsoft.AspNet.Server.IIS": "1.0.0-*",
         "Microsoft.Framework.Logging.Console": "1.0.0-*",
-        "Microsoft.Framework.Logging.NLog": "1.0.0-*",
         "Kestrel": "1.0.0-*"
     },
     "commands": {
