@@ -104,7 +104,7 @@ namespace Microsoft.AspNet.Authentication.OAuth
                 }
 
                 // OAuth2 10.12 CSRF
-                if (!ValidateCorrelationId(properties, Logger))
+                if (!ValidateCorrelationId(properties))
                 {
                     return new AuthenticationTicket(properties, Options.AuthenticationScheme);
                 }
