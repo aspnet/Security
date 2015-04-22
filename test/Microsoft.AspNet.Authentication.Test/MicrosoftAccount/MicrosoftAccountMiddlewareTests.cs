@@ -143,7 +143,7 @@ namespace Microsoft.AspNet.Authentication.Tests.MicrosoftAccount
             properties.RedirectUri = "/me";
             var state = stateFormat.Protect(properties);
             var transaction = await SendAsync(server,
-                "https://example.com/signin-microsoft?code=TestCode&state=" + Uri.EscapeDataString(state),
+                "https://example.com/signin-microsoft?code=TestCode&state=" + UrlEncoder.Default.UrlEncode(state),
                 correlationKey + "=" + correlationValue);
             transaction.Response.StatusCode.ShouldBe(HttpStatusCode.Redirect);
             transaction.Response.Headers.Location.ToString().ShouldBe("/me");

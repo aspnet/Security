@@ -75,7 +75,7 @@ namespace Microsoft.AspNet.Authentication.Tests.OpenIdConnect
             });
             var transaction = await SendAsync(server, "https://example.com/challenge");
             transaction.Response.StatusCode.ShouldBe(HttpStatusCode.Redirect);
-            transaction.Response.Headers.Location.Query.ShouldContain("&scope=" + Uri.EscapeDataString("openid profile"));
+            transaction.Response.Headers.Location.Query.ShouldContain("&scope=" + UrlEncoder.Default.UrlEncode("openid profile"));
         }
 
         [Fact]
@@ -92,8 +92,8 @@ namespace Microsoft.AspNet.Authentication.Tests.OpenIdConnect
             var transaction = await SendAsync(server, "https://example.com/challenge");
             transaction.Response.StatusCode.ShouldBe(HttpStatusCode.Redirect);
             var query = transaction.Response.Headers.Location.Query;
-            query.ShouldContain("scope=" + Uri.EscapeDataString("https://www.googleapis.com/auth/plus.login"));
-            query.ShouldContain("response_type=" + Uri.EscapeDataString("id_token"));
+            query.ShouldContain("scope=" + UrlEncoder.Default.UrlEncode("https://www.googleapis.com/auth/plus.login"));
+            query.ShouldContain("response_type=" + UrlEncoder.Default.UrlEncode("id_token"));
         }
 
         [Fact]
@@ -148,7 +148,7 @@ namespace Microsoft.AspNet.Authentication.Tests.OpenIdConnect
 
             var transaction = await SendAsync(server, "https://example.com/signout");
             transaction.Response.StatusCode.ShouldBe(HttpStatusCode.Redirect);
-            transaction.Response.Headers.Location.AbsoluteUri.ShouldContain(Uri.EscapeDataString("https://example.com/logout"));
+            transaction.Response.Headers.Location.AbsoluteUri.ShouldContain(UrlEncoder.Default.UrlEncode("https://example.com/logout"));
         }
 
         [Fact]
@@ -163,7 +163,7 @@ namespace Microsoft.AspNet.Authentication.Tests.OpenIdConnect
 
             var transaction = await SendAsync(server, "https://example.com/signout_with_specific_redirect_uri");
             transaction.Response.StatusCode.ShouldBe(HttpStatusCode.Redirect);
-            transaction.Response.Headers.Location.AbsoluteUri.ShouldContain(Uri.EscapeDataString("http://www.example.com/specific_redirect_uri"));
+            transaction.Response.Headers.Location.AbsoluteUri.ShouldContain(UrlEncoder.Default.UrlEncode("http://www.example.com/specific_redirect_uri"));
         }
 
         [Fact]

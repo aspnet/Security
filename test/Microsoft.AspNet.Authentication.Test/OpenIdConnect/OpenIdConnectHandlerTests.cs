@@ -115,7 +115,7 @@ namespace Microsoft.AspNet.Authentication.Tests.OpenIdConnect
 
             var propertiesFormatter = new AuthenticationPropertiesFormater();
             var protectedProperties = propertiesFormatter.Protect(new AuthenticationProperties());
-            var state = OpenIdConnectAuthenticationDefaults.AuthenticationPropertiesKey + "=" + Uri.EscapeDataString(protectedProperties);
+            var state = OpenIdConnectAuthenticationDefaults.AuthenticationPropertiesKey + "=" + UrlEncoder.Default.UrlEncode(protectedProperties);
             var code = Guid.NewGuid().ToString();
             var message =
                 new OpenIdConnectMessage
