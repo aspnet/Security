@@ -733,35 +733,4 @@ namespace Microsoft.AspNet.Authentication.Tests.OpenIdConnect
 
         public CustomLogger Logger {  get { return _logger; } }
     }
-
-    /// <summary>
-    /// Processing a <see cref="OpenIdConnectMessage"/> requires 'unprotecting' the state.
-    /// This class side-steps that process.
-    /// </summary>
-    public class AuthenticationPropertiesFormater : ISecureDataFormat<AuthenticationProperties>
-    {
-        public string Protect(AuthenticationProperties data)
-        {
-            return "protectedData";
-        }
-
-        AuthenticationProperties ISecureDataFormat<AuthenticationProperties>.Unprotect(string protectedText)
-        { 
-            return new AuthenticationProperties();
-        }
-    }
-
-    /// <summary>
-    /// Used to set up different configurations of metadata for different tests
-    /// </summary>
-    public class ConfigurationManager
-    {
-        /// <summary>
-        /// Simple static empty manager.
-        /// </summary>
-        static public IConfigurationManager<OpenIdConnectConfiguration> DefaultStaticConfigurationManager
-        {
-           get { return new StaticConfigurationManager<OpenIdConnectConfiguration>(new OpenIdConnectConfiguration()); }
-        }
-    }
 }

@@ -239,12 +239,18 @@ namespace Microsoft.AspNet.Authentication.OpenIdConnect
             {
                 redirectToIdentityProviderNotification.ProtocolMessage.State = OpenIdConnectAuthenticationDefaults.AuthenticationPropertiesKey + "=" + Uri.EscapeDataString(Options.StateDataFormat.Protect(properties));
             }
+            else
+            {
+                redirectToIdentityProviderNotification.ProtocolMessage.State += "&" + OpenIdConnectAuthenticationDefaults.AuthenticationPropertiesKey + "=" + Uri.EscapeDataString(Options.StateDataFormat.Protect(properties));
+            }
 
             string redirectUri = redirectToIdentityProviderNotification.ProtocolMessage.CreateAuthenticationRequestUrl();
             if (!Uri.IsWellFormedUriString(redirectUri, UriKind.Absolute))
             {
                 _logger.LogWarning(Resources.OIDCH_0036_UriIsNotWellFormed, redirectUri);
             }
+
+            _logger.LogDebug(Resources.OIDCH_0037_RedirectUri, redirectUri);
 
             Response.Redirect(redirectUri);
         }

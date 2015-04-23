@@ -3,6 +3,7 @@
 
 using System;
 using System.Collections.Generic;
+using Microsoft.AspNet.Http.Authentication;
 using Microsoft.IdentityModel.Protocols;
 using Xunit;
 
@@ -110,6 +111,38 @@ namespace Microsoft.AspNet.Authentication.Tests.OpenIdConnect
     }
 
     /// <summary>
+    /// Processing a <see cref="OpenIdConnectMessage"/> requires 'unprotecting' the state.
+    /// This class side-steps that process.
+    /// </summary>
+    public class AuthenticationPropertiesFormater : ISecureDataFormat<AuthenticationProperties>
+    {
+        string _protectedString = Guid.NewGuid().ToString();
+
+        public string Protect(AuthenticationProperties data)
+        {
+            return _protectedString;
+        }
+
+        AuthenticationProperties ISecureDataFormat<AuthenticationProperties>.Unprotect(string protectedText)
+        {
+            return new AuthenticationProperties();
+        }
+    }
+
+    /// <summary>
+    /// Used to set up different configurations of metadata for different tests
+    /// </summary>
+    public class ConfigurationManager
+    {
+        /// <summary>
+        /// Simple static empty manager.
+        /// </summary>
+        static public IConfigurationManager<OpenIdConnectConfiguration> DefaultStaticConfigurationManager
+        {
+            get { return new StaticConfigurationManager<OpenIdConnectConfiguration>(new OpenIdConnectConfiguration()); }
+        }
+    }
+    /// <summary>
     /// This helper class is used to check that query string parameters are as expected.
     /// </summary>
     public class ExpectedQueryValues
@@ -119,7 +152,7 @@ namespace Microsoft.AspNet.Authentication.Tests.OpenIdConnect
             Authority = authority;
         }
 
-        public void CheckValues(string query, string[] parameters)
+        public void CheckValues(string query, IEnumerable<string> parameters)
         {
             var errors = new List<string>();
             if (!query.StartsWith(Authority))
@@ -149,6 +182,10 @@ namespace Microsoft.AspNet.Authentication.Tests.OpenIdConnect
                 {
                     errors.Add(ExpectedScope);
                 }
+                else if (str == OpenIdConnectParameterNames.State && !query.Contains(ExpectedState))
+                {
+                    errors.Add(ExpectedState);
+                }
             }
 
             if (errors.Count > 0)
@@ -171,6 +208,7 @@ namespace Microsoft.AspNet.Authentication.Tests.OpenIdConnect
         public string ResponseMode { get; set; } = OpenIdConnectResponseModes.FormPost;
         public string ResponseType { get; set; } = Guid.NewGuid().ToString();
         public string Scope { get; set; } = Guid.NewGuid().ToString();
+        public string State { get; set; } = Guid.NewGuid().ToString();
 
         public string ExpectedClientId
         {
@@ -196,5 +234,14 @@ namespace Microsoft.AspNet.Authentication.Tests.OpenIdConnect
         {
             get { return OpenIdConnectParameterNames.Scope + "=" + Scope; }
         }
+        public string ExpectedState
+        {
+            get { return OpenIdConnectParameterNames.State + "=" + State; }
+        }
+    }
+
+    public class DerivedOpenIdConnectMessage : OpenIdConnectMessage
+    {
+
     }
 }

@@ -165,11 +165,19 @@ namespace Microsoft.AspNet.Authentication.OpenIdConnect
         }
 
         /// <summary>
-        /// OIDCH_0036: Uri.IsWellFormedUriString(redirectUri, UriKind.Absolute) returned 'false', redirectUri is: {0}", (redirectUri ?? "null"))
+        /// OIDCH_0036: Uri.IsWellFormedUriString(redirectUri, UriKind.Absolute) returned 'false', redirectUri is: {0}'.)
         /// </summary>
         internal static string OIDCH_0036_UriIsNotWellFormed
         {
             get { return ResourceManager.GetString("OIDCH_0036_UriIsNotWellFormed"); }
+        }
+
+        /// <summary>
+        /// OIDCH_0036: RedirectUri is: '{0}'.
+        /// </summary>
+        internal static string OIDCH_0037_RedirectUri
+        {
+            get { return ResourceManager.GetString("OIDCH_0037_RedirectUri"); }
         }
 
         /// <summary>

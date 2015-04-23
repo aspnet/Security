@@ -106,10 +106,64 @@ namespace Microsoft.AspNet.Authentication.Tests.OpenIdConnect
                 });
         }
 
+        [Theory]
+        [InlineData(true)]
+        [InlineData(false)]
+        public async Task ChallengeWillSetStateInNotification(bool setStateInNotification)
+        {
+            //System.Diagnostics.Debugger.Launch();
+            var queryValues = new ExpectedQueryValues("https://login.windows.net/common");
+            var stateDataFormat = new AuthenticationPropertiesFormater();
+            var server = CreateServer(options =>
+            {
+                options.Authority = queryValues.Authority;
+                options.ClientId = queryValues.ClientId;
+                options.RedirectUri = queryValues.RedirectUri;
+                options.Resource = queryValues.Resource;
+                options.Scope = queryValues.Scope;
+                options.StateDataFormat = stateDataFormat;
+                options.Notifications = new OpenIdConnectAuthenticationNotifications
+                {
+                    RedirectToIdentityProvider = notification =>
+                    {
+                        if (setStateInNotification)
+                        {
+                            notification.ProtocolMessage.State = queryValues.State;
+                        }
+                        return Task.FromResult<object>(null);
+                    }
+                };
+            });
+
+            var transaction = await SendAsync(server, "https://example.com/challenge");
+            transaction.Response.StatusCode.ShouldBe(HttpStatusCode.Redirect);
+            if (setStateInNotification)
+            {
+                queryValues.State += Uri.EscapeDataString("&" + OpenIdConnectAuthenticationDefaults.AuthenticationPropertiesKey + "=" + stateDataFormat.Protect(new AuthenticationProperties()));
+            }
+            else
+            {
+                queryValues.State = Uri.EscapeDataString(OpenIdConnectAuthenticationDefaults.AuthenticationPropertiesKey + "=" + stateDataFormat.Protect(new AuthenticationProperties()));
+            }
+
+            queryValues.CheckValues(
+                transaction.Response.Headers.Location.AbsoluteUri,
+                new List<string>
+                {
+                    OpenIdConnectParameterNames.ClientId,
+                    OpenIdConnectParameterNames.RedirectUri,
+                    OpenIdConnectParameterNames.Resource,
+                    OpenIdConnectParameterNames.ResponseMode,
+                    OpenIdConnectParameterNames.Scope,
+                    OpenIdConnectParameterNames.State,
+                }
+            );
+        }
+
         [Fact]
         public async Task ChallengeWillUseNotifications()
         {
-            System.Diagnostics.Debugger.Launch();
+            //System.Diagnostics.Debugger.Launch();
             var queryValues = new ExpectedQueryValues("https://login.windows.net/common");
             var queryValuesSetInNotification = new ExpectedQueryValues("https://login.windows.net/common");
             var server = CreateServer(options =>

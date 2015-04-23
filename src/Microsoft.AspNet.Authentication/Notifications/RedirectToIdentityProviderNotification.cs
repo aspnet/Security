@@ -7,8 +7,8 @@ using Microsoft.AspNet.Http.Authentication;
 namespace Microsoft.AspNet.Authentication.Notifications
 {
     /// <summary>
-    /// When a use configures the <see cref="AuthenticationMiddleware{TOptions}"/> to be notification prior to redirecting to an IdentityProvider
-    /// this notification is passed to the 'RedirectToIdentityProvider".
+    /// When a use configures the <see cref="AuthenticationMiddleware{TOptions}"/> to be notified prior to redirecting to an IdentityProvider
+    /// and instance of <see cref="RedirectFromIdentityProviderNotification{TMessage, TOptions}"/> passed to 'RedirectToIdentityProvider".
     /// </summary>
     /// <typeparam name="TMessage">protocol specific message.</typeparam>
     /// <typeparam name="TOptions">protocol specific options.</typeparam>
