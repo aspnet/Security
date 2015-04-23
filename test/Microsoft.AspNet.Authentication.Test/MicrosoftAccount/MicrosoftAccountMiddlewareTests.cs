@@ -178,8 +178,7 @@ namespace Microsoft.AspNet.Authentication.Tests.MicrosoftAccount
             },
             services =>
             {
-                services.AddWebEncoders();
-                services.AddDataProtection();
+                services.AddAuthentication();
                 services.Configure<ExternalAuthenticationOptions>(options =>
                 {
                     options.SignInScheme = "External";

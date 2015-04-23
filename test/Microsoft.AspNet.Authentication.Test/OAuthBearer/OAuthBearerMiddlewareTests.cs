@@ -336,10 +336,7 @@ namespace Microsoft.AspNet.Authentication.OAuthBearer
                     }
                 });
             },
-            services => {
-                services.AddDataProtection();
-                services.AddWebEncoders();
-            });
+            services => services.AddAuthentication());
         }
 
         private static async Task<Transaction> SendAsync(TestServer server, string uri, string authorizationHeader = null)
