@@ -226,6 +226,8 @@ namespace Microsoft.AspNet.Authentication.Google
             transaction.Response.StatusCode.ShouldBe(HttpStatusCode.InternalServerError);
         }
 
+
+
         [Fact]
         public async Task ReplyPathWillAuthenticateValidAuthorizeCodeAndState()
         {
@@ -530,6 +532,7 @@ namespace Microsoft.AspNet.Authentication.Google
             },
             services =>
             {
+                services.AddWebEncoders();
                 services.AddDataProtection();
                 services.Configure<ExternalAuthenticationOptions>(options =>
                 {

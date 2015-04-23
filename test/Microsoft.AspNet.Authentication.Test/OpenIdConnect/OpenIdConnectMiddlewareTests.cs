@@ -312,6 +312,7 @@ namespace Microsoft.AspNet.Authentication.Tests.OpenIdConnect
             },
             services =>
             {
+                services.AddWebEncoders();
                 services.AddDataProtection();
                 services.Configure<ExternalAuthenticationOptions>(options =>
                 {

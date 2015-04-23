@@ -142,6 +142,7 @@ namespace Microsoft.AspNet.Authentication.Tests.OpenIdConnect
             get { return new StaticConfigurationManager<OpenIdConnectConfiguration>(new OpenIdConnectConfiguration()); }
         }
     }
+
     /// <summary>
     /// This helper class is used to check that query string parameters are as expected.
     /// </summary>
