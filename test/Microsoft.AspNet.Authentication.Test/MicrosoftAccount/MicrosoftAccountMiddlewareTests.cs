@@ -19,6 +19,7 @@ using Microsoft.AspNet.Http;
 using Microsoft.AspNet.Http.Authentication;
 using Microsoft.AspNet.TestHost;
 using Microsoft.Framework.DependencyInjection;
+using Microsoft.Framework.WebEncoders;
 using Newtonsoft.Json;
 using Shouldly;
 using Xunit;
@@ -45,7 +46,7 @@ namespace Microsoft.AspNet.Authentication.Tests.MicrosoftAccount
                 },
                 context =>
                 {
-                    context.Response.Challenge("Microsoft");
+                    context.Authentication.Challenge("Microsoft");
                     return true;
                 });
             var transaction = await SendAsync(server, "http://example.com/challenge");
@@ -65,7 +66,7 @@ namespace Microsoft.AspNet.Authentication.Tests.MicrosoftAccount
                 },
                 context =>
                 {
-                    context.Response.Challenge("Microsoft");
+                    context.Authentication.Challenge("Microsoft");
                     return true;
                 });
             var transaction = await SendAsync(server, "http://example.com/challenge");
@@ -139,11 +140,11 @@ namespace Microsoft.AspNet.Authentication.Tests.MicrosoftAccount
             var properties = new AuthenticationProperties();
             var correlationKey = ".AspNet.Correlation.Microsoft";
             var correlationValue = "TestCorrelationId";
-            properties.Dictionary.Add(correlationKey, correlationValue);
+            properties.Items.Add(correlationKey, correlationValue);
             properties.RedirectUri = "/me";
             var state = stateFormat.Protect(properties);
             var transaction = await SendAsync(server,
-                "https://example.com/signin-microsoft?code=TestCode&state=" + Uri.EscapeDataString(state),
+                "https://example.com/signin-microsoft?code=TestCode&state=" + UrlEncoder.Default.UrlEncode(state),
                 correlationKey + "=" + correlationValue);
             transaction.Response.StatusCode.ShouldBe(HttpStatusCode.Redirect);
             transaction.Response.Headers.Location.ToString().ShouldBe("/me");
@@ -177,8 +178,7 @@ namespace Microsoft.AspNet.Authentication.Tests.MicrosoftAccount
             },
             services =>
             {
-                services.AddWebEncoders();
-                services.AddDataProtection();
+                services.AddAuthentication();
                 services.Configure<ExternalAuthenticationOptions>(options =>
                 {
                     options.SignInScheme = "External";

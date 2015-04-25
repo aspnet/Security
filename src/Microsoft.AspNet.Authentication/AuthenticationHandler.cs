@@ -10,6 +10,7 @@ using Microsoft.AspNet.Http;
 using Microsoft.AspNet.Http.Authentication;
 using Microsoft.Framework.Internal;
 using Microsoft.Framework.Logging;
+using Microsoft.Framework.WebEncoders;
 
 namespace Microsoft.AspNet.Authentication
 {
@@ -30,9 +31,9 @@ namespace Microsoft.AspNet.Authentication
 
         private AuthenticationOptions _baseOptions;
 
-        protected IChallengeContext ChallengeContext { get; set; }
+        protected ChallengeContext ChallengeContext { get; set; }
         protected SignInContext SignInContext { get; set; }
-        protected ISignOutContext SignOutContext { get; set; }
+        protected SignOutContext SignOutContext { get; set; }
 
         protected HttpContext Context { get; private set; }
 
@@ -50,6 +51,8 @@ namespace Microsoft.AspNet.Authentication
 
         protected ILogger Logger { get; private set; }
 
+        protected IUrlEncoder UrlEncoder { get; private set; }
+
         internal AuthenticationOptions BaseOptions
         {
             get { return _baseOptions; }
@@ -61,12 +64,13 @@ namespace Microsoft.AspNet.Authentication
 
         public bool Faulted { get; set; }
 
-        protected async Task BaseInitializeAsync([NotNull] AuthenticationOptions options, [NotNull] HttpContext context, [NotNull] ILogger logger)
+        protected async Task BaseInitializeAsync([NotNull] AuthenticationOptions options, [NotNull] HttpContext context, [NotNull] ILogger logger, [NotNull] IUrlEncoder encoder)
         {
             _baseOptions = options;
             Context = context;
             RequestPathBase = Request.PathBase;
             Logger = logger;
+            UrlEncoder = encoder;
 
             RegisterAuthenticationHandler();
 
@@ -141,9 +145,9 @@ namespace Microsoft.AspNet.Authentication
             return Task.FromResult(false);
         }
 
-        public virtual void GetDescriptions(IDescribeSchemesContext describeContext)
+        public virtual void GetDescriptions(DescribeSchemesContext describeContext)
         {
-            describeContext.Accept(BaseOptions.Description.Dictionary);
+            describeContext.Accept(BaseOptions.Description.Items);
 
             if (PriorHandler != null)
             {
@@ -151,7 +155,7 @@ namespace Microsoft.AspNet.Authentication
             }
         }
 
-        public virtual void Authenticate(IAuthenticateContext context)
+        public virtual void Authenticate(AuthenticateContext context)
         {
             if (ShouldHandleScheme(context.AuthenticationScheme))
             {
@@ -159,7 +163,7 @@ namespace Microsoft.AspNet.Authentication
                 if (ticket?.Principal != null)
                 {
                     AuthenticateCalled = true;
-                    context.Authenticated(ticket.Principal, ticket.Properties.Dictionary, BaseOptions.Description.Dictionary);
+                    context.Authenticated(ticket.Principal, ticket.Properties.Items, BaseOptions.Description.Items);
                 }
                 else
                 {
@@ -173,7 +177,7 @@ namespace Microsoft.AspNet.Authentication
             }
         }
 
-        public virtual async Task AuthenticateAsync(IAuthenticateContext context)
+        public virtual async Task AuthenticateAsync(AuthenticateContext context)
         {
             if (ShouldHandleScheme(context.AuthenticationScheme))
             {
@@ -181,7 +185,7 @@ namespace Microsoft.AspNet.Authentication
                 if (ticket?.Principal != null)
                 {
                     AuthenticateCalled = true;
-                    context.Authenticated(ticket.Principal, ticket.Properties.Dictionary, BaseOptions.Description.Dictionary);
+                    context.Authenticated(ticket.Principal, ticket.Properties.Items, BaseOptions.Description.Items);
                 }
                 else
                 {
@@ -322,13 +326,13 @@ namespace Microsoft.AspNet.Authentication
             return Task.FromResult(0);
         }
 
-        public virtual void SignIn(ISignInContext context)
+        public virtual void SignIn(SignInContext context)
         {
             if (ShouldHandleScheme(context.AuthenticationScheme))
             {
-                SignInContext = new SignInContext(context.Principal, new AuthenticationProperties(context.Properties));
+                SignInContext = context;
                 SignOutContext = null;
-                context.Accept(BaseOptions.Description.Dictionary);
+                context.Accept();
             }
 
             if (PriorHandler != null)
@@ -337,7 +341,7 @@ namespace Microsoft.AspNet.Authentication
             }
         }
 
-        public virtual void SignOut(ISignOutContext context)
+        public virtual void SignOut(SignOutContext context)
         {
             if (ShouldHandleScheme(context.AuthenticationScheme))
             {
@@ -352,7 +356,7 @@ namespace Microsoft.AspNet.Authentication
             }
         }
 
-        public virtual void Challenge(IChallengeContext context)
+        public virtual void Challenge(ChallengeContext context)
         {
             if (ShouldHandleScheme(context.AuthenticationScheme))
             {
@@ -410,7 +414,7 @@ namespace Microsoft.AspNet.Authentication
                 Secure = Request.IsHttps
             };
 
-            properties.Dictionary[correlationKey] = correlationId;
+            properties.Items[correlationKey] = correlationId;
 
             Response.Cookies.Append(correlationKey, correlationId, cookieOptions);
         }
@@ -433,7 +437,7 @@ namespace Microsoft.AspNet.Authentication
             Response.Cookies.Delete(correlationKey, cookieOptions);
 
             string correlationExtra;
-            if (!properties.Dictionary.TryGetValue(
+            if (!properties.Items.TryGetValue(
                 correlationKey,
                 out correlationExtra))
             {
@@ -441,7 +445,7 @@ namespace Microsoft.AspNet.Authentication
                 return false;
             }
 
-            properties.Dictionary.Remove(correlationKey);
+            properties.Items.Remove(correlationKey);
 
             if (!string.Equals(correlationCookie, correlationExtra, StringComparison.Ordinal))
             {

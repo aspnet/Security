@@ -13,7 +13,6 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Xml;
 using System.Xml.Linq;
-
 using Microsoft.AspNet.Authentication.Cookies;
 using Microsoft.AspNet.Authentication.OpenIdConnect;
 using Microsoft.AspNet.Builder;
@@ -21,6 +20,7 @@ using Microsoft.AspNet.Http;
 using Microsoft.AspNet.Http.Authentication;
 using Microsoft.AspNet.TestHost;
 using Microsoft.Framework.DependencyInjection;
+using Microsoft.Framework.WebEncoders;
 using Microsoft.IdentityModel.Protocols;
 using Newtonsoft.Json;
 using Shouldly;
@@ -75,7 +75,7 @@ namespace Microsoft.AspNet.Authentication.Tests.OpenIdConnect
             });
             var transaction = await SendAsync(server, "https://example.com/challenge");
             transaction.Response.StatusCode.ShouldBe(HttpStatusCode.Redirect);
-            transaction.Response.Headers.Location.Query.ShouldContain("&scope=" + Uri.EscapeDataString("openid profile"));
+            transaction.Response.Headers.Location.Query.ShouldContain("&scope=" + UrlEncoder.Default.UrlEncode("openid profile"));
         }
 
         [Fact]
@@ -104,6 +104,10 @@ namespace Microsoft.AspNet.Authentication.Tests.OpenIdConnect
                     OpenIdConnectParameterNames.ResponseMode,
                     OpenIdConnectParameterNames.Scope
                 });
+
+            var query = transaction.Response.Headers.Location.Query;
+            query.ShouldContain("scope=" + UrlEncoder.Default.UrlEncode("https://www.googleapis.com/auth/plus.login"));
+            query.ShouldContain("response_type=" + UrlEncoder.Default.UrlEncode("id_token"));
         }
 
         [Theory]
@@ -228,7 +232,7 @@ namespace Microsoft.AspNet.Authentication.Tests.OpenIdConnect
 
             var transaction = await SendAsync(server, "https://example.com/signout");
             transaction.Response.StatusCode.ShouldBe(HttpStatusCode.Redirect);
-            transaction.Response.Headers.Location.AbsoluteUri.ShouldContain(Uri.EscapeDataString("https://example.com/logout"));
+            transaction.Response.Headers.Location.AbsoluteUri.ShouldContain(UrlEncoder.Default.UrlEncode("https://example.com/logout"));
         }
 
         [Fact]
@@ -243,7 +247,7 @@ namespace Microsoft.AspNet.Authentication.Tests.OpenIdConnect
 
             var transaction = await SendAsync(server, "https://example.com/signout_with_specific_redirect_uri");
             transaction.Response.StatusCode.ShouldBe(HttpStatusCode.Redirect);
-            transaction.Response.Headers.Location.AbsoluteUri.ShouldContain(Uri.EscapeDataString("http://www.example.com/specific_redirect_uri"));
+            transaction.Response.Headers.Location.AbsoluteUri.ShouldContain(UrlEncoder.Default.UrlEncode("http://www.example.com/specific_redirect_uri"));
         }
 
         [Fact]
@@ -284,21 +288,21 @@ namespace Microsoft.AspNet.Authentication.Tests.OpenIdConnect
                     var res = context.Response;
                     if (req.Path == new PathString("/challenge"))
                     {
-                        res.Challenge("OpenIdConnect");
+                        context.Authentication.Challenge("OpenIdConnect");
                         res.StatusCode = 401;
                     }
                     else if (req.Path == new PathString("/signin"))
                     {
                         // REVIEW: this used to just be res.SignIn()
-                        res.SignIn("OpenIdConnect", new ClaimsPrincipal());
+                        context.Authentication.SignIn("OpenIdConnect", new ClaimsPrincipal());
                     }
                     else if (req.Path == new PathString("/signout"))
                     {
-                        res.SignOut(OpenIdConnectAuthenticationDefaults.AuthenticationScheme);
+                        context.Authentication.SignOut(OpenIdConnectAuthenticationDefaults.AuthenticationScheme);
                     }
                     else if (req.Path == new PathString("/signout_with_specific_redirect_uri"))
                     {
-                        res.SignOut(
+                        context.Authentication.SignOut(
                             OpenIdConnectAuthenticationDefaults.AuthenticationScheme,
                             new AuthenticationProperties() { RedirectUri = "http://www.example.com/specific_redirect_uri" });
                     }
@@ -314,8 +318,7 @@ namespace Microsoft.AspNet.Authentication.Tests.OpenIdConnect
             },
             services =>
             {
-                services.AddWebEncoders();
-                services.AddDataProtection();
+                services.AddAuthentication();
                 services.Configure<ExternalAuthenticationOptions>(options =>
                 {
                     options.SignInScheme = CookieAuthenticationDefaults.AuthenticationScheme;

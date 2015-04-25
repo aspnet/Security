@@ -11,8 +11,7 @@ namespace CookieSample
     {
         public void ConfigureServices(IServiceCollection services)
         {
-            services.AddWebEncoders();
-            services.AddDataProtection();
+            services.AddAuthentication();
         }
 
         public void Configure(IApplicationBuilder app, ILoggerFactory loggerfactory)
@@ -29,7 +28,7 @@ namespace CookieSample
                 if (string.IsNullOrEmpty(context.User.Identity.Name))
                 {
                     var user = new ClaimsPrincipal(new ClaimsIdentity(new[] { new Claim(ClaimTypes.Name, "bob") }));
-                    context.Response.SignIn(CookieAuthenticationDefaults.AuthenticationScheme, user);
+                    context.Authentication.SignIn(CookieAuthenticationDefaults.AuthenticationScheme, user);
                     context.Response.ContentType = "text/plain";
                     await context.Response.WriteAsync("Hello First timer");
                     return;

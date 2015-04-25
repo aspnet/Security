@@ -109,7 +109,7 @@ namespace Microsoft.AspNet.Authentication.Google
             var transaction = await SendAsync(server, "https://example.com/challenge");
             transaction.Response.StatusCode.ShouldBe(HttpStatusCode.Redirect);
             var query = transaction.Response.Headers.Location.Query;
-            query.ShouldContain("&scope=" + Uri.EscapeDataString("openid profile email"));
+            query.ShouldContain("&scope=" + UrlEncoder.Default.UrlEncode("openid profile email"));
         }
 
         [Fact]
@@ -124,7 +124,7 @@ namespace Microsoft.AspNet.Authentication.Google
             var transaction = await SendAsync(server, "https://example.com/401");
             transaction.Response.StatusCode.ShouldBe(HttpStatusCode.Redirect);
             var query = transaction.Response.Headers.Location.Query;
-            query.ShouldContain("&scope=" + Uri.EscapeDataString("openid profile email"));
+            query.ShouldContain("&scope=" + UrlEncoder.Default.UrlEncode("openid profile email"));
         }
 
         [Fact]
@@ -142,14 +142,14 @@ namespace Microsoft.AspNet.Authentication.Google
                     var res = context.Response;
                     if (req.Path == new PathString("/challenge2"))
                     {
-                        res.Challenge(new AuthenticationProperties(
+                        context.Authentication.Challenge("Google", new AuthenticationProperties(
                             new Dictionary<string, string>()
                             {
                                 { "scope", "https://www.googleapis.com/auth/plus.login" },
                                 { "access_type", "offline" },
                                 { "approval_prompt", "force" },
                                 { "login_hint", "test@example.com" }
-                            }), "Google");
+                            }));
                         res.StatusCode = 401;
                     }
 
@@ -231,7 +231,7 @@ namespace Microsoft.AspNet.Authentication.Google
         [Fact]
         public async Task ReplyPathWillAuthenticateValidAuthorizeCodeAndState()
         {
-            ISecureDataFormat<AuthenticationProperties> stateFormat = new PropertiesDataFormat(new EphemeralDataProtectionProvider().CreateProtector("GoogleTest"));
+            var stateFormat = new PropertiesDataFormat(new EphemeralDataProtectionProvider().CreateProtector("GoogleTest"));
             var server = CreateServer(options =>
             {
                 options.ClientId = "Test Id";
@@ -280,11 +280,11 @@ namespace Microsoft.AspNet.Authentication.Google
             var properties = new AuthenticationProperties();
             var correlationKey = ".AspNet.Correlation.Google";
             var correlationValue = "TestCorrelationId";
-            properties.Dictionary.Add(correlationKey, correlationValue);
+            properties.Items.Add(correlationKey, correlationValue);
             properties.RedirectUri = "/me";
             var state = stateFormat.Protect(properties);
             var transaction = await SendAsync(server,
-                "https://example.com/signin-google?code=TestCode&state=" + Uri.EscapeDataString(state),
+                "https://example.com/signin-google?code=TestCode&state=" + UrlEncoder.Default.UrlEncode(state),
                 correlationKey + "=" + correlationValue);
             transaction.Response.StatusCode.ShouldBe(HttpStatusCode.Redirect);
             transaction.Response.Headers.Location.ToString().ShouldBe("/me");
@@ -308,7 +308,7 @@ namespace Microsoft.AspNet.Authentication.Google
         [Fact]
         public async Task ReplyPathWillRejectIfCodeIsInvalid()
         {
-            ISecureDataFormat<AuthenticationProperties> stateFormat = new PropertiesDataFormat(new EphemeralDataProtectionProvider().CreateProtector("GoogleTest"));
+            var stateFormat = new PropertiesDataFormat(new EphemeralDataProtectionProvider().CreateProtector("GoogleTest"));
             var server = CreateServer(options =>
             {
                 options.ClientId = "Test Id";
@@ -325,11 +325,11 @@ namespace Microsoft.AspNet.Authentication.Google
             var properties = new AuthenticationProperties();
             var correlationKey = ".AspNet.Correlation.Google";
             var correlationValue = "TestCorrelationId";
-            properties.Dictionary.Add(correlationKey, correlationValue);
+            properties.Items.Add(correlationKey, correlationValue);
             properties.RedirectUri = "/me";
             var state = stateFormat.Protect(properties);
             var transaction = await SendAsync(server,
-                "https://example.com/signin-google?code=TestCode&state=" + Uri.EscapeDataString(state),
+                "https://example.com/signin-google?code=TestCode&state=" + UrlEncoder.Default.UrlEncode(state),
                 correlationKey + "=" + correlationValue);
             transaction.Response.StatusCode.ShouldBe(HttpStatusCode.Redirect);
             transaction.Response.Headers.Location.ToString().ShouldContain("error=access_denied");
@@ -338,7 +338,7 @@ namespace Microsoft.AspNet.Authentication.Google
         [Fact]
         public async Task ReplyPathWillRejectIfAccessTokenIsMissing()
         {
-            ISecureDataFormat<AuthenticationProperties> stateFormat = new PropertiesDataFormat(new EphemeralDataProtectionProvider().CreateProtector("GoogleTest"));
+            var stateFormat = new PropertiesDataFormat(new EphemeralDataProtectionProvider().CreateProtector("GoogleTest"));
             var server = CreateServer(options =>
             {
                 options.ClientId = "Test Id";
@@ -355,11 +355,11 @@ namespace Microsoft.AspNet.Authentication.Google
             var properties = new AuthenticationProperties();
             var correlationKey = ".AspNet.Correlation.Google";
             var correlationValue = "TestCorrelationId";
-            properties.Dictionary.Add(correlationKey, correlationValue);
+            properties.Items.Add(correlationKey, correlationValue);
             properties.RedirectUri = "/me";
             var state = stateFormat.Protect(properties);
             var transaction = await SendAsync(server,
-                "https://example.com/signin-google?code=TestCode&state=" + Uri.EscapeDataString(state),
+                "https://example.com/signin-google?code=TestCode&state=" + UrlEncoder.Default.UrlEncode(state),
                 correlationKey + "=" + correlationValue);
             transaction.Response.StatusCode.ShouldBe(HttpStatusCode.Redirect);
             transaction.Response.Headers.Location.ToString().ShouldContain("error=access_denied");
@@ -368,7 +368,7 @@ namespace Microsoft.AspNet.Authentication.Google
         [Fact]
         public async Task AuthenticatedEventCanGetRefreshToken()
         {
-            ISecureDataFormat<AuthenticationProperties> stateFormat = new PropertiesDataFormat(new EphemeralDataProtectionProvider().CreateProtector("GoogleTest"));
+            var stateFormat = new PropertiesDataFormat(new EphemeralDataProtectionProvider().CreateProtector("GoogleTest"));
             var server = CreateServer(options =>
             {
                 options.ClientId = "Test Id";
@@ -427,11 +427,11 @@ namespace Microsoft.AspNet.Authentication.Google
             var properties = new AuthenticationProperties();
             var correlationKey = ".AspNet.Correlation.Google";
             var correlationValue = "TestCorrelationId";
-            properties.Dictionary.Add(correlationKey, correlationValue);
+            properties.Items.Add(correlationKey, correlationValue);
             properties.RedirectUri = "/me";
             var state = stateFormat.Protect(properties);
             var transaction = await SendAsync(server,
-                "https://example.com/signin-google?code=TestCode&state=" + Uri.EscapeDataString(state),
+                "https://example.com/signin-google?code=TestCode&state=" + UrlEncoder.Default.UrlEncode(state),
                 correlationKey + "=" + correlationValue);
             transaction.Response.StatusCode.ShouldBe(HttpStatusCode.Redirect);
             transaction.Response.Headers.Location.ToString().ShouldBe("/me");
@@ -497,7 +497,7 @@ namespace Microsoft.AspNet.Authentication.Google
                     var res = context.Response;
                     if (req.Path == new PathString("/challenge"))
                     {
-                        res.Challenge("Google");
+                        context.Authentication.Challenge("Google");
                         res.StatusCode = 401;
                     }
                     else if (req.Path == new PathString("/me"))
@@ -507,14 +507,14 @@ namespace Microsoft.AspNet.Authentication.Google
                     else if (req.Path == new PathString("/unauthorized"))
                     {
                         // Simulate Authorization failure 
-                        var result = await context.AuthenticateAsync("Google");
-                        res.Challenge("Google");
+                        var result = await context.Authentication.AuthenticateAsync("Google");
+                        context.Authentication.Challenge("Google");
                     }
                     else if (req.Path == new PathString("/unauthorizedAuto"))
                     {
-                        var result = await context.AuthenticateAsync("Google");
+                        var result = await context.Authentication.AuthenticateAsync("Google");
                         res.StatusCode = 401;
-                        res.Challenge();
+                        context.Authentication.Challenge();
                     }
                     else if (req.Path == new PathString("/401"))
                     {
@@ -532,8 +532,7 @@ namespace Microsoft.AspNet.Authentication.Google
             },
             services =>
             {
-                services.AddWebEncoders();
-                services.AddDataProtection();
+                services.AddAuthentication();
                 services.Configure<ExternalAuthenticationOptions>(options =>
                 {
                     options.SignInScheme = CookieAuthenticationScheme;
@@ -614,7 +613,7 @@ namespace Microsoft.AspNet.Authentication.Google
 
             public string FindClaimValue(string claimType)
             {
-                XElement claim = ResponseElement.Elements("claim").SingleOrDefault(elt => elt.Attribute("type").Value == claimType);
+                var claim = ResponseElement.Elements("claim").SingleOrDefault(elt => elt.Attribute("type").Value == claimType);
                 if (claim == null)
                 {
                     return null;

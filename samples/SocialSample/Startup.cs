@@ -19,8 +19,7 @@ namespace CookieSample
     {
         public void ConfigureServices(IServiceCollection services)
         {
-            services.AddWebEncoders();
-            services.AddDataProtection();
+            services.AddAuthentication();
             services.Configure<ExternalAuthenticationOptions>(options =>
             {
                 options.SignInScheme = CookieAuthenticationDefaults.AuthenticationScheme;
@@ -139,13 +138,13 @@ namespace CookieSample
                     OnGetUserInformationAsync = async (context) =>
                     {
                         // Get the GitHub user
-                        HttpRequestMessage userRequest = new HttpRequestMessage(HttpMethod.Get, context.Options.UserInformationEndpoint);
+                        var userRequest = new HttpRequestMessage(HttpMethod.Get, context.Options.UserInformationEndpoint);
                         userRequest.Headers.Authorization = new AuthenticationHeaderValue("Bearer", context.AccessToken);
                         userRequest.Headers.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
-                        HttpResponseMessage userResponse = await context.Backchannel.SendAsync(userRequest, context.HttpContext.RequestAborted);
+                        var userResponse = await context.Backchannel.SendAsync(userRequest, context.HttpContext.RequestAborted);
                         userResponse.EnsureSuccessStatusCode();
                         var text = await userResponse.Content.ReadAsStringAsync();
-                        JObject user = JObject.Parse(text);
+                        var user = JObject.Parse(text);
 
                         var identity = new ClaimsIdentity(
                             context.Options.AuthenticationScheme,
@@ -184,19 +183,19 @@ namespace CookieSample
             {
                 signoutApp.Run(async context =>
                 {
-                    string authType = context.Request.Query["authscheme"];
+                    var authType = context.Request.Query["authscheme"];
                     if (!string.IsNullOrEmpty(authType))
                     {
                         // By default the client will be redirect back to the URL that issued the challenge (/login?authtype=foo),
                         // send them to the home page instead (/).
-                        context.Response.Challenge(new AuthenticationProperties() { RedirectUri = "/" }, authType);
+                        context.Authentication.Challenge(authType, new AuthenticationProperties() { RedirectUri = "/" });
                         return;
                     }
 
                     context.Response.ContentType = "text/html";
                     await context.Response.WriteAsync("<html><body>");
                     await context.Response.WriteAsync("Choose an authentication scheme: <br>");
-                    foreach (var type in context.GetAuthenticationSchemes())
+                    foreach (var type in context.Authentication.GetAuthenticationSchemes())
                     {
                         await context.Response.WriteAsync("<a href=\"?authscheme=" + type.AuthenticationScheme + "\">" + (type.Caption ?? "(suppressed)") + "</a><br>");
                     }
@@ -209,7 +208,7 @@ namespace CookieSample
             {
                 signoutApp.Run(async context =>
                 {
-                    context.Response.SignOut(CookieAuthenticationDefaults.AuthenticationScheme);
+                    context.Authentication.SignOut(CookieAuthenticationDefaults.AuthenticationScheme);
                     context.Response.ContentType = "text/html";
                     await context.Response.WriteAsync("<html><body>");
                     await context.Response.WriteAsync("You have been logged out. Goodbye " + context.User.Identity.Name + "<br>");
@@ -224,7 +223,7 @@ namespace CookieSample
                 if (string.IsNullOrEmpty(context.User.Identity.Name))
                 {
                     // The cookie middleware will intercept this 401 and redirect to /login
-                    context.Response.Challenge();
+                    context.Authentication.Challenge();
                     return;
                 }
                 await next();

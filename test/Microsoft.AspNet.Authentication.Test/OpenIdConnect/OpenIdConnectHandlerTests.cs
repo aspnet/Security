@@ -19,6 +19,7 @@ using Microsoft.AspNet.TestHost;
 using Microsoft.Framework.DependencyInjection;
 using Microsoft.Framework.Logging;
 using Microsoft.Framework.OptionsModel;
+using Microsoft.Framework.WebEncoders;
 using Microsoft.IdentityModel.Protocols;
 using Shouldly;
 using Xunit;
@@ -114,7 +115,7 @@ namespace Microsoft.AspNet.Authentication.Tests.OpenIdConnect
 
             var propertiesFormatter = new AuthenticationPropertiesFormater();
             var protectedProperties = propertiesFormatter.Protect(new AuthenticationProperties());
-            var state = OpenIdConnectAuthenticationDefaults.AuthenticationPropertiesKey + "=" + Uri.EscapeDataString(protectedProperties);
+            var state = OpenIdConnectAuthenticationDefaults.AuthenticationPropertiesKey + "=" + UrlEncoder.Default.UrlEncode(protectedProperties);
             var code = Guid.NewGuid().ToString();
             var message =
                 new OpenIdConnectMessage
@@ -491,28 +492,6 @@ namespace Microsoft.AspNet.Authentication.Tests.OpenIdConnect
         }
     }
 
-    public class OpenIdConnectAuthenticationContext : IAuthenticateContext
-    {
-        public OpenIdConnectAuthenticationContext(string scheme = null)
-        {
-            AuthenticationScheme = scheme ?? OpenIdConnectAuthenticationDefaults.AuthenticationScheme;
-        }
-
-        public string AuthenticationScheme
-        {
-            get;
-            set;
-        }
-
-        public void Authenticated(ClaimsPrincipal principal, IDictionary<string, string> properties, IDictionary<string, object> description)
-        {
-        }
-
-        public void NotAuthenticated()
-        {
-        }
-    }
-
     /// <summary>
     /// Provides a Facade over IOptions
     /// </summary>
@@ -564,9 +543,9 @@ namespace Microsoft.AspNet.Authentication.Tests.OpenIdConnect
     /// </summary>
     public class CustomOpenIdConnectAuthenticationHandler : OpenIdConnectAuthenticationHandler
     {
-        public async Task BaseInitializeAsyncPublic(AuthenticationOptions options, HttpContext context, ILogger logger)
+        public async Task BaseInitializeAsyncPublic(AuthenticationOptions options, HttpContext context, ILogger logger, IUrlEncoder encoder)
         {
-            await base.BaseInitializeAsync(options, context, logger);
+            await base.BaseInitializeAsync(options, context, logger, encoder);
         }
 
         public override bool ShouldHandleScheme(string authenticationScheme)
@@ -574,7 +553,7 @@ namespace Microsoft.AspNet.Authentication.Tests.OpenIdConnect
             return true;
         }
 
-        public override void Challenge(IChallengeContext context)
+        public override void Challenge(ChallengeContext context)
         {
         }
 
@@ -602,11 +581,12 @@ namespace Microsoft.AspNet.Authentication.Tests.OpenIdConnect
             RequestDelegate next,
             IDataProtectionProvider dataProtectionProvider,
             ILoggerFactory loggerFactory,
+            IUrlEncoder encoder,
             IOptions<ExternalAuthenticationOptions> externalOptions,
             IOptions<OpenIdConnectAuthenticationOptions> options,
             ConfigureOptions<OpenIdConnectAuthenticationOptions> configureOptions = null
             )
-        : base(next, dataProtectionProvider, loggerFactory, externalOptions, options, configureOptions)
+        : base(next, dataProtectionProvider, loggerFactory, encoder, externalOptions, options, configureOptions)
         {
             Logger = (loggerFactory as CustomLoggerFactory).Logger;
         }

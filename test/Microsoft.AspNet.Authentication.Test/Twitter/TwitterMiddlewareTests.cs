@@ -54,7 +54,7 @@ namespace Microsoft.AspNet.Authentication.Twitter
                 }),
                 context =>
                 {
-                    context.Response.Challenge("Twitter");
+                    context.Authentication.Challenge("Twitter");
                     return true;
                 });
             var transaction = await SendAsync(server, "http://example.com/challenge");
@@ -92,7 +92,7 @@ namespace Microsoft.AspNet.Authentication.Twitter
                 }),
                 context =>
                 {
-                    context.Response.Challenge("Twitter");
+                    context.Authentication.Challenge("Twitter");
                     return true;
                 });
             var transaction = await SendAsync(server, "http://example.com/challenge");
@@ -123,8 +123,7 @@ namespace Microsoft.AspNet.Authentication.Twitter
             },
             services =>
             {
-                services.AddWebEncoders();
-                services.AddDataProtection();
+                services.AddAuthentication();
                 services.Configure<ExternalAuthenticationOptions>(options =>
                 {
                     options.SignInScheme = "External";
