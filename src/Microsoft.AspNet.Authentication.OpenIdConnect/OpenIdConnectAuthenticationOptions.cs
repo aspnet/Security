@@ -247,6 +247,11 @@ namespace Microsoft.AspNet.Authentication.OpenIdConnect
         public string SignInScheme { get; set; }
 
         /// <summary>
+        /// Gets or sets the SignOutUri which is the address the IdentityProvider will use to send a 'signOut' message indicating that the user should be signed out.
+        /// </summary>
+        public PathString SignOutUri { get; set; }
+
+        /// <summary>
         /// Gets or sets the type used to secure data handled by the middleware.
         /// </summary>
         public ISecureDataFormat<AuthenticationProperties> StateDataFormat

@@ -203,6 +203,8 @@ namespace Microsoft.AspNet.Authentication.Tests.OpenIdConnect
         [Fact]
         public async Task SignOutWithDefaultRedirectUri()
         {
+            System.Diagnostics.Debugger.Launch();
+
             var server = CreateServer(options =>
             {
                 options.Authority = "https://login.windows.net/common";
