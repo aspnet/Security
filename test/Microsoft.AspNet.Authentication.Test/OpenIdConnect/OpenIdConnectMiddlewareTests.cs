@@ -4,14 +4,11 @@
 using System;
 using System.Collections.Generic;
 using System.Globalization;
-using System.IO;
 using System.Linq;
 using System.Net;
 using System.Net.Http;
 using System.Security.Claims;
-using System.Text;
 using System.Threading.Tasks;
-using System.Xml;
 using System.Xml.Linq;
 using Microsoft.AspNet.Authentication.Cookies;
 using Microsoft.AspNet.Authentication.OpenIdConnect;
@@ -22,7 +19,6 @@ using Microsoft.AspNet.TestHost;
 using Microsoft.Framework.DependencyInjection;
 using Microsoft.Framework.WebEncoders;
 using Microsoft.IdentityModel.Protocols;
-using Newtonsoft.Json;
 using Shouldly;
 using Xunit;
 
@@ -50,8 +46,6 @@ namespace Microsoft.AspNet.Authentication.Tests.OpenIdConnect
 
             var transaction = await SendAsync(server, "https://example.com/challenge");
             transaction.Response.StatusCode.ShouldBe(HttpStatusCode.Redirect);
-
-            var location = transaction.Response.Headers.Location.ToString();
             queryValues.CheckValues(
                 transaction.Response.Headers.Location.AbsoluteUri,
                 new string[]
@@ -74,7 +68,7 @@ namespace Microsoft.AspNet.Authentication.Tests.OpenIdConnect
                 options.Configuration = ConfigurationManager.DefaultOpenIdConnectConfiguration();
             });
             var transaction = await SendAsync(server, "https://example.com/challenge");
-            transaction.SetCookie.Single().ShouldContain("OpenIdConnect.nonce.");
+            transaction.SetCookie.Single().ShouldContain(OpenIdConnectAuthenticationDefaults.CookieNoncePrefix);
         }
 
         [Fact]
@@ -360,11 +354,13 @@ namespace Microsoft.AspNet.Authentication.Tests.OpenIdConnect
         private class Transaction
         {
             public HttpRequestMessage Request { get; set; }
+
             public HttpResponseMessage Response { get; set; }
 
             public IList<string> SetCookie { get; set; }
 
             public string ResponseText { get; set; }
+
             public XElement ResponseElement { get; set; }
 
             public string AuthenticationCookieValue
@@ -413,6 +409,5 @@ namespace Microsoft.AspNet.Authentication.Tests.OpenIdConnect
             }
             return nonceTime;
         }
-
     }
 }
