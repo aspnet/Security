@@ -34,23 +34,34 @@ namespace Microsoft.AspNet.Authentication.Tests.OpenIdConnect
         static string nonceDelimiter = ".";
 
         [Fact]
-        public async Task ChallengeWillTriggerRedirect()
+        public async Task ChallengeWillSetDefaults()
         {
+            var stateDataFormat = new AuthenticationPropertiesFormater();
+            var queryValues = ExpectedQueryValues.Defaults("https://login.windows.net/common");
+            queryValues.Configuration = ConfigurationManager.DefaultOpenIdConnectConfiguration();
+            queryValues.State = OpenIdConnectAuthenticationDefaults.AuthenticationPropertiesKey + "=" + stateDataFormat.Protect(new AuthenticationProperties());
             var server = CreateServer(options =>
             {
                 options.Authority = "https://login.windows.net/common";
-                options.ClientId = "Test Id";
-                options.SignInScheme = OpenIdConnectAuthenticationDefaults.AuthenticationScheme;
+                options.Configuration = queryValues.Configuration;
+                options.ClientId = queryValues.ClientId;
+                options.StateDataFormat = stateDataFormat;
             });
+
             var transaction = await SendAsync(server, "https://example.com/challenge");
             transaction.Response.StatusCode.ShouldBe(HttpStatusCode.Redirect);
+
             var location = transaction.Response.Headers.Location.ToString();
-            location.ShouldContain("https://login.windows.net/common/oauth2/authorize?");
-            location.ShouldContain("client_id=");
-            location.ShouldContain("&response_type=");
-            location.ShouldContain("&scope=");
-            location.ShouldContain("&state=");
-            location.ShouldContain("&response_mode=");
+            queryValues.CheckValues(
+                transaction.Response.Headers.Location.AbsoluteUri,
+                new string[]
+                {
+                    OpenIdConnectParameterNames.ClientId,
+                    OpenIdConnectParameterNames.ResponseMode,
+                    OpenIdConnectParameterNames.ResponseType,
+                    OpenIdConnectParameterNames.Scope,
+                    OpenIdConnectParameterNames.State
+                });
         }
 
         [Fact]
@@ -60,33 +71,23 @@ namespace Microsoft.AspNet.Authentication.Tests.OpenIdConnect
             {
                 options.Authority = "https://login.windows.net/common";
                 options.ClientId = "Test Id";
+                options.Configuration = ConfigurationManager.DefaultOpenIdConnectConfiguration();
             });
             var transaction = await SendAsync(server, "https://example.com/challenge");
             transaction.SetCookie.Single().ShouldContain("OpenIdConnect.nonce.");
         }
 
         [Fact]
-        public async Task ChallengeWillSetDefaultScope()
-        {
-            var server = CreateServer(options =>
-            {
-                options.Authority = "https://login.windows.net/common";
-                options.ClientId = "Test Id";
-            });
-            var transaction = await SendAsync(server, "https://example.com/challenge");
-            transaction.Response.StatusCode.ShouldBe(HttpStatusCode.Redirect);
-            transaction.Response.Headers.Location.Query.ShouldContain("&scope=" + UrlEncoder.Default.UrlEncode("openid profile"));
-        }
-
-        [Fact]
         public async Task ChallengeWillUseOptionsProperties()
         {
             var queryValues = new ExpectedQueryValues("https://login.windows.net/common");
+            queryValues.Configuration = ConfigurationManager.DefaultOpenIdConnectConfiguration();
 
             var server = CreateServer(options =>
             {
                 options.Authority = queryValues.Authority;
                 options.ClientId = queryValues.ClientId;
+                options.Configuration = queryValues.Configuration;
                 options.RedirectUri = queryValues.RedirectUri;
                 options.Resource = queryValues.Resource;
                 options.Scope = queryValues.Scope;
@@ -112,11 +113,13 @@ namespace Microsoft.AspNet.Authentication.Tests.OpenIdConnect
         public async Task ChallengeWillSetStateInNotification(bool setStateInNotification)
         {
             var queryValues = new ExpectedQueryValues("https://login.windows.net/common");
+            queryValues.Configuration = ConfigurationManager.DefaultOpenIdConnectConfiguration();
             var stateDataFormat = new AuthenticationPropertiesFormater();
             var server = CreateServer(options =>
             {
                 options.Authority = queryValues.Authority;
                 options.ClientId = queryValues.ClientId;
+                options.Configuration = queryValues.Configuration;
                 options.RedirectUri = queryValues.RedirectUri;
                 options.Resource = queryValues.Resource;
                 options.Scope = queryValues.Scope;
@@ -138,11 +141,11 @@ namespace Microsoft.AspNet.Authentication.Tests.OpenIdConnect
             transaction.Response.StatusCode.ShouldBe(HttpStatusCode.Redirect);
             if (setStateInNotification)
             {
-                queryValues.State += UrlEncoder.Default.UrlEncode("&" + OpenIdConnectAuthenticationDefaults.AuthenticationPropertiesKey + "=" + stateDataFormat.Protect(new AuthenticationProperties()));
+                queryValues.State += ("&" + OpenIdConnectAuthenticationDefaults.AuthenticationPropertiesKey + "=" + stateDataFormat.Protect(new AuthenticationProperties()));
             }
             else
             {
-                queryValues.State = UrlEncoder.Default.UrlEncode(OpenIdConnectAuthenticationDefaults.AuthenticationPropertiesKey + "=" + stateDataFormat.Protect(new AuthenticationProperties()));
+                queryValues.State = OpenIdConnectAuthenticationDefaults.AuthenticationPropertiesKey + "=" + stateDataFormat.Protect(new AuthenticationProperties());
             }
 
             queryValues.CheckValues(
@@ -163,11 +166,14 @@ namespace Microsoft.AspNet.Authentication.Tests.OpenIdConnect
         public async Task ChallengeWillUseNotifications()
         {
             var queryValues = new ExpectedQueryValues("https://login.windows.net/common");
+            queryValues.Configuration = ConfigurationManager.DefaultOpenIdConnectConfiguration();
             var queryValuesSetInNotification = new ExpectedQueryValues("https://login.windows.net/common");
+            queryValuesSetInNotification.Configuration = ConfigurationManager.DefaultOpenIdConnectConfiguration();
             var server = CreateServer(options =>
             {
                 options.Authority = queryValues.Authority;
                 options.ClientId = queryValues.ClientId;
+                options.Configuration = queryValues.Configuration;
                 options.RedirectUri = queryValues.RedirectUri;
                 options.Resource = queryValues.Resource;
                 options.Scope = queryValues.Scope;
@@ -201,24 +207,28 @@ namespace Microsoft.AspNet.Authentication.Tests.OpenIdConnect
         [Fact]
         public async Task SignOutWithDefaultRedirectUri()
         {
+            var configuration = ConfigurationManager.DefaultOpenIdConnectConfiguration();
             var server = CreateServer(options =>
             {
                 options.Authority = "https://login.windows.net/common";
                 options.ClientId = "Test Id";
+                options.Configuration = configuration;
             });
 
             var transaction = await SendAsync(server, "https://example.com/signout");
             transaction.Response.StatusCode.ShouldBe(HttpStatusCode.Redirect);
-            transaction.Response.Headers.Location.AbsoluteUri.ShouldBe("https://login.windows.net/common/oauth2/logout");
+            transaction.Response.Headers.Location.AbsoluteUri.ShouldBe(configuration.EndSessionEndpoint);
         }
 
         [Fact]
         public async Task SignOutWithCustomRedirectUri()
         {
+            var configuration = ConfigurationManager.DefaultOpenIdConnectConfiguration();
             var server = CreateServer(options =>
             {
                 options.Authority = "https://login.windows.net/common";
                 options.ClientId = "Test Id";
+                options.Configuration = configuration;
                 options.PostLogoutRedirectUri = "https://example.com/logout";
             });
 
@@ -230,10 +240,12 @@ namespace Microsoft.AspNet.Authentication.Tests.OpenIdConnect
         [Fact]
         public async Task SignOutWith_Specific_RedirectUri_From_Authentication_Properites()
         {
+            var configuration = ConfigurationManager.DefaultOpenIdConnectConfiguration();
             var server = CreateServer(options =>
             {
                 options.Authority = "https://login.windows.net/common";
                 options.ClientId = "Test Id";
+                options.Configuration = configuration;
                 options.PostLogoutRedirectUri = "https://example.com/logout";
             });
 
@@ -271,7 +283,7 @@ namespace Microsoft.AspNet.Authentication.Tests.OpenIdConnect
             {
                 app.UseCookieAuthentication(options =>
                 {
-                    options.AuthenticationScheme = "OpenIdConnect";
+                    options.AuthenticationScheme = OpenIdConnectAuthenticationDefaults.AuthenticationScheme;
                 });
                 app.UseOpenIdConnectAuthentication(configureOptions);
                 app.Use(async (context, next) =>
@@ -280,13 +292,13 @@ namespace Microsoft.AspNet.Authentication.Tests.OpenIdConnect
                     var res = context.Response;
                     if (req.Path == new PathString("/challenge"))
                     {
-                        context.Authentication.Challenge("OpenIdConnect");
+                        context.Authentication.Challenge(OpenIdConnectAuthenticationDefaults.AuthenticationScheme);
                         res.StatusCode = 401;
                     }
                     else if (req.Path == new PathString("/signin"))
                     {
                         // REVIEW: this used to just be res.SignIn()
-                        context.Authentication.SignIn("OpenIdConnect", new ClaimsPrincipal());
+                        context.Authentication.SignIn(OpenIdConnectAuthenticationDefaults.AuthenticationScheme, new ClaimsPrincipal());
                     }
                     else if (req.Path == new PathString("/signout"))
                     {
@@ -371,57 +383,6 @@ namespace Microsoft.AspNet.Authentication.Tests.OpenIdConnect
                     return null;
                 }
             }
-
-            public string FindClaimValue(string claimType)
-            {
-                XElement claim = ResponseElement.Elements("claim").SingleOrDefault(elt => elt.Attribute("type").Value == claimType);
-                if (claim == null)
-                {
-                    return null;
-                }
-                return claim.Attribute("value").Value;
-            }
-        }
-        private static void Describe(HttpResponse res, ClaimsIdentity identity)
-        {
-            res.StatusCode = 200;
-            res.ContentType = "text/xml";
-            var xml = new XElement("xml");
-            if (identity != null)
-            {
-                xml.Add(identity.Claims.Select(claim => new XElement("claim", new XAttribute("type", claim.Type), new XAttribute("value", claim.Value))));
-            }
-            using (var memory = new MemoryStream())
-            {
-                using (var writer = new XmlTextWriter(memory, Encoding.UTF8))
-                {
-                    xml.WriteTo(writer);
-                }
-                res.Body.Write(memory.ToArray(), 0, memory.ToArray().Length);
-            }
-        }
-
-        private class TestHttpMessageHandler : HttpMessageHandler
-        {
-            public Func<HttpRequestMessage, HttpResponseMessage> Sender { get; set; }
-
-            protected override Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, System.Threading.CancellationToken cancellationToken)
-            {
-                if (Sender != null)
-                {
-                    return Task.FromResult(Sender(request));
-                }
-
-                return Task.FromResult<HttpResponseMessage>(null);
-            }
-        }
-
-        private static HttpResponseMessage ReturnJsonResponse(object content)
-        {
-            var res = new HttpResponseMessage(HttpStatusCode.OK);
-            var text = JsonConvert.SerializeObject(content);
-            res.Content = new StringContent(text, Encoding.UTF8, "application/json");
-            return res;
         }
 
         private static DateTime GetNonceExpirationTime(string keyname, TimeSpan nonceLifetime)

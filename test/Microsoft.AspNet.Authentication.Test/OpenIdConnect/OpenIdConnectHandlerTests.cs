@@ -7,13 +7,9 @@
 using System;
 using System.Collections.Generic;
 using System.Net.Http;
-using System.Security.Claims;
 using System.Threading.Tasks;
-using Microsoft.AspNet.Authentication.Notifications;
 using Microsoft.AspNet.Authentication.OpenIdConnect;
 using Microsoft.AspNet.Builder;
-using Microsoft.AspNet.DataProtection;
-using Microsoft.AspNet.Http;
 using Microsoft.AspNet.Http.Authentication;
 using Microsoft.AspNet.TestHost;
 using Microsoft.Framework.DependencyInjection;
@@ -206,7 +202,7 @@ namespace Microsoft.AspNet.Authentication.Tests.OpenIdConnect
         private static void DefaultOptions(OpenIdConnectAuthenticationOptions options)
         {
             options.AuthenticationScheme = "OpenIdConnectHandlerTest";
-            options.ConfigurationManager = ConfigurationManager.DefaultStaticConfigurationManager;
+            options.ConfigurationManager = ConfigurationManager.DefaultStaticConfigurationManager();
             options.StateDataFormat = new AuthenticationPropertiesFormater();
         }
 

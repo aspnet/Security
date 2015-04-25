@@ -4,6 +4,7 @@
 using System;
 using System.Collections.Generic;
 using Microsoft.AspNet.Http.Authentication;
+using Microsoft.Framework.WebEncoders;
 using Microsoft.IdentityModel.Protocols;
 using Xunit;
 
@@ -135,11 +136,25 @@ namespace Microsoft.AspNet.Authentication.Tests.OpenIdConnect
     public class ConfigurationManager
     {
         /// <summary>
-        /// Simple static empty manager.
+        /// Default settings for <see cref="OpenIdConnectConfiguration"/>
         /// </summary>
-        static public IConfigurationManager<OpenIdConnectConfiguration> DefaultStaticConfigurationManager
+        static public IConfigurationManager<OpenIdConnectConfiguration> DefaultStaticConfigurationManager()
         {
-            get { return new StaticConfigurationManager<OpenIdConnectConfiguration>(new OpenIdConnectConfiguration()); }
+            return new StaticConfigurationManager<OpenIdConnectConfiguration>(DefaultOpenIdConnectConfiguration());
+        }
+
+        /// <summary>
+        /// Default settings for <see cref="OpenIdConnectConfiguration"/>
+        /// </summary>
+        /// <returns></returns>
+        static public OpenIdConnectConfiguration DefaultOpenIdConnectConfiguration()
+        {
+            return new OpenIdConnectConfiguration()
+            {
+                AuthorizationEndpoint = @"https://login.windows.net/common/oauth2/authorize",
+                EndSessionEndpoint = @"https://login.windows.net/common/oauth2/endsessionendpoint",
+                TokenEndpoint = @"https://login.windows.net/common/oauth2/token",
+            };
         }
     }
 
@@ -153,10 +168,18 @@ namespace Microsoft.AspNet.Authentication.Tests.OpenIdConnect
             Authority = authority;
         }
 
+        public static ExpectedQueryValues Defaults(string authority)
+        {
+            var result = new ExpectedQueryValues(authority);
+            result.Scope = OpenIdConnectScopes.OpenIdProfile;
+            result.ResponseType = OpenIdConnectResponseTypes.CodeIdToken;
+            return result;
+        }
+
         public void CheckValues(string query, IEnumerable<string> parameters)
         {
             var errors = new List<string>();
-            if (!query.StartsWith(Authority))
+            if (!query.StartsWith(ExpectedAuthority))
             {
                 errors.Add("authority: " + Authority);
             }
@@ -203,42 +226,72 @@ namespace Microsoft.AspNet.Authentication.Tests.OpenIdConnect
         }
 
         public string Authority { get; set; }
+
         public string ClientId { get; set; } = Guid.NewGuid().ToString();
+
         public string RedirectUri { get; set; } = Guid.NewGuid().ToString();
+
+        public OpenIdConnectRequestType RequestType { get; set; } = OpenIdConnectRequestType.AuthenticationRequest;
+
         public string Resource { get; set; } = Guid.NewGuid().ToString();
+
         public string ResponseMode { get; set; } = OpenIdConnectResponseModes.FormPost;
+
         public string ResponseType { get; set; } = Guid.NewGuid().ToString();
+
         public string Scope { get; set; } = Guid.NewGuid().ToString();
+
         public string State { get; set; } = Guid.NewGuid().ToString();
+
+        public string ExpectedAuthority
+        {
+            get
+            {
+                if (RequestType == OpenIdConnectRequestType.TokenRequest)
+                {
+                    return Configuration?.EndSessionEndpoint ?? Authority + @"/oauth2/token";
+                }
+                else if (RequestType == OpenIdConnectRequestType.LogoutRequest)
+                {
+                    return Configuration?.TokenEndpoint ?? Authority + @"/oauth2/logout";
+                }
+
+                return Configuration?.AuthorizationEndpoint ?? Authority + (@"/oauth2/authorize");
+            }
+        }
+
+        public OpenIdConnectConfiguration Configuration { get; set; }
 
         public string ExpectedClientId
         {
-            get { return OpenIdConnectParameterNames.ClientId + "=" + ClientId; }
+            get { return OpenIdConnectParameterNames.ClientId + "=" + Encoder.UrlEncode(ClientId); }
         }
 
         public string ExpectedRedirectUri
         {
-            get { return OpenIdConnectParameterNames.RedirectUri + "=" + RedirectUri; }
+            get { return OpenIdConnectParameterNames.RedirectUri + "=" + Encoder.UrlEncode(RedirectUri); }
         }
 
         public string ExpectedResource
         {
-            get { return OpenIdConnectParameterNames.Resource + "=" + Resource; }
+            get { return OpenIdConnectParameterNames.Resource + "=" + Encoder.UrlEncode(Resource); }
         }
 
         public string ExpectedResponseMode
         {
-            get { return OpenIdConnectParameterNames.ResponseMode + "=" + ResponseMode; }
+            get { return OpenIdConnectParameterNames.ResponseMode + "=" + Encoder.UrlEncode(ResponseMode); }
         }
 
         public string ExpectedScope
         {
-            get { return OpenIdConnectParameterNames.Scope + "=" + Scope; }
+            get { return OpenIdConnectParameterNames.Scope + "=" + Encoder.UrlEncode(Scope); }
         }
         public string ExpectedState
         {
-            get { return OpenIdConnectParameterNames.State + "=" + State; }
+            get { return OpenIdConnectParameterNames.State + "=" + Encoder.UrlEncode(State); }
         }
+
+        public UrlEncoder Encoder { get; set; } = UrlEncoder.Default;
     }
 
     public class DerivedOpenIdConnectMessage : OpenIdConnectMessage
