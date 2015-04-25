@@ -104,10 +104,6 @@ namespace Microsoft.AspNet.Authentication.Tests.OpenIdConnect
                     OpenIdConnectParameterNames.ResponseMode,
                     OpenIdConnectParameterNames.Scope
                 });
-
-            var query = transaction.Response.Headers.Location.Query;
-            query.ShouldContain("scope=" + UrlEncoder.Default.UrlEncode("https://www.googleapis.com/auth/plus.login"));
-            query.ShouldContain("response_type=" + UrlEncoder.Default.UrlEncode("id_token"));
         }
 
         [Theory]
@@ -115,7 +111,6 @@ namespace Microsoft.AspNet.Authentication.Tests.OpenIdConnect
         [InlineData(false)]
         public async Task ChallengeWillSetStateInNotification(bool setStateInNotification)
         {
-            //System.Diagnostics.Debugger.Launch();
             var queryValues = new ExpectedQueryValues("https://login.windows.net/common");
             var stateDataFormat = new AuthenticationPropertiesFormater();
             var server = CreateServer(options =>
@@ -143,11 +138,11 @@ namespace Microsoft.AspNet.Authentication.Tests.OpenIdConnect
             transaction.Response.StatusCode.ShouldBe(HttpStatusCode.Redirect);
             if (setStateInNotification)
             {
-                queryValues.State += Uri.EscapeDataString("&" + OpenIdConnectAuthenticationDefaults.AuthenticationPropertiesKey + "=" + stateDataFormat.Protect(new AuthenticationProperties()));
+                queryValues.State += UrlEncoder.Default.UrlEncode("&" + OpenIdConnectAuthenticationDefaults.AuthenticationPropertiesKey + "=" + stateDataFormat.Protect(new AuthenticationProperties()));
             }
             else
             {
-                queryValues.State = Uri.EscapeDataString(OpenIdConnectAuthenticationDefaults.AuthenticationPropertiesKey + "=" + stateDataFormat.Protect(new AuthenticationProperties()));
+                queryValues.State = UrlEncoder.Default.UrlEncode(OpenIdConnectAuthenticationDefaults.AuthenticationPropertiesKey + "=" + stateDataFormat.Protect(new AuthenticationProperties()));
             }
 
             queryValues.CheckValues(
@@ -167,7 +162,6 @@ namespace Microsoft.AspNet.Authentication.Tests.OpenIdConnect
         [Fact]
         public async Task ChallengeWillUseNotifications()
         {
-            //System.Diagnostics.Debugger.Launch();
             var queryValues = new ExpectedQueryValues("https://login.windows.net/common");
             var queryValuesSetInNotification = new ExpectedQueryValues("https://login.windows.net/common");
             var server = CreateServer(options =>
@@ -207,8 +201,6 @@ namespace Microsoft.AspNet.Authentication.Tests.OpenIdConnect
         [Fact]
         public async Task SignOutWithDefaultRedirectUri()
         {
-            System.Diagnostics.Debugger.Launch();
-
             var server = CreateServer(options =>
             {
                 options.Authority = "https://login.windows.net/common";
