@@ -3,6 +3,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Text;
 using Microsoft.AspNet.Http.Authentication;
 using Microsoft.Framework.WebEncoders;
 using Microsoft.IdentityModel.Protocols;
@@ -112,25 +113,6 @@ namespace Microsoft.AspNet.Authentication.Tests.OpenIdConnect
     }
 
     /// <summary>
-    /// Processing a <see cref="OpenIdConnectMessage"/> requires 'unprotecting' the state.
-    /// This class side-steps that process.
-    /// </summary>
-    public class AuthenticationPropertiesFormater : ISecureDataFormat<AuthenticationProperties>
-    {
-        string _protectedString = Guid.NewGuid().ToString();
-
-        public string Protect(AuthenticationProperties data)
-        {
-            return _protectedString;
-        }
-
-        AuthenticationProperties ISecureDataFormat<AuthenticationProperties>.Unprotect(string protectedText)
-        {
-            return new AuthenticationProperties();
-        }
-    }
-
-    /// <summary>
     /// Used to set up different configurations of metadata for different tests
     /// </summary>
     public class ConfigurationManager
@@ -181,47 +163,71 @@ namespace Microsoft.AspNet.Authentication.Tests.OpenIdConnect
             var errors = new List<string>();
             if (!query.StartsWith(ExpectedAuthority))
             {
-                errors.Add("authority: " + Authority);
+                errors.Add("ExpectedAuthority: " + ExpectedAuthority);
             }
 
             foreach(var str in parameters)
             {
-                if (str == OpenIdConnectParameterNames.ClientId && !query.Contains(ExpectedClientId))
+                if (str == OpenIdConnectParameterNames.ClientId)
                 {
-                    errors.Add(ExpectedClientId);
+                    if (!query.Contains(ExpectedClientId))
+                        errors.Add("ExpectedClientId: " + ExpectedClientId);
+
+                    continue;
                 }
-                else if (str == OpenIdConnectParameterNames.RedirectUri && !query.Contains(ExpectedRedirectUri))
+
+                if (str == OpenIdConnectParameterNames.RedirectUri)
                 {
-                    errors.Add(ExpectedRedirectUri);
+                     if(!query.Contains(ExpectedRedirectUri))
+                        errors.Add("ExpectedRedirectUri: " + ExpectedRedirectUri);
+
+                    continue;
                 }
-                else if (str == OpenIdConnectParameterNames.Resource && !query.Contains(ExpectedResource))
+
+                if (str == OpenIdConnectParameterNames.Resource)
                 {
-                    errors.Add(ExpectedResource);
+                    if(!query.Contains(ExpectedResource))
+                        errors.Add("ExpectedResource: " + ExpectedResource);
+
+                    continue;
                 }
-                else if (str == OpenIdConnectParameterNames.ResponseMode && !query.Contains(ExpectedResponseMode))
+
+                if (str == OpenIdConnectParameterNames.ResponseMode)
                 {
-                    errors.Add(ExpectedResponseMode);
+                    if(!query.Contains(ExpectedResponseMode))
+                        errors.Add("ExpectedResponseMode: " + ExpectedResponseMode);
+
+                    continue;
                 }
-                else if (str == OpenIdConnectParameterNames.Scope && !query.Contains(ExpectedScope))
+
+                if (str == OpenIdConnectParameterNames.Scope)
                 {
-                    errors.Add(ExpectedScope);
+                    if (!query.Contains(ExpectedScope))
+                        errors.Add("ExpectedScope: " + ExpectedScope);
+
+                    continue;
                 }
-                else if (str == OpenIdConnectParameterNames.State && !query.Contains(ExpectedState))
+
+                if (str == OpenIdConnectParameterNames.State)
                 {
-                    errors.Add(ExpectedState);
+                    if (!query.Contains(ExpectedState))
+                        errors.Add("ExpectedState: " + ExpectedState);
+
+                    continue;
                 }
             }
 
             if (errors.Count > 0)
             {
-                Console.WriteLine("query string not as expected: " + Environment.NewLine + query + Environment.NewLine);
+                var sb = new StringBuilder();
+                sb.AppendLine("query string not as expected: " + Environment.NewLine + query + Environment.NewLine);
                 foreach (var str in errors)
                 {
-                    Console.WriteLine(str);
+                    sb.AppendLine(str);
                 }
 
-                Console.WriteLine(Environment.NewLine);
-                Assert.True(false);
+                Console.WriteLine(sb.ToString());
+                Assert.True(false, sb.ToString());
             }
         }
 
@@ -292,10 +298,5 @@ namespace Microsoft.AspNet.Authentication.Tests.OpenIdConnect
         }
 
         public UrlEncoder Encoder { get; set; } = UrlEncoder.Default;
-    }
-
-    public class DerivedOpenIdConnectMessage : OpenIdConnectMessage
-    {
-
     }
 }

@@ -57,7 +57,7 @@ namespace Microsoft.AspNet.Authentication.OpenIdConnect
                     _configuration = await Options.ConfigurationManager.GetConfigurationAsync(Context.RequestAborted);
                 }
 
-                var openIdConnectMessage = new OpenIdConnectMessage()
+                var message = new OpenIdConnectMessage()
                 {
                     IssuerAddress = _configuration == null ? string.Empty : (_configuration.EndSessionEndpoint ?? string.Empty),
                     RequestType = OpenIdConnectRequestType.LogoutRequest,
@@ -69,21 +69,20 @@ namespace Microsoft.AspNet.Authentication.OpenIdConnect
                 var properties = new AuthenticationProperties(signout.Properties);
                 if (!string.IsNullOrEmpty(properties.RedirectUri))
                 {
-                    openIdConnectMessage.PostLogoutRedirectUri = properties.RedirectUri;
+                    message.PostLogoutRedirectUri = properties.RedirectUri;
                 }
                 else if (!string.IsNullOrWhiteSpace(Options.PostLogoutRedirectUri))
                 {
-                    openIdConnectMessage.PostLogoutRedirectUri = Options.PostLogoutRedirectUri;
+                    message.PostLogoutRedirectUri = Options.PostLogoutRedirectUri;
                 }
 
-                var notification = new RedirectToIdentityProviderNotification<OpenIdConnectMessage, OpenIdConnectAuthenticationOptions>(Context, Options)
+                var notification = new RedirectToIdentityProviderNotification<OpenIdConnectMessage, OpenIdConnectAuthenticationOptions>(Context, Options, message, properties);
+                if (Options.Notifications.RedirectToIdentityProvider != null)
                 {
-                    ProtocolMessage = openIdConnectMessage
-                };
+                    await Options.Notifications.RedirectToIdentityProvider(notification);
+                }
 
-                await Options.Notifications.RedirectToIdentityProvider(notification);
-
-                if (!notification.HandledResponse)
+                if (!notification.HandledResponse || !notification.Skipped)
                 {
                     var redirectUri = notification.ProtocolMessage.CreateLogoutRequestUrl();
                     if (!Uri.IsWellFormedUriString(redirectUri, UriKind.Absolute))
@@ -187,11 +186,8 @@ namespace Microsoft.AspNet.Authentication.OpenIdConnect
                 message.Nonce = Options.ProtocolValidator.GenerateNonce();
             }
 
-            var redirectToIdentityProviderNotification = new RedirectToIdentityProviderNotification<OpenIdConnectMessage, OpenIdConnectAuthenticationOptions>(Context, Options)
-            {
-                AuthenticationProperties = properties,
-                ProtocolMessage = message
-            };
+            var redirectToIdentityProviderNotification =
+                new RedirectToIdentityProviderNotification<OpenIdConnectMessage, OpenIdConnectAuthenticationOptions>(Context, Options, message, properties);
 
             await Options.Notifications.RedirectToIdentityProvider(redirectToIdentityProviderNotification);
             if (redirectToIdentityProviderNotification.HandledResponse)
@@ -224,11 +220,11 @@ namespace Microsoft.AspNet.Authentication.OpenIdConnect
             // if user set add to state.
             if (string.IsNullOrWhiteSpace(redirectToIdentityProviderNotification.ProtocolMessage.State))
             {
-                redirectToIdentityProviderNotification.ProtocolMessage.State = OpenIdConnectAuthenticationDefaults.AuthenticationPropertiesKey + "=" + Uri.EscapeDataString(Options.StateDataFormat.Protect(properties));
+                redirectToIdentityProviderNotification.ProtocolMessage.State = OpenIdConnectAuthenticationDefaults.AuthenticationPropertiesKey + "=" + Options.StateDataFormat.Protect(properties);
             }
             else
             {
-                redirectToIdentityProviderNotification.ProtocolMessage.State += "&" + OpenIdConnectAuthenticationDefaults.AuthenticationPropertiesKey + "=" + Uri.EscapeDataString(Options.StateDataFormat.Protect(properties));
+                redirectToIdentityProviderNotification.ProtocolMessage.State += "&" + OpenIdConnectAuthenticationDefaults.AuthenticationPropertiesKey + "=" + Options.StateDataFormat.Protect(properties);
             }
 
             string redirectUri = redirectToIdentityProviderNotification.ProtocolMessage.CreateAuthenticationRequestUrl();

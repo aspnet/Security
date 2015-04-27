@@ -101,6 +101,13 @@ namespace Microsoft.AspNet.Authentication.Tests.OpenIdConnect
                 });
         }
 
+        /// <summary>
+        /// Tests for users who want to add 'state'. There are two ways to do it.
+        /// 1. Users set 'state' (OpenIdConnectMessage.State) in the notification. The runtime appends to that state.
+        /// 2. Users add to the AuthenticationProperties (notification.AuthenticationProperties), values will be serialized.
+        /// </summary>
+        /// <param name="setStateInNotification"></param>
+        /// <returns></returns>
         [Theory]
         [InlineData(true)]
         [InlineData(false)]
@@ -108,6 +115,7 @@ namespace Microsoft.AspNet.Authentication.Tests.OpenIdConnect
         {
             var queryValues = new ExpectedQueryValues("https://login.windows.net/common");
             queryValues.Configuration = ConfigurationManager.DefaultOpenIdConnectConfiguration();
+            var localProperties = new AuthenticationProperties();
             var stateDataFormat = new AuthenticationPropertiesFormater();
             var server = CreateServer(options =>
             {
@@ -126,8 +134,10 @@ namespace Microsoft.AspNet.Authentication.Tests.OpenIdConnect
                         {
                             notification.ProtocolMessage.State = queryValues.State;
                         }
+                        localProperties = new AuthenticationProperties(notification.AuthenticationProperties.Items);
                         return Task.FromResult<object>(null);
                     }
+
                 };
             });
 
@@ -135,11 +145,11 @@ namespace Microsoft.AspNet.Authentication.Tests.OpenIdConnect
             transaction.Response.StatusCode.ShouldBe(HttpStatusCode.Redirect);
             if (setStateInNotification)
             {
-                queryValues.State += ("&" + OpenIdConnectAuthenticationDefaults.AuthenticationPropertiesKey + "=" + stateDataFormat.Protect(new AuthenticationProperties()));
+                queryValues.State += ("&" + OpenIdConnectAuthenticationDefaults.AuthenticationPropertiesKey + "=" + stateDataFormat.Protect(localProperties));
             }
             else
             {
-                queryValues.State = OpenIdConnectAuthenticationDefaults.AuthenticationPropertiesKey + "=" + stateDataFormat.Protect(new AuthenticationProperties());
+                queryValues.State = OpenIdConnectAuthenticationDefaults.AuthenticationPropertiesKey + "=" + stateDataFormat.Protect(localProperties);
             }
 
             queryValues.CheckValues(

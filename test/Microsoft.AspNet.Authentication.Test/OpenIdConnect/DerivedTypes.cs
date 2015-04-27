@@ -2,9 +2,11 @@
 // Licensed under the Apache License, Version 2.0. See License.txt in the project root for license information.
 // this controls if the logs are written to the console.
 // they can be reviewed for general content.
+#define _Verbose
 
 using System;
 using System.Collections.Generic;
+using System.Text;
 using System.Threading.Tasks;
 using Microsoft.AspNet.Authentication.Notifications;
 using Microsoft.AspNet.Authentication.OpenIdConnect;
@@ -16,68 +18,48 @@ using Microsoft.Framework.Logging;
 using Microsoft.Framework.OptionsModel;
 using Microsoft.Framework.WebEncoders;
 using Microsoft.IdentityModel.Protocols;
+using Xunit;
 
 namespace Microsoft.AspNet.Authentication.Tests.OpenIdConnect
 {
     /// <summary>
-    /// Extension specifies <see cref="CustomOpenIdConnectAuthenticationMiddleware"/> as the middleware.
+    /// Processing a <see cref="OpenIdConnectMessage"/> requires 'unprotecting' the state.
+    /// This class side-steps that process.
     /// </summary>
-    public static class OpenIdConnectAuthenticationExtensions
+    public class AuthenticationPropertiesFormater : ISecureDataFormat<AuthenticationProperties>
     {
-        /// <summary>
-        /// Adds the <see cref="OpenIdConnectAuthenticationMiddleware"/> into the ASP.NET runtime.
-        /// </summary>
-        /// <param name="app">The application builder</param>
-        /// <param name="customConfigureOption">Options which control the processing of the OpenIdConnect protocol and token validation.</param>
-        /// <param name="loggerFactory">custom loggerFactory</param>
-        /// <returns>The application builder</returns>
-        public static IApplicationBuilder UseCustomOpenIdConnectAuthentication(this IApplicationBuilder app, CustomConfigureOptions customConfigureOption, ILoggerFactory loggerFactory)
-        {
-            return app.UseMiddleware<CustomOpenIdConnectAuthenticationMiddleware>(customConfigureOption, loggerFactory);
-        }
+        string _protectedString = Guid.NewGuid().ToString();
 
-        /// <summary>
-        /// Adds the <see cref="OpenIdConnectAuthenticationMiddleware"/> into the ASP.NET runtime.
-        /// </summary>
-        /// <param name="app">The application builder</param>
-        /// <param name="options">Options which control the processing of the OpenIdConnect protocol and token validation.</param>
-        /// <param name="loggerFactory">custom loggerFactory</param>
-        /// <returns>The application builder</returns>
-        public static IApplicationBuilder UseCustomOpenIdConnectAuthentication(this IApplicationBuilder app, IOptions<OpenIdConnectAuthenticationOptions> options, ILoggerFactory loggerFactory)
+        public string Protect(AuthenticationProperties data)
         {
-            return app.UseMiddleware<CustomOpenIdConnectAuthenticationMiddleware>(options, loggerFactory);
-        }
-    }
-
-    /// <summary>
-    /// Provides a Facade over IOptions
-    /// </summary>
-    public class Options : IOptions<OpenIdConnectAuthenticationOptions>
-    {
-        OpenIdConnectAuthenticationOptions _options;
-
-        public Options(Action<OpenIdConnectAuthenticationOptions> action)
-        {
-            _options = new OpenIdConnectAuthenticationOptions();
-            action(_options);
-        }
-
-        OpenIdConnectAuthenticationOptions IOptions<OpenIdConnectAuthenticationOptions>.Options
-        {
-            get
+            if (data == null || data.Items.Count == 0)
             {
-                return _options;
+                return "null";
             }
+
+            var encoder = UrlEncoder.Default;
+            var sb = new StringBuilder();
+            foreach(var item in data.Items)
+            {
+                sb.Append(encoder.UrlEncode(item.Key) + " " + encoder.UrlEncode(item.Value) + " ");
+            }
+
+            return sb.ToString();
         }
 
-        /// <summary>
-        /// For now returns _options
-        /// </summary>
-        /// <param name="name">configuration to return</param>
-        /// <returns></returns>
-        public OpenIdConnectAuthenticationOptions GetNamedOptions(string name)
+        AuthenticationProperties ISecureDataFormat<AuthenticationProperties>.Unprotect(string protectedText)
         {
-            return _options;
+            var propeties = new AuthenticationProperties();
+            if (protectedText != "null")
+            {
+                string[] items = protectedText.Split(' ');
+                for (int i = 0; i < items.Length; i+=2)
+                {
+                    propeties.Items.Add(items[i], items[i + 1]);
+                }
+            }
+
+            return propeties;
         }
     }
 
@@ -123,8 +105,8 @@ namespace Microsoft.AspNet.Authentication.Tests.OpenIdConnect
         public void Log(LogLevel logLevel, int eventId, object state, Exception exception, Func<object, Exception, string> formatter)
         {
             if (IsEnabled(logLevel))
-            {
-                logEntries.Add(
+            {                
+                var logEntry =
                     new LogEntry
                     {
                         EventId = eventId,
@@ -132,10 +114,12 @@ namespace Microsoft.AspNet.Authentication.Tests.OpenIdConnect
                         Formatter = formatter,
                         Level = logLevel,
                         State = state,
-                    });
+                    };
+
+                logEntries.Add(logEntry);
 
 #if _Verbose
-                Console.WriteLine(state?.ToString() ?? "state null");
+                Console.WriteLine(logEntry.ToString());
 #endif
             }
         }
@@ -177,31 +161,54 @@ namespace Microsoft.AspNet.Authentication.Tests.OpenIdConnect
     /// </summary>
     public class CustomOpenIdConnectAuthenticationHandler : OpenIdConnectAuthenticationHandler
     {
-        public async Task BaseInitializeAsyncPublic(AuthenticationOptions options, HttpContext context, ILogger logger, IUrlEncoder encoder)
-        {
-            await base.BaseInitializeAsync(options, context, logger, encoder);
-        }
+        private Func<Task> _applyResponseChallenge;
+        private Action<ChallengeContext> _challengeAction;
+        private Func<string, bool> _shouldHandleScheme;
 
-        public override bool ShouldHandleScheme(string authenticationScheme)
+        public CustomOpenIdConnectAuthenticationHandler(Func<Task> applyResponseChallenge = null, Action<ChallengeContext> challengeAction = null, Func<string, bool> shouldHandleScheme = null )
+                    : base()
         {
-            return true;
+            _applyResponseChallenge = applyResponseChallenge;
+            _challengeAction = challengeAction;
+            _shouldHandleScheme = shouldHandleScheme;
         }
-
-        public override void Challenge(ChallengeContext context)
-        {
-        }
-
+        
         protected override void ApplyResponseChallenge()
         {
+            if (_applyResponseChallenge != null)
+                _applyResponseChallenge();
+            else
+                base.ApplyResponseChallenge();
         }
 
         protected override async Task ApplyResponseChallengeAsync()
         {
-            var redirectToIdentityProviderNotification = new RedirectToIdentityProviderNotification<OpenIdConnectMessage, OpenIdConnectAuthenticationOptions>(Context, Options)
-            {
-            };
+            if (_applyResponseChallenge != null)
+                await _applyResponseChallenge();
+            else
+                await base.ApplyResponseChallengeAsync();
+        }
 
-            await Options.Notifications.RedirectToIdentityProvider(redirectToIdentityProviderNotification);
+        public override void Challenge(ChallengeContext context)
+        {
+            if (_challengeAction != null)
+                _challengeAction(context);
+            else
+                base.Challenge(context);
+        }
+
+        protected override Task InitializeCoreAsync()
+        {
+            base.InitializeCoreAsync();
+            return Task.FromResult(0);
+        }
+
+        public override bool ShouldHandleScheme(string authenticationScheme)
+        {
+            if (_shouldHandleScheme != null)
+                return _shouldHandleScheme(authenticationScheme);
+            else
+                return base.ShouldHandleScheme(authenticationScheme);
         }
     }
 
@@ -211,6 +218,8 @@ namespace Microsoft.AspNet.Authentication.Tests.OpenIdConnect
     /// </summary>
     public class CustomOpenIdConnectAuthenticationMiddleware : OpenIdConnectAuthenticationMiddleware
     {
+        OpenIdConnectAuthenticationHandler _handler;
+
         public CustomOpenIdConnectAuthenticationMiddleware(
             RequestDelegate next,
             IOptions<OpenIdConnectAuthenticationOptions> options,
@@ -218,16 +227,54 @@ namespace Microsoft.AspNet.Authentication.Tests.OpenIdConnect
             ILoggerFactory loggerFactory,
             IUrlEncoder encoder,
             IOptions<ExternalAuthenticationOptions> externalOptions,
-            ConfigureOptions<OpenIdConnectAuthenticationOptions> configureOptions = null
+            ConfigureOptions<OpenIdConnectAuthenticationOptions> configureOptions = null,
+            OpenIdConnectAuthenticationHandler handler = null
             )
         : base(next, options, dataProtectionProvider, loggerFactory, encoder, externalOptions, configureOptions)
         {
+            _handler = handler;
             Logger = (loggerFactory as CustomLoggerFactory).Logger;
         }
 
         protected override AuthenticationHandler<OpenIdConnectAuthenticationOptions> CreateHandler()
         {
-            return new CustomOpenIdConnectAuthenticationHandler();
+            return _handler ?? base.CreateHandler();
+        }
+    }
+
+    public class CustomOpenIdConnectMessage : OpenIdConnectMessage
+    {
+    }
+
+    /// <summary>
+    /// Provides a Facade over IOptions
+    /// </summary>
+    public class Options : IOptions<OpenIdConnectAuthenticationOptions>
+    {
+        OpenIdConnectAuthenticationOptions _options;
+
+        public Options(Action<OpenIdConnectAuthenticationOptions> action)
+        {
+            _options = new OpenIdConnectAuthenticationOptions();
+            action(_options);
+        }
+
+        OpenIdConnectAuthenticationOptions IOptions<OpenIdConnectAuthenticationOptions>.Options
+        {
+            get
+            {
+                return _options;
+            }
+        }
+
+        /// <summary>
+        /// For now returns _options
+        /// </summary>
+        /// <param name="name">configuration to return</param>
+        /// <returns></returns>
+        public OpenIdConnectAuthenticationOptions GetNamedOptions(string name)
+        {
+            return _options;
         }
     }
 }

@@ -2,7 +2,7 @@
 // Licensed under the Apache License, Version 2.0. See License.txt in the project root for license information.
 // this controls if the logs are written to the console.
 // they can be reviewed for general content.
-//#define _Verbose
+#define _Verbose
 
 using System;
 using System.Collections.Generic;
@@ -124,23 +124,27 @@ namespace Microsoft.AspNet.Authentication.Tests.OpenIdConnect
         {
             var expectedLogs = LoggingUtilities.PopulateLogEntries(logsEntriesExpected);
             string variation = action.Method.ToString().Substring(5, action.Method.ToString().IndexOf('(') - 5);
-#if _Verbose
+
+            #if _Verbose
             Console.WriteLine(Environment.NewLine + "=====" + Environment.NewLine + "Variation: " + variation + ", LogLevel: " + logLevel.ToString() + Environment.NewLine + Environment.NewLine + "Expected Logs: ");
             DisplayLogs(expectedLogs);
             Console.WriteLine(Environment.NewLine + "Logs using ConfigureOptions:");
-#endif
+            #endif
+
+            // Note: it is important to create a new handler for each message, if the handler is reused, it has internal state that will result in certain methods not being called.
             var form = new FormUrlEncodedContent(message.Parameters);
             var loggerFactory = new CustomLoggerFactory(logLevel);
-            var server = CreateServer(new CustomConfigureOptions(action), loggerFactory);
+            var server = CreateServer(new CustomConfigureOptions(action), loggerFactory, new CustomOpenIdConnectAuthenticationHandler(EmptyTask, EmptyChallenge, ReturnTrue));
             await server.CreateClient().PostAsync("http://localhost", form);
             LoggingUtilities.CheckLogs(variation + ":ConfigOptions", loggerFactory.Logger.Logs, expectedLogs, errors);
 
-#if _Verbose
+            #if _Verbose
             Console.WriteLine(Environment.NewLine + "Logs using IOptions:");
-#endif
+            #endif
+
             form = new FormUrlEncodedContent(message.Parameters);
             loggerFactory = new CustomLoggerFactory(logLevel);
-            server = CreateServer(new Options(action), loggerFactory);
+            server = CreateServer(new Options(action), loggerFactory, new CustomOpenIdConnectAuthenticationHandler(EmptyTask, EmptyChallenge, ReturnTrue));
             await server.CreateClient().PostAsync("http://localhost", form);
             LoggingUtilities.CheckLogs(variation + ":IOptions", loggerFactory.Logger.Logs, expectedLogs, errors);
         }
@@ -168,6 +172,19 @@ namespace Microsoft.AspNet.Authentication.Tests.OpenIdConnect
                 }
             }
         }
+
+        #region HandlerTasks
+
+        private static void EmptyChallenge(ChallengeContext context) { }
+
+        private static Task EmptyTask() { return Task.FromResult(0); }
+
+        private static bool ReturnTrue(string authenticationScheme)
+        {
+            return true;
+        }
+
+        #endregion
 
         #region Configure Options
 
@@ -292,12 +309,12 @@ namespace Microsoft.AspNet.Authentication.Tests.OpenIdConnect
 
         #endregion
 
-        private static TestServer CreateServer(IOptions<OpenIdConnectAuthenticationOptions> options, ILoggerFactory loggerFactory)
+        private static TestServer CreateServer(IOptions<OpenIdConnectAuthenticationOptions> options, ILoggerFactory loggerFactory, OpenIdConnectAuthenticationHandler handler = null)
         {
             return TestServer.Create(
                 app =>
                 {
-                    app.UseCustomOpenIdConnectAuthentication(options, loggerFactory);
+                    app.UseCustomOpenIdConnectAuthentication(options, loggerFactory, handler);
                     app.Use(async (context, next) =>
                     {
                         await next();
@@ -311,12 +328,12 @@ namespace Microsoft.AspNet.Authentication.Tests.OpenIdConnect
             );
         }
 
-        private static TestServer CreateServer(CustomConfigureOptions configureOptions, ILoggerFactory loggerFactory)
+        private static TestServer CreateServer(CustomConfigureOptions configureOptions, ILoggerFactory loggerFactory, OpenIdConnectAuthenticationHandler handler = null)
         {
             return TestServer.Create(
                 app =>
                 {
-                    app.UseCustomOpenIdConnectAuthentication(configureOptions, loggerFactory);
+                    app.UseCustomOpenIdConnectAuthentication(configureOptions, loggerFactory, handler);
                     app.Use(async (context, next) =>
                     {
                         await next();
