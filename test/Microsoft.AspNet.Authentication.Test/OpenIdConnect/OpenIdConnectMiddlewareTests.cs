@@ -28,34 +28,26 @@ namespace Microsoft.AspNet.Authentication.Tests.OpenIdConnect
     {
         static string noncePrefix = "OpenIdConnect." + "Nonce.";
         static string nonceDelimiter = ".";
+        const string Challenge = "/challenge";
+        const string ChallengeWithOutContext = "/challengeWithOutContext";
+        const string ChallengeWithProperties = "/challengeWithProperties";
+        const string DefaultHost = @"https://example.com";
+        const string DefaultAuthority = @"https://login.windows.net/common";
 
         [Fact]
         public async Task ChallengeWillSetDefaults()
         {
             var stateDataFormat = new AuthenticationPropertiesFormater();
             var queryValues = ExpectedQueryValues.Defaults("https://login.windows.net/common");
-            queryValues.Configuration = ConfigurationManager.DefaultOpenIdConnectConfiguration();
             queryValues.State = OpenIdConnectAuthenticationDefaults.AuthenticationPropertiesKey + "=" + stateDataFormat.Protect(new AuthenticationProperties());
             var server = CreateServer(options =>
             {
-                options.Authority = "https://login.windows.net/common";
-                options.Configuration = queryValues.Configuration;
-                options.ClientId = queryValues.ClientId;
-                options.StateDataFormat = stateDataFormat;
+                SetOptions(options, DefaultParameters(), queryValues);
             });
 
             var transaction = await SendAsync(server, "https://example.com/challenge");
             transaction.Response.StatusCode.ShouldBe(HttpStatusCode.Redirect);
-            queryValues.CheckValues(
-                transaction.Response.Headers.Location.AbsoluteUri,
-                new string[]
-                {
-                    OpenIdConnectParameterNames.ClientId,
-                    OpenIdConnectParameterNames.ResponseMode,
-                    OpenIdConnectParameterNames.ResponseType,
-                    OpenIdConnectParameterNames.Scope,
-                    OpenIdConnectParameterNames.State
-                });
+            queryValues.CheckValues(transaction.Response.Headers.Location.AbsoluteUri, DefaultParameters());
         }
 
         [Fact]
@@ -75,30 +67,14 @@ namespace Microsoft.AspNet.Authentication.Tests.OpenIdConnect
         public async Task ChallengeWillUseOptionsProperties()
         {
             var queryValues = new ExpectedQueryValues("https://login.windows.net/common");
-            queryValues.Configuration = ConfigurationManager.DefaultOpenIdConnectConfiguration();
-
             var server = CreateServer(options =>
             {
-                options.Authority = queryValues.Authority;
-                options.ClientId = queryValues.ClientId;
-                options.Configuration = queryValues.Configuration;
-                options.RedirectUri = queryValues.RedirectUri;
-                options.Resource = queryValues.Resource;
-                options.Scope = queryValues.Scope;
+                SetOptions(options, DefaultParameters(), queryValues);
             });
 
             var transaction = await SendAsync(server, "https://example.com/challenge");
             transaction.Response.StatusCode.ShouldBe(HttpStatusCode.Redirect);
-            queryValues.CheckValues(
-                transaction.Response.Headers.Location.AbsoluteUri,
-                new string[]
-                {
-                    OpenIdConnectParameterNames.ClientId,
-                    OpenIdConnectParameterNames.RedirectUri,
-                    OpenIdConnectParameterNames.Resource,
-                    OpenIdConnectParameterNames.ResponseMode,
-                    OpenIdConnectParameterNames.Scope
-                });
+            queryValues.CheckValues(transaction.Response.Headers.Location.AbsoluteUri, DefaultParameters());
         }
 
         /// <summary>
@@ -106,31 +82,36 @@ namespace Microsoft.AspNet.Authentication.Tests.OpenIdConnect
         /// 1. Users set 'state' (OpenIdConnectMessage.State) in the notification. The runtime appends to that state.
         /// 2. Users add to the AuthenticationProperties (notification.AuthenticationProperties), values will be serialized.
         /// </summary>
-        /// <param name="setStateInNotification"></param>
+        /// <param name="userSetsState"></param>
         /// <returns></returns>
         [Theory]
-        [InlineData(true)]
-        [InlineData(false)]
-        public async Task ChallengeWillSetStateInNotification(bool setStateInNotification)
+        [InlineData(true, Challenge)]
+        [InlineData(false, Challenge)]
+        [InlineData(true, ChallengeWithOutContext)]
+        [InlineData(false, ChallengeWithOutContext)]
+        [InlineData(true, ChallengeWithProperties)]
+        [InlineData(false, ChallengeWithProperties)]
+        public async Task ChallengeSettingState(bool userSetsState, string challenge)
         {
             var queryValues = new ExpectedQueryValues("https://login.windows.net/common");
-            queryValues.Configuration = ConfigurationManager.DefaultOpenIdConnectConfiguration();
             var localProperties = new AuthenticationProperties();
             var stateDataFormat = new AuthenticationPropertiesFormater();
+            AuthenticationProperties challengeProperties = null;
+            if (challenge == ChallengeWithProperties)
+            {
+                challengeProperties = new AuthenticationProperties();
+                challengeProperties.Items.Add("item1", Guid.NewGuid().ToString());
+            }
+
             var server = CreateServer(options =>
             {
-                options.Authority = queryValues.Authority;
-                options.ClientId = queryValues.ClientId;
-                options.Configuration = queryValues.Configuration;
-                options.RedirectUri = queryValues.RedirectUri;
-                options.Resource = queryValues.Resource;
-                options.Scope = queryValues.Scope;
-                options.StateDataFormat = stateDataFormat;
+                SetOptions(options, DefaultParameters(new string[] { OpenIdConnectParameterNames.State }), queryValues);
+                options.AutomaticAuthentication = challenge.Equals(ChallengeWithOutContext);
                 options.Notifications = new OpenIdConnectAuthenticationNotifications
                 {
                     RedirectToIdentityProvider = notification =>
                     {
-                        if (setStateInNotification)
+                        if (userSetsState)
                         {
                             notification.ProtocolMessage.State = queryValues.State;
                         }
@@ -139,48 +120,30 @@ namespace Microsoft.AspNet.Authentication.Tests.OpenIdConnect
                     }
 
                 };
-            });
+            }, null, challengeProperties);
 
-            var transaction = await SendAsync(server, "https://example.com/challenge");
+            var transaction = await SendAsync(server, DefaultHost + challenge);
             transaction.Response.StatusCode.ShouldBe(HttpStatusCode.Redirect);
-            if (setStateInNotification)
+            if (userSetsState)
             {
-                queryValues.State += ("&" + OpenIdConnectAuthenticationDefaults.AuthenticationPropertiesKey + "=" + stateDataFormat.Protect(localProperties));
+                queryValues.State = OpenIdConnectAuthenticationDefaults.AuthenticationPropertiesKey + "=" + stateDataFormat.Protect(localProperties) + "&" + queryValues.State;
             }
             else
             {
                 queryValues.State = OpenIdConnectAuthenticationDefaults.AuthenticationPropertiesKey + "=" + stateDataFormat.Protect(localProperties);
             }
 
-            queryValues.CheckValues(
-                transaction.Response.Headers.Location.AbsoluteUri,
-                new List<string>
-                {
-                    OpenIdConnectParameterNames.ClientId,
-                    OpenIdConnectParameterNames.RedirectUri,
-                    OpenIdConnectParameterNames.Resource,
-                    OpenIdConnectParameterNames.ResponseMode,
-                    OpenIdConnectParameterNames.Scope,
-                    OpenIdConnectParameterNames.State,
-                }
-            );
+            queryValues.CheckValues(transaction.Response.Headers.Location.AbsoluteUri, DefaultParameters(new string[] { OpenIdConnectParameterNames.State }));
         }
 
         [Fact]
         public async Task ChallengeWillUseNotifications()
         {
             var queryValues = new ExpectedQueryValues("https://login.windows.net/common");
-            queryValues.Configuration = ConfigurationManager.DefaultOpenIdConnectConfiguration();
             var queryValuesSetInNotification = new ExpectedQueryValues("https://login.windows.net/common");
-            queryValuesSetInNotification.Configuration = ConfigurationManager.DefaultOpenIdConnectConfiguration();
             var server = CreateServer(options =>
             {
-                options.Authority = queryValues.Authority;
-                options.ClientId = queryValues.ClientId;
-                options.Configuration = queryValues.Configuration;
-                options.RedirectUri = queryValues.RedirectUri;
-                options.Resource = queryValues.Resource;
-                options.Scope = queryValues.Scope;
+                SetOptions(options, DefaultParameters(), queryValues);
                 options.Notifications = new OpenIdConnectAuthenticationNotifications
                 {
                     RedirectToIdentityProvider = notification =>
@@ -196,16 +159,44 @@ namespace Microsoft.AspNet.Authentication.Tests.OpenIdConnect
 
             var transaction = await SendAsync(server,"https://example.com/challenge");
             transaction.Response.StatusCode.ShouldBe(HttpStatusCode.Redirect);
-            queryValuesSetInNotification.CheckValues(
-                transaction.Response.Headers.Location.AbsoluteUri,
-                new string[]
+            queryValuesSetInNotification.CheckValues(transaction.Response.Headers.Location.AbsoluteUri, DefaultParameters());
+        }
+
+        private void SetOptions(OpenIdConnectAuthenticationOptions options, List<string> parameters, ExpectedQueryValues queryValues, ISecureDataFormat<AuthenticationProperties> secureDataFormat = null)
+        {
+            foreach (var param in parameters)
+            {
+                if (param.Equals(OpenIdConnectParameterNames.ClientId))
+                    options.ClientId = queryValues.ClientId;
+                else if (param.Equals(OpenIdConnectParameterNames.RedirectUri))
+                    options.RedirectUri = queryValues.RedirectUri;
+                else if (param.Equals(OpenIdConnectParameterNames.Resource))
+                    options.Resource = queryValues.Resource;
+                else if (param.Equals(OpenIdConnectParameterNames.Scope))
+                    options.Scope = queryValues.Scope;
+            }
+
+            options.Authority = queryValues.Authority;
+            options.Configuration = queryValues.Configuration;
+            options.StateDataFormat = secureDataFormat ?? new AuthenticationPropertiesFormater();
+        }
+
+        private List<string> DefaultParameters(string[] additionalParams = null)
+        {
+            var parameters =
+                new List<string>
                 {
                     OpenIdConnectParameterNames.ClientId,
                     OpenIdConnectParameterNames.RedirectUri,
                     OpenIdConnectParameterNames.Resource,
                     OpenIdConnectParameterNames.ResponseMode,
-                    OpenIdConnectParameterNames.Scope
-                });
+                    OpenIdConnectParameterNames.Scope,
+                };
+
+            if (additionalParams != null)
+                parameters.AddRange(additionalParams);
+
+            return parameters;
         }
 
         [Fact]
@@ -258,30 +249,7 @@ namespace Microsoft.AspNet.Authentication.Tests.OpenIdConnect
             transaction.Response.Headers.Location.AbsoluteUri.ShouldContain(UrlEncoder.Default.UrlEncode("http://www.example.com/specific_redirect_uri"));
         }
 
-        [Fact]
-        // Test Cases for calculating the expiration time of cookie from cookie name
-        public void NonceCookieExpirationTime()
-        {
-            DateTime utcNow = DateTime.UtcNow;
-
-            GetNonceExpirationTime(noncePrefix + DateTime.MaxValue.Ticks.ToString(CultureInfo.InvariantCulture) + nonceDelimiter, TimeSpan.FromHours(1)).ShouldBe(DateTime.MaxValue);
-
-            GetNonceExpirationTime(noncePrefix + DateTime.MinValue.Ticks.ToString(CultureInfo.InvariantCulture) + nonceDelimiter, TimeSpan.FromHours(1)).ShouldBe(DateTime.MinValue + TimeSpan.FromHours(1));
-
-            GetNonceExpirationTime(noncePrefix + utcNow.Ticks.ToString(CultureInfo.InvariantCulture) + nonceDelimiter, TimeSpan.FromHours(1)).ShouldBe(utcNow + TimeSpan.FromHours(1));
-
-            GetNonceExpirationTime(noncePrefix, TimeSpan.FromHours(1)).ShouldBe(DateTime.MinValue);
-
-            GetNonceExpirationTime("", TimeSpan.FromHours(1)).ShouldBe(DateTime.MinValue);
-
-            GetNonceExpirationTime(noncePrefix + noncePrefix, TimeSpan.FromHours(1)).ShouldBe(DateTime.MinValue);
-
-            GetNonceExpirationTime(noncePrefix + utcNow.Ticks.ToString(CultureInfo.InvariantCulture) + nonceDelimiter + utcNow.Ticks.ToString(CultureInfo.InvariantCulture) + nonceDelimiter, TimeSpan.FromHours(1)).ShouldBe(utcNow + TimeSpan.FromHours(1));
-
-            GetNonceExpirationTime(utcNow.Ticks.ToString(CultureInfo.InvariantCulture) + nonceDelimiter + utcNow.Ticks.ToString(CultureInfo.InvariantCulture) + nonceDelimiter, TimeSpan.FromHours(1)).ShouldBe(DateTime.MinValue);
-        }
-
-        private static TestServer CreateServer(Action<OpenIdConnectAuthenticationOptions> configureOptions, Func<HttpContext, Task> handler = null)
+        private static TestServer CreateServer(Action<OpenIdConnectAuthenticationOptions> configureOptions, Func<HttpContext, Task> handler = null, AuthenticationProperties properties = null)
         {
             return TestServer.Create(app =>
             {
@@ -294,9 +262,19 @@ namespace Microsoft.AspNet.Authentication.Tests.OpenIdConnect
                 {
                     var req = context.Request;
                     var res = context.Response;
-                    if (req.Path == new PathString("/challenge"))
+
+                    if (req.Path == new PathString(Challenge))
                     {
                         context.Authentication.Challenge(OpenIdConnectAuthenticationDefaults.AuthenticationScheme);
+                        res.StatusCode = 401;
+                    }
+                    else if (req.Path == new PathString(ChallengeWithProperties))
+                    {
+                        context.Authentication.Challenge(OpenIdConnectAuthenticationDefaults.AuthenticationScheme, properties);
+                        res.StatusCode = 401;
+                    }
+                    else if (req.Path == new PathString(ChallengeWithOutContext))
+                    {
                         res.StatusCode = 401;
                     }
                     else if (req.Path == new PathString("/signin"))
@@ -391,6 +369,29 @@ namespace Microsoft.AspNet.Authentication.Tests.OpenIdConnect
             }
         }
 
+        [Fact]
+        // Test Cases for calculating the expiration time of cookie from cookie name
+        public void NonceCookieExpirationTime()
+        {
+            DateTime utcNow = DateTime.UtcNow;
+
+            GetNonceExpirationTime(noncePrefix + DateTime.MaxValue.Ticks.ToString(CultureInfo.InvariantCulture) + nonceDelimiter, TimeSpan.FromHours(1)).ShouldBe(DateTime.MaxValue);
+
+            GetNonceExpirationTime(noncePrefix + DateTime.MinValue.Ticks.ToString(CultureInfo.InvariantCulture) + nonceDelimiter, TimeSpan.FromHours(1)).ShouldBe(DateTime.MinValue + TimeSpan.FromHours(1));
+
+            GetNonceExpirationTime(noncePrefix + utcNow.Ticks.ToString(CultureInfo.InvariantCulture) + nonceDelimiter, TimeSpan.FromHours(1)).ShouldBe(utcNow + TimeSpan.FromHours(1));
+
+            GetNonceExpirationTime(noncePrefix, TimeSpan.FromHours(1)).ShouldBe(DateTime.MinValue);
+
+            GetNonceExpirationTime("", TimeSpan.FromHours(1)).ShouldBe(DateTime.MinValue);
+
+            GetNonceExpirationTime(noncePrefix + noncePrefix, TimeSpan.FromHours(1)).ShouldBe(DateTime.MinValue);
+
+            GetNonceExpirationTime(noncePrefix + utcNow.Ticks.ToString(CultureInfo.InvariantCulture) + nonceDelimiter + utcNow.Ticks.ToString(CultureInfo.InvariantCulture) + nonceDelimiter, TimeSpan.FromHours(1)).ShouldBe(utcNow + TimeSpan.FromHours(1));
+
+            GetNonceExpirationTime(utcNow.Ticks.ToString(CultureInfo.InvariantCulture) + nonceDelimiter + utcNow.Ticks.ToString(CultureInfo.InvariantCulture) + nonceDelimiter, TimeSpan.FromHours(1)).ShouldBe(DateTime.MinValue);
+        }
+
         private static DateTime GetNonceExpirationTime(string keyname, TimeSpan nonceLifetime)
         {
             DateTime nonceTime = DateTime.MinValue;
@@ -417,6 +418,7 @@ namespace Microsoft.AspNet.Authentication.Tests.OpenIdConnect
                     }
                 }
             }
+
             return nonceTime;
         }
     }

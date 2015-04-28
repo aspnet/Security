@@ -4,7 +4,6 @@
 using System;
 using System.Collections.Generic;
 using System.Text;
-using Microsoft.AspNet.Http.Authentication;
 using Microsoft.Framework.WebEncoders;
 using Microsoft.IdentityModel.Protocols;
 using Xunit;
@@ -145,9 +144,10 @@ namespace Microsoft.AspNet.Authentication.Tests.OpenIdConnect
     /// </summary>
     public class ExpectedQueryValues
     {
-        public ExpectedQueryValues(string authority)
+        public ExpectedQueryValues(string authority, OpenIdConnectConfiguration configuration = null)
         {
             Authority = authority;
+            Configuration = configuration ?? ConfigurationManager.DefaultOpenIdConnectConfiguration();
         }
 
         public static ExpectedQueryValues Defaults(string authority)

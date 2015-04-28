@@ -217,14 +217,15 @@ namespace Microsoft.AspNet.Authentication.OpenIdConnect
                 }
             }
 
-            // if user set add to state.
+            // If 'OpenIdConnectMessage.State' is null, then the user never set it in the notification. Just set the state
             if (string.IsNullOrWhiteSpace(redirectToIdentityProviderNotification.ProtocolMessage.State))
             {
                 redirectToIdentityProviderNotification.ProtocolMessage.State = OpenIdConnectAuthenticationDefaults.AuthenticationPropertiesKey + "=" + Options.StateDataFormat.Protect(properties);
             }
+            // the user did set 'OpenIdConnectMessage.State, add a parameter to the state
             else
             {
-                redirectToIdentityProviderNotification.ProtocolMessage.State += "&" + OpenIdConnectAuthenticationDefaults.AuthenticationPropertiesKey + "=" + Options.StateDataFormat.Protect(properties);
+                redirectToIdentityProviderNotification.ProtocolMessage.State = OpenIdConnectAuthenticationDefaults.AuthenticationPropertiesKey + "=" + Options.StateDataFormat.Protect(properties) + "&" + redirectToIdentityProviderNotification.ProtocolMessage.State;
             }
 
             string redirectUri = redirectToIdentityProviderNotification.ProtocolMessage.CreateAuthenticationRequestUrl();
