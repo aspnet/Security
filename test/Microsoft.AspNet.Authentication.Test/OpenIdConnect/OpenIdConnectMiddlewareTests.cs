@@ -33,19 +33,22 @@ namespace Microsoft.AspNet.Authentication.Tests.OpenIdConnect
         const string ChallengeWithProperties = "/challengeWithProperties";
         const string DefaultHost = @"https://example.com";
         const string DefaultAuthority = @"https://login.windows.net/common";
+        const string Logout = "/logout";
+        const string Signin = "/signin";
+        const string Signout = "/signout";
 
         [Fact]
         public async Task ChallengeWillSetDefaults()
         {
             var stateDataFormat = new AuthenticationPropertiesFormater();
-            var queryValues = ExpectedQueryValues.Defaults("https://login.windows.net/common");
+            var queryValues = ExpectedQueryValues.Defaults(DefaultAuthority);
             queryValues.State = OpenIdConnectAuthenticationDefaults.AuthenticationPropertiesKey + "=" + stateDataFormat.Protect(new AuthenticationProperties());
             var server = CreateServer(options =>
             {
                 SetOptions(options, DefaultParameters(), queryValues);
             });
 
-            var transaction = await SendAsync(server, "https://example.com/challenge");
+            var transaction = await SendAsync(server, DefaultHost + Challenge);
             transaction.Response.StatusCode.ShouldBe(HttpStatusCode.Redirect);
             queryValues.CheckValues(transaction.Response.Headers.Location.AbsoluteUri, DefaultParameters());
         }
@@ -55,24 +58,24 @@ namespace Microsoft.AspNet.Authentication.Tests.OpenIdConnect
         {
             var server = CreateServer(options =>
             {
-                options.Authority = "https://login.windows.net/common";
+                options.Authority = DefaultAuthority;
                 options.ClientId = "Test Id";
                 options.Configuration = ConfigurationManager.DefaultOpenIdConnectConfiguration();
             });
-            var transaction = await SendAsync(server, "https://example.com/challenge");
+            var transaction = await SendAsync(server, DefaultHost + Challenge);
             transaction.SetCookie.Single().ShouldContain(OpenIdConnectAuthenticationDefaults.CookieNoncePrefix);
         }
 
         [Fact]
         public async Task ChallengeWillUseOptionsProperties()
         {
-            var queryValues = new ExpectedQueryValues("https://login.windows.net/common");
+            var queryValues = new ExpectedQueryValues(DefaultAuthority);
             var server = CreateServer(options =>
             {
                 SetOptions(options, DefaultParameters(), queryValues);
             });
 
-            var transaction = await SendAsync(server, "https://example.com/challenge");
+            var transaction = await SendAsync(server, DefaultHost + Challenge);
             transaction.Response.StatusCode.ShouldBe(HttpStatusCode.Redirect);
             queryValues.CheckValues(transaction.Response.Headers.Location.AbsoluteUri, DefaultParameters());
         }
@@ -93,7 +96,7 @@ namespace Microsoft.AspNet.Authentication.Tests.OpenIdConnect
         [InlineData(false, ChallengeWithProperties)]
         public async Task ChallengeSettingState(bool userSetsState, string challenge)
         {
-            var queryValues = new ExpectedQueryValues("https://login.windows.net/common");
+            var queryValues = new ExpectedQueryValues(DefaultAuthority);
             var localProperties = new AuthenticationProperties();
             var stateDataFormat = new AuthenticationPropertiesFormater();
             AuthenticationProperties challengeProperties = null;
@@ -139,8 +142,8 @@ namespace Microsoft.AspNet.Authentication.Tests.OpenIdConnect
         [Fact]
         public async Task ChallengeWillUseNotifications()
         {
-            var queryValues = new ExpectedQueryValues("https://login.windows.net/common");
-            var queryValuesSetInNotification = new ExpectedQueryValues("https://login.windows.net/common");
+            var queryValues = new ExpectedQueryValues(DefaultAuthority);
+            var queryValuesSetInNotification = new ExpectedQueryValues(DefaultAuthority);
             var server = CreateServer(options =>
             {
                 SetOptions(options, DefaultParameters(), queryValues);
@@ -157,7 +160,7 @@ namespace Microsoft.AspNet.Authentication.Tests.OpenIdConnect
                 };
             });
 
-            var transaction = await SendAsync(server,"https://example.com/challenge");
+            var transaction = await SendAsync(server, DefaultHost + Challenge);
             transaction.Response.StatusCode.ShouldBe(HttpStatusCode.Redirect);
             queryValuesSetInNotification.CheckValues(transaction.Response.Headers.Location.AbsoluteUri, DefaultParameters());
         }
@@ -205,12 +208,12 @@ namespace Microsoft.AspNet.Authentication.Tests.OpenIdConnect
             var configuration = ConfigurationManager.DefaultOpenIdConnectConfiguration();
             var server = CreateServer(options =>
             {
-                options.Authority = "https://login.windows.net/common";
+                options.Authority = DefaultAuthority;
                 options.ClientId = "Test Id";
                 options.Configuration = configuration;
             });
 
-            var transaction = await SendAsync(server, "https://example.com/signout");
+            var transaction = await SendAsync(server, DefaultHost + Signout);
             transaction.Response.StatusCode.ShouldBe(HttpStatusCode.Redirect);
             transaction.Response.Headers.Location.AbsoluteUri.ShouldBe(configuration.EndSessionEndpoint);
         }
@@ -221,13 +224,13 @@ namespace Microsoft.AspNet.Authentication.Tests.OpenIdConnect
             var configuration = ConfigurationManager.DefaultOpenIdConnectConfiguration();
             var server = CreateServer(options =>
             {
-                options.Authority = "https://login.windows.net/common";
+                options.Authority = DefaultAuthority;
                 options.ClientId = "Test Id";
                 options.Configuration = configuration;
                 options.PostLogoutRedirectUri = "https://example.com/logout";
             });
 
-            var transaction = await SendAsync(server, "https://example.com/signout");
+            var transaction = await SendAsync(server, DefaultHost + Signout);
             transaction.Response.StatusCode.ShouldBe(HttpStatusCode.Redirect);
             transaction.Response.Headers.Location.AbsoluteUri.ShouldContain(UrlEncoder.Default.UrlEncode("https://example.com/logout"));
         }
@@ -238,7 +241,7 @@ namespace Microsoft.AspNet.Authentication.Tests.OpenIdConnect
             var configuration = ConfigurationManager.DefaultOpenIdConnectConfiguration();
             var server = CreateServer(options =>
             {
-                options.Authority = "https://login.windows.net/common";
+                options.Authority = DefaultAuthority;
                 options.ClientId = "Test Id";
                 options.Configuration = configuration;
                 options.PostLogoutRedirectUri = "https://example.com/logout";
@@ -277,12 +280,12 @@ namespace Microsoft.AspNet.Authentication.Tests.OpenIdConnect
                     {
                         res.StatusCode = 401;
                     }
-                    else if (req.Path == new PathString("/signin"))
+                    else if (req.Path == new PathString(Signin))
                     {
                         // REVIEW: this used to just be res.SignIn()
                         context.Authentication.SignIn(OpenIdConnectAuthenticationDefaults.AuthenticationScheme, new ClaimsPrincipal());
                     }
-                    else if (req.Path == new PathString("/signout"))
+                    else if (req.Path == new PathString(Signout))
                     {
                         context.Authentication.SignOut(OpenIdConnectAuthenticationDefaults.AuthenticationScheme);
                     }

@@ -4,6 +4,7 @@
 using System;
 using System.Collections.Generic;
 using System.Text;
+using Microsoft.AspNet.Authentication.OpenIdConnect;
 using Microsoft.Framework.WebEncoders;
 using Microsoft.IdentityModel.Protocols;
 using Xunit;
@@ -108,6 +109,17 @@ namespace Microsoft.AspNet.Authentication.Tests.OpenIdConnect
             }
 
             return AreEqual<Exception>(exception1.InnerException, exception2.InnerException);
+        }
+    }
+
+    public class Default
+    {
+        public static void Options(OpenIdConnectAuthenticationOptions options)
+        {
+            options.AuthenticationScheme = "OpenIdConnectHandlerTest";
+            options.ConfigurationManager = ConfigurationManager.DefaultStaticConfigurationManager();
+            options.ClientId = Guid.NewGuid().ToString();
+            options.StateDataFormat = new AuthenticationPropertiesFormater();
         }
     }
 

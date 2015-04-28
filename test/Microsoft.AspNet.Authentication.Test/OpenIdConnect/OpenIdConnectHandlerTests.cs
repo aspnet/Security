@@ -80,7 +80,7 @@ namespace Microsoft.AspNet.Authentication.Tests.OpenIdConnect
             await RunVariation(LogLevel.Debug, message, CodeReceivedSkippedOptions, errors, logsEntriesExpected);
 
             logsEntriesExpected = new int[] { 0, 1, 7, 14 };
-            await RunVariation(LogLevel.Debug, message, DefaultOptions, errors, logsEntriesExpected);
+            await RunVariation(LogLevel.Debug, message, Default.Options, errors, logsEntriesExpected);
 
             // each message below should return before processing the idtoken
             message.IdToken = "invalid_token";
@@ -190,7 +190,7 @@ namespace Microsoft.AspNet.Authentication.Tests.OpenIdConnect
 
         private static void CodeReceivedHandledOptions(OpenIdConnectAuthenticationOptions options)
         {
-            DefaultOptions(options);
+            Default.Options(options);
             options.Notifications =
                 new OpenIdConnectAuthenticationNotifications
                 {
@@ -204,7 +204,7 @@ namespace Microsoft.AspNet.Authentication.Tests.OpenIdConnect
 
         private static void CodeReceivedSkippedOptions(OpenIdConnectAuthenticationOptions options)
         {
-            DefaultOptions(options);
+            Default.Options(options);
             options.Notifications =
                 new OpenIdConnectAuthenticationNotifications
                 {
@@ -216,16 +216,9 @@ namespace Microsoft.AspNet.Authentication.Tests.OpenIdConnect
                 };
         }
 
-        private static void DefaultOptions(OpenIdConnectAuthenticationOptions options)
-        {
-            options.AuthenticationScheme = "OpenIdConnectHandlerTest";
-            options.ConfigurationManager = ConfigurationManager.DefaultStaticConfigurationManager();
-            options.StateDataFormat = new AuthenticationPropertiesFormater();
-        }
-
         private static void MessageReceivedHandledOptions(OpenIdConnectAuthenticationOptions options)
         {
-            DefaultOptions(options);
+            Default.Options(options);
             options.Notifications =
                 new OpenIdConnectAuthenticationNotifications
                 {
@@ -239,7 +232,7 @@ namespace Microsoft.AspNet.Authentication.Tests.OpenIdConnect
 
         private static void MessageReceivedSkippedOptions(OpenIdConnectAuthenticationOptions options)
         {
-            DefaultOptions(options);
+            Default.Options(options);
             options.Notifications =
                 new OpenIdConnectAuthenticationNotifications
                 {
@@ -253,7 +246,7 @@ namespace Microsoft.AspNet.Authentication.Tests.OpenIdConnect
 
         private static void SecurityTokenReceivedHandledOptions(OpenIdConnectAuthenticationOptions options)
         {
-            DefaultOptions(options);
+            Default.Options(options);
             options.Notifications =
                 new OpenIdConnectAuthenticationNotifications
                 {
@@ -267,7 +260,7 @@ namespace Microsoft.AspNet.Authentication.Tests.OpenIdConnect
 
         private static void SecurityTokenReceivedSkippedOptions(OpenIdConnectAuthenticationOptions options)
         {
-            DefaultOptions(options);
+            Default.Options(options);
             options.Notifications =
                 new OpenIdConnectAuthenticationNotifications
                 {
@@ -281,7 +274,7 @@ namespace Microsoft.AspNet.Authentication.Tests.OpenIdConnect
 
         private static void SecurityTokenValidatedHandledOptions(OpenIdConnectAuthenticationOptions options)
         {
-            DefaultOptions(options);
+            Default.Options(options);
             options.Notifications =
                 new OpenIdConnectAuthenticationNotifications
                 {
@@ -295,7 +288,7 @@ namespace Microsoft.AspNet.Authentication.Tests.OpenIdConnect
 
         private static void SecurityTokenValidatedSkippedOptions(OpenIdConnectAuthenticationOptions options)
         {
-            DefaultOptions(options);
+            Default.Options(options);
             options.Notifications =
                 new OpenIdConnectAuthenticationNotifications
                 {
