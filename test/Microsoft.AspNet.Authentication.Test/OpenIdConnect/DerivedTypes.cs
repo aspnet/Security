@@ -1,11 +1,9 @@
 ﻿// Copyright (c) Microsoft Open Technologies, Inc. All rights reserved.
 // Licensed under the Apache License, Version 2.0. See License.txt in the project root for license information.
-// this controls if the logs are written to the console.
-// they can be reviewed for general content.
-#define _Verbose
 
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Text;
 using System.Threading.Tasks;
 using Microsoft.AspNet.Authentication.OpenIdConnect;
@@ -20,10 +18,9 @@ using Microsoft.IdentityModel.Protocols;
 namespace Microsoft.AspNet.Authentication.Tests.OpenIdConnect
 {
     /// <summary>
-    /// Processing a <see cref="OpenIdConnectMessage"/> requires 'unprotecting' the state.
-    /// This class side-steps that process.
+    /// This formatter creates an easy to read string of the format: "'key1' 'value1' ..."
     /// </summary>
-    public class AuthenticationPropertiesFormater : ISecureDataFormat<AuthenticationProperties>
+    public class AuthenticationPropertiesFormaterKeyValue : ISecureDataFormat<AuthenticationProperties>
     {
         string _protectedString = Guid.NewGuid().ToString();
 
@@ -50,13 +47,70 @@ namespace Microsoft.AspNet.Authentication.Tests.OpenIdConnect
             if (protectedText != "null")
             {
                 string[] items = protectedText.Split(' ');
-                for (int i = 0; i < items.Length; i+=2)
+                for (int i = 0; i < items.Length - 1; i+=2)
                 {
                     propeties.Items.Add(items[i], items[i + 1]);
                 }
             }
 
             return propeties;
+        }
+    }
+
+    /// <summary>
+    /// This formatter always throws. message and exception type can be set.
+    /// Defaults:
+    /// message: "AuthenticationPropertiesFormaterThrows"
+    /// type:  InvalidOperationException
+    /// </summary>
+    public class AuthenticationPropertiesFormaterThrows : ISecureDataFormat<AuthenticationProperties>
+    {
+        AuthenticationPropertiesFormaterThrows(string message = "AuthenticationPropertiesFormaterThrows", Type exceptionType = null)
+        {
+            Message = message;
+            ExceptionType = exceptionType ?? typeof(InvalidOperationException);
+        }
+
+        public Type ExceptionType { get; set; }
+
+        public string Message { get; set; }
+
+        public string Protect(AuthenticationProperties data)
+        {
+            throw (Exception)Activator.CreateInstance(ExceptionType, Message);
+        }
+
+        AuthenticationProperties ISecureDataFormat<AuthenticationProperties>.Unprotect(string protectedText)
+        {
+            throw (Exception)Activator.CreateInstance(ExceptionType, Message);
+        }
+    }
+
+    /// <summary>
+    /// This formatter returns values passed in the constructor
+    /// Defaults:
+    /// Protect: null
+    /// UnProtect: null
+    /// </summary>
+    public class AuthenticationPropertiesFormaterSetReturn : ISecureDataFormat<AuthenticationProperties>
+    {
+        string _protect;
+        AuthenticationProperties _unprotect;
+
+        AuthenticationPropertiesFormaterSetReturn(string protect = null, AuthenticationProperties unprotect = null)
+        {
+            _protect = protect;
+            _unprotect = unprotect;
+        }
+
+        public string Protect(AuthenticationProperties data)
+        {
+            return _protect;
+        }
+
+        AuthenticationProperties ISecureDataFormat<AuthenticationProperties>.Unprotect(string protectedText)
+        {
+            return _unprotect;
         }
     }
 
@@ -114,10 +168,7 @@ namespace Microsoft.AspNet.Authentication.Tests.OpenIdConnect
                     };
 
                 logEntries.Add(logEntry);
-
-#if _Verbose
-                Console.WriteLine(logEntry.ToString());
-#endif
+                Debug.WriteLine(logEntry.ToString());
             }
         }
 
@@ -207,11 +258,14 @@ namespace Microsoft.AspNet.Authentication.Tests.OpenIdConnect
             else
                 return base.ShouldHandleScheme(authenticationScheme);
         }
+
+        public OpenIdConnectAuthenticationOptions OptionsPublic { get; set; }
+
     }
 
     /// <summary>
-    /// Used to set <see cref="CustomOpenIdConnectAuthenticationHandler"/> as the AuthenticationHandler
-    /// which can be configured to handle certain messages.
+    /// pass a <see cref="OpenIdConnectAuthenticationHandler"/> as the AuthenticationHandler
+    /// configured to handle certain messages.
     /// </summary>
     public class CustomOpenIdConnectAuthenticationMiddleware : OpenIdConnectAuthenticationMiddleware
     {
@@ -231,6 +285,11 @@ namespace Microsoft.AspNet.Authentication.Tests.OpenIdConnect
         {
             _handler = handler;
             Logger = (loggerFactory as CustomLoggerFactory).Logger;
+            var customHandler = _handler as CustomOpenIdConnectAuthenticationHandler;
+            if (customHandler != null)
+            {
+                customHandler.OptionsPublic = Options;
+            }
         }
 
         protected override AuthenticationHandler<OpenIdConnectAuthenticationOptions> CreateHandler()

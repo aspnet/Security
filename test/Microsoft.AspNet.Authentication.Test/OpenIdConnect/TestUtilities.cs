@@ -114,12 +114,14 @@ namespace Microsoft.AspNet.Authentication.Tests.OpenIdConnect
 
     public class Default
     {
+        public const string LocalHost = @"http://localhost";
+
         public static void Options(OpenIdConnectAuthenticationOptions options)
         {
             options.AuthenticationScheme = "OpenIdConnectHandlerTest";
             options.ConfigurationManager = ConfigurationManager.DefaultStaticConfigurationManager();
             options.ClientId = Guid.NewGuid().ToString();
-            options.StateDataFormat = new AuthenticationPropertiesFormater();
+            options.StateDataFormat = new AuthenticationPropertiesFormaterKeyValue();
         }
     }
 

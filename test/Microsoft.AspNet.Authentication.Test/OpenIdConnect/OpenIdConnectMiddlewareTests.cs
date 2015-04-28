@@ -40,7 +40,7 @@ namespace Microsoft.AspNet.Authentication.Tests.OpenIdConnect
         [Fact]
         public async Task ChallengeWillSetDefaults()
         {
-            var stateDataFormat = new AuthenticationPropertiesFormater();
+            var stateDataFormat = new AuthenticationPropertiesFormaterKeyValue();
             var queryValues = ExpectedQueryValues.Defaults(DefaultAuthority);
             queryValues.State = OpenIdConnectAuthenticationDefaults.AuthenticationPropertiesKey + "=" + stateDataFormat.Protect(new AuthenticationProperties());
             var server = CreateServer(options =>
@@ -98,7 +98,7 @@ namespace Microsoft.AspNet.Authentication.Tests.OpenIdConnect
         {
             var queryValues = new ExpectedQueryValues(DefaultAuthority);
             var localProperties = new AuthenticationProperties();
-            var stateDataFormat = new AuthenticationPropertiesFormater();
+            var stateDataFormat = new AuthenticationPropertiesFormaterKeyValue();
             AuthenticationProperties challengeProperties = null;
             if (challenge == ChallengeWithProperties)
             {
@@ -181,7 +181,7 @@ namespace Microsoft.AspNet.Authentication.Tests.OpenIdConnect
 
             options.Authority = queryValues.Authority;
             options.Configuration = queryValues.Configuration;
-            options.StateDataFormat = secureDataFormat ?? new AuthenticationPropertiesFormater();
+            options.StateDataFormat = secureDataFormat ?? new AuthenticationPropertiesFormaterKeyValue();
         }
 
         private List<string> DefaultParameters(string[] additionalParams = null)
