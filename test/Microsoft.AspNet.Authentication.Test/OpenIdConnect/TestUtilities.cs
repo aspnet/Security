@@ -3,6 +3,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Text;
 using Microsoft.AspNet.Authentication.OpenIdConnect;
 using Microsoft.Framework.WebEncoders;
@@ -240,7 +241,7 @@ namespace Microsoft.AspNet.Authentication.Tests.OpenIdConnect
                     sb.AppendLine(str);
                 }
 
-                Console.WriteLine(sb.ToString());
+                Debug.WriteLine(sb.ToString());
                 Assert.True(false, sb.ToString());
             }
         }

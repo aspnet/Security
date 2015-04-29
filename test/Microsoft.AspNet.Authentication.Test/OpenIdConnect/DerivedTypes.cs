@@ -137,7 +137,7 @@ namespace Microsoft.AspNet.Authentication.Tests.OpenIdConnect
             _logLevel = logLevel;
         }
 
-        List<LogEntry> logEntries = new List<LogEntry>();
+        List<LogEntry> _logEntries = new List<LogEntry>();
 
         public IDisposable BeginScopeImpl(object state)
         {
@@ -167,12 +167,12 @@ namespace Microsoft.AspNet.Authentication.Tests.OpenIdConnect
                         State = state,
                     };
 
-                logEntries.Add(logEntry);
+                _logEntries.Add(logEntry);
                 Debug.WriteLine(logEntry.ToString());
             }
         }
 
-        public List<LogEntry> Logs { get { return logEntries; } }
+        public List<LogEntry> Logs { get { return _logEntries; } }
     }
 
     public class CustomLoggerFactory : ILoggerFactory
@@ -259,8 +259,11 @@ namespace Microsoft.AspNet.Authentication.Tests.OpenIdConnect
                 return base.ShouldHandleScheme(authenticationScheme);
         }
 
-        public OpenIdConnectAuthenticationOptions OptionsPublic { get; set; }
+        public ILogger LoggerPublic { get { return Logger; } }
 
+        public IUrlEncoder UrlEncoderPublic { get { return UrlEncoder; } }
+
+        public OpenIdConnectAuthenticationOptions OptionsPublic { get; set; }
     }
 
     /// <summary>

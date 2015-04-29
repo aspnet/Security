@@ -337,7 +337,7 @@ namespace Microsoft.AspNet.Authentication.OpenIdConnect
                 // OpenIdConnect protocol allows a Code to be received without the id_token
                 if (!string.IsNullOrWhiteSpace(message.IdToken))
                 {
-                    Logger.LogDebug(Resources.OIDCH_0020_IdTokenReceived, message.IdToken);
+                    Logger.LogDebug(Resources.OIDCH_0020_IdTokenReceived);
                     var securityTokenReceivedNotification =
                         new SecurityTokenReceivedNotification<OpenIdConnectMessage, OpenIdConnectAuthenticationOptions>(Context, Options)
                         {
@@ -391,8 +391,8 @@ namespace Microsoft.AspNet.Authentication.OpenIdConnect
 
                     if (validatedToken == null)
                     {
-                        Logger.LogError(Resources.OIDCH_0011_UnableToValidateToken, message.IdToken);
-                        throw new InvalidOperationException(string.Format(CultureInfo.InvariantCulture, Resources.OIDCH_0011_UnableToValidateToken, message.IdToken));
+                        Logger.LogError(Resources.OIDCH_0011_UnableToValidateToken);
+                        throw new InvalidOperationException(Resources.OIDCH_0011_UnableToValidateToken);
                     }
 
                     ticket = new AuthenticationTicket(principal, properties, Options.AuthenticationScheme);

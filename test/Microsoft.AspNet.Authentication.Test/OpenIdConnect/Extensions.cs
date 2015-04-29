@@ -5,6 +5,7 @@ using Microsoft.AspNet.Authentication.OpenIdConnect;
 using Microsoft.AspNet.Builder;
 using Microsoft.Framework.Logging;
 using Microsoft.Framework.OptionsModel;
+using Microsoft.Framework.WebEncoders;
 
 namespace Microsoft.AspNet.Authentication.Tests.OpenIdConnect
 {
@@ -20,9 +21,9 @@ namespace Microsoft.AspNet.Authentication.Tests.OpenIdConnect
         /// <param name="customConfigureOption">Options which control the processing of the OpenIdConnect protocol and token validation.</param>
         /// <param name="loggerFactory">custom loggerFactory</param>
         /// <returns>The application builder</returns>
-        public static IApplicationBuilder UseCustomOpenIdConnectAuthentication(this IApplicationBuilder app, CustomConfigureOptions customConfigureOption, ILoggerFactory loggerFactory, OpenIdConnectAuthenticationHandler handler = null)
+        public static IApplicationBuilder UseCustomOpenIdConnectAuthentication(this IApplicationBuilder app, CustomConfigureOptions customConfigureOption, IUrlEncoder encoder, ILoggerFactory loggerFactory, OpenIdConnectAuthenticationHandler handler = null)
         {
-            return app.UseMiddleware<CustomOpenIdConnectAuthenticationMiddleware>(customConfigureOption, loggerFactory, handler);
+            return app.UseMiddleware<CustomOpenIdConnectAuthenticationMiddleware>(customConfigureOption, encoder, loggerFactory, handler);
         }
 
         /// <summary>
@@ -32,9 +33,9 @@ namespace Microsoft.AspNet.Authentication.Tests.OpenIdConnect
         /// <param name="options">Options which control the processing of the OpenIdConnect protocol and token validation.</param>
         /// <param name="loggerFactory">custom loggerFactory</param>
         /// <returns>The application builder</returns>
-        public static IApplicationBuilder UseCustomOpenIdConnectAuthentication(this IApplicationBuilder app, IOptions<OpenIdConnectAuthenticationOptions> options, ILoggerFactory loggerFactory, OpenIdConnectAuthenticationHandler handler = null)
+        public static IApplicationBuilder UseCustomOpenIdConnectAuthentication(this IApplicationBuilder app, IOptions<OpenIdConnectAuthenticationOptions> options, IUrlEncoder encoder, ILoggerFactory loggerFactory, OpenIdConnectAuthenticationHandler handler = null)
         {
-            return app.UseMiddleware<CustomOpenIdConnectAuthenticationMiddleware>(options, loggerFactory, handler);
+            return app.UseMiddleware<CustomOpenIdConnectAuthenticationMiddleware>(options, encoder, loggerFactory, handler);
         }
     }
 }
