@@ -277,7 +277,7 @@ namespace Microsoft.AspNet.Authentication.OpenIdConnect
         }
 
         /// <summary>
-        /// OIDCH_0011: Unable to validate the 'id_token', no suitable ISecurityTokenValidator was found."
+        /// OIDCH_0011: Unable to validate the 'id_token', no suitable ISecurityTokenValidator was found for: '{0}'.
         /// </summary>
         internal static string OIDCH_0011_UnableToValidateToken
         {
@@ -349,7 +349,7 @@ namespace Microsoft.AspNet.Authentication.OpenIdConnect
         }
 
         /// <summary>
-        /// OIDCH_0020: id_token received
+        /// OIDCH_0020: 'id_token' received: '{0}'.
         /// </summary>
         internal static string OIDCH_0020_IdTokenReceived
         {

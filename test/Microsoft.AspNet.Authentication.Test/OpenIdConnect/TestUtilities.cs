@@ -246,6 +246,8 @@ namespace Microsoft.AspNet.Authentication.Tests.OpenIdConnect
             }
         }
 
+        public UrlEncoder Encoder { get; set; } = UrlEncoder.Default;
+
         public string Authority { get; set; }
 
         public string ClientId { get; set; } = Guid.NewGuid().ToString();
@@ -307,11 +309,11 @@ namespace Microsoft.AspNet.Authentication.Tests.OpenIdConnect
         {
             get { return OpenIdConnectParameterNames.Scope + "=" + Encoder.UrlEncode(Scope); }
         }
+
         public string ExpectedState
         {
             get { return OpenIdConnectParameterNames.State + "=" + Encoder.UrlEncode(State); }
         }
 
-        public UrlEncoder Encoder { get; set; } = UrlEncoder.Default;
     }
 }

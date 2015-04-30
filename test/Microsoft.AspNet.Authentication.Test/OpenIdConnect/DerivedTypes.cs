@@ -205,7 +205,7 @@ namespace Microsoft.AspNet.Authentication.Tests.OpenIdConnect
     }
 
     /// <summary>
-    /// Used to control which methods are handled
+    /// Allows for controlling methods and capturing and exposing artifacts.
     /// </summary>
     public class CustomOpenIdConnectAuthenticationHandler : OpenIdConnectAuthenticationHandler
     {
@@ -237,6 +237,25 @@ namespace Microsoft.AspNet.Authentication.Tests.OpenIdConnect
                 await base.ApplyResponseChallengeAsync();
         }
 
+        /// <summary>
+        /// Captures Ticket
+        /// </summary>
+        /// <returns></returns>
+        protected override AuthenticationTicket AuthenticateCore()
+        {
+            Ticket = base.AuthenticateCoreAsync().GetAwaiter().GetResult();
+            return Ticket;
+        }
+
+        /// <summary>
+        /// Captures Ticket
+        /// </summary>
+        protected override async Task<AuthenticationTicket> AuthenticateCoreAsync()
+        {
+            Ticket = await base.AuthenticateCoreAsync();
+            return Ticket;
+        }
+
         public override void Challenge(ChallengeContext context)
         {
             if (_challengeAction != null)
@@ -261,9 +280,11 @@ namespace Microsoft.AspNet.Authentication.Tests.OpenIdConnect
 
         public ILogger LoggerPublic { get { return Logger; } }
 
+        public OpenIdConnectAuthenticationOptions OptionsPublic { get; set; }
+
         public IUrlEncoder UrlEncoderPublic { get { return UrlEncoder; } }
 
-        public OpenIdConnectAuthenticationOptions OptionsPublic { get; set; }
+        public AuthenticationTicket Ticket { get; set; }
     }
 
     /// <summary>

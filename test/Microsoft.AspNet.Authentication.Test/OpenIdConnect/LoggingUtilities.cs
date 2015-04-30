@@ -5,6 +5,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using Microsoft.Framework.Logging;
 
 namespace Microsoft.AspNet.Authentication.Tests.OpenIdConnect
@@ -121,6 +122,32 @@ namespace Microsoft.AspNet.Authentication.Tests.OpenIdConnect
             }
         }
 
+        public static void DebugWriteLineLogs(List<LogEntry> logs, string message = null)
+        {
+            if (!string.IsNullOrWhiteSpace(message))
+                Debug.WriteLine(message);
+
+            foreach (var logentry in logs)
+                Debug.WriteLine(logentry.ToString());
+        }
+
+        public static void DebugWriteLineLoggingErrors(Dictionary<string, List<Tuple<LogEntry, LogEntry>>> errors)
+        {
+            if (errors.Count > 0)
+            {
+                foreach (var error in errors)
+                {
+                    Debug.WriteLine("Error in Variation: " + error.Key);
+                    foreach (var logError in error.Value)
+                    {
+                        Debug.WriteLine("*Captured*, *Expected* : *" + (logError.Item1?.ToString() ?? "null") + "*, *" + (logError.Item2?.ToString() ?? "null") + "*");
+                    }
+
+                    Debug.WriteLine(Environment.NewLine);
+                }
+            }
+        }
+
         /// <summary>
         /// Populates a list of expected log entries for a test variation.
         /// </summary>
@@ -167,6 +194,5 @@ namespace Microsoft.AspNet.Authentication.Tests.OpenIdConnect
                 return message;
             }
         }
-    }
-    
+    }    
 }
