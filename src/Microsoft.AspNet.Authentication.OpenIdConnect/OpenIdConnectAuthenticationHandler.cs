@@ -225,7 +225,7 @@ namespace Microsoft.AspNet.Authentication.OpenIdConnect
             // the user did set 'OpenIdConnectMessage.State, add a parameter to the state
             else
             {
-                redirectToIdentityProviderNotification.ProtocolMessage.State = OpenIdConnectAuthenticationDefaults.AuthenticationPropertiesKey + "=" + Options.StateDataFormat.Protect(properties) + "&" + redirectToIdentityProviderNotification.ProtocolMessage.State;
+                redirectToIdentityProviderNotification.ProtocolMessage.State = OpenIdConnectAuthenticationDefaults.AuthenticationPropertiesKey + "=" + Options.StateDataFormat.Protect(properties) + "&userstate=" + redirectToIdentityProviderNotification.ProtocolMessage.State;
             }
 
             string redirectUri = redirectToIdentityProviderNotification.ProtocolMessage.CreateAuthenticationRequestUrl();

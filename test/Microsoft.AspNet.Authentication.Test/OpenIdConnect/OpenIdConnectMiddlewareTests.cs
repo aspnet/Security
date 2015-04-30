@@ -129,7 +129,7 @@ namespace Microsoft.AspNet.Authentication.Tests.OpenIdConnect
             transaction.Response.StatusCode.ShouldBe(HttpStatusCode.Redirect);
             if (userSetsState)
             {
-                queryValues.State = OpenIdConnectAuthenticationDefaults.AuthenticationPropertiesKey + "=" + stateDataFormat.Protect(localProperties) + "&" + queryValues.State;
+                queryValues.State = OpenIdConnectAuthenticationDefaults.AuthenticationPropertiesKey + "=" + stateDataFormat.Protect(localProperties) + "&userstate=" + queryValues.State;
             }
             else
             {
