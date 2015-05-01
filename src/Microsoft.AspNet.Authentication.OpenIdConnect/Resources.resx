@@ -157,7 +157,10 @@
     <value>OIDCH_0035: redirectToIdentityProviderNotification.Skipped</value>
   </data>
   <data name="OIDCH_0036_UriIsNotWellFormed" xml:space="preserve">
-    <value>OIDCH_0036: Uri.IsWellFormedUriString(redirectUri, UriKind.Absolute) returned 'false', redirectUri is: {0}", (redirectUri ?? "null"))</value>
+    <value>OIDCH_0036: Uri.IsWellFormedUriString(redirectUri, UriKind.Absolute) returned 'false', redirectUri is: '{0}'.</value>
+  </data>
+  <data name="OIDCH_0037_RedirectUri" xml:space="preserve">
+    <value>OIDCH_0037: RedirectUri is: '{0}'.</value>
   </data>
   <data name="OIDCH_0000_AuthenticateCoreAsync" xml:space="preserve">
     <value>OIDCH_0000: Entering: '{0}'.</value>
