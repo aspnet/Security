@@ -93,12 +93,12 @@ namespace Microsoft.AspNet.Authentication.Twitter
                     new ClaimsIdentity(
                         new[]
                         {
-                            new Claim(ClaimTypes.NameIdentifier, accessToken.UserId, "http://www.w3.org/2001/XMLSchema#string", Options.AuthenticationScheme),
-                            new Claim(ClaimTypes.Name, accessToken.ScreenName, "http://www.w3.org/2001/XMLSchema#string", Options.AuthenticationScheme),
-                            new Claim("urn:twitter:userid", accessToken.UserId, "http://www.w3.org/2001/XMLSchema#string", Options.AuthenticationScheme),
-                            new Claim("urn:twitter:screenname", accessToken.ScreenName, "http://www.w3.org/2001/XMLSchema#string", Options.AuthenticationScheme)
+                            new Claim(ClaimTypes.NameIdentifier, accessToken.UserId, "http://www.w3.org/2001/XMLSchema#string", Options.ClaimsIssuer),
+                            new Claim(ClaimTypes.Name, accessToken.ScreenName, "http://www.w3.org/2001/XMLSchema#string", Options.ClaimsIssuer),
+                            new Claim("urn:twitter:userid", accessToken.UserId, "http://www.w3.org/2001/XMLSchema#string", Options.ClaimsIssuer),
+                            new Claim("urn:twitter:screenname", accessToken.ScreenName, "http://www.w3.org/2001/XMLSchema#string", Options.ClaimsIssuer)
                         },
-                        Options.AuthenticationScheme,
+                        Options.ClaimsIssuer,
                         ClaimsIdentity.DefaultNameClaimType,
                         ClaimsIdentity.DefaultRoleClaimType));
                 context.Properties = requestToken.Properties;

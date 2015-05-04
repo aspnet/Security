@@ -1,16 +1,11 @@
 // Copyright (c) .NET Foundation. All rights reserved. See License.txt in the project root for license information.
 
 using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
 using System.Net;
 using System.Net.Http;
 using System.Security.Claims;
 using System.Text;
 using System.Threading.Tasks;
-using System.Xml;
-using System.Xml.Linq;
 using Microsoft.AspNet.Authentication.DataHandler;
 using Microsoft.AspNet.Authentication.MicrosoftAccount;
 using Microsoft.AspNet.Builder;
@@ -49,7 +44,7 @@ namespace Microsoft.AspNet.Authentication.Tests.MicrosoftAccount
                     context.Authentication.Challenge("Microsoft");
                     return true;
                 });
-            var transaction = await SendAsync(server, "http://example.com/challenge");
+            var transaction = await server.SendAsync("http://example.com/challenge");
             transaction.Response.StatusCode.ShouldBe(HttpStatusCode.Redirect);
             var query = transaction.Response.Headers.Location.Query;
             query.ShouldContain("custom=test");
@@ -69,7 +64,7 @@ namespace Microsoft.AspNet.Authentication.Tests.MicrosoftAccount
                     context.Authentication.Challenge("Microsoft");
                     return true;
                 });
-            var transaction = await SendAsync(server, "http://example.com/challenge");
+            var transaction = await server.SendAsync("http://example.com/challenge");
             transaction.Response.StatusCode.ShouldBe(HttpStatusCode.Redirect);
             var location = transaction.Response.Headers.Location.AbsoluteUri;
             location.ShouldContain("https://login.live.com/oauth20_authorize.srf");
@@ -83,7 +78,7 @@ namespace Microsoft.AspNet.Authentication.Tests.MicrosoftAccount
         [Fact]
         public async Task AuthenticatedEventCanGetRefreshToken()
         {
-            ISecureDataFormat<AuthenticationProperties> stateFormat = new PropertiesDataFormat(new EphemeralDataProtectionProvider().CreateProtector("MsftTest"));
+            var stateFormat = new PropertiesDataFormat(new EphemeralDataProtectionProvider().CreateProtector("MsftTest"));
             var server = CreateServer(
                 options =>
                 {
@@ -134,7 +129,7 @@ namespace Microsoft.AspNet.Authentication.Tests.MicrosoftAccount
                 },
                 context =>
                 {
-                    Describe(context.Response, context.User);
+                    context.Response.Describe(context.User);
                     return true;
                 });
             var properties = new AuthenticationProperties();
@@ -143,7 +138,7 @@ namespace Microsoft.AspNet.Authentication.Tests.MicrosoftAccount
             properties.Items.Add(correlationKey, correlationValue);
             properties.RedirectUri = "/me";
             var state = stateFormat.Protect(properties);
-            var transaction = await SendAsync(server,
+            var transaction = await server.SendAsync(
                 "https://example.com/signin-microsoft?code=TestCode&state=" + UrlEncoder.Default.UrlEncode(state),
                 correlationKey + "=" + correlationValue);
             transaction.Response.StatusCode.ShouldBe(HttpStatusCode.Redirect);
@@ -153,7 +148,7 @@ namespace Microsoft.AspNet.Authentication.Tests.MicrosoftAccount
             transaction.SetCookie[1].ShouldContain(".AspNet.External");
 
             var authCookie = transaction.AuthenticationCookieValue;
-            transaction = await SendAsync(server, "https://example.com/me", authCookie);
+            transaction = await server.SendAsync("https://example.com/me", authCookie);
             transaction.Response.StatusCode.ShouldBe(HttpStatusCode.OK);
             transaction.FindClaimValue("RefreshToken").ShouldBe("Test Refresh Token");
         }
@@ -186,112 +181,12 @@ namespace Microsoft.AspNet.Authentication.Tests.MicrosoftAccount
             });
         }
 
-        private static async Task<Transaction> SendAsync(TestServer server, string uri, string cookieHeader = null)
-        {
-            var request = new HttpRequestMessage(HttpMethod.Get, uri);
-            if (!string.IsNullOrEmpty(cookieHeader))
-            {
-                request.Headers.Add("Cookie", cookieHeader);
-            }
-            var transaction = new Transaction
-            {
-                Request = request,
-                Response = await server.CreateClient().SendAsync(request),
-            };
-            if (transaction.Response.Headers.Contains("Set-Cookie"))
-            {
-                transaction.SetCookie = transaction.Response.Headers.GetValues("Set-Cookie").ToList();
-            }
-            transaction.ResponseText = await transaction.Response.Content.ReadAsStringAsync();
-
-            if (transaction.Response.Content != null &&
-                transaction.Response.Content.Headers.ContentType != null &&
-                transaction.Response.Content.Headers.ContentType.MediaType == "text/xml")
-            {
-                transaction.ResponseElement = XElement.Parse(transaction.ResponseText);
-            }
-            return transaction;
-        }
-
         private static HttpResponseMessage ReturnJsonResponse(object content)
         {
             var res = new HttpResponseMessage(HttpStatusCode.OK);
             var text = JsonConvert.SerializeObject(content);
             res.Content = new StringContent(text, Encoding.UTF8, "application/json");
             return res;
-        }
-
-        private static void Describe(HttpResponse res, ClaimsPrincipal principal)
-        {
-            res.StatusCode = 200;
-            res.ContentType = "text/xml";
-            var xml = new XElement("xml");
-            if (principal != null)
-            {
-                foreach (var identity in principal.Identities)
-                {
-                    xml.Add(identity.Claims.Select(claim => new XElement("claim", new XAttribute("type", claim.Type), new XAttribute("value", claim.Value))));
-                }
-            }
-            using (var memory = new MemoryStream())
-            {
-                using (var writer = new XmlTextWriter(memory, Encoding.UTF8))
-                {
-                    xml.WriteTo(writer);
-                }
-                res.Body.Write(memory.ToArray(), 0, memory.ToArray().Length);
-            }
-        }
-
-        private class TestHttpMessageHandler : HttpMessageHandler
-        {
-            public Func<HttpRequestMessage, HttpResponseMessage> Sender { get; set; }
-
-            protected override Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, System.Threading.CancellationToken cancellationToken)
-            {
-                if (Sender != null)
-                {
-                    return Task.FromResult(Sender(request));
-                }
-
-                return Task.FromResult<HttpResponseMessage>(null);
-            }
-        }
-
-        private class Transaction
-        {
-            public HttpRequestMessage Request { get; set; }
-            public HttpResponseMessage Response { get; set; }
-            public IList<string> SetCookie { get; set; }
-            public string ResponseText { get; set; }
-            public XElement ResponseElement { get; set; }
-
-            public string AuthenticationCookieValue
-            {
-                get
-                {
-                    if (SetCookie != null && SetCookie.Count > 0)
-                    {
-                        var authCookie = SetCookie.SingleOrDefault(c => c.Contains(".AspNet.External="));
-                        if (authCookie != null)
-                        {
-                            return authCookie.Substring(0, authCookie.IndexOf(';'));
-                        }
-                    }
-
-                    return null;
-                }
-            }
-
-            public string FindClaimValue(string claimType)
-            {
-                XElement claim = ResponseElement.Elements("claim").SingleOrDefault(elt => elt.Attribute("type").Value == claimType);
-                if (claim == null)
-                {
-                    return null;
-                }
-                return claim.Attribute("value").Value;
-            }
         }
     }
 }
