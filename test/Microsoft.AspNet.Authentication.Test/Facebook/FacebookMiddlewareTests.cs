@@ -71,8 +71,7 @@ namespace Microsoft.AspNet.Authentication.Facebook
                 },
                 services =>
                 {
-                    services.AddWebEncoders();
-                    services.AddDataProtection();
+                    services.AddAuthentication();
                     services.ConfigureFacebookAuthentication(options =>
                     {
                         options.AppId = "Test App Id";

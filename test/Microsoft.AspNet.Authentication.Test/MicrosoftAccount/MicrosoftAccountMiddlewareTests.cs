@@ -38,11 +38,6 @@ namespace Microsoft.AspNet.Authentication.Tests.MicrosoftAccount
                             context.Response.Redirect(context.RedirectUri + "&custom=test");
                         }
                     };
-                },
-                context =>
-                {
-                    context.Authentication.Challenge("Microsoft");
-                    return true;
                 });
             var transaction = await server.SendAsync("http://example.com/challenge");
             transaction.Response.StatusCode.ShouldBe(HttpStatusCode.Redirect);
@@ -58,11 +53,6 @@ namespace Microsoft.AspNet.Authentication.Tests.MicrosoftAccount
                 {
                     options.ClientId = "Test Client Id";
                     options.ClientSecret = "Test Client Secret";
-                },
-                context =>
-                {
-                    context.Authentication.Challenge("Microsoft");
-                    return true;
                 });
             var transaction = await server.SendAsync("http://example.com/challenge");
             transaction.Response.StatusCode.ShouldBe(HttpStatusCode.Redirect);
@@ -122,15 +112,10 @@ namespace Microsoft.AspNet.Authentication.Tests.MicrosoftAccount
                         OnAuthenticated = context =>
                         {
                             var refreshToken = context.RefreshToken;
-                            context.Principal.AddIdentity(new ClaimsIdentity(new Claim[] { new Claim("RefreshToken", refreshToken) }));
+                            context.Principal.AddIdentity(new ClaimsIdentity(new Claim[] { new Claim("RefreshToken", refreshToken, ClaimValueTypes.String, "Microsoft") }, "Microsoft"));
                             return Task.FromResult<object>(null);
                         }
                     };
-                },
-                context =>
-                {
-                    context.Response.Describe(context.User);
-                    return true;
                 });
             var properties = new AuthenticationProperties();
             var correlationKey = ".AspNet.Correlation.Microsoft";
@@ -145,7 +130,7 @@ namespace Microsoft.AspNet.Authentication.Tests.MicrosoftAccount
             transaction.Response.Headers.Location.ToString().ShouldBe("/me");
             transaction.SetCookie.Count.ShouldBe(2);
             transaction.SetCookie[0].ShouldContain(correlationKey);
-            transaction.SetCookie[1].ShouldContain(".AspNet.External");
+            transaction.SetCookie[1].ShouldContain(".AspNet." + TestExtensions.CookieAuthenticationScheme);
 
             var authCookie = transaction.AuthenticationCookieValue;
             transaction = await server.SendAsync("https://example.com/me", authCookie);
@@ -153,19 +138,31 @@ namespace Microsoft.AspNet.Authentication.Tests.MicrosoftAccount
             transaction.FindClaimValue("RefreshToken").ShouldBe("Test Refresh Token");
         }
 
-        private static TestServer CreateServer(Action<MicrosoftAccountAuthenticationOptions> configureOptions, Func<HttpContext, bool> handler)
+        private static TestServer CreateServer(Action<MicrosoftAccountAuthenticationOptions> configureOptions)
         {
             return TestServer.Create(app =>
             {
                 app.UseCookieAuthentication(options =>
                 {
-                    options.AuthenticationScheme = "External";
+                    options.AuthenticationScheme = TestExtensions.CookieAuthenticationScheme;
                     options.AutomaticAuthentication = true;
                 });
                 app.UseMicrosoftAccountAuthentication(configureOptions);
+
                 app.Use(async (context, next) =>
                 {
-                    if (handler == null || !handler(context))
+                    var req = context.Request;
+                    var res = context.Response;
+                    if (req.Path == new PathString("/challenge"))
+                    {
+                        context.Authentication.Challenge("Microsoft");
+                        res.StatusCode = 401;
+                    }
+                    else if (req.Path == new PathString("/me"))
+                    {
+                        res.Describe(context.User);
+                    }
+                    else
                     {
                         await next();
                     }
@@ -176,7 +173,7 @@ namespace Microsoft.AspNet.Authentication.Tests.MicrosoftAccount
                 services.AddAuthentication();
                 services.Configure<ExternalAuthenticationOptions>(options =>
                 {
-                    options.SignInScheme = "External";
+                    options.SignInScheme = TestExtensions.CookieAuthenticationScheme;
                 });
             });
         }

@@ -1,8 +1,6 @@
 // Copyright (c) .NET Foundation. All rights reserved.
 // Licensed under the Apache License, Version 2.0. See License.txt in the project root for license information.
 
-using System;
-using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Net.Http;
@@ -16,64 +14,10 @@ using Microsoft.AspNet.TestHost;
 
 namespace Microsoft.AspNet.Authentication
 {
-    public class Transaction
+    public static class TestExtensions
     {
-        public HttpRequestMessage Request { get; set; }
-        public HttpResponseMessage Response { get; set; }
+        public const string CookieAuthenticationScheme = "External";
 
-        public IList<string> SetCookie { get; set; }
-
-        public string ResponseText { get; set; }
-        public XElement ResponseElement { get; set; }
-
-        public string AuthenticationCookieValue
-        {
-            get
-            {
-                if (SetCookie != null && SetCookie.Count > 0)
-                {
-                    var authCookie = SetCookie.SingleOrDefault(c => c.Contains(".AspNet.Cookie="));
-                    if (authCookie != null)
-                    {
-                        return authCookie.Substring(0, authCookie.IndexOf(';'));
-                    }
-                }
-
-                return null;
-            }
-        }
-
-        public string FindClaimValue(string claimType, string issuer = null)
-        {
-            var claim = ResponseElement.Elements("claim")
-                .SingleOrDefault(elt => elt.Attribute("type").Value == claimType &&
-                    (issuer == null || elt.Attribute("issuer").Value == issuer));
-            if (claim == null)
-            {
-                return null;
-            }
-            return claim.Attribute("value").Value;
-        }
-    }
-
-    public class TestHttpMessageHandler : HttpMessageHandler
-    {
-        public Func<HttpRequestMessage, HttpResponseMessage> Sender { get; set; }
-
-        protected override Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, System.Threading.CancellationToken cancellationToken)
-        {
-            if (Sender != null)
-            {
-                return Task.FromResult(Sender(request));
-            }
-
-            return Task.FromResult<HttpResponseMessage>(null);
-        }
-    }
-
-
-    public static class AuthTestExtensions
-    {
         public static async Task<Transaction> SendAsync(this TestServer server, string uri, string cookieHeader = null)
         {
             var request = new HttpRequestMessage(HttpMethod.Get, uri);

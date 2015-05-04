@@ -2,14 +2,12 @@
 
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Linq;
 using System.Net;
 using System.Net.Http;
 using System.Security.Claims;
 using System.Text;
 using System.Threading.Tasks;
-using System.Xml.Linq;
 using Microsoft.AspNet.Authentication.DataHandler;
 using Microsoft.AspNet.Builder;
 using Microsoft.AspNet.DataProtection;
@@ -26,8 +24,6 @@ namespace Microsoft.AspNet.Authentication.Google
 {
     public class GoogleMiddlewareTests
     {
-        private const string CookieAuthenticationScheme = "Cookie";
-
         [Fact]
         public async Task ChallengeWillTriggerRedirection()
         {
@@ -228,6 +224,7 @@ namespace Microsoft.AspNet.Authentication.Google
 
         [Theory]
         [InlineData(null)]
+        [InlineData("CustomIssuer")]
         public async Task ReplyPathWillAuthenticateValidAuthorizeCodeAndState(string claimsIssuer)
         {
             var stateFormat = new PropertiesDataFormat(new EphemeralDataProtectionProvider().CreateProtector("GoogleTest"));
@@ -290,7 +287,7 @@ namespace Microsoft.AspNet.Authentication.Google
             transaction.Response.Headers.Location.ToString().ShouldBe("/me");
             transaction.SetCookie.Count.ShouldBe(2);
             transaction.SetCookie[0].ShouldContain(correlationKey);
-            transaction.SetCookie[1].ShouldContain(".AspNet.Cookie");
+            transaction.SetCookie[1].ShouldContain(".AspNet." + TestExtensions.CookieAuthenticationScheme);
 
             var authCookie = transaction.AuthenticationCookieValue;
             transaction = await server.SendAsync("https://example.com/me", authCookie);
@@ -370,7 +367,6 @@ namespace Microsoft.AspNet.Authentication.Google
         public async Task AuthenticatedEventCanGetRefreshToken()
         {
             var stateFormat = new PropertiesDataFormat(new EphemeralDataProtectionProvider().CreateProtector("GoogleTest"));
-            Debugger.Launch();
             var server = CreateServer(options =>
             {
                 options.ClientId = "Test Id";
@@ -421,7 +417,7 @@ namespace Microsoft.AspNet.Authentication.Google
                     OnAuthenticated = context =>
                         {
                             var refreshToken = context.RefreshToken;
-                            context.Principal.AddIdentity(new ClaimsIdentity(new Claim[] { new Claim("RefreshToken", refreshToken) }, "Google"));
+                            context.Principal.AddIdentity(new ClaimsIdentity(new Claim[] { new Claim("RefreshToken", refreshToken, ClaimValueTypes.String, "Google") }, "Google"));
                             return Task.FromResult<object>(null);
                         }
                 };
@@ -439,7 +435,7 @@ namespace Microsoft.AspNet.Authentication.Google
             transaction.Response.Headers.Location.ToString().ShouldBe("/me");
             transaction.SetCookie.Count.ShouldBe(2);
             transaction.SetCookie[0].ShouldContain(correlationKey);
-            transaction.SetCookie[1].ShouldContain(".AspNet.Cookie");
+            transaction.SetCookie[1].ShouldContain(".AspNet." + TestExtensions.CookieAuthenticationScheme);
 
             var authCookie = transaction.AuthenticationCookieValue;
             transaction = await server.SendAsync("https://example.com/me", authCookie);
@@ -461,7 +457,7 @@ namespace Microsoft.AspNet.Authentication.Google
             {
                 app.UseCookieAuthentication(options =>
                 {
-                    options.AuthenticationScheme = CookieAuthenticationScheme;
+                    options.AuthenticationScheme = TestExtensions.CookieAuthenticationScheme;
                     options.AutomaticAuthentication = true;
                 });
                 app.UseGoogleAuthentication(configureOptions);
@@ -510,7 +506,7 @@ namespace Microsoft.AspNet.Authentication.Google
                 services.AddAuthentication();
                 services.Configure<ExternalAuthenticationOptions>(options =>
                 {
-                    options.SignInScheme = CookieAuthenticationScheme;
+                    options.SignInScheme = TestExtensions.CookieAuthenticationScheme;
                 });
                 services.ConfigureClaimsTransformation(p =>
                 {
