@@ -80,7 +80,10 @@ namespace Microsoft.AspNet.Authorization
 
         public AuthorizationPolicyBuilder RequireRole([NotNull] IEnumerable<string> roles)
         {
-            RequireClaim(ClaimTypes.Role, roles);
+            Requirements.Add(new RolesAuthorizationRequirement
+            {
+                AllowedRoles = roles
+            });
             return this;
         }
 
