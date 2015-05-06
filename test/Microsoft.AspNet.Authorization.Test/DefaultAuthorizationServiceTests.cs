@@ -482,7 +482,6 @@ namespace Microsoft.AspNet.Authorization.Test
         [Fact]
         public async Task CanRequireUserName()
         {
-            Debugger.Launch();
             // Arrange
             var authorizationService = BuildAuthorizationService(services =>
             {
@@ -498,6 +497,50 @@ namespace Microsoft.AspNet.Authorization.Test
                     },
                     "AuthType")
                 );
+
+            // Act
+            var allowed = await authorizationService.AuthorizeAsync(user, null, "Hao");
+
+            // Assert
+            Assert.True(allowed);
+        }
+
+        [Fact]
+        public async Task CanRequireUserNameWithDiffClaimType()
+        {
+            // Arrange
+            var authorizationService = BuildAuthorizationService(services =>
+            {
+                services.ConfigureAuthorization(options =>
+                {
+                    options.AddPolicy("Hao", policy => policy.RequireUserName("Hao"));
+                });
+            });
+            var identity = new ClaimsIdentity("AuthType", "Name", "Role");
+            identity.AddClaim(new Claim("Name", "Hao"));
+            var user = new ClaimsPrincipal(identity);
+
+            // Act
+            var allowed = await authorizationService.AuthorizeAsync(user, null, "Hao");
+
+            // Assert
+            Assert.True(allowed);
+        }
+
+        [Fact]
+        public async Task CanRequireRoleWithDiffClaimType()
+        {
+            // Arrange
+            var authorizationService = BuildAuthorizationService(services =>
+            {
+                services.ConfigureAuthorization(options =>
+                {
+                    options.AddPolicy("Hao", policy => policy.RequireRole("Hao"));
+                });
+            });
+            var identity = new ClaimsIdentity("AuthType", "Name", "Role");
+            identity.AddClaim(new Claim("Role", "Hao"));
+            var user = new ClaimsPrincipal(identity);
 
             // Act
             var allowed = await authorizationService.AuthorizeAsync(user, null, "Hao");
