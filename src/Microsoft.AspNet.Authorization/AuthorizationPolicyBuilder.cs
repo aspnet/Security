@@ -55,21 +55,13 @@ namespace Microsoft.AspNet.Authorization
 
         public AuthorizationPolicyBuilder RequireClaim([NotNull] string claimType, IEnumerable<string> requiredValues)
         {
-            Requirements.Add(new ClaimsAuthorizationRequirement
-            {
-                ClaimType = claimType,
-                AllowedValues = requiredValues
-            });
+            Requirements.Add(new ClaimsAuthorizationRequirement(claimType, requiredValues));
             return this;
         }
 
         public AuthorizationPolicyBuilder RequireClaim([NotNull] string claimType)
         {
-            Requirements.Add(new ClaimsAuthorizationRequirement
-            {
-                ClaimType = claimType,
-                AllowedValues = null
-            });
+            Requirements.Add(new ClaimsAuthorizationRequirement(claimType, allowedValues: null));
             return this;
         }
 
@@ -80,16 +72,13 @@ namespace Microsoft.AspNet.Authorization
 
         public AuthorizationPolicyBuilder RequireRole([NotNull] IEnumerable<string> roles)
         {
-            Requirements.Add(new RolesAuthorizationRequirement
-            {
-                AllowedRoles = roles
-            });
+            Requirements.Add(new RolesAuthorizationRequirement(roles));
             return this;
         }
 
         public AuthorizationPolicyBuilder RequireUserName([NotNull] string userName)
         {
-            RequireClaim(ClaimTypes.Name, userName);
+            Requirements.Add(new NameAuthorizationRequirement(userName));
             return this;
         }
 

@@ -3,6 +3,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Security.Claims;
 using System.Threading.Tasks;
@@ -481,6 +482,7 @@ namespace Microsoft.AspNet.Authorization.Test
         [Fact]
         public async Task CanRequireUserName()
         {
+            Debugger.Launch();
             // Arrange
             var authorizationService = BuildAuthorizationService(services =>
             {
