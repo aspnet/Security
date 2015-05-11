@@ -427,29 +427,15 @@ namespace Microsoft.AspNet.Authorization.Test
         }
 
         [Fact]
-        public async Task PolicyFailsWithNoRequirements()
+        public void PolicyThrowsWithNoRequirements()
         {
-            // Arrange
-            var authorizationService = BuildAuthorizationService(services =>
+            Assert.Throws<InvalidOperationException>(() => BuildAuthorizationService(services =>
             {
                 services.ConfigureAuthorization(options =>
                 {
                     options.AddPolicy("Basic", policy => { });
                 });
-            });
-            var user = new ClaimsPrincipal(
-                new ClaimsIdentity(
-                    new Claim[] {
-                        new Claim(ClaimTypes.Name, "Name"),
-                    },
-                    "AuthType")
-                );
-
-            // Act
-            var allowed = await authorizationService.AuthorizeAsync(user, "Basic");
-
-            // Assert
-            Assert.False(allowed);
+            }));
         }
 
         [Fact]
