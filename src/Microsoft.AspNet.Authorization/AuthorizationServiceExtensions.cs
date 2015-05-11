@@ -11,6 +11,18 @@ namespace Microsoft.AspNet.Authorization
     public static class AuthorizationServiceExtensions
     {
         /// <summary>
+        /// Checks if a user meets a specific requirement for the specified resource
+        /// </summary>
+        /// <param name="user"></param>
+        /// <param name="resource"></param>
+        /// <param name="requirement"></param>
+        /// <returns></returns>
+        public static Task<bool> AuthorizeAsync([NotNull] this IAuthorizationService service, ClaimsPrincipal user, object resource, [NotNull] IAuthorizationRequirement requirement)
+        {
+            return service.AuthorizeAsync(user, resource, new IAuthorizationRequirement[] { requirement });
+        }
+
+        /// <summary>
         /// Checks if a user meets a specific authorization policy
         /// </summary>
         /// <param name="service">The authorization service.</param>
@@ -45,6 +57,18 @@ namespace Microsoft.AspNet.Authorization
         public static Task<bool> AuthorizeAsync([NotNull] this IAuthorizationService service, ClaimsPrincipal user, [NotNull] string policyName)
         {
             return service.AuthorizeAsync(user, resource: null, policyName: policyName);
+        }
+
+        /// <summary>
+        /// Checks if a user meets a specific requirement for the specified resource
+        /// </summary>
+        /// <param name="user"></param>
+        /// <param name="resource"></param>
+        /// <param name="requirement"></param>
+        /// <returns></returns>
+        public static bool Authorize([NotNull] this IAuthorizationService service, ClaimsPrincipal user, object resource, [NotNull] IAuthorizationRequirement requirement)
+        {
+            return service.Authorize(user, resource, new IAuthorizationRequirement[] { requirement });
         }
 
         /// <summary>
