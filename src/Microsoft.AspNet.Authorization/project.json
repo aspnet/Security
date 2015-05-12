@@ -1,11 +1,11 @@
 {
-    "version": "1.0.0-*",
+    "version": "1.0.0-beta4",
     "description": "ASP.NET 5 authorization classes.",
     "dependencies": {
-        "Microsoft.AspNet.Http.Interfaces": "1.0.0-*",
-        "Microsoft.Framework.Logging.Interfaces": "1.0.0-*",
-        "Microsoft.Framework.NotNullAttribute.Internal": { "type": "build", "version": "1.0.0-*" },
-        "Microsoft.Framework.OptionsModel": "1.0.0-*"
+        "Microsoft.AspNet.Http.Interfaces": "1.0.0-beta4",
+        "Microsoft.Framework.Logging.Interfaces": "1.0.0-beta4",
+        "Microsoft.Framework.NotNullAttribute.Internal": { "type": "build", "version": "1.0.0-beta4" },
+        "Microsoft.Framework.OptionsModel": "1.0.0-beta4"
     },
     "frameworks": {
         "dnx451": { },

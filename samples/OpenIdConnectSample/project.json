@@ -1,10 +1,10 @@
 {
     "dependencies": {
-        "Kestrel": "1.0.0-*",
-        "Microsoft.AspNet.Authentication.Cookies": "1.0.0-*",
-        "Microsoft.AspNet.Server.IIS": "1.0.0-*",
-        "Microsoft.AspNet.Authentication.OpenIdConnect": "1.0.0-*",
-        "Microsoft.AspNet.Server.WebListener": "1.0.0-*"
+        "Kestrel": "1.0.0-beta4",
+        "Microsoft.AspNet.Authentication.Cookies": "1.0.0-beta4",
+        "Microsoft.AspNet.Server.IIS": "1.0.0-beta4",
+        "Microsoft.AspNet.Authentication.OpenIdConnect": "1.0.0-beta4",
+        "Microsoft.AspNet.Server.WebListener": "1.0.0-beta4"
     },
     "frameworks": {
         "dnx451": { },

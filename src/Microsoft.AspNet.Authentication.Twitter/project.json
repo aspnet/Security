@@ -1,9 +1,9 @@
 {
-    "version": "1.0.0-*",
+    "version": "1.0.0-beta4",
     "description": "ASP.NET 5 middleware that enables an application to support Twitter's OAuth 2.0 authentication workflow.",
     "dependencies": {
-        "Microsoft.AspNet.Authentication": "1.0.0-*",
-        "Microsoft.Framework.NotNullAttribute.Internal": { "type": "build", "version": "1.0.0-*" }
+        "Microsoft.AspNet.Authentication": "1.0.0-beta4",
+        "Microsoft.Framework.NotNullAttribute.Internal": { "type": "build", "version": "1.0.0-beta4" }
     },
     "frameworks": {
         "dnx451": {
@@ -14,7 +14,7 @@
         },
         "dnxcore50": {
             "dependencies": {
-                "System.Net.Http.WinHttpHandler": "4.0.0-beta-*"
+                "System.Net.Http.WinHttpHandler": "4.0.0-beta-22816"
             }
         }
     }
