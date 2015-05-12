@@ -62,6 +62,7 @@ namespace Microsoft.AspNet.Authentication.Tests.OpenIdConnect
                     { "OIDCH_0019:", LogLevel.Debug },
                     { "OIDCH_0020:", LogLevel.Debug },
                     { "OIDCH_0026:", LogLevel.Error },
+                    { "OIDCH_0037:", LogLevel.Debug }
                 };
 
             BuildLogEntryList();
@@ -151,11 +152,15 @@ namespace Microsoft.AspNet.Authentication.Tests.OpenIdConnect
             logsEntriesExpected = new int[] { 3 };
             await RunVariation(LogLevel.Information, message, MessageReceivedSkippedOptions, errors, logsEntriesExpected);
 
-            logsEntriesExpected = new int[] {0, 1, 7, 20, 8 };
+            logsEntriesExpected = new int[] {0, 1, 7, 14, 20, 8 };
             await RunVariation(LogLevel.Debug, message, SecurityTokenReceivedHandledOptions, errors, logsEntriesExpected);
 
-            logsEntriesExpected = new int[] {0, 1, 7, 20, 9 };
+            logsEntriesExpected = new int[] {0, 1, 7, 14, 20, 9 };
             await RunVariation(LogLevel.Debug, message, SecurityTokenReceivedSkippedOptions, errors, logsEntriesExpected);
+
+            message.IdToken = null;
+            logsEntriesExpected = new int[] { 0, 1, 7, 14, 22, 20, 8};
+            await RunVariation(LogLevel.Debug, message, CodeReceivedAndRedeemedHandledOptions, errors, logsEntriesExpected);
 
 #if _Verbose
             Console.WriteLine("\n ===== \n");
@@ -317,6 +322,21 @@ namespace Microsoft.AspNet.Authentication.Tests.OpenIdConnect
                 };
         }
 
+        private static void CodeReceivedAndRedeemedHandledOptions(OpenIdConnectAuthenticationOptions options)
+        {
+            DefaultOptions(options);
+            options.ResponseType = "code";
+            options.Notifications =
+                new OpenIdConnectAuthenticationNotifications
+                {
+                    SecurityTokenReceived = (notification) =>
+                    {
+                        notification.HandleResponse();
+                        return Task.FromResult<object>(null);
+                    }
+                };
+        }
+
         private static void CodeReceivedSkippedOptions(OpenIdConnectAuthenticationOptions options)
         {
             DefaultOptions(options);
@@ -336,6 +356,7 @@ namespace Microsoft.AspNet.Authentication.Tests.OpenIdConnect
             options.AuthenticationScheme = "OpenIdConnectHandlerTest";
             options.ConfigurationManager = ConfigurationManager.DefaultStaticConfigurationManager;
             options.StateDataFormat = new AuthenticationPropertiesFormater();
+
         }
 
         private static void MessageReceivedHandledOptions(OpenIdConnectAuthenticationOptions options)
@@ -569,6 +590,11 @@ namespace Microsoft.AspNet.Authentication.Tests.OpenIdConnect
             };
 
             await Options.Notifications.RedirectToIdentityProvider(redirectToIdentityProviderNotification);
+        }
+
+        protected override IdentityModel.Clients.ActiveDirectory.AuthenticationResult RedeemAuthorizationCode(string authorizationCode)
+        {
+            return null;
         }
     }
 

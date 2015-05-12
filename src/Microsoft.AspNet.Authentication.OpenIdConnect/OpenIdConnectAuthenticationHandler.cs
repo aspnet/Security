@@ -13,6 +13,11 @@ using Microsoft.AspNet.Http;
 using Microsoft.AspNet.Http.Authentication;
 using Microsoft.Framework.Logging;
 using Microsoft.IdentityModel.Protocols;
+using Microsoft.IdentityModel.Clients.ActiveDirectory;
+using System.Net.Http;
+using System.Net.Http.Headers;
+using Newtonsoft.Json;
+using System.Collections.Generic;
 
 namespace Microsoft.AspNet.Authentication.OpenIdConnect
 {
@@ -238,6 +243,7 @@ namespace Microsoft.AspNet.Authentication.OpenIdConnect
         /// <remarks>Uses log id's OIDCH-0000 - OIDCH-0025</remarks>
         protected override async Task<AuthenticationTicket> AuthenticateCoreAsync()
         {
+            bool isCodeOnlyFlow = (Options.ResponseType == "code");
             Logger.LogDebug(Resources.OIDCH_0000_AuthenticateCoreAsync, this.GetType());
 
             // Allow login to be constrained to a specific path. Need to make this runtime configurable.
@@ -319,6 +325,45 @@ namespace Microsoft.AspNet.Authentication.OpenIdConnect
                 {
                     Logger.LogDebug(Resources.OIDCH_0007_UpdatingConfiguration);
                     _configuration = await Options.ConfigurationManager.GetConfigurationAsync(Context.RequestAborted);
+                }
+
+                if (!string.IsNullOrWhiteSpace(message.Code))
+                {
+                    Logger.LogDebug(Resources.OIDCH_0014_CodeReceived, message.Code);
+
+                    var authorizationCodeReceivedNotification = new AuthorizationCodeReceivedNotification(Context, Options)
+                    {
+                        Code = message.Code,
+                        ProtocolMessage = message
+                        //RedirectUri = ticket.Properties.Items.ContainsKey(OpenIdConnectAuthenticationDefaults.RedirectUriUsedForCodeKey) ?
+                        //ticket.Properties.Items[OpenIdConnectAuthenticationDefaults.RedirectUriUsedForCodeKey] : string.Empty,
+                    };
+
+                    await Options.Notifications.AuthorizationCodeReceived(authorizationCodeReceivedNotification);
+                    if (authorizationCodeReceivedNotification.HandledResponse)
+                    {
+                        Logger.LogInformation(Resources.OIDCH_0015_CodeReceivedNotificationHandledResponse);
+                        return authorizationCodeReceivedNotification.AuthenticationTicket;
+                    }
+
+                    if (authorizationCodeReceivedNotification.Skipped)
+                    {
+                        Logger.LogInformation(Resources.OIDCH_0016_CodeReceivedNotificationSkipped);
+                        return null;
+                    }
+
+                    // Redeeming authorization code for tokens
+                    if (string.IsNullOrWhiteSpace(message.IdToken) && isCodeOnlyFlow)
+                    {
+                        Logger.LogDebug("OIDCH_0037: Id Token is null. Redeeming code : {0} for tokens.", message.Code);
+
+                        var tokens = RedeemAuthorizationCode(message.Code);
+                        // Exchange code for tokens
+                        if (tokens != null)
+                        {
+                            message.IdToken = tokens.IdToken;
+                        }
+                    }
                 }
 
                 // OpenIdConnect protocol allows a Code to be received without the id_token
@@ -429,58 +474,31 @@ namespace Microsoft.AspNet.Authentication.OpenIdConnect
                         return null;
                     }
 
-                    string nonce = jwt.Payload.Nonce;
-                    if (Options.NonceCache != null)
+                    // If id_token is received using code only flow, no need to validate nonce and chash.
+                    if (!isCodeOnlyFlow)
                     {
-                        // if the nonce cannot be removed, it was used
-                        if (!Options.NonceCache.TryRemoveNonce(nonce))
+
+                        string nonce = jwt.Payload.Nonce;
+                        if (Options.NonceCache != null)
                         {
-                            nonce = null;
+                            // if the nonce cannot be removed, it was used
+                            if (!Options.NonceCache.TryRemoveNonce(nonce))
+                            {
+                                nonce = null;
+                            }
                         }
-                    }
-                    else
-                    {
-                        nonce = ReadNonceCookie(nonce);
-                    }
+                        else
+                        {
+                            nonce = ReadNonceCookie(nonce);
+                        }
 
-                    var protocolValidationContext = new OpenIdConnectProtocolValidationContext
-                    {
-                        AuthorizationCode = message.Code,
-                        Nonce = nonce, 
-                    };
+                        var protocolValidationContext = new OpenIdConnectProtocolValidationContext
+                        {
+                            AuthorizationCode = message.Code,
+                            Nonce = nonce,
+                        };
 
-                    Options.ProtocolValidator.Validate(jwt, protocolValidationContext);
-                }
-
-                if (message.Code != null)
-                {
-                    Logger.LogDebug(Resources.OIDCH_0014_CodeReceived, message.Code);
-                    if (ticket == null)
-                    {
-                        ticket = new AuthenticationTicket(properties, Options.AuthenticationScheme);
-                    }
-
-                    var authorizationCodeReceivedNotification = new AuthorizationCodeReceivedNotification(Context, Options)
-                    {
-                        AuthenticationTicket = ticket,
-                        Code = message.Code,
-                        JwtSecurityToken = jwt,
-                        ProtocolMessage = message,
-                        RedirectUri = ticket.Properties.Items.ContainsKey(OpenIdConnectAuthenticationDefaults.RedirectUriUsedForCodeKey) ?
-                                      ticket.Properties.Items[OpenIdConnectAuthenticationDefaults.RedirectUriUsedForCodeKey] : string.Empty,
-                    };
-
-                    await Options.Notifications.AuthorizationCodeReceived(authorizationCodeReceivedNotification);
-                    if (authorizationCodeReceivedNotification.HandledResponse)
-                    {
-                        Logger.LogInformation(Resources.OIDCH_0015_CodeReceivedNotificationHandledResponse);
-                        return authorizationCodeReceivedNotification.AuthenticationTicket;
-                    }
-
-                    if (authorizationCodeReceivedNotification.Skipped)
-                    {
-                        Logger.LogInformation(Resources.OIDCH_0016_CodeReceivedNotificationSkipped);
-                        return null;
+                        Options.ProtocolValidator.Validate(jwt, protocolValidationContext);
                     }
                 }
 
@@ -518,6 +536,14 @@ namespace Microsoft.AspNet.Authentication.OpenIdConnect
 
                 throw;
             }
+        }
+
+        protected virtual IdentityModel.Clients.ActiveDirectory.AuthenticationResult RedeemAuthorizationCode(string authorizationCode)
+        {
+            AuthenticationContext authContext = new AuthenticationContext(Options.Authority, false);
+            ClientCredential credential = new ClientCredential(Options.ClientId, Options.ClientSecret);
+            var tokens = authContext.AcquireTokenByAuthorizationCodeAsync(authorizationCode, new Uri(Options.RedirectUri), credential).GetAwaiter().GetResult();
+            return tokens;
         }
 
         /// <summary>

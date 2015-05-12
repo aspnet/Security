@@ -222,4 +222,7 @@
   <data name="OIDCH_0020_IdTokenReceived" xml:space="preserve">
     <value>OIDCH_0020: 'id_token' received: '{0}'</value>
   </data>
+  <data name="OIDCH_0037_Redeeming_Auth_Code" xml:space="preserve">
+    <value>OIDCH_0037: Id Token is null. Redeeming code : {0} for tokens.</value>
+  </data>
 </root>
