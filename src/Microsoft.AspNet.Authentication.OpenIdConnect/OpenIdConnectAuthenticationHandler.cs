@@ -243,7 +243,7 @@ namespace Microsoft.AspNet.Authentication.OpenIdConnect
         /// <remarks>Uses log id's OIDCH-0000 - OIDCH-0025</remarks>
         protected override async Task<AuthenticationTicket> AuthenticateCoreAsync()
         {
-            bool isCodeOnlyFlow = (Options.ResponseType == OpenIdConnectConstants.Code);
+            bool isCodeOnlyFlow = (Options.ResponseType == OpenIdConnectResponseTypes.CodeOnly);
             Logger.LogDebug(Resources.OIDCH_0000_AuthenticateCoreAsync, this.GetType());
 
             // Allow login to be constrained to a specific path. Need to make this runtime configurable.
@@ -474,32 +474,34 @@ namespace Microsoft.AspNet.Authentication.OpenIdConnect
                         return null;
                     }
 
-                    // If id_token is received using code only flow, no need to validate nonce and chash.
-                    if (!isCodeOnlyFlow)
+
+                    string nonce = jwt.Payload.Nonce;
+                    if (Options.NonceCache != null)
                     {
-
-                        string nonce = jwt.Payload.Nonce;
-                        if (Options.NonceCache != null)
+                        // if the nonce cannot be removed, it was used
+                        if (!Options.NonceCache.TryRemoveNonce(nonce))
                         {
-                            // if the nonce cannot be removed, it was used
-                            if (!Options.NonceCache.TryRemoveNonce(nonce))
-                            {
-                                nonce = null;
-                            }
+                            nonce = null;
                         }
-                        else
-                        {
-                            nonce = ReadNonceCookie(nonce);
-                        }
-
-                        var protocolValidationContext = new OpenIdConnectProtocolValidationContext
-                        {
-                            AuthorizationCode = message.Code,
-                            Nonce = nonce,
-                        };
-
-                        Options.ProtocolValidator.Validate(jwt, protocolValidationContext);
                     }
+                    else
+                    {
+                        nonce = ReadNonceCookie(nonce);
+                    }
+
+                    var protocolValidationContext = new OpenIdConnectProtocolValidationContext
+                    {
+                        AuthorizationCode = message.Code,
+                        Nonce = nonce,
+                    };
+                    
+                    // If id_token is received using code only flow, no need to validate chash and also it is not returned in the response. Setting authorizationCode to null will skip the validation of chash.
+                    if (isCodeOnlyFlow)
+                    {
+                        protocolValidationContext.AuthorizationCode = null;
+                    }
+
+                    Options.ProtocolValidator.Validate(jwt, protocolValidationContext);
                 }
 
                 return ticket;
