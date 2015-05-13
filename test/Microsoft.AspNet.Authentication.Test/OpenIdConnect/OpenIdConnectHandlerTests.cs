@@ -1,4 +1,4 @@
-// Copyright (c) .NET Foundation. All rights reserved.
+﻿// Copyright (c) .NET Foundation. All rights reserved.
 // Licensed under the Apache License, Version 2.0. See License.txt in the project root for license information.
 
 // this controls if the logs are written to the console.
@@ -159,7 +159,7 @@ namespace Microsoft.AspNet.Authentication.Tests.OpenIdConnect
             await RunVariation(LogLevel.Debug, message, SecurityTokenReceivedSkippedOptions, errors, logsEntriesExpected);
 
             message.IdToken = null;
-            logsEntriesExpected = new int[] { 0, 1, 7, 14, 22, 20, 8};
+            logsEntriesExpected = new int[] { 0, 1, 7, 14, 22};
             await RunVariation(LogLevel.Debug, message, CodeReceivedAndRedeemedHandledOptions, errors, logsEntriesExpected);
 
 #if _Verbose

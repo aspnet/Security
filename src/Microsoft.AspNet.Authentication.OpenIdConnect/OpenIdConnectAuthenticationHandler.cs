@@ -1,4 +1,4 @@
-// Copyright (c) .NET Foundation. All rights reserved.
+﻿// Copyright (c) .NET Foundation. All rights reserved.
 // Licensed under the Apache License, Version 2.0. See License.txt in the project root for license information.
 
 using System;
@@ -334,9 +334,9 @@ namespace Microsoft.AspNet.Authentication.OpenIdConnect
                     var authorizationCodeReceivedNotification = new AuthorizationCodeReceivedNotification(Context, Options)
                     {
                         Code = message.Code,
-                        ProtocolMessage = message
-                        //RedirectUri = ticket.Properties.Items.ContainsKey(OpenIdConnectAuthenticationDefaults.RedirectUriUsedForCodeKey) ?
-                        //ticket.Properties.Items[OpenIdConnectAuthenticationDefaults.RedirectUriUsedForCodeKey] : string.Empty,
+                        ProtocolMessage = message,
+                        RedirectUri = properties.Items.ContainsKey(OpenIdConnectAuthenticationDefaults.RedirectUriUsedForCodeKey) ? 
+                                      properties.Items[OpenIdConnectAuthenticationDefaults.RedirectUriUsedForCodeKey] : string.Empty,
                     };
 
                     await Options.Notifications.AuthorizationCodeReceived(authorizationCodeReceivedNotification);
@@ -355,7 +355,7 @@ namespace Microsoft.AspNet.Authentication.OpenIdConnect
                     // Redeeming authorization code for tokens
                     if (string.IsNullOrWhiteSpace(message.IdToken) && isCodeOnlyFlow)
                     {
-                        Logger.LogDebug("OIDCH_0037: Id Token is null. Redeeming code : {0} for tokens.", message.Code);
+                        Logger.LogDebug(Resources.OIDCH_0037_Redeeming_Auth_Code, message.Code);
 
                         var tokens = RedeemAuthorizationCode(message.Code);
                         // Exchange code for tokens
