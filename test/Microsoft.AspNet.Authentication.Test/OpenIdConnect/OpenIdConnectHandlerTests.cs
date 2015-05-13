@@ -325,7 +325,7 @@ namespace Microsoft.AspNet.Authentication.Tests.OpenIdConnect
         private static void CodeReceivedAndRedeemedHandledOptions(OpenIdConnectAuthenticationOptions options)
         {
             DefaultOptions(options);
-            options.ResponseType = "code";
+            options.ResponseType = OpenIdConnectResponseTypes.CodeOnly;
             options.Notifications =
                 new OpenIdConnectAuthenticationNotifications
                 {
