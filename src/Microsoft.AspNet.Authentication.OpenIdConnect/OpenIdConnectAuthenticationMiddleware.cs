@@ -170,9 +170,7 @@ namespace Microsoft.AspNet.Authentication.OpenIdConnect
                 }
                 webRequestHandler.ServerCertificateValidationCallback = options.BackchannelCertificateValidator.Validate;
             }
-#endif
-
-#if DNXCORE50
+#else
                 new WinHttpHandler();
 #endif
             return handler;

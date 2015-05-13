@@ -243,7 +243,7 @@ namespace Microsoft.AspNet.Authentication.OpenIdConnect
         /// <remarks>Uses log id's OIDCH-0000 - OIDCH-0025</remarks>
         protected override async Task<AuthenticationTicket> AuthenticateCoreAsync()
         {
-            bool isCodeOnlyFlow = (Options.ResponseType == "code");
+            bool isCodeOnlyFlow = (Options.ResponseType == OpenIdConnectConstants.Code);
             Logger.LogDebug(Resources.OIDCH_0000_AuthenticateCoreAsync, this.GetType());
 
             // Allow login to be constrained to a specific path. Need to make this runtime configurable.
