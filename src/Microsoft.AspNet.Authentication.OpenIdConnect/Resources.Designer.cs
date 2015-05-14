@@ -173,6 +173,14 @@ namespace Microsoft.AspNet.Authentication.OpenIdConnect
         }
 
         /// <summary>
+        /// OIDCH_0037: Id Token is null. Redeeming code : {0} for tokens.
+        /// </summary>
+        internal static string OIDCH_0037_Redeeming_Auth_Code
+        {
+            get { return ResourceManager.GetString("OIDCH_0037_Redeeming_Auth_Code"); }
+        }
+
+        /// <summary>
         /// OIDCH_0000: Entering: '{0}'.
         /// </summary>
         internal static string OIDCH_0000_AuthenticateCoreAsync

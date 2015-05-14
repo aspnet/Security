@@ -14,7 +14,7 @@
         "Microsoft.AspNet.TestHost": "1.0.0-*",
         "Moq": "4.2.1312.1622",
         "xunit.runner.aspnet": "2.0.0-aspnet-*",
-        "Microsoft.IdentityModel.Clients.ActiveDirectory": "3.1.204222344-alpha"
+        "Microsoft.IdentityModel.Clients.ActiveDirectory": "3.3.205132343-alpha"
     },
     "commands": {
         "test": "xunit.runner.aspnet"

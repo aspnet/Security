@@ -5,7 +5,7 @@
         "Microsoft.AspNet.Authentication": "1.0.0-*",
         "Microsoft.Framework.NotNullAttribute.Internal": { "type": "build", "version": "1.0.0-*" },
         "Microsoft.IdentityModel.Protocol.Extensions": "2.0.0-beta4-*",
-        "Microsoft.IdentityModel.Clients.ActiveDirectory": "3.1.204222344-alpha",
+        "Microsoft.IdentityModel.Clients.ActiveDirectory": "3.3.205132343-alpha",
         "System.Threading.Tasks": "4.0.10-beta-*",
         "System.Runtime": "4.0.20-beta-*"
 
