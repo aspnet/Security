@@ -10,7 +10,14 @@ using Microsoft.Framework.OptionsModel;
 
 namespace Microsoft.AspNet.Authorization
 {
-    public class DefaultAuthorizationService : IAuthorizationService
+
+    // Consider adding for IPolicyMap
+    public interface IPolicyMap
+    {
+        IEnumerable<IAuthorizationHandler> Lookup(string policyName);
+    }
+
+    public class DefaultAuthorizationService : IAuthorizationService, IPolicyMap
     {
         private readonly IList<IAuthorizationHandler> _handlers;
         private readonly AuthorizationOptions _options;
@@ -35,6 +42,7 @@ namespace Microsoft.AspNet.Authorization
             foreach (var handler in _handlers)
             {
                 handler.Handle(authContext);
+                //REVIEW: Do we want to consider short circuiting on failure
             }
             return authContext.HasSucceeded;
         }

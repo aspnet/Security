@@ -26,5 +26,23 @@ namespace Microsoft.Framework.DependencyInjection
             services.AddTransient<IAuthorizationHandler, PassThroughAuthorizationHandler>();
             return services;
         }
+
+        //policy.AddRequirement(new MagicRequirement(context, req => { context.Fail() }));
+
+        // Add this come up name
+        public class MagicRequirement : AuthorizationHandler<MagicRequirement>, IAuthorizationRequirement
+        {
+            public Action<AuthorizationContext, MagicRequirement> Handler { get;  }
+
+            public MagicRequirement(Action<AuthorizationContext, MagicRequirement> handleMe)
+            {
+                Handler = handleMe;
+            }
+
+            protected override void Handle(AuthorizationContext context, MagicRequirement requirement)
+            {
+                Handler.Invoke(context, requirement);
+            }
+        }
     }
 }
