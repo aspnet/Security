@@ -2,22 +2,21 @@
 // Licensed under the Apache License, Version 2.0. See License.txt in the project root for license information.
 
 using System;
+using System.Collections.Generic;
 using System.Globalization;
 using System.IdentityModel.Tokens;
 using System.IO;
 using System.Linq;
+using System.Net.Http;
 using System.Security.Claims;
 using System.Threading.Tasks;
 using Microsoft.AspNet.Authentication.Notifications;
+using Microsoft.AspNet.Authentication.OAuth;
 using Microsoft.AspNet.Http;
 using Microsoft.AspNet.Http.Authentication;
 using Microsoft.Framework.Logging;
 using Microsoft.IdentityModel.Protocols;
-using Microsoft.IdentityModel.Clients.ActiveDirectory;
-using System.Net.Http;
-using System.Net.Http.Headers;
-using Newtonsoft.Json;
-using System.Collections.Generic;
+using Newtonsoft.Json.Linq;
 
 namespace Microsoft.AspNet.Authentication.OpenIdConnect
 {
@@ -41,6 +40,13 @@ namespace Microsoft.AspNet.Authentication.OpenIdConnect
                        Request.Path +
                        Request.QueryString;
             }
+        }
+
+        protected HttpClient Backchannel { get; private set; }
+
+        public OpenIdConnectAuthenticationHandler(HttpClient backchannel)
+        {
+            Backchannel = backchannel;
         }
 
         protected override void ApplyResponseGrant()
@@ -243,7 +249,7 @@ namespace Microsoft.AspNet.Authentication.OpenIdConnect
         /// <remarks>Uses log id's OIDCH-0000 - OIDCH-0025</remarks>
         protected override async Task<AuthenticationTicket> AuthenticateCoreAsync()
         {
-            bool isCodeOnlyFlow = (Options.ResponseType == OpenIdConnectResponseTypes.CodeOnly);
+            var isCodeOnlyFlow = (Options.ResponseType == OpenIdConnectResponseTypes.CodeOnly);
             Logger.LogDebug(Resources.OIDCH_0000_AuthenticateCoreAsync, this.GetType());
 
             // Allow login to be constrained to a specific path. Need to make this runtime configurable.
@@ -357,7 +363,7 @@ namespace Microsoft.AspNet.Authentication.OpenIdConnect
                     {
                         Logger.LogDebug(Resources.OIDCH_0037_Redeeming_Auth_Code, message.Code);
 
-                        var tokens = RedeemAuthorizationCode(message.Code);
+                        var tokens = await RedeemAuthorizationCode(message.Code);
                         // Exchange code for tokens
                         if (tokens != null)
                         {
@@ -474,7 +480,6 @@ namespace Microsoft.AspNet.Authentication.OpenIdConnect
                         return null;
                     }
 
-
                     string nonce = jwt.Payload.Nonce;
                     if (Options.NonceCache != null)
                     {
@@ -540,12 +545,23 @@ namespace Microsoft.AspNet.Authentication.OpenIdConnect
             }
         }
 
-        protected virtual IdentityModel.Clients.ActiveDirectory.AuthenticationResult RedeemAuthorizationCode(string authorizationCode)
+        protected virtual async Task<TokenResponse> RedeemAuthorizationCode(string authorizationCode)
         {
-            AuthenticationContext authContext = new AuthenticationContext(Options.Authority, false);
-            ClientCredential credential = new ClientCredential(Options.ClientId, Options.ClientSecret);
-            var tokens = authContext.AcquireTokenByAuthorizationCodeAsync(authorizationCode, new Uri(Options.RedirectUri), credential).GetAwaiter().GetResult();
-            return tokens;
+            var tokenRequestParameters = new Dictionary<string, string>()
+            {
+                { "client_id", Options.ClientId },
+                { "redirect_uri", Options.RedirectUri },
+                { "client_secret", Options.ClientSecret },
+                { "code", authorizationCode },
+                { "grant_type", "authorization_code" },
+            };
+            var requestMessage = new HttpRequestMessage(HttpMethod.Post, _configuration.TokenEndpoint);
+            requestMessage.Content = new FormUrlEncodedContent(tokenRequestParameters);
+            var responseMessage = await Backchannel.SendAsync(requestMessage);
+            responseMessage.EnsureSuccessStatusCode();
+            var tokenResonse = await responseMessage.Content.ReadAsStringAsync();
+            JObject jsonTokenResponse = JObject.Parse(tokenResonse);
+            return new TokenResponse(jsonTokenResponse);
         }
 
         /// <summary>

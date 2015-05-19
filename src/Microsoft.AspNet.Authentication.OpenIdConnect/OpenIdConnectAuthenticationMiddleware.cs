@@ -4,6 +4,7 @@
 using System;
 using System.Collections.ObjectModel;
 using System.Diagnostics.CodeAnalysis;
+using System.Diagnostics.Tracing;
 using System.IdentityModel.Tokens;
 using System.Net.Http;
 using System.Text;
@@ -13,10 +14,10 @@ using Microsoft.AspNet.Authentication.DataHandler.Serializer;
 using Microsoft.AspNet.Builder;
 using Microsoft.AspNet.DataProtection;
 using Microsoft.AspNet.Http;
+using Microsoft.Framework.Internal;
 using Microsoft.Framework.Logging;
 using Microsoft.Framework.OptionsModel;
 using Microsoft.IdentityModel.Protocols;
-using Microsoft.Framework.Internal;
 using Microsoft.Framework.WebEncoders;
 
 namespace Microsoft.AspNet.Authentication.OpenIdConnect
@@ -48,6 +49,7 @@ namespace Microsoft.AspNet.Authentication.OpenIdConnect
             : base(next, options, loggerFactory, encoder, configureOptions)
         {
 <<<<<<< HEAD
+<<<<<<< HEAD
             if (string.IsNullOrEmpty(Options.SignInScheme) && !string.IsNullOrEmpty(externalOptions.Options.SignInScheme))
 =======
             _logger = loggerFactory.CreateLogger<OpenIdConnectAuthenticationMiddleware>();
@@ -62,6 +64,10 @@ namespace Microsoft.AspNet.Authentication.OpenIdConnect
                 IdentityModelEventSource.LogLevel = EventLevel.Informational;
                 eventListener.EnableEvents(IdentityModelEventSource.Logger, EventLevel.Informational);
             }
+=======
+            var eventListener = new DefaultIdentityModelLoggingListener(Logger);
+            eventListener.EnableEvents(IdentityModelEventSource.Logger, EventLevel.Informational);
+>>>>>>> Removing adal dependency and addressing some github comments
 
             if (string.IsNullOrWhiteSpace(Options.TokenValidationParameters.AuthenticationType))
 >>>>>>> Adding logging draft.
@@ -117,6 +123,11 @@ namespace Microsoft.AspNet.Authentication.OpenIdConnect
                 Options.TokenValidationParameters.ValidAudience = Options.ClientId;
             }
 
+            Backchannel = new HttpClient(ResolveHttpMessageHandler(Options));
+            Backchannel.DefaultRequestHeaders.UserAgent.ParseAdd("Microsoft ASP.NET OAuth middleware");
+            Backchannel.Timeout = Options.BackchannelTimeout;
+            Backchannel.MaxResponseContentBufferSize = 1024 * 1024 * 10; // 10 MB
+
             if (Options.ConfigurationManager == null)
             {
                 if (Options.Configuration != null)
@@ -136,13 +147,12 @@ namespace Microsoft.AspNet.Authentication.OpenIdConnect
                         Options.MetadataAddress += ".well-known/openid-configuration";
                     }
 
-                    var httpClient = new HttpClient(ResolveHttpMessageHandler(Options));
-                    httpClient.Timeout = Options.BackchannelTimeout;
-                    httpClient.MaxResponseContentBufferSize = 1024 * 1024 * 10; // 10 MB
-                    Options.ConfigurationManager = new ConfigurationManager<OpenIdConnectConfiguration>(Options.MetadataAddress, httpClient);
+                    Options.ConfigurationManager = new ConfigurationManager<OpenIdConnectConfiguration>(Options.MetadataAddress, Backchannel);
                 }
             }
         }
+
+        protected HttpClient Backchannel { get; private set; }
 
         /// <summary>
         /// Provides the <see cref="AuthenticationHandler"/> object for processing authentication-related requests.
@@ -150,7 +160,7 @@ namespace Microsoft.AspNet.Authentication.OpenIdConnect
         /// <returns>An <see cref="AuthenticationHandler"/> configured with the <see cref="OpenIdConnectAuthenticationOptions"/> supplied to the constructor.</returns>
         protected override AuthenticationHandler<OpenIdConnectAuthenticationOptions> CreateHandler()
         {
-            return new OpenIdConnectAuthenticationHandler();
+            return new OpenIdConnectAuthenticationHandler(Backchannel);
         }
 
         [SuppressMessage("Microsoft.Reliability", "CA2000:Dispose objects before losing scope", Justification = "Managed by caller")]

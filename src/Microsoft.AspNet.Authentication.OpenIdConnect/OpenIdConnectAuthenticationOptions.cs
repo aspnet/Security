@@ -338,7 +338,5 @@ namespace Microsoft.AspNet.Authentication.OpenIdConnect
             get;
             set;
         }
-
-        public EventListener IdentityModelEventSourceListener { get; set; }
     }
 }

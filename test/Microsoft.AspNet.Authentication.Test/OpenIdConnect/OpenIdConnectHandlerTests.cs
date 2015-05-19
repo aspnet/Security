@@ -10,6 +10,7 @@ using System.Collections.Generic;
 using System.Net.Http;
 using System.Threading.Tasks;
 using Microsoft.AspNet.Authentication.Notifications;
+using Microsoft.AspNet.Authentication.OAuth;
 using Microsoft.AspNet.Authentication.OpenIdConnect;
 using Microsoft.AspNet.Builder;
 using Microsoft.AspNet.DataProtection;
@@ -592,7 +593,7 @@ namespace Microsoft.AspNet.Authentication.Tests.OpenIdConnect
             await Options.Notifications.RedirectToIdentityProvider(redirectToIdentityProviderNotification);
         }
 
-        protected override IdentityModel.Clients.ActiveDirectory.AuthenticationResult RedeemAuthorizationCode(string authorizationCode)
+        protected override async Task<TokenResponse> RedeemAuthorizationCode(string authorizationCode)
         {
             return null;
         }

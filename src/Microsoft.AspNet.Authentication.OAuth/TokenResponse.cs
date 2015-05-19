@@ -14,6 +14,7 @@ namespace Microsoft.AspNet.Authentication.OAuth
             TokenType = response.Value<string>("token_type");
             RefreshToken = response.Value<string>("refresh_token");
             ExpiresIn = response.Value<string>("expires_in");
+            IdToken = response.Value<string>("id_token");
         }
 
         public JObject Response { get; set; }
@@ -21,5 +22,6 @@ namespace Microsoft.AspNet.Authentication.OAuth
         public string TokenType { get; set; }
         public string RefreshToken { get; set; }
         public string ExpiresIn { get; set; }
+        public string IdToken { get; set; }
     }
 }

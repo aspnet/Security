@@ -5,10 +5,15 @@
         "Microsoft.AspNet.Authentication": "1.0.0-*",
         "Microsoft.Framework.NotNullAttribute.Internal": { "type": "build", "version": "1.0.0-*" },
         "Microsoft.IdentityModel.Protocol.Extensions": "2.0.0-beta4-*",
-        "Microsoft.IdentityModel.Clients.ActiveDirectory": "3.3.205132343-alpha",
         "System.Threading.Tasks": "4.0.10-beta-*",
+<<<<<<< HEAD
         "System.Runtime": "4.0.20-beta-*"
 
+=======
+        "System.Runtime": "4.0.20-beta-*",
+        "Microsoft.Framework.NotNullAttribute.Sources": { "type": "build", "version": "1.0.0-*" },
+        "Microsoft.AspNet.Authentication.OAuth": "1.0.0-*"
+>>>>>>> Removing adal dependency and addressing some github comments
     },
     "frameworks": {
         "dnx451": {
