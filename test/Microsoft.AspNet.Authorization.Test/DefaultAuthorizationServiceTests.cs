@@ -3,6 +3,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Security.Claims;
 using System.Threading.Tasks;
@@ -668,6 +669,7 @@ namespace Microsoft.AspNet.Authorization.Test
             Assert.Equal(shouldSucceed, allowed);
         }
 
+        [Fact]
         public async Task CanCombinePolicies()
         {
             // Arrange
@@ -695,6 +697,7 @@ namespace Microsoft.AspNet.Authorization.Test
             Assert.True(allowed);
         }
 
+        [Fact]
         public async Task CombinePoliciesWillFailIfBasePolicyFails()
         {
             // Arrange
@@ -721,6 +724,7 @@ namespace Microsoft.AspNet.Authorization.Test
             Assert.False(allowed);
         }
 
+        [Fact]
         public async Task CombinedPoliciesWillFailIfExtraRequirementFails()
         {
             // Arrange
@@ -785,6 +789,7 @@ namespace Microsoft.AspNet.Authorization.Test
             }
         }
 
+        [Fact]
         public async Task CanAuthorizeAllSuperuserOperations()
         {
             // Arrange
@@ -808,6 +813,7 @@ namespace Microsoft.AspNet.Authorization.Test
             Assert.True(await authorizationService.AuthorizeAsync(user, null, Operations.Create));
         }
 
+        [Fact]
         public async Task CanAuthorizeOnlyAllowedOperations()
         {
             // Arrange
@@ -823,6 +829,26 @@ namespace Microsoft.AspNet.Authorization.Test
             Assert.True(await authorizationService.AuthorizeAsync(user, null, Operations.Edit));
             Assert.False(await authorizationService.AuthorizeAsync(user, null, Operations.Delete));
             Assert.False(await authorizationService.AuthorizeAsync(user, null, Operations.Create));
+        }
+
+        [Fact]
+        public void CanAuthorizeWithDelegateRequirement()
+        {
+            var authorizationService = BuildAuthorizationService(services =>
+            {
+                services.ConfigureAuthorization(options =>
+                {
+                    // REVIEW: we could add some sugar on PolicyBuilder RequireHandler?
+                    options.AddPolicy("Basic", policy => policy.AddRequirements(new DelegateRequirement((context, req) => context.Succeed(req))));
+                });
+            });
+            var user = new ClaimsPrincipal();
+
+            // Act
+            var allowed = authorizationService.Authorize(user, "Basic");
+
+            // Assert
+            Assert.True(allowed);
         }
     }
 }

@@ -41,13 +41,9 @@ namespace Microsoft.AspNet.Authorization
         public virtual async Task HandleAsync(AuthorizationContext context)
         {
             var resource = context.Resource as TResource;
-            // REVIEW: should we allow null resources?
-            if (resource != null)
+            foreach (var req in context.Requirements.OfType<TRequirement>())
             {
-                foreach (var req in context.Requirements.OfType<TRequirement>())
-                {
-                    await HandleAsync(context, req, resource);
-                }
+                await HandleAsync(context, req, resource);
             }
         }
 
