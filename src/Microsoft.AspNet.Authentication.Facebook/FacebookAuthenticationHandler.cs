@@ -17,7 +17,7 @@ using Newtonsoft.Json.Linq;
 
 namespace Microsoft.AspNet.Authentication.Facebook
 {
-    internal class FacebookAuthenticationHandler : OAuthAuthenticationSquaredHandler<FacebookAuthenticationOptions, FacebookAuthenticationNotifications>
+    internal class FacebookAuthenticationHandler : OAuthAuthenticationHandler<FacebookAuthenticationOptions, FacebookAuthenticationNotifications>
     {
         public FacebookAuthenticationHandler(HttpClient httpClient)
             : base(httpClient)

@@ -15,13 +15,6 @@ using Newtonsoft.Json.Linq;
 
 namespace Microsoft.AspNet.Authentication.OAuth
 {
-    public class OAuthAuthenticationSquaredHandler<TOptions, TNotifications> : OAuthAuthenticationHandler<TOptions, TNotifications>
-        where TOptions : OAuthAuthenticationOptions<TNotifications>
-        where TNotifications : IOAuthAuthenticationNotifications
-    {
-        public OAuthAuthenticationSquaredHandler(HttpClient backchannel) : base(backchannel) { }
-    }
-
     public class OAuthAuthenticationHandler<TOptions, TNotifications> : AuthenticationHandler<TOptions>
         where TOptions : OAuthAuthenticationOptions<TNotifications>
         where TNotifications : IOAuthAuthenticationNotifications
