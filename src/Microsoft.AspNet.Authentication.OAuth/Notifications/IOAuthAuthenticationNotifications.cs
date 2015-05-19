@@ -5,6 +5,18 @@ using System.Threading.Tasks;
 
 namespace Microsoft.AspNet.Authentication.OAuth
 {
+    // TODO: Pick a real name
+    public interface IOAuthAuthenticationSquaredNotifications<TContext> : IOAuthAuthenticationNotifications where TContext : class
+    {
+        /// <summary>
+        /// Invoked after succesfully authenticating a user.
+        /// </summary>
+        /// <param name="context">Contains information about the login session as well as the user <see cref="System.Security.Claims.ClaimsIdentity"/>.</param>
+        /// <returns>A <see cref="Task"/> representing the completed operation.</returns>
+        Task Authenticated(TContext context);
+
+    }
+
     /// <summary>
     /// Specifies callback methods which the <see cref="OAuthAuthenticationMiddleware"/> invokes to enable developer control over the authentication process.
     /// </summary>

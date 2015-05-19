@@ -6,16 +6,16 @@ using Microsoft.AspNet.Authentication.OAuth;
 
 namespace Microsoft.AspNet.Authentication.Facebook
 {
-    /// <summary>
-    /// Specifies callback methods which the <see cref="FacebookAuthenticationMiddleware"></see> invokes to enable developer control over the authentication process.
-    /// </summary>
-    public interface IFacebookAuthenticationNotifications : IOAuthAuthenticationNotifications
-    {
-        /// <summary>
-        /// Invoked when Facebook succesfully authenticates a user.
-        /// </summary>
-        /// <param name="context">Contains information about the login session as well as the user <see cref="System.Security.Claims.ClaimsIdentity"/>.</param>
-        /// <returns>A <see cref="Task"/> representing the completed operation.</returns>
-        Task Authenticated(FacebookAuthenticatedContext context);
-    }
+    ///// <summary>
+    ///// Specifies callback methods which the <see cref="FacebookAuthenticationMiddleware"></see> invokes to enable developer control over the authentication process.
+    ///// </summary>
+    //public interface IFacebookAuthenticationNotifications : IOAuthAuthenticationNotifications
+    //{
+    //    /// <summary>
+    //    /// Invoked when Facebook succesfully authenticates a user.
+    //    /// </summary>
+    //    /// <param name="context">Contains information about the login session as well as the user <see cref="System.Security.Claims.ClaimsIdentity"/>.</param>
+    //    /// <returns>A <see cref="Task"/> representing the completed operation.</returns>
+    //    Task Authenticated(FacebookAuthenticatedContext context);
+    //}
 }
