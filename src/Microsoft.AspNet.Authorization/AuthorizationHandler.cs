@@ -70,6 +70,6 @@ namespace Microsoft.AspNet.Authorization
             }
         }
 
-        public abstract void Handle(AuthorizationContext context, TRequirement requirement, TResource resource);
+        protected abstract void Handle(AuthorizationContext context, TRequirement requirement, TResource resource);
     }
 }

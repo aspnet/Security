@@ -10,14 +10,7 @@ using Microsoft.Framework.OptionsModel;
 
 namespace Microsoft.AspNet.Authorization
 {
-
-    // Consider adding for IPolicyMap
-    public interface IPolicyMap
-    {
-        IEnumerable<IAuthorizationHandler> Lookup(string policyName);
-    }
-
-    public class DefaultAuthorizationService : IAuthorizationService, IPolicyMap
+    public class DefaultAuthorizationService : IAuthorizationService
     {
         private readonly IList<IAuthorizationHandler> _handlers;
         private readonly AuthorizationOptions _options;

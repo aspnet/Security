@@ -582,7 +582,7 @@ namespace Microsoft.AspNet.Authorization.Test
         public class CustomRequirement : IAuthorizationRequirement { }
         public class CustomHandler : AuthorizationHandler<CustomRequirement>
         {
-            public override void Handle(AuthorizationContext context, CustomRequirement requirement)
+            protected override void Handle(AuthorizationContext context, CustomRequirement requirement)
             {
                 context.Succeed(requirement);
             }
@@ -638,7 +638,7 @@ namespace Microsoft.AspNet.Authorization.Test
 
             public bool Succeed { get; set; }
 
-            public override void Handle(AuthorizationContext context, PassThroughRequirement requirement)
+            protected override void Handle(AuthorizationContext context, PassThroughRequirement requirement)
             {
                 if (Succeed) {
                     context.Succeed(requirement);
@@ -765,7 +765,7 @@ namespace Microsoft.AspNet.Authorization.Test
 
             private IEnumerable<OperationAuthorizationRequirement> _allowed;
 
-            public override void Handle(AuthorizationContext context, OperationAuthorizationRequirement requirement, ExpenseReport resource)
+            protected override void Handle(AuthorizationContext context, OperationAuthorizationRequirement requirement, ExpenseReport resource)
             {
                 if (_allowed.Contains(requirement))
                 {
@@ -776,7 +776,7 @@ namespace Microsoft.AspNet.Authorization.Test
 
         public class SuperUserHandler : AuthorizationHandler<OperationAuthorizationRequirement>
         {
-            public override void Handle(AuthorizationContext context, OperationAuthorizationRequirement requirement)
+            protected override void Handle(AuthorizationContext context, OperationAuthorizationRequirement requirement)
             {
                 if (context.User.HasClaim("SuperUser", "yes"))
                 {
