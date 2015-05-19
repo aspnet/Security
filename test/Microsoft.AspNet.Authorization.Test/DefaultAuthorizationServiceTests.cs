@@ -838,8 +838,7 @@ namespace Microsoft.AspNet.Authorization.Test
             {
                 services.ConfigureAuthorization(options =>
                 {
-                    // REVIEW: we could add some sugar on PolicyBuilder RequireHandler?
-                    options.AddPolicy("Basic", policy => policy.AddRequirements(new DelegateRequirement((context, req) => context.Succeed(req))));
+                    options.AddPolicy("Basic", policy => policy.RequireDelegate((context, req) => context.Succeed(req)));
                 });
             });
             var user = new ClaimsPrincipal();
