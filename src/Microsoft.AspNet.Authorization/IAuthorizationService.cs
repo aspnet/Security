@@ -8,27 +8,6 @@ using Microsoft.Framework.Internal;
 
 namespace Microsoft.AspNet.Authorization
 {
-    public interface IPolicyMap
-    {
-        /// <summary>
-        /// Checks if a user meets a specific authorization policy
-        /// </summary>
-        /// <param name="user">The user to check the policy against.</param>
-        /// <param name="resource">The resource the policy should be checked with.</param>
-        /// <param name="policyName">The name of the policy to check against a specific context.</param>
-        /// <returns><value>true</value> when the user fulfills the policy, <value>false</value> otherwise.</returns>
-        Task<bool> AuthorizeAsync(ClaimsPrincipal user, object resource, [NotNull] string policyName);
-
-        /// <summary>
-        /// Checks if a user meets a specific authorization policy
-        /// </summary>
-        /// <param name="user">The user to check the policy against.</param>
-        /// <param name="resource">The resource the policy should be checked with.</param>
-        /// <param name="policyName">The name of the policy to check against a specific context.</param>
-        /// <returns><value>true</value> when the user fulfills the policy, <value>false</value> otherwise.</returns>
-        bool Authorize(ClaimsPrincipal user, object resource, [NotNull] string policyName);
-    }
-
     /// <summary>
     /// Checks policy based permissions for a user
     /// </summary>
