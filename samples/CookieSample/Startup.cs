@@ -1,37 +1,34 @@
-using System;
 using System.Security.Claims;
-using Microsoft.AspNet;
-using Microsoft.AspNet.Http;
-using Microsoft.AspNet.Security.Cookies;
-using Microsoft.AspNet.RequestContainer;
+using Microsoft.AspNet.Authentication.Cookies;
 using Microsoft.AspNet.Builder;
+using Microsoft.AspNet.Http;
 using Microsoft.Framework.DependencyInjection;
-using Microsoft.Framework.DependencyInjection.Fallback;
 using Microsoft.Framework.Logging;
 
 namespace CookieSample
 {
     public class Startup
     {
-        public void Configuration(IBuilder app)
+        public void ConfigureServices(IServiceCollection services)
         {
-            app.UseServices(services =>
-            {
-                // TODO: Move to host.
-                services.AddInstance<ILoggerFactory>(new NullLoggerFactory());
-            });
+            services.AddAuthentication();
+        }
 
-            app.UseCookieAuthentication(new CookieAuthenticationOptions()
-            {
+        public void Configure(IApplicationBuilder app, ILoggerFactory loggerfactory)
+        {
+            loggerfactory.AddConsole(LogLevel.Information);
 
+            app.UseCookieAuthentication(options =>
+            {
+                options.AutomaticAuthentication = true;
             });
 
             app.Run(async context =>
             {
-                if (context.User == null || !context.User.Identity.IsAuthenticated)
+                if (string.IsNullOrEmpty(context.User.Identity.Name))
                 {
-                    context.Response.SignIn(new ClaimsIdentity(new[] { new Claim("name", "bob") }, CookieAuthenticationDefaults.AuthenticationType));                    
-
+                    var user = new ClaimsPrincipal(new ClaimsIdentity(new[] { new Claim(ClaimTypes.Name, "bob") }));
+                    context.Authentication.SignIn(CookieAuthenticationDefaults.AuthenticationScheme, user);
                     context.Response.ContentType = "text/plain";
                     await context.Response.WriteAsync("Hello First timer");
                     return;
@@ -40,24 +37,6 @@ namespace CookieSample
                 context.Response.ContentType = "text/plain";
                 await context.Response.WriteAsync("Hello old timer");
             });
-        }
-
-        // TODO: Temp workaround until the host reliably provides logging.
-        // If ILoggerFactory is never guaranteed, move this fallback into Microsoft.Framework.Logging.
-        private class NullLoggerFactory : ILoggerFactory
-        {
-            public ILogger Create(string name)
-            {
-                return new NullLongger();
-            }
-        }
-
-        private class NullLongger : ILogger
-        {
-            public bool WriteCore(TraceType eventType, int eventId, object state, Exception exception, Func<object, Exception, string> formatter)
-            {
-                return false;
-            }
         }
     }
 }

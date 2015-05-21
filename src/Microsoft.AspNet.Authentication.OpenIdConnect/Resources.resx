@@ -1,0 +1,225 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <!-- 
+    Microsoft ResX Schema 
+    
+    Version 2.0
+    
+    The primary goals of this format is to allow a simple XML format 
+    that is mostly human readable. The generation and parsing of the 
+    various data types are done through the TypeConverter classes 
+    associated with the data types.
+    
+    Example:
+    
+    ... ado.net/XML headers & schema ...
+    <resheader name="resmimetype">text/microsoft-resx</resheader>
+    <resheader name="version">2.0</resheader>
+    <resheader name="reader">System.Resources.ResXResourceReader, System.Windows.Forms, ...</resheader>
+    <resheader name="writer">System.Resources.ResXResourceWriter, System.Windows.Forms, ...</resheader>
+    <data name="Name1"><value>this is my long string</value><comment>this is a comment</comment></data>
+    <data name="Color1" type="System.Drawing.Color, System.Drawing">Blue</data>
+    <data name="Bitmap1" mimetype="application/x-microsoft.net.object.binary.base64">
+        <value>[base64 mime encoded serialized .NET Framework object]</value>
+    </data>
+    <data name="Icon1" type="System.Drawing.Icon, System.Drawing" mimetype="application/x-microsoft.net.object.bytearray.base64">
+        <value>[base64 mime encoded string representing a byte array form of the .NET Framework object]</value>
+        <comment>This is a comment</comment>
+    </data>
+                
+    There are any number of "resheader" rows that contain simple 
+    name/value pairs.
+    
+    Each data row contains a name, and value. The row also contains a 
+    type or mimetype. Type corresponds to a .NET class that support 
+    text/value conversion through the TypeConverter architecture. 
+    Classes that don't support this are serialized and stored with the 
+    mimetype set.
+    
+    The mimetype is used for serialized objects, and tells the 
+    ResXResourceReader how to depersist the object. This is currently not 
+    extensible. For a given mimetype the value must be set accordingly:
+    
+    Note - application/x-microsoft.net.object.binary.base64 is the format 
+    that the ResXResourceWriter will generate, however the reader can 
+    read any of the formats listed below.
+    
+    mimetype: application/x-microsoft.net.object.binary.base64
+    value   : The object must be serialized with 
+            : System.Runtime.Serialization.Formatters.Binary.BinaryFormatter
+            : and then encoded with base64 encoding.
+    
+    mimetype: application/x-microsoft.net.object.soap.base64
+    value   : The object must be serialized with 
+            : System.Runtime.Serialization.Formatters.Soap.SoapFormatter
+            : and then encoded with base64 encoding.
+
+    mimetype: application/x-microsoft.net.object.bytearray.base64
+    value   : The object must be serialized into a byte array 
+            : using a System.ComponentModel.TypeConverter
+            : and then encoded with base64 encoding.
+    -->
+  <xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
+    <xsd:import namespace="http://www.w3.org/XML/1998/namespace" />
+    <xsd:element name="root" msdata:IsDataSet="true">
+      <xsd:complexType>
+        <xsd:choice maxOccurs="unbounded">
+          <xsd:element name="metadata">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" />
+              </xsd:sequence>
+              <xsd:attribute name="name" use="required" type="xsd:string" />
+              <xsd:attribute name="type" type="xsd:string" />
+              <xsd:attribute name="mimetype" type="xsd:string" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="assembly">
+            <xsd:complexType>
+              <xsd:attribute name="alias" type="xsd:string" />
+              <xsd:attribute name="name" type="xsd:string" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="data">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+                <xsd:element name="comment" type="xsd:string" minOccurs="0" msdata:Ordinal="2" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" msdata:Ordinal="1" />
+              <xsd:attribute name="type" type="xsd:string" msdata:Ordinal="3" />
+              <xsd:attribute name="mimetype" type="xsd:string" msdata:Ordinal="4" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="resheader">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" />
+            </xsd:complexType>
+          </xsd:element>
+        </xsd:choice>
+      </xsd:complexType>
+    </xsd:element>
+  </xsd:schema>
+  <resheader name="resmimetype">
+    <value>text/microsoft-resx</value>
+  </resheader>
+  <resheader name="version">
+    <value>2.0</value>
+  </resheader>
+  <resheader name="reader">
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <resheader name="writer">
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <data name="OIDCH_0101_BackChallnelLessThanZero" xml:space="preserve">
+    <value>OIDCH_0101: BackchannelTimeout cannot be less or equal to TimeSpan.Zero.</value>
+  </data>
+  <data name="OIDCH_0102_Exception_ValidatorHandlerMismatch" xml:space="preserve">
+    <value>OIDCH_0102: An ICertificateValidator cannot be specified at the same time as an HttpMessageHandler unless it is a WebRequestHandler.</value>
+  </data>
+  <data name="OIDCH_0051_RedirectUriLogoutIsNotWellFormed" xml:space="preserve">
+    <value>OIDC_0051: The query string for Logout is not a well formed URI. The runtime cannot redirect. Redirect uri: '{0}'.</value>
+  </data>
+  <data name="OIDCH_0026_ApplyResponseChallengeAsync" xml:space="preserve">
+    <value>OIDCH_0026: Entering: '{0}'</value>
+  </data>
+  <data name="OIDCH_0027_401_ConvertedTo_403" xml:space="preserve">
+    <value>OIDCH_0027: converted 401 to 403.</value>
+  </data>
+  <data name="OIDCH_0028_StatusCodeNot401" xml:space="preserve">
+    <value>OIDCH_0028: Response.StatusCode != 401, StatusCode: '{0}'.</value>
+  </data>
+  <data name="OIDCH_0029_ChallengContextEqualsNull" xml:space="preserve">
+    <value>OIDCH_0029: ChallengeContext == null AND !Options.AutomaticAuthentication</value>
+  </data>
+  <data name="OIDCH_0030_Using_Properties_RedirectUri" xml:space="preserve">
+    <value>OIDCH_0030: using properties.RedirectUri for 'local redirect' post authentication: '{0}'.</value>
+  </data>
+  <data name="OIDCH_0031_Using_Options_RedirectUri" xml:space="preserve">
+    <value>OIDCH_0031: using Options.RedirectUri for 'redirect_uri': '{0}'.</value>
+  </data>
+  <data name="OIDCH_0032_UsingCurrentUriRedirectUri" xml:space="preserve">
+    <value>OIDCH_0032: using the CurrentUri for 'local redirect' post authentication: '{0}'.</value>
+  </data>
+  <data name="OIDCH_0033_TryAddNonceFailed" xml:space="preserve">
+    <value>OIDCH_0033: ProtocolValidator.RequireNonce == true. Options.NonceCache.TryAddNonce returned false. This usually indicates the nonce is not unique or has been used. The nonce is: '{0}'.</value>
+  </data>
+  <data name="OIDCH_0034_RedirectToIdentityProviderNotificationHandledResponse" xml:space="preserve">
+    <value>OIDCH_0034: redirectToIdentityProviderNotification.HandledResponse</value>
+  </data>
+  <data name="OIDCH_0035_RedirectToIdentityProviderNotificationSkipped" xml:space="preserve">
+    <value>OIDCH_0035: redirectToIdentityProviderNotification.Skipped</value>
+  </data>
+  <data name="OIDCH_0036_UriIsNotWellFormed" xml:space="preserve">
+    <value>OIDCH_0036: Uri.IsWellFormedUriString(redirectUri, UriKind.Absolute) returned 'false', redirectUri is: {0}", (redirectUri ?? "null"))</value>
+  </data>
+  <data name="OIDCH_0000_AuthenticateCoreAsync" xml:space="preserve">
+    <value>OIDCH_0000: Entering: '{0}'.</value>
+  </data>
+  <data name="OIDCH_0001_MessageReceived" xml:space="preserve">
+    <value>OIDCH_0001: MessageReceived: '{0}'.</value>
+  </data>
+  <data name="OIDCH_0002_MessageReceivedNotificationHandledResponse" xml:space="preserve">
+    <value>OIDCH_0002: messageReceivedNotification.HandledResponse</value>
+  </data>
+  <data name="OIDCH_0003_MessageReceivedNotificationSkipped" xml:space="preserve">
+    <value>OIDCH_0003: messageReceivedNotification.Skipped</value>
+  </data>
+  <data name="OIDCH_0004_MessageStateIsNullOrWhiteSpace" xml:space="preserve">
+    <value>OIDCH_0004:  OpenIdConnectAuthenticationHandler: message.State is null or whitespace. State is required to process the message.</value>
+  </data>
+  <data name="OIDCH_0005_MessageStateIsInValid" xml:space="preserve">
+    <value>OIDCH_0005: unable to unprotect the message.State</value>
+  </data>
+  <data name="OIDCH_0006_MessageErrorNotNull" xml:space="preserve">
+    <value>OIDCH_0006_MessageErrorNotNull: '{0}'.</value>
+  </data>
+  <data name="OIDCH_0007_UpdatingConfiguration" xml:space="preserve">
+    <value>OIDCH_0007: updating configuration</value>
+  </data>
+  <data name="OIDCH_0008_SecurityTokenReceivedNotificationHandledResponse" xml:space="preserve">
+    <value>OIDCH_0008: securityTokenReceivedNotification.HandledResponse</value>
+  </data>
+  <data name="OIDCH_0009_SecurityTokenReceivedNotificationSkipped:" xml:space="preserve">
+    <value>OIDCH_0009: securityTokenReceivedNotification.Skipped</value>
+  </data>
+  <data name="OIDCH_0010_ValidatedSecurityTokenNotJwt" xml:space="preserve">
+    <value>OIDCH_0010: Validated Security Token must be a JwtSecurityToken was: '{0}'.</value>
+  </data>
+  <data name="OIDCH_0011_UnableToValidateToken" xml:space="preserve">
+    <value>OIDCH_0011: Unable to validate the 'id_token', no suitable ISecurityTokenValidator was found for: {0}."</value>
+  </data>
+  <data name="OIDCH_0012_SecurityTokenValidatedNotificationHandledResponse" xml:space="preserve">
+    <value>OIDCH_0012: securityTokenValidatedNotification.HandledResponse</value>
+  </data>
+  <data name="OIDCH_0013_SecurityTokenValidatedNotificationSkipped" xml:space="preserve">
+    <value>OIDCH_0013: securityTokenValidatedNotification.Skipped</value>
+  </data>
+  <data name="OIDCH_0014_CodeReceived" xml:space="preserve">
+    <value>OIDCH_0014: 'code' received: '{0}'</value>
+  </data>
+  <data name="OIDCH_0015_CodeReceivedNotificationHandledResponse" xml:space="preserve">
+    <value>OIDCH_0015: codeReceivedNotification.HandledResponse</value>
+  </data>
+  <data name="OIDCH_0016_CodeReceivedNotificationSkipped" xml:space="preserve">
+    <value>OIDCH_0016: codeReceivedNotification.Skipped</value>
+  </data>
+  <data name="OIDCH_0017: Exception occurred while processing message" xml:space="preserve">
+    <value>OIDCH_0017: Exception occurred while processing message</value>
+  </data>
+  <data name="OIDCH_0018_AuthenticationFailedNotificationHandledResponse" xml:space="preserve">
+    <value>OIDCH_0018: authenticationFailedNotification.HandledResponse</value>
+  </data>
+  <data name="OIDCH_0019_AuthenticationNotificationFailedSkipped" xml:space="preserve">
+    <value>OIDCH_0019: authenticationFailedNotification.Skipped</value>
+  </data>
+  <data name="OIDCH_0020_IdTokenReceived" xml:space="preserve">
+    <value>OIDCH_0020: 'id_token' received: '{0}'</value>
+  </data>
+</root>

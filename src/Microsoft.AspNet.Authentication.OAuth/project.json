@@ -1,0 +1,22 @@
+{
+    "version": "1.0.0-*",
+    "description": "ASP.NET 5 middleware that enables an application to support any standard OAuth 2.0 authentication workflow.",
+    "dependencies": {
+        "Microsoft.AspNet.Authentication": "1.0.0-*",
+        "Microsoft.Framework.NotNullAttribute.Sources": { "type": "build", "version": "1.0.0-*" },
+        "Newtonsoft.Json": "6.0.6"
+    },
+    "frameworks": {
+        "dnx451": {
+            "frameworkAssemblies": {
+                "System.Net.Http.WebRequest": "",
+                "System.Net.Http": ""
+            }
+        },
+        "dnxcore50": {
+            "dependencies": {
+                "System.Net.Http.WinHttpHandler": "4.0.0-beta-*"
+            }
+        }
+    }
+}
