@@ -181,6 +181,14 @@ namespace Microsoft.AspNet.Authentication.OpenIdConnect
         }
 
         /// <summary>
+        /// OIDCH_0038: Subject claim received from userinfo endpoint does not match the one in the id token.
+        /// </summary>
+        internal static string OIDCH_0038_Subject_Claim_Mismatch
+        {
+            get { return ResourceManager.GetString("OIDCH_0038_Subject_Claim_Mismatch"); }
+        }
+
+        /// <summary>
         /// OIDCH_0000: Entering: '{0}'.
         /// </summary>
         internal static string OIDCH_0000_AuthenticateCoreAsync

@@ -566,6 +566,8 @@ namespace Microsoft.AspNet.Authentication.Tests.OpenIdConnect
     /// </summary>
     public class CustomOpenIdConnectAuthenticationHandler : OpenIdConnectAuthenticationHandler
     {
+        public CustomOpenIdConnectAuthenticationHandler() : base(null) { }
+
         public async Task BaseInitializeAsyncPublic(AuthenticationOptions options, HttpContext context, ILogger logger, IUrlEncoder encoder)
         {
             await base.BaseInitializeAsync(options, context, logger, encoder);
@@ -593,7 +595,7 @@ namespace Microsoft.AspNet.Authentication.Tests.OpenIdConnect
             await Options.Notifications.RedirectToIdentityProvider(redirectToIdentityProviderNotification);
         }
 
-        protected override async Task<TokenResponse> RedeemAuthorizationCode(string authorizationCode)
+        protected override async Task<OpenIdConnectMessage> RedeemAuthorizationCode(string authorizationCode)
         {
             return null;
         }

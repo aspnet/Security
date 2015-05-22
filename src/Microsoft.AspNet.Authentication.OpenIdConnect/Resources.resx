@@ -225,4 +225,7 @@
   <data name="OIDCH_0037_Redeeming_Auth_Code" xml:space="preserve">
     <value>OIDCH_0037: Id Token is null. Redeeming code : {0} for tokens.</value>
   </data>
+  <data name="OIDCH_0038_Subject_Claim_Mismatch" xml:space="preserve">
+    <value>OIDCH_0038: Subject claim received from userinfo endpoint does not match the one in the id token.</value>
+  </data>
 </root>
