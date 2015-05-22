@@ -12,7 +12,6 @@ using System.Net.Http.Headers;
 using System.Security.Claims;
 using System.Threading.Tasks;
 using Microsoft.AspNet.Authentication.Notifications;
-using Microsoft.AspNet.Authentication.OAuth;
 using Microsoft.AspNet.Http;
 using Microsoft.AspNet.Http.Authentication;
 using Microsoft.Framework.Logging;
@@ -437,6 +436,7 @@ namespace Microsoft.AspNet.Authentication.OpenIdConnect
 
                     if (Options.GetClaimsFromUserInfoEndpoint)
                     {
+                        Logger.LogDebug(Resources.OIDCH_0039_Sending_Request_UIEndpoint);
                         ticket = await GetUserInformationAsync(properties, tokens, ticket);
                     }
 
@@ -521,7 +521,7 @@ namespace Microsoft.AspNet.Authentication.OpenIdConnect
                     }
                 }
 
-            return ticket;
+                return ticket;
             }
             catch (Exception exception)
             {

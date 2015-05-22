@@ -8,6 +8,7 @@
 using System;
 using System.Collections.Generic;
 using System.Net.Http;
+using System.Security.Claims;
 using System.Threading.Tasks;
 using Microsoft.AspNet.Authentication.Notifications;
 using Microsoft.AspNet.Authentication.OAuth;
@@ -153,14 +154,14 @@ namespace Microsoft.AspNet.Authentication.Tests.OpenIdConnect
             logsEntriesExpected = new int[] { 3 };
             await RunVariation(LogLevel.Information, message, MessageReceivedSkippedOptions, errors, logsEntriesExpected);
 
-            logsEntriesExpected = new int[] {0, 1, 7, 14, 20, 8 };
+            logsEntriesExpected = new int[] {0, 1, 7, 20, 8 };
             await RunVariation(LogLevel.Debug, message, SecurityTokenReceivedHandledOptions, errors, logsEntriesExpected);
 
-            logsEntriesExpected = new int[] {0, 1, 7, 14, 20, 9 };
+            logsEntriesExpected = new int[] {0, 1, 7, 20, 9 };
             await RunVariation(LogLevel.Debug, message, SecurityTokenReceivedSkippedOptions, errors, logsEntriesExpected);
 
             message.IdToken = null;
-            logsEntriesExpected = new int[] { 0, 1, 7, 14, 22};
+            logsEntriesExpected = new int[] { 0, 1, 7, 22, 20, 8};
             await RunVariation(LogLevel.Debug, message, CodeReceivedAndRedeemedHandledOptions, errors, logsEntriesExpected);
 
 #if _Verbose
@@ -419,6 +420,7 @@ namespace Microsoft.AspNet.Authentication.Tests.OpenIdConnect
         private static void SecurityTokenValidatedHandledOptions(OpenIdConnectAuthenticationOptions options)
         {
             DefaultOptions(options);
+            options.GetClaimsFromUserInfoEndpoint = true;
             options.Notifications =
                 new OpenIdConnectAuthenticationNotifications
                 {
@@ -597,8 +599,12 @@ namespace Microsoft.AspNet.Authentication.Tests.OpenIdConnect
 
         protected override async Task<OpenIdConnectMessage> RedeemAuthorizationCode(string authorizationCode)
         {
-            return null;
+            return new OpenIdConnectMessage()
+            {
+                IdToken = "test token"
+            };
         }
+
     }
 
     /// <summary>
