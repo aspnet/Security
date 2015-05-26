@@ -16,7 +16,7 @@ namespace Microsoft.AspNet.Authentication.Facebook
     /// <summary>
     /// An ASP.NET middleware for authenticating users using Facebook.
     /// </summary>
-    public class FacebookAuthenticationMiddleware : OAuthAuthenticationMiddleware<FacebookAuthenticationOptions, IFacebookAuthenticationNotifications>
+    public class FacebookAuthenticationMiddleware : OAuthAuthenticationMiddleware<FacebookAuthenticationOptions, FacebookAuthenticationNotifications>
     {
         /// <summary>
         /// Initializes a new <see cref="FacebookAuthenticationMiddleware"/>.

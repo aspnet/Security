@@ -6,6 +6,34 @@ using System.Threading.Tasks;
 
 namespace Microsoft.AspNet.Authentication.OAuth
 {
+    public class OAuthAuthenticationSquaredNotifications<TContext> : OAuthAuthenticationNotifications, IOAuthAuthenticationSquaredNotifications<TContext>
+        where TContext : class
+    {
+        /// <summary>
+        /// Initializes a new <see cref="OAuthAuthenticationSquaredNotifications"/>.
+        /// </summary>
+        public OAuthAuthenticationSquaredNotifications()
+        {
+            OnAuthenticated = context => Task.FromResult(0);
+        }
+
+        /// <summary>
+        /// Gets or sets the function that is invoked when the Authenticated method is invoked.
+        /// </summary>
+        public Func<TContext, Task> OnAuthenticated { get; set; }
+
+        /// <summary>
+        /// Invoked whenever Facebook succesfully authenticates a user.
+        /// </summary>
+        /// <param name="context">Contains information about the login session as well as the user <see cref="System.Security.Claims.ClaimsIdentity"/>.</param>
+        /// <returns>A <see cref="Task"/> representing the completed operation.</returns>
+        public virtual Task Authenticated(TContext context)
+        {
+            return OnAuthenticated(context);
+        }
+    }
+
+
     /// <summary>
     /// Default <see cref="IOAuthAuthenticationNotifications"/> implementation.
     /// </summary>
