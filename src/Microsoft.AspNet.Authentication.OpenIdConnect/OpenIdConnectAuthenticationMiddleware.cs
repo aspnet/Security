@@ -124,7 +124,7 @@ namespace Microsoft.AspNet.Authentication.OpenIdConnect
             }
 
             Backchannel = new HttpClient(ResolveHttpMessageHandler(Options));
-            Backchannel.DefaultRequestHeaders.UserAgent.ParseAdd("Microsoft ASP.NET OAuth middleware");
+            Backchannel.DefaultRequestHeaders.UserAgent.ParseAdd("Microsoft ASP.NET OpenIdConnect middleware");
             Backchannel.Timeout = Options.BackchannelTimeout;
             Backchannel.MaxResponseContentBufferSize = 1024 * 1024 * 10; // 10 MB
 

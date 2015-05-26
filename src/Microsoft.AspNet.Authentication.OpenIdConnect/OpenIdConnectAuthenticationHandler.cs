@@ -576,15 +576,16 @@ namespace Microsoft.AspNet.Authentication.OpenIdConnect
             var jsonTokenResponse = JObject.Parse(tokenResonse);
             return new OpenIdConnectMessage()
             {
-                AccessToken = jsonTokenResponse.Value<string>("access_token"),
-                IdToken = jsonTokenResponse.Value<string>("id_token"),
-                TokenType = jsonTokenResponse.Value<string>("token_type"),
-                ExpiresIn = jsonTokenResponse.Value<string>("expires_in")
+                AccessToken = jsonTokenResponse.Value<string>(OpenIdConnectParameterNames.AccessToken),
+                IdToken = jsonTokenResponse.Value<string>(OpenIdConnectParameterNames.IdToken),
+                TokenType = jsonTokenResponse.Value<string>(OpenIdConnectParameterNames.TokenType),
+                ExpiresIn = jsonTokenResponse.Value<string>(OpenIdConnectParameterNames.ExpiresIn)
             };
         }
 
         protected virtual async Task<AuthenticationTicket> GetUserInformationAsync(AuthenticationProperties properties, OpenIdConnectMessage message, AuthenticationTicket ticket)
         {
+
             var requestMessage = new HttpRequestMessage(HttpMethod.Get, _configuration.UserInfoEndpoint);
             requestMessage.Headers.Authorization = new AuthenticationHeaderValue("Bearer", message.AccessToken);
             var responseMessage = await Backchannel.SendAsync(requestMessage);
@@ -593,23 +594,23 @@ namespace Microsoft.AspNet.Authentication.OpenIdConnect
             var user = JObject.Parse(userInfoResponse);
 
             var identity = (ClaimsIdentity)ticket.Principal.Identity;
-            var subject = identity.FindFirst(ClaimTypes.NameIdentifier).ToString();
+            var subject = identity.FindFirst(ClaimTypes.NameIdentifier).Value;
 
             // check if the sub claim matches
             var userInfoSubject = user.Value<string>("sub");
-            if (userInfoSubject == null || !string.Equals(userInfoSubject.ToString(), subject, StringComparison.OrdinalIgnoreCase))
+            if (userInfoSubject == null || !string.Equals(userInfoSubject, subject, StringComparison.OrdinalIgnoreCase))
             {
                 Logger.LogError(Resources.OIDCH_0038_Subject_Claim_Mismatch);
                 throw new ArgumentException(Resources.OIDCH_0038_Subject_Claim_Mismatch); 
             }
 
             var userInfoIdentity = new ClaimsIdentity(identity);
-            foreach (KeyValuePair<string, JToken> pair in user)
+            foreach (var pair in user)
             {
                 JToken value;
                 var claimValue = user.TryGetValue(pair.Key, out value) ? value.ToString() : null;
 
-                IDictionary<string, string> inboundClaimTypeMap = new Dictionary<string, string>(JwtSecurityTokenHandler.InboundClaimTypeMap);
+                var inboundClaimTypeMap = new Dictionary<string, string>(JwtSecurityTokenHandler.InboundClaimTypeMap);
                 string longClaimTypeName;
                 inboundClaimTypeMap.TryGetValue(pair.Key, out longClaimTypeName);
 
