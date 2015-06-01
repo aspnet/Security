@@ -463,12 +463,15 @@ namespace Microsoft.AspNet.Authentication.Google
                 app.UseGoogleAuthentication(configureOptions);
                 app.UseClaimsTransformation(o =>
                 {
-                    o.Transformation = p =>
+                    o.Transformer = new ClaimsTransformer
                     {
-                        var id = new ClaimsIdentity("xform");
-                        id.AddClaim(new Claim("xform", "yup"));
-                        p.AddIdentity(id);
-                        return p;
+                        TransformSyncDelegate = p =>
+                        {
+                            var id = new ClaimsIdentity("xform");
+                            id.AddClaim(new Claim("xform", "yup"));
+                            p.AddIdentity(id);
+                            return p;
+                        }
                     };
                 });
                 app.Use(async (context, next) =>

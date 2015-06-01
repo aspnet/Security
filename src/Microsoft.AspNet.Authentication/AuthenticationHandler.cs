@@ -92,7 +92,7 @@ namespace Microsoft.AspNet.Authentication
 
         private static void OnSendingHeaderCallback(object state)
         {
-            AuthenticationHandler handler = (AuthenticationHandler)state;
+            var handler = (AuthenticationHandler)state;
             handler.ApplyResponse();
         }
 
