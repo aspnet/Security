@@ -206,7 +206,6 @@ namespace Microsoft.AspNet.Authentication.Tests.OpenIdConnect
                     if (req.Path == new PathString("/challenge"))
                     {
                         context.Authentication.Challenge("OpenIdConnect");
-                        res.StatusCode = 401;
                     }
                     else if (req.Path == new PathString("/signin"))
                     {

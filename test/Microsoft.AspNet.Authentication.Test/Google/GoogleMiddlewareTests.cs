@@ -2,6 +2,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Net;
 using System.Net.Http;
@@ -142,7 +143,6 @@ namespace Microsoft.AspNet.Authentication.Google
                                 { "approval_prompt", "force" },
                                 { "login_hint", "test@example.com" }
                             }));
-                        res.StatusCode = 401;
                     }
 
                     return Task.FromResult<object>(null);
@@ -476,7 +476,6 @@ namespace Microsoft.AspNet.Authentication.Google
                     if (req.Path == new PathString("/challenge"))
                     {
                         context.Authentication.Challenge("Google");
-                        res.StatusCode = 401;
                     }
                     else if (req.Path == new PathString("/me"))
                     {
@@ -491,7 +490,6 @@ namespace Microsoft.AspNet.Authentication.Google
                     else if (req.Path == new PathString("/unauthorizedAuto"))
                     {
                         var result = await context.Authentication.AuthenticateAsync("Google");
-                        res.StatusCode = 401;
                         context.Authentication.Challenge();
                     }
                     else if (req.Path == new PathString("/401"))

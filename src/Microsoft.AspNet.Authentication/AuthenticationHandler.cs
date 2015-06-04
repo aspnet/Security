@@ -38,6 +38,8 @@ namespace Microsoft.AspNet.Authentication
 
         protected HttpContext Context { get; private set; }
 
+        protected bool ChallengeCalled { get; set; }
+
         protected HttpRequest Request
         {
             get { return Context.Request; }
@@ -58,9 +60,6 @@ namespace Microsoft.AspNet.Authentication
         {
             get { return _baseOptions; }
         }
-
-        // REVIEW: Overriding Authenticate and not calling base requires manually calling this for 401-403 to work
-        protected bool AuthenticateCalled { get; set; }
 
         public IAuthenticationHandler PriorHandler { get; set; }
 
@@ -92,7 +91,7 @@ namespace Microsoft.AspNet.Authentication
 
         private static void OnSendingHeaderCallback(object state)
         {
-            AuthenticationHandler handler = (AuthenticationHandler)state;
+            var handler = (AuthenticationHandler)state;
             handler.ApplyResponse();
         }
 
@@ -164,7 +163,6 @@ namespace Microsoft.AspNet.Authentication
                 var ticket = Authenticate();
                 if (ticket?.Principal != null)
                 {
-                    AuthenticateCalled = true;
                     context.Authenticated(ticket.Principal, ticket.Properties.Items, BaseOptions.Description.Items);
                 }
                 else
@@ -186,7 +184,6 @@ namespace Microsoft.AspNet.Authentication
                 var ticket = await AuthenticateAsync();
                 if (ticket?.Principal != null)
                 {
-                    AuthenticateCalled = true;
                     context.Authenticated(ticket.Principal, ticket.Properties.Items, BaseOptions.Description.Items);
                 }
                 else
@@ -272,7 +269,9 @@ namespace Microsoft.AspNet.Authentication
         protected virtual void ApplyResponseCore()
         {
             ApplyResponseGrant();
-            ApplyResponseChallenge();
+
+            // If challenge was explicitly called, we don't want to challenge again
+            ApplyResponseChallengeOnce();
         }
 
         /// <summary>
@@ -312,7 +311,9 @@ namespace Microsoft.AspNet.Authentication
         protected virtual async Task ApplyResponseCoreAsync()
         {
             await ApplyResponseGrantAsync();
-            await ApplyResponseChallengeAsync();
+
+            // If challenge was explicitly called, we don't want to challenge again
+            await ApplyResponseChallengeOnceAsync();
         }
 
         protected abstract void ApplyResponseGrant();
@@ -358,13 +359,48 @@ namespace Microsoft.AspNet.Authentication
             }
         }
 
+        protected virtual void HandleChallenge(ChallengeContext context)
+        {
+            switch (context.Behavior)
+            {
+                case ChallengeBehavior.Automatic:
+                    // REVIEW: Do we need to no-op if the status code has already been changed
+
+                    // If there is a principal already, invoke the forbidden code path
+                    var ticket = Authenticate();
+                    if (ticket?.Principal != null)
+                    {
+                        HandleForbidden(context);
+                        return;
+                    }
+                    else
+                    {
+                        HandleUnauthorized(context);
+                    }
+                    return;
+                case ChallengeBehavior.Unauthorized:
+                    HandleUnauthorized(context);
+                    return;
+                case ChallengeBehavior.Forbidden:
+                    HandleForbidden(context);
+                    return;
+            }
+        }
+
+        protected virtual void HandleForbidden(ChallengeContext context)
+        {
+            Response.StatusCode = 403;
+        }
+
+        protected virtual void HandleUnauthorized(ChallengeContext context)
+        {
+            // REVIEW: This is pretty GROSS (no way to centralize challenge??)
+            ApplyResponseChallengeOnceAsync().GetAwaiter().GetResult();
+        }
+
         public virtual void Challenge(ChallengeContext context)
         {
-            if (ShouldHandleScheme(context.AuthenticationScheme))
-            {
-                ChallengeContext = context;
-                context.Accept();
-            }
+            ProcessChallenge(context);
 
             if (PriorHandler != null)
             {
@@ -372,7 +408,26 @@ namespace Microsoft.AspNet.Authentication
             }
         }
 
+        protected virtual void ProcessChallenge(ChallengeContext context)
+        {
+            if (ShouldHandleScheme(context.AuthenticationScheme))
+            {
+                ChallengeContext = context;
+                HandleChallenge(context);
+                ChallengeCalled = true;
+                context.Accept();
+            }
+        }
+
         protected abstract void ApplyResponseChallenge();
+
+        private void ApplyResponseChallengeOnce()
+        {
+            if (!ChallengeCalled)
+            {
+                ApplyResponseChallenge();
+            }
+        }
 
         public virtual bool ShouldHandleScheme(string authenticationScheme)
         {
@@ -380,15 +435,15 @@ namespace Microsoft.AspNet.Authentication
                 (BaseOptions.AutomaticAuthentication && string.IsNullOrWhiteSpace(authenticationScheme));
         }
 
-        public virtual bool ShouldConvertChallengeToForbidden()
-        {
-            // Return 403 iff 401 and this handler's authenticate was called
-            // and the challenge is for the authentication type
-            return Response.StatusCode == 401 &&
-                AuthenticateCalled &&
-                ChallengeContext != null &&
-                ShouldHandleScheme(ChallengeContext.AuthenticationScheme);
-        }
+        //protected virtual bool ShouldConvertChallengeToForbidden()
+        //{
+        //    // Return 403 iff 401 and this handler's authenticate was called
+        //    // and the challenge is for the authentication type
+        //    return Response.StatusCode == 401 &&
+        //        AuthenticateCalled &&
+        //        ChallengeContext != null &&
+        //        ShouldHandleScheme(ChallengeContext.AuthenticationScheme);
+        //}
 
         /// <summary>
         /// Override this method to deal with 401 challenge concerns, if an authentication scheme in question
@@ -399,6 +454,15 @@ namespace Microsoft.AspNet.Authentication
         protected virtual Task ApplyResponseChallengeAsync()
         {
             ApplyResponseChallenge();
+            return Task.FromResult(0);
+        }
+
+        private Task ApplyResponseChallengeOnceAsync()
+        {
+            if (!ChallengeCalled)
+            {
+                return ApplyResponseChallengeAsync();
+            }
             return Task.FromResult(0);
         }
 

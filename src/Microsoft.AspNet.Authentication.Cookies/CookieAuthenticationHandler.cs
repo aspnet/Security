@@ -8,6 +8,7 @@ using System.Security.Claims;
 using System.Threading.Tasks;
 using Microsoft.AspNet.Http;
 using Microsoft.AspNet.Http.Authentication;
+using Microsoft.AspNet.Http.Features.Authentication;
 using Microsoft.Framework.Logging;
 
 namespace Microsoft.AspNet.Authentication.Cookies
@@ -99,7 +100,6 @@ namespace Microsoft.AspNet.Authentication.Cookies
 
                 await Options.Notifications.ValidatePrincipal(context);
 
-                AuthenticateCalled = true;
                 return new AuthenticationTicket(context.Principal, context.Properties, Options.AuthenticationScheme);
             }
             catch (Exception exception)
@@ -315,49 +315,50 @@ namespace Microsoft.AspNet.Authentication.Cookies
             return path[0] == '/' && path[1] != '/' && path[1] != '\\';
         }
 
+        protected override void HandleForbidden(ChallengeContext context)
+        {
+            // HandleForbidden by redirecting to AccessDeniedPath if set
+            if (Options.AccessDeniedPath.HasValue)
+            {
+                try
+                {
+                    var accessDeniedUri =
+                        Request.Scheme +
+                        "://" +
+                        Request.Host +
+                        Request.PathBase +
+                        Options.AccessDeniedPath;
+
+                    var redirectContext = new CookieApplyRedirectContext(Context, Options, accessDeniedUri);
+                    Options.Notifications.ApplyRedirect(redirectContext);
+                }
+                catch (Exception exception)
+                {
+                    var exceptionContext = new CookieExceptionContext(Context, Options,
+                        CookieExceptionContext.ExceptionLocation.ApplyResponseChallenge, exception, ticket: null);
+                    Options.Notifications.Exception(exceptionContext);
+                    if (exceptionContext.Rethrow)
+                    {
+                        throw;
+                    }
+                }
+            }
+            else
+            {
+                base.HandleForbidden(context);
+            }
+        }
+
         protected override void ApplyResponseChallenge()
         {
-            if (ShouldConvertChallengeToForbidden())
-            {
-                // Handle 403 by redirecting to AccessDeniedPath if set
-                if (Options.AccessDeniedPath.HasValue)
-                {
-                    try
-                    {
-                        var accessDeniedUri =
-                            Request.Scheme +
-                            "://" +
-                            Request.Host +
-                            Request.PathBase +
-                            Options.AccessDeniedPath;
+            // REVIEW: should we check if status code is 401?
 
-                        var redirectContext = new CookieApplyRedirectContext(Context, Options, accessDeniedUri);
-                        Options.Notifications.ApplyRedirect(redirectContext);
-                    }
-                    catch (Exception exception)
-                    {
-                        var exceptionContext = new CookieExceptionContext(Context, Options,
-                            CookieExceptionContext.ExceptionLocation.ApplyResponseChallenge, exception, ticket: null);
-                        Options.Notifications.Exception(exceptionContext);
-                        if (exceptionContext.Rethrow)
-                        {
-                            throw;
-                        }
-                    }
-                }
-                else
-                {
-                    Response.StatusCode = 403;
-                }
-                return;
-            }
-
-            if (Response.StatusCode != 401 || !Options.LoginPath.HasValue )
+            if (!Options.LoginPath.HasValue)
             {
                 return;
             }
 
-            // Automatic middleware should redirect on 401 even if there wasn't an explicit challenge.
+            // Should redirect even if there wasn't an explicit challenge when Automatic.
             if (ChallengeContext == null && !Options.AutomaticAuthentication)
             {
                 return;

@@ -110,13 +110,6 @@ namespace Microsoft.AspNet.Authentication.OpenIdConnect
         {
             Logger.LogDebug(Resources.OIDCH_0026_ApplyResponseChallengeAsync, this.GetType());
 
-            if (ShouldConvertChallengeToForbidden())
-            {
-                Logger.LogDebug(Resources.OIDCH_0027_401_ConvertedTo_403);
-                Response.StatusCode = 403;
-                return;
-            }
-
             if (Response.StatusCode != 401)
             {
                 Logger.LogDebug(Resources.OIDCH_0028_StatusCodeNot401, Response.StatusCode);

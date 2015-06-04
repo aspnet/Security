@@ -6,7 +6,6 @@ using System.Collections.Generic;
 using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Threading.Tasks;
-using Microsoft.AspNet.Http;
 using Microsoft.AspNet.Http.Authentication;
 using Microsoft.AspNet.Http.Extensions;
 using Microsoft.AspNet.WebUtilities;
@@ -37,7 +36,7 @@ namespace Microsoft.AspNet.Authentication.OAuth
 
         public async Task<bool> InvokeReturnPathAsync()
         {
-            AuthenticationTicket ticket = await AuthenticateAsync();
+            var ticket = await AuthenticateAsync();
             if (ticket == null)
             {
                 Logger.LogWarning("Invalid return state, unable to redirect.");
@@ -83,7 +82,7 @@ namespace Microsoft.AspNet.Authentication.OAuth
             AuthenticationProperties properties = null;
             try
             {
-                IReadableStringCollection query = Request.Query;
+                var query = Request.Query;
 
                 // TODO: Is this a standard error returned by servers?
                 var value = query.Get("error");
@@ -94,8 +93,8 @@ namespace Microsoft.AspNet.Authentication.OAuth
                     return null;
                 }
 
-                string code = query.Get("code");
-                string state = query.Get("state");
+                var code = query.Get("code");
+                var state = query.Get("state");
 
                 properties = Options.StateDataFormat.Unprotect(state);
                 if (properties == null)
@@ -115,8 +114,8 @@ namespace Microsoft.AspNet.Authentication.OAuth
                     return new AuthenticationTicket(properties, Options.AuthenticationScheme);
                 }
 
-                string requestPrefix = Request.Scheme + "://" + Request.Host;
-                string redirectUri = requestPrefix + RequestPathBase + Options.CallbackPath;
+                var requestPrefix = Request.Scheme + "://" + Request.Host;
+                var redirectUri = requestPrefix + RequestPathBase + Options.CallbackPath;
 
                 var tokens = await ExchangeCodeAsync(code, redirectUri);
 
@@ -151,11 +150,11 @@ namespace Microsoft.AspNet.Authentication.OAuth
             var requestMessage = new HttpRequestMessage(HttpMethod.Post, Options.TokenEndpoint);
             requestMessage.Headers.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
             requestMessage.Content = requestContent;
-            HttpResponseMessage response = await Backchannel.SendAsync(requestMessage, Context.RequestAborted);
+            var response = await Backchannel.SendAsync(requestMessage, Context.RequestAborted);
             response.EnsureSuccessStatusCode();
-            string oauthTokenResponse = await response.Content.ReadAsStringAsync();
+            var oauthTokenResponse = await response.Content.ReadAsStringAsync();
 
-            JObject oauth2Token = JObject.Parse(oauthTokenResponse);
+            var oauth2Token = JObject.Parse(oauthTokenResponse);
             return new TokenResponse(oauth2Token);
         }
 
@@ -171,12 +170,7 @@ namespace Microsoft.AspNet.Authentication.OAuth
 
         protected override void ApplyResponseChallenge()
         {
-            if (ShouldConvertChallengeToForbidden())
-            {
-                Response.StatusCode = 403;
-                return;
-            }
-
+            // REVIEW: do we need this 401 check?
             if (Response.StatusCode != 401)
             {
                 return;
@@ -188,11 +182,9 @@ namespace Microsoft.AspNet.Authentication.OAuth
                 return;
             }
 
-            string baseUri = Request.Scheme + "://" + Request.Host + Request.PathBase;
-
-            string currentUri = baseUri + Request.Path + Request.QueryString;
-
-            string redirectUri = baseUri + Options.CallbackPath;
+            var baseUri = Request.Scheme + "://" + Request.Host + Request.PathBase;
+            var currentUri = baseUri + Request.Path + Request.QueryString;
+            var redirectUri = baseUri + Options.CallbackPath;
 
             AuthenticationProperties properties;
             if (ChallengeContext == null)
@@ -211,7 +203,7 @@ namespace Microsoft.AspNet.Authentication.OAuth
             // OAuth2 10.12 CSRF
             GenerateCorrelationId(properties);
 
-            string authorizationEndpoint = BuildChallengeUrl(properties, redirectUri);
+            var authorizationEndpoint = BuildChallengeUrl(properties, redirectUri);
 
             var redirectContext = new OAuthApplyRedirectContext(
                 Context, Options,
@@ -221,9 +213,9 @@ namespace Microsoft.AspNet.Authentication.OAuth
 
         protected virtual string BuildChallengeUrl(AuthenticationProperties properties, string redirectUri)
         {
-            string scope = FormatScope();
+            var scope = FormatScope();
 
-            string state = Options.StateDataFormat.Protect(properties);
+            var state = Options.StateDataFormat.Protect(properties);
 
             var queryBuilder = new QueryBuilder()
             {

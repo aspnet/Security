@@ -15,6 +15,7 @@ using System.Xml.Linq;
 using Microsoft.AspNet.Builder;
 using Microsoft.AspNet.Http;
 using Microsoft.AspNet.Http.Authentication;
+using Microsoft.AspNet.Http.Features.Authentication;
 using Microsoft.AspNet.TestHost;
 using Microsoft.Framework.DependencyInjection;
 using Shouldly;
@@ -72,7 +73,7 @@ namespace Microsoft.AspNet.Authentication.Cookies
             transaction.Response.StatusCode.ShouldBe(auto ? HttpStatusCode.Redirect : HttpStatusCode.Unauthorized);
             if (auto)
             {
-                Uri location = transaction.Response.Headers.Location;
+                var location = transaction.Response.Headers.Location;
                 location.ToString().ShouldBe("http://example.com/login?ReturnUrl=%2FCustomRedirect");
             }
         }
@@ -566,12 +567,15 @@ namespace Microsoft.AspNet.Authentication.Cookies
                     }
                     else if (req.Path == new PathString("/me"))
                     {
-                        Describe(res, new AuthenticationResult(context.User, new AuthenticationProperties(), new AuthenticationDescription()));
+                        var authContext = new AuthenticateContext(CookieAuthenticationDefaults.AuthenticationScheme);
+                        authContext.Authenticated(context.User, properties: null, description: null);
+                        Describe(res, authContext);
                     }
                     else if (req.Path.StartsWithSegments(new PathString("/me"), out remainder))
                     {
-                        var result = await context.Authentication.AuthenticateAsync(remainder.Value.Substring(1));
-                        Describe(res, result);
+                        var authContext = new AuthenticateContext(remainder.Value.Substring(1));
+                        await context.Authentication.AuthenticateAsync(authContext);
+                        Describe(res, authContext);
                     }
                     else if (req.Path == new PathString("/testpath") && testpath != null)
                     {
@@ -595,7 +599,7 @@ namespace Microsoft.AspNet.Authentication.Cookies
             return server;
         }
 
-        private static void Describe(HttpResponse res, AuthenticationResult result)
+        private static void Describe(HttpResponse res, AuthenticateContext result)
         {
             res.StatusCode = 200;
             res.ContentType = "text/xml";
@@ -606,7 +610,7 @@ namespace Microsoft.AspNet.Authentication.Cookies
             }
             if (result != null && result.Properties != null)
             {
-                xml.Add(result.Properties.Items.Select(extra => new XElement("extra", new XAttribute("type", extra.Key), new XAttribute("value", extra.Value))));
+                xml.Add(result.Properties.Select(extra => new XElement("extra", new XAttribute("type", extra.Key), new XAttribute("value", extra.Value))));
             }
             using (var memory = new MemoryStream())
             {

@@ -128,11 +128,7 @@ namespace Microsoft.AspNet.Authentication.Twitter
 
         protected override async Task ApplyResponseChallengeAsync()
         {
-            if (ShouldConvertChallengeToForbidden())
-            {
-                Response.StatusCode = 403;
-                return;
-            }
+            // REVIEW: should we check if status code is 401?
 
             if (Response.StatusCode != 401)
             {

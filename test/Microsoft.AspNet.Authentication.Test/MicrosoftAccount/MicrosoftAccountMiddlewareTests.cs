@@ -156,7 +156,6 @@ namespace Microsoft.AspNet.Authentication.Tests.MicrosoftAccount
                     if (req.Path == new PathString("/challenge"))
                     {
                         context.Authentication.Challenge("Microsoft");
-                        res.StatusCode = 401;
                     }
                     else if (req.Path == new PathString("/me"))
                     {

@@ -10,6 +10,7 @@ using System.Threading.Tasks;
 using Microsoft.AspNet.Authentication.Notifications;
 using Microsoft.AspNet.Http;
 using Microsoft.AspNet.Http.Authentication;
+using Microsoft.AspNet.Http.Features.Authentication;
 using Microsoft.Framework.Logging;
 using Microsoft.IdentityModel.Protocols;
 
@@ -179,6 +180,15 @@ namespace Microsoft.AspNet.Authentication.OAuthBearer
             }
         }
 
+        protected override void HandleUnauthorized(ChallengeContext context)
+        {
+            base.HandleUnauthorized(context);
+
+            // REVIEW: GROSS!! See if we can remove this
+            Options.Notifications.ApplyChallenge(new AuthenticationChallengeNotification<OAuthBearerAuthenticationOptions>(Context, Options))
+                .GetAwaiter().GetResult();
+        }
+
         protected override void ApplyResponseChallenge()
         {
             ApplyResponseChallengeAsync().GetAwaiter().GetResult();
@@ -186,12 +196,6 @@ namespace Microsoft.AspNet.Authentication.OAuthBearer
 
         protected override async Task ApplyResponseChallengeAsync()
         {
-            if (ShouldConvertChallengeToForbidden())
-            {
-                Response.StatusCode = 403;
-                return;
-            }
-
             if ((Response.StatusCode != 401) || (ChallengeContext == null && !Options.AutomaticAuthentication))
             {
                 return;
