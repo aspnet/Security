@@ -400,22 +400,17 @@ namespace Microsoft.AspNet.Authentication
 
         public virtual void Challenge(ChallengeContext context)
         {
-            ProcessChallenge(context);
-
-            if (PriorHandler != null)
-            {
-                PriorHandler.Challenge(context);
-            }
-        }
-
-        protected virtual void ProcessChallenge(ChallengeContext context)
-        {
             if (ShouldHandleScheme(context.AuthenticationScheme))
             {
                 ChallengeContext = context;
                 HandleChallenge(context);
                 ChallengeCalled = true;
                 context.Accept();
+            }
+
+            if (PriorHandler != null)
+            {
+                PriorHandler.Challenge(context);
             }
         }
 
@@ -434,16 +429,6 @@ namespace Microsoft.AspNet.Authentication
             return string.Equals(BaseOptions.AuthenticationScheme, authenticationScheme, StringComparison.Ordinal) ||
                 (BaseOptions.AutomaticAuthentication && string.IsNullOrWhiteSpace(authenticationScheme));
         }
-
-        //protected virtual bool ShouldConvertChallengeToForbidden()
-        //{
-        //    // Return 403 iff 401 and this handler's authenticate was called
-        //    // and the challenge is for the authentication type
-        //    return Response.StatusCode == 401 &&
-        //        AuthenticateCalled &&
-        //        ChallengeContext != null &&
-        //        ShouldHandleScheme(ChallengeContext.AuthenticationScheme);
-        //}
 
         /// <summary>
         /// Override this method to deal with 401 challenge concerns, if an authentication scheme in question
