@@ -29,6 +29,7 @@ namespace Microsoft.AspNet.Authentication
         private Task _applyResponse;
         private bool _applyResponseInitialized;
         private object _applyResponseSyncLock;
+        private bool _challengeApplied;
 
         private AuthenticationOptions _baseOptions;
 
@@ -37,8 +38,6 @@ namespace Microsoft.AspNet.Authentication
         protected SignOutContext SignOutContext { get; set; }
 
         protected HttpContext Context { get; private set; }
-
-        protected bool ChallengeCalled { get; set; }
 
         protected HttpRequest Request
         {
@@ -404,7 +403,6 @@ namespace Microsoft.AspNet.Authentication
             {
                 ChallengeContext = context;
                 HandleChallenge(context);
-                ChallengeCalled = true;
                 context.Accept();
             }
 
@@ -414,13 +412,12 @@ namespace Microsoft.AspNet.Authentication
             }
         }
 
-        protected abstract void ApplyResponseChallenge();
-
         private void ApplyResponseChallengeOnce()
         {
-            if (!ChallengeCalled)
+            if (!_challengeApplied)
             {
                 ApplyResponseChallenge();
+                _challengeApplied = true;
             }
         }
 
@@ -436,19 +433,27 @@ namespace Microsoft.AspNet.Authentication
         /// changing the 401 result to 302 of a login page or external sign-in location.)
         /// </summary>
         /// <returns></returns>
+        protected abstract void ApplyResponseChallenge();
+
+        /// <summary>
+        /// Override this method to deal with 401 challenge concerns, if an authentication scheme in question
+        /// deals an authentication interaction as part of it's request flow. (like adding a response header, or
+        /// changing the 401 result to 302 of a login page or external sign-in location.)
+        /// </summary>
+        /// <returns></returns>
         protected virtual Task ApplyResponseChallengeAsync()
         {
             ApplyResponseChallenge();
             return Task.FromResult(0);
         }
 
-        private Task ApplyResponseChallengeOnceAsync()
+        private async Task ApplyResponseChallengeOnceAsync()
         {
-            if (!ChallengeCalled)
+            if (!_challengeApplied)
             {
-                return ApplyResponseChallengeAsync();
+                await ApplyResponseChallengeAsync();
+                _challengeApplied = true;
             }
-            return Task.FromResult(0);
         }
 
         protected void GenerateCorrelationId([NotNull] AuthenticationProperties properties)
