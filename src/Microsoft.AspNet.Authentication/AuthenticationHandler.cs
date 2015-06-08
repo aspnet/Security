@@ -328,6 +328,12 @@ namespace Microsoft.AspNet.Authentication
             return Task.FromResult(0);
         }
 
+        public virtual bool ShouldHandleScheme(string authenticationScheme)
+        {
+            return string.Equals(BaseOptions.AuthenticationScheme, authenticationScheme, StringComparison.Ordinal) ||
+                (BaseOptions.AutomaticAuthentication && string.IsNullOrWhiteSpace(authenticationScheme));
+        }
+
         public virtual void SignIn(SignInContext context)
         {
             if (ShouldHandleScheme(context.AuthenticationScheme))
@@ -412,19 +418,17 @@ namespace Microsoft.AspNet.Authentication
             }
         }
 
-        private void ApplyResponseChallengeOnce()
+        /// <summary>
+        /// Calls ApplyResponseChallenge at most once (via this method)
+        /// </summary>
+        /// <returns></returns>
+        protected void ApplyResponseChallengeOnce()
         {
             if (!_challengeApplied)
             {
                 ApplyResponseChallenge();
                 _challengeApplied = true;
             }
-        }
-
-        public virtual bool ShouldHandleScheme(string authenticationScheme)
-        {
-            return string.Equals(BaseOptions.AuthenticationScheme, authenticationScheme, StringComparison.Ordinal) ||
-                (BaseOptions.AutomaticAuthentication && string.IsNullOrWhiteSpace(authenticationScheme));
         }
 
         /// <summary>
@@ -447,7 +451,11 @@ namespace Microsoft.AspNet.Authentication
             return Task.FromResult(0);
         }
 
-        private async Task ApplyResponseChallengeOnceAsync()
+        /// <summary>
+        /// Calls ApplyResponseChallenge at most once (via this method)
+        /// </summary>
+        /// <returns></returns>
+        protected async Task ApplyResponseChallengeOnceAsync()
         {
             if (!_challengeApplied)
             {

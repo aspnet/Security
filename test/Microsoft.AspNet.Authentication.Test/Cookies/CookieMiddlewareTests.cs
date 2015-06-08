@@ -51,7 +51,7 @@ namespace Microsoft.AspNet.Authentication.Cookies
             transaction.Response.StatusCode.ShouldBe(auto ? HttpStatusCode.Redirect : HttpStatusCode.Unauthorized);
             if (auto)
             {
-                Uri location = transaction.Response.Headers.Location;
+                var location = transaction.Response.Headers.Location;
                 location.LocalPath.ShouldBe("/login");
                 location.Query.ShouldBe("?ReturnUrl=%2Fprotected");
             }
@@ -447,7 +447,7 @@ namespace Microsoft.AspNet.Authentication.Cookies
         [Theory]
         [InlineData(true)]
         [InlineData(false)]
-        public async Task CookieTurns401To403IfAuthenticated(bool automatic)
+        public async Task CookieTurns401To403WithCookie(bool automatic)
         {
             var clock = new TestClock();
             var server = CreateServer(options =>
@@ -459,18 +459,56 @@ namespace Microsoft.AspNet.Authentication.Cookies
 
             var transaction1 = await SendAsync(server, "http://example.com/testpath");
 
-            var url = "http://example.com/unauthorized";
-            if (automatic)
-            {
-                url += "auto";
-            }
+            var url = "http://example.com/challenge";
             var transaction2 = await SendAsync(server, url, transaction1.CookieNameValue);
 
             transaction2.Response.StatusCode.ShouldBe(HttpStatusCode.Forbidden);
         }
 
+        [Theory]
+        [InlineData(true)]
+        [InlineData(false)]
+        public async Task CookieChallengeRedirectsToLoginWithoutCookie(bool automatic)
+        {
+            var clock = new TestClock();
+            var server = CreateServer(options =>
+            {
+                options.LoginPath = new PathString("/login");
+                options.AutomaticAuthentication = automatic;
+                options.AccessDeniedPath = new PathString("/accessdenied");
+                options.SystemClock = clock;
+            },
+            SignInAsAlice);
+
+            var url = "http://example.com/challenge";
+            var transaction = await SendAsync(server, url);
+
+            transaction.Response.StatusCode.ShouldBe(HttpStatusCode.Redirect);
+            var location = transaction.Response.Headers.Location;
+            location.LocalPath.ShouldBe("/login");
+        }
+
+        [Theory]
+        [InlineData(true)]
+        [InlineData(false)]
+        public async Task CookieForbidTurns401To403WithoutCookie(bool automatic)
+        {
+            var clock = new TestClock();
+            var server = CreateServer(options =>
+            {
+                options.AutomaticAuthentication = automatic;
+                options.SystemClock = clock;
+            },
+            SignInAsAlice);
+
+            var url = "http://example.com/forbid";
+            var transaction = await SendAsync(server, url);
+
+            transaction.Response.StatusCode.ShouldBe(HttpStatusCode.Forbidden);
+        }
+
         [Fact]
-        public async Task CookieTurns401ToAccessDeniedWhenSetAndIfAuthenticated()
+        public async Task CookieTurns401ToAccessDeniedWhenSetWithCookie()
         {
             var clock = new TestClock();
             var server = CreateServer(options =>
@@ -482,7 +520,7 @@ namespace Microsoft.AspNet.Authentication.Cookies
 
             var transaction1 = await SendAsync(server, "http://example.com/testpath");
 
-            var transaction2 = await SendAsync(server, "http://example.com/unauthorized", transaction1.CookieNameValue);
+            var transaction2 = await SendAsync(server, "http://example.com/challenge", transaction1.CookieNameValue);
 
             transaction2.Response.StatusCode.ShouldBe(HttpStatusCode.Redirect);
 
@@ -491,7 +529,23 @@ namespace Microsoft.AspNet.Authentication.Cookies
         }
 
         [Fact]
-        public async Task CookieDoesNothingTo401IfNotAuthenticated()
+        public async Task CookieChallengeDoesNothingIfNotAuthenticated()
+        {
+            var clock = new TestClock();
+            var server = CreateServer(options =>
+            {
+                options.SystemClock = clock;
+            });
+
+            var transaction1 = await SendAsync(server, "http://example.com/testpath");
+
+            var transaction2 = await SendAsync(server, "http://example.com/challenge", transaction1.CookieNameValue);
+
+            transaction2.Response.StatusCode.ShouldBe(HttpStatusCode.Unauthorized);
+        }
+
+        [Fact]
+        public async Task CookieChallengeWithUnauthorizedRedirectsToLoginIfNotAuthenticated()
         {
             var clock = new TestClock();
             var server = CreateServer(options =>
@@ -550,16 +604,17 @@ namespace Microsoft.AspNet.Authentication.Cookies
                     {
                         res.StatusCode = 401;
                     }
-                    else if (req.Path == new PathString("/unauthorized"))
+                    else if (req.Path == new PathString("/forbid")) // Simulate forbidden 
                     {
-                        // Simulate Authorization failure 
-                        var result = await context.Authentication.AuthenticateAsync(CookieAuthenticationDefaults.AuthenticationScheme);
+                        context.Authentication.Forbid(CookieAuthenticationDefaults.AuthenticationScheme);
+                    }
+                    else if (req.Path == new PathString("/challenge"))
+                    {
                         context.Authentication.Challenge(CookieAuthenticationDefaults.AuthenticationScheme);
                     }
-                    else if (req.Path == new PathString("/unauthorizedauto"))
+                    else if (req.Path == new PathString("/unauthorized"))
                     {
-                        // Simulate Authorization failure 
-                        context.Authentication.Challenge(CookieAuthenticationDefaults.AuthenticationScheme);
+                        context.Authentication.Challenge(CookieAuthenticationDefaults.AuthenticationScheme, new AuthenticationProperties(), ChallengeBehavior.Unauthorized);
                     }
                     else if (req.Path == new PathString("/protected/CustomRedirect"))
                     {
