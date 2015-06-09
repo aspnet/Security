@@ -161,7 +161,7 @@ namespace Microsoft.AspNet.Authentication.Cookies
             var cookieOptions = BuildCookieOptions();
             if (ticket.Properties.IsPersistent && _renewExpiresUtc.HasValue)
             {
-                cookieOptions.Expires = _renewExpiresUtc.Value.ToUniversalTime().DateTime;
+                cookieOptions.Expires = _renewExpiresUtc.Value.UtcDateTime;
             }
 
             Options.CookieManager.AppendResponseCookie(
@@ -236,7 +236,7 @@ namespace Microsoft.AspNet.Authentication.Cookies
                 if (signInContext.Properties.IsPersistent)
                 {
                     var expiresUtc = signInContext.Properties.ExpiresUtc ?? issuedUtc.Add(Options.ExpireTimeSpan);
-                    signInContext.CookieOptions.Expires = expiresUtc.ToUniversalTime().DateTime;
+                    signInContext.CookieOptions.Expires = expiresUtc.UtcDateTime;
                 }
 
                 model = new AuthenticationTicket(signInContext.Principal, signInContext.Properties, signInContext.AuthenticationScheme);
