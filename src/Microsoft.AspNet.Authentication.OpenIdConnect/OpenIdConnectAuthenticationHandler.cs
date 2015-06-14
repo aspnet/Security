@@ -164,16 +164,15 @@ namespace Microsoft.AspNet.Authentication.OpenIdConnect
                 properties.RedirectUri = CurrentUri;
             }
 
-            if (!string.IsNullOrWhiteSpace(Options.RedirectUri))
-            {
-                Logger.LogDebug(Resources.OIDCH_0031_Using_Options_RedirectUri, Options.RedirectUri);
-            }
-
             // When redeeming a 'code' for an AccessToken, this value is needed
             if (!string.IsNullOrWhiteSpace(Options.RedirectUri))
             {
+                Logger.LogDebug(Resources.OIDCH_0031_Using_Options_RedirectUri, Options.RedirectUri);
                 properties.Items.Add(OpenIdConnectAuthenticationDefaults.RedirectUriUsedForCodeKey, Options.RedirectUri);
             }
+
+            // adding response type to properties so that we can determine the response type of an incoming message.
+            properties.Items.Add(OpenIdConnectParameterNames.ResponseType, Options.ResponseType);
 
             if (_configuration == null && Options.ConfigurationManager != null)
             {
@@ -249,7 +248,6 @@ namespace Microsoft.AspNet.Authentication.OpenIdConnect
         /// <remarks>Uses log id's OIDCH-0000 - OIDCH-0025</remarks>
         protected override async Task<AuthenticationTicket> AuthenticateCoreAsync()
         {
-            var isCodeOnlyFlow = (Options.ResponseType == OpenIdConnectResponseTypes.CodeOnly);
             OpenIdConnectMessage tokens = null;
             Logger.LogDebug(Resources.OIDCH_0000_AuthenticateCoreAsync, this.GetType());
 
@@ -312,11 +310,15 @@ namespace Microsoft.AspNet.Authentication.OpenIdConnect
                 }
 
                 var properties = GetPropertiesFromState(message.State);
+
                 if (properties == null)
                 {
                     Logger.LogError(Resources.OIDCH_0005_MessageStateIsInvalid);
                     return null;
                 }
+
+                var isCodeOnlyFlow = (properties.Items.ContainsKey(OpenIdConnectParameterNames.ResponseType) ? 
+                    (properties.Items[OpenIdConnectParameterNames.ResponseType] == OpenIdConnectResponseTypes.CodeOnly) : false);
 
                 // devs will need to hook AuthenticationFailedNotification to avoid having 'raw' runtime errors displayed to users.
                 if (!string.IsNullOrWhiteSpace(message.Error))
@@ -585,8 +587,24 @@ namespace Microsoft.AspNet.Authentication.OpenIdConnect
 
         protected virtual async Task<AuthenticationTicket> GetUserInformationAsync(AuthenticationProperties properties, OpenIdConnectMessage message, AuthenticationTicket ticket)
         {
+            string userInfoEndpoint = null;
+            if (_configuration != null)
+            {
+                userInfoEndpoint = _configuration.UserInfoEndpoint;
+            }
 
-            var requestMessage = new HttpRequestMessage(HttpMethod.Get, _configuration.UserInfoEndpoint);
+            if (string.IsNullOrEmpty(userInfoEndpoint))
+            {
+                userInfoEndpoint = Options.Configuration != null ? Options.Configuration.UserInfoEndpoint : null;
+            }
+
+            if (string.IsNullOrEmpty(userInfoEndpoint))
+            {
+                Logger.LogError("UserInfo endpoint is not set. Request to retrieve claims from userinfo endpoint cannot be completed.");
+                return ticket;
+            }
+
+            var requestMessage = new HttpRequestMessage(HttpMethod.Get, userInfoEndpoint);
             requestMessage.Headers.Authorization = new AuthenticationHeaderValue("Bearer", message.AccessToken);
             var responseMessage = await Backchannel.SendAsync(requestMessage);
             responseMessage.EnsureSuccessStatusCode();

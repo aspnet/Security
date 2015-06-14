@@ -4,7 +4,6 @@
 using System;
 using System.Collections.ObjectModel;
 using System.Diagnostics.CodeAnalysis;
-using System.Diagnostics.Tracing;
 using System.IdentityModel.Tokens;
 using System.Net.Http;
 using System.Text;
@@ -17,8 +16,8 @@ using Microsoft.AspNet.Http;
 using Microsoft.Framework.Internal;
 using Microsoft.Framework.Logging;
 using Microsoft.Framework.OptionsModel;
-using Microsoft.IdentityModel.Protocols;
 using Microsoft.Framework.WebEncoders;
+using Microsoft.IdentityModel.Protocols;
 
 namespace Microsoft.AspNet.Authentication.OpenIdConnect
 {
@@ -48,29 +47,7 @@ namespace Microsoft.AspNet.Authentication.OpenIdConnect
             ConfigureOptions<OpenIdConnectAuthenticationOptions> configureOptions = null)
             : base(next, options, loggerFactory, encoder, configureOptions)
         {
-<<<<<<< HEAD
-<<<<<<< HEAD
             if (string.IsNullOrEmpty(Options.SignInScheme) && !string.IsNullOrEmpty(externalOptions.Options.SignInScheme))
-=======
-            _logger = loggerFactory.CreateLogger<OpenIdConnectAuthenticationMiddleware>();
-
-            if (Options.IdentityModelEventSourceListener != null)
-            {
-                Options.IdentityModelEventSourceListener.EnableEvents(IdentityModelEventSource.Logger, EventLevel.Informational);
-            }
-            else
-            {
-                DefaultLoggingListener eventListener = new DefaultLoggingListener(_logger);
-                IdentityModelEventSource.LogLevel = EventLevel.Informational;
-                eventListener.EnableEvents(IdentityModelEventSource.Logger, EventLevel.Informational);
-            }
-=======
-            var eventListener = new DefaultIdentityModelLoggingListener(Logger);
-            eventListener.EnableEvents(IdentityModelEventSource.Logger, EventLevel.Informational);
->>>>>>> Removing adal dependency and addressing some github comments
-
-            if (string.IsNullOrWhiteSpace(Options.TokenValidationParameters.AuthenticationType))
->>>>>>> Adding logging draft.
             {
                 Options.SignInScheme = externalOptions.Options.SignInScheme;
             }
