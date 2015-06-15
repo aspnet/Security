@@ -69,11 +69,6 @@ namespace Microsoft.AspNet.Authentication
             {
                 throw new NotImplementedException();
             }
-
-            protected override Task ApplyResponseGrantAsync()
-            {
-                throw new NotImplementedException();
-            }
         }
 
         private class TestOptions : AuthenticationOptions { }
@@ -101,11 +96,6 @@ namespace Microsoft.AspNet.Authentication
             }
 
             protected override Task ApplyResponseChallengeAsync()
-            {
-                throw new NotImplementedException();
-            }
-
-            protected override Task ApplyResponseGrantAsync()
             {
                 throw new NotImplementedException();
             }

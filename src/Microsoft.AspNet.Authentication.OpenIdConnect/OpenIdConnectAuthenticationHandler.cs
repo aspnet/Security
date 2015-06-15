@@ -11,6 +11,7 @@ using System.Threading.Tasks;
 using Microsoft.AspNet.Authentication.Notifications;
 using Microsoft.AspNet.Http;
 using Microsoft.AspNet.Http.Authentication;
+using Microsoft.AspNet.Http.Features.Authentication;
 using Microsoft.Framework.Logging;
 using Microsoft.IdentityModel.Protocols;
 
@@ -42,9 +43,8 @@ namespace Microsoft.AspNet.Authentication.OpenIdConnect
         /// Handles Signout
         /// </summary>
         /// <returns></returns>
-        protected override async Task ApplyResponseGrantAsync()
+        protected override async Task HandleSignOutAsync(SignOutContext signout)
         {
-            var signout = SignOutContext;
             if (signout != null)
             {
                 if (_configuration == null && Options.ConfigurationManager != null)

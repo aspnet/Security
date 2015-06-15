@@ -192,11 +192,5 @@ namespace Microsoft.AspNet.Authentication.OAuthBearer
 
             await Options.Notifications.ApplyChallenge(new AuthenticationChallengeNotification<OAuthBearerAuthenticationOptions>(Context, Options));
         }
-
-        protected override Task ApplyResponseGrantAsync()
-        {
-            // N/A
-            return Task.FromResult(0);
-        }
     }
 }

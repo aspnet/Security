@@ -366,11 +366,5 @@ namespace Microsoft.AspNet.Authentication.Twitter
                 return Convert.ToBase64String(hash);
             }
         }
-
-        protected override Task ApplyResponseGrantAsync()
-        {
-            // N/A - No SignIn or SignOut support.
-            return Task.FromResult(0);
-        }
     }
 }

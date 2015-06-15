@@ -229,11 +229,5 @@ namespace Microsoft.AspNet.Authentication.OAuth
             // OAuth2 3.3 space separated
             return string.Join(" ", Options.Scope);
         }
-
-        protected override Task ApplyResponseGrantAsync()
-        {
-            // N/A - No SignIn or SignOut support.
-            return Task.FromResult(0);
-        }
     }
 }

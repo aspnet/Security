@@ -34,8 +34,8 @@ namespace Microsoft.AspNet.Authentication
         private AuthenticationOptions _baseOptions;
 
         protected ChallengeContext ChallengeContext { get; set; }
-        protected SignInContext SignInContext { get; set; }
-        protected SignOutContext SignOutContext { get; set; }
+        protected bool SignInCalled { get; set; }
+        protected bool SignOutCalled { get; set; }
 
         protected HttpContext Context { get; private set; }
 
@@ -95,7 +95,7 @@ namespace Microsoft.AspNet.Authentication
         private static void OnSendingHeaderCallback(object state)
         {
             var handler = (AuthenticationHandler)state;
-            _myTaskFactory.StartNew(() => handler.ApplyResponseAsync()).Unwrap().GetAwaiter().GetResult();
+            handler.ApplyResponseChallengeOnceAsync().GetAwaiter().GetResult();
         }
 
         protected virtual Task InitializeCoreAsync()
@@ -201,61 +201,51 @@ namespace Microsoft.AspNet.Authentication
         //    }
         //}
 
-        /// <summary>
-        /// Core method that may be overridden by handler. The default behavior is to call two common response 
-        /// activities, one that deals with sign-in/sign-out concerns, and a second to deal with 401 challenges.
-        /// </summary>
-        /// <returns></returns>
-        public virtual async Task ApplyResponseAsync()
-        {
-            await ApplyResponseGrantAsync();
-
-            // If challenge was explicitly called, we don't want to challenge again
-            await ApplyResponseChallengeOnceAsync();
-        }
-
-        /// <summary>
-        /// Override this method to dela with sign-in/sign-out concerns, if an authentication scheme in question
-        /// deals with grant/revoke as part of it's request flow. (like setting/deleting cookies)
-        /// </summary>
-        /// <returns></returns>
-        protected abstract Task ApplyResponseGrantAsync();
-
         public virtual bool ShouldHandleScheme(string authenticationScheme)
         {
             return string.Equals(BaseOptions.AuthenticationScheme, authenticationScheme, StringComparison.Ordinal) ||
                 (BaseOptions.AutomaticAuthentication && string.IsNullOrWhiteSpace(authenticationScheme));
         }
 
-        public virtual Task SignInAsync(SignInContext context)
+        public virtual async Task SignInAsync(SignInContext context)
         {
             if (ShouldHandleScheme(context.AuthenticationScheme))
             {
-                SignInContext = context;
-                SignOutContext = null;
+                SignInCalled = true;
+                await HandleSignInAsync(context);
                 context.Accept();
             }
 
             if (PriorHandler != null)
             {
-                return PriorHandler.SignInAsync(context);
+                await PriorHandler.SignInAsync(context);
             }
+        }
+
+        // REVIEW: We could just use SignInContext property instead of parameter
+        protected virtual Task HandleSignInAsync(SignInContext context)
+        {
             return Task.FromResult(0);
         }
 
-        public virtual Task SignOutAsync(SignOutContext context)
+
+        public virtual async Task SignOutAsync(SignOutContext context)
         {
             if (ShouldHandleScheme(context.AuthenticationScheme))
             {
-                SignInContext = null;
-                SignOutContext = context;
+                SignOutCalled = true;
+                await HandleSignOutAsync(context);
                 context.Accept();
             }
 
             if (PriorHandler != null)
             {
-                return PriorHandler.SignOutAsync(context);
+                await PriorHandler.SignOutAsync(context);
             }
+        }
+
+        protected virtual Task HandleSignOutAsync(SignOutContext context)
+        {
             return Task.FromResult(0);
         }
 
