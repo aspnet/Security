@@ -20,16 +20,11 @@ namespace Microsoft.AspNet.Authentication.OAuthBearer
     {
         private OpenIdConnectConfiguration _configuration;
 
-        protected override AuthenticationTicket AuthenticateCore()
-        {
-            return AuthenticateCoreAsync().GetAwaiter().GetResult();
-        }
-
         /// <summary>
         /// Searches the 'Authorization' header for a 'Bearer' token. If the 'Bearer' token is found, it is validated using <see cref="TokenValidationParameters"/> set in the options.
         /// </summary>
         /// <returns></returns>
-        protected override async Task<AuthenticationTicket> AuthenticateCoreAsync()
+        public override async Task<AuthenticationTicket> AuthenticateAsync()
         {
             string token = null;
             try
@@ -180,18 +175,12 @@ namespace Microsoft.AspNet.Authentication.OAuthBearer
             }
         }
 
-        protected override void HandleUnauthorized(ChallengeContext context)
+        protected override async Task HandleUnauthorizedAsync(ChallengeContext context)
         {
-            base.HandleUnauthorized(context);
+            await base.HandleUnauthorizedAsync(context);
 
             // REVIEW: GROSS!! See if we can remove this
-            Options.Notifications.ApplyChallenge(new AuthenticationChallengeNotification<OAuthBearerAuthenticationOptions>(Context, Options))
-                .GetAwaiter().GetResult();
-        }
-
-        protected override void ApplyResponseChallenge()
-        {
-            ApplyResponseChallengeAsync().GetAwaiter().GetResult();
+            await Options.Notifications.ApplyChallenge(new AuthenticationChallengeNotification<OAuthBearerAuthenticationOptions>(Context, Options));
         }
 
         protected override async Task ApplyResponseChallengeAsync()
@@ -204,9 +193,10 @@ namespace Microsoft.AspNet.Authentication.OAuthBearer
             await Options.Notifications.ApplyChallenge(new AuthenticationChallengeNotification<OAuthBearerAuthenticationOptions>(Context, Options));
         }
 
-        protected override void ApplyResponseGrant()
+        protected override Task ApplyResponseGrantAsync()
         {
             // N/A
+            return Task.FromResult(0);
         }
     }
 }

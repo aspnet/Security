@@ -27,12 +27,7 @@ namespace Microsoft.AspNet.Authentication.Cookies
         private DateTimeOffset _renewExpiresUtc;
         private string _sessionKey;
 
-        protected override AuthenticationTicket AuthenticateCore()
-        {
-            return AuthenticateCoreAsync().GetAwaiter().GetResult();
-        }
-
-        protected override async Task<AuthenticationTicket> AuthenticateCoreAsync()
+        public override async Task<AuthenticationTicket> AuthenticateAsync()
         {
             AuthenticationTicket ticket = null;
             try
@@ -115,9 +110,91 @@ namespace Microsoft.AspNet.Authentication.Cookies
             }
         }
 
-        protected override void ApplyResponseGrant()
+        private CookieOptions BuildCookieOptions()
         {
-            ApplyResponseGrantAsync().GetAwaiter().GetResult();
+            var cookieOptions = new CookieOptions
+            {
+                Domain = Options.CookieDomain,
+                HttpOnly = Options.CookieHttpOnly,
+                Path = Options.CookiePath ?? (RequestPathBase.HasValue ? RequestPathBase.ToString() : "/"),
+            };
+            if (Options.CookieSecure == CookieSecureOption.SameAsRequest)
+            {
+                cookieOptions.Secure = Request.IsHttps;
+            }
+            else
+            {
+                cookieOptions.Secure = Options.CookieSecure == CookieSecureOption.Always;
+            }
+            return cookieOptions;
+        }
+
+        private async Task ApplyCookie(AuthenticationTicket model)
+        {
+            var cookieOptions = BuildCookieOptions();
+
+            model.Properties.IssuedUtc = _renewIssuedUtc;
+            model.Properties.ExpiresUtc = _renewExpiresUtc;
+
+            if (Options.SessionStore != null && _sessionKey != null)
+            {
+                await Options.SessionStore.RenewAsync(_sessionKey, model);
+                var principal = new ClaimsPrincipal(
+                    new ClaimsIdentity(
+                        new[] { new Claim(SessionIdClaim, _sessionKey, ClaimValueTypes.String, Options.ClaimsIssuer) },
+                        Options.AuthenticationScheme));
+                model = new AuthenticationTicket(principal, null, Options.AuthenticationScheme);
+            }
+
+            var cookieValue = Options.TicketDataFormat.Protect(model);
+
+            if (model.Properties.IsPersistent)
+            {
+                cookieOptions.Expires = _renewExpiresUtc.ToUniversalTime().DateTime;
+            }
+
+            Options.CookieManager.AppendResponseCookie(
+                Context,
+                Options.CookieName,
+                cookieValue,
+                cookieOptions);
+
+            Response.Headers.Set(
+                HeaderNameCacheControl,
+                HeaderValueNoCache);
+
+            Response.Headers.Set(
+                HeaderNamePragma,
+                HeaderValueNoCache);
+
+            Response.Headers.Set(
+                HeaderNameExpires,
+                HeaderValueMinusOne);
+        }
+
+        protected override async Task TeardownCoreAsync()
+        {
+            // Only renew if requested, and neither sign in or sign out was called
+            if (!_shouldRenew || SignInContext != null || SignOutContext != null)
+            {
+                return;
+            }
+
+            var model = await AuthenticateAsync();
+            try
+            {
+                await ApplyCookie(model);
+            }
+            catch (Exception exception)
+            {
+                var exceptionContext = new CookieExceptionContext(Context, Options,
+                    CookieExceptionContext.ExceptionLocation.ApplyResponseGrant, exception, model);
+                Options.Notifications.Exception(exceptionContext);
+                if (exceptionContext.Rethrow)
+                {
+                    throw;
+                }
+            }
         }
 
         protected override async Task ApplyResponseGrantAsync()
@@ -135,20 +212,7 @@ namespace Microsoft.AspNet.Authentication.Cookies
             var model = await AuthenticateAsync();
             try
             {
-                var cookieOptions = new CookieOptions
-                {
-                    Domain = Options.CookieDomain,
-                    HttpOnly = Options.CookieHttpOnly,
-                    Path = Options.CookiePath ?? (RequestPathBase.HasValue ? RequestPathBase.ToString() : "/"),
-                };
-                if (Options.CookieSecure == CookieSecureOption.SameAsRequest)
-                {
-                    cookieOptions.Secure = Request.IsHttps;
-                }
-                else
-                {
-                    cookieOptions.Secure = Options.CookieSecure == CookieSecureOption.Always;
-                }
+                var cookieOptions = BuildCookieOptions();
 
                 if (shouldSignin)
                 {
@@ -315,7 +379,7 @@ namespace Microsoft.AspNet.Authentication.Cookies
             return path[0] == '/' && path[1] != '/' && path[1] != '\\';
         }
 
-        protected override void HandleForbidden(ChallengeContext context)
+        protected override Task HandleForbiddenAsync(ChallengeContext context)
         {
             // HandleForbidden by redirecting to AccessDeniedPath if set
             if (Options.AccessDeniedPath.HasValue)
@@ -345,23 +409,24 @@ namespace Microsoft.AspNet.Authentication.Cookies
             }
             else
             {
-                base.HandleForbidden(context);
+                return base.HandleForbiddenAsync(context);
             }
+            return Task.FromResult(0);
         }
 
-        protected override void ApplyResponseChallenge()
+        protected override Task ApplyResponseChallengeAsync()
         {
             // REVIEW: should we check if status code is 401?
 
             if (!Options.LoginPath.HasValue)
             {
-                return;
+                return Task.FromResult(0);
             }
 
             // Should redirect even if there wasn't an explicit challenge when Automatic.
             if (ChallengeContext == null && !Options.AutomaticAuthentication)
             {
-                return;
+                return Task.FromResult(0);
             }
 
             var redirectUri = string.Empty;
@@ -401,6 +466,7 @@ namespace Microsoft.AspNet.Authentication.Cookies
                     throw;
                 }
             }
+            return Task.FromResult(0);
         }
     }
 }

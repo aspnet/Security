@@ -38,11 +38,6 @@ namespace Microsoft.AspNet.Authentication.OpenIdConnect
             }
         }
 
-        protected override void ApplyResponseGrant()
-        {
-            ApplyResponseGrantAsync().GetAwaiter().GetResult();
-        }
-
         /// <summary>
         /// Handles Signout
         /// </summary>
@@ -94,11 +89,6 @@ namespace Microsoft.AspNet.Authentication.OpenIdConnect
                     Response.Redirect(redirectUri);
                 }
             }
-        }
-
-        protected override void ApplyResponseChallenge()
-        {
-            ApplyResponseChallengeAsync().GetAwaiter().GetResult();
         }
 
         /// <summary>
@@ -219,17 +209,12 @@ namespace Microsoft.AspNet.Authentication.OpenIdConnect
             Response.Redirect(redirectUri);
         }
 
-        protected override AuthenticationTicket AuthenticateCore()
-        {
-            return AuthenticateCoreAsync().GetAwaiter().GetResult();
-        }
-
         /// <summary>
         /// Invoked to process incoming OpenIdConnect messages.
         /// </summary>
         /// <returns>An <see cref="AuthenticationTicket"/> if successful.</returns>
         /// <remarks>Uses log id's OIDCH-0000 - OIDCH-0025</remarks>
-        protected override async Task<AuthenticationTicket> AuthenticateCoreAsync()
+        public override async Task<AuthenticationTicket> AuthenticateAsync()
         {
             Logger.LogDebug(Resources.OIDCH_0000_AuthenticateCoreAsync, this.GetType());
 
@@ -625,7 +610,7 @@ namespace Microsoft.AspNet.Authentication.OpenIdConnect
             {
                 if (ticket.Principal != null)
                 {
-                    Request.HttpContext.Authentication.SignIn(Options.SignInScheme, ticket.Principal, ticket.Properties);
+                    await Request.HttpContext.Authentication.SignInAsync(Options.SignInScheme, ticket.Principal, ticket.Properties);
                 }
 
                 // Redirect back to the original secured resource, if any.

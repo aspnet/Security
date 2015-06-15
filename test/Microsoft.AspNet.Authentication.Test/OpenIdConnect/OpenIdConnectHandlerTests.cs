@@ -554,12 +554,9 @@ namespace Microsoft.AspNet.Authentication.Tests.OpenIdConnect
             return true;
         }
 
-        public override void Challenge(ChallengeContext context)
+        public override Task ChallengeAsync(ChallengeContext context)
         {
-        }
-
-        protected override void ApplyResponseChallenge()
-        {
+            return Task.FromResult(0);
         }
 
         protected override async Task ApplyResponseChallengeAsync()

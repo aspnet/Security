@@ -50,9 +50,10 @@ namespace Microsoft.AspNet.Authentication.Twitter
                     };
                     options.BackchannelCertificateValidator = null;
                 }),
-                context =>
+                context => 
                 {
-                    context.Authentication.Challenge("Twitter");
+                    // REVIEW: Gross
+                    context.Authentication.ChallengeAsync("Twitter").GetAwaiter().GetResult();
                     return true;
                 });
             var transaction = await server.SendAsync("http://example.com/challenge");
@@ -90,7 +91,8 @@ namespace Microsoft.AspNet.Authentication.Twitter
                 }),
                 context =>
                 {
-                    context.Authentication.Challenge("Twitter");
+                    // REVIEW: gross
+                    context.Authentication.ChallengeAsync("Twitter").GetAwaiter().GetResult();
                     return true;
                 });
             var transaction = await server.SendAsync("http://example.com/challenge");

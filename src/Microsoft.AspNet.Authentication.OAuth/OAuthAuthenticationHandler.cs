@@ -55,7 +55,7 @@ namespace Microsoft.AspNet.Authentication.OAuth
 
             if (context.SignInScheme != null && context.Principal != null)
             {
-                Context.Authentication.SignIn(context.SignInScheme, context.Principal, context.Properties);
+                await Context.Authentication.SignInAsync(context.SignInScheme, context.Principal, context.Properties);
             }
 
             if (!context.IsRequestCompleted && context.RedirectUri != null)
@@ -72,12 +72,7 @@ namespace Microsoft.AspNet.Authentication.OAuth
             return context.IsRequestCompleted;
         }
 
-        protected override AuthenticationTicket AuthenticateCore()
-        {
-            return AuthenticateCoreAsync().GetAwaiter().GetResult();
-        }
-
-        protected override async Task<AuthenticationTicket> AuthenticateCoreAsync()
+        public override async Task<AuthenticationTicket> AuthenticateAsync()
         {
             AuthenticationProperties properties = null;
             try
@@ -168,18 +163,18 @@ namespace Microsoft.AspNet.Authentication.OAuth
             return new AuthenticationTicket(context.Principal, context.Properties, Options.AuthenticationScheme);
         }
 
-        protected override void ApplyResponseChallenge()
+        protected override Task ApplyResponseChallengeAsync()
         {
             // REVIEW: do we need this 401 check?
             if (Response.StatusCode != 401)
             {
-                return;
+                return Task.FromResult(0);
             }
 
             // When Automatic should redirect on 401 even if there wasn't an explicit challenge.
             if (ChallengeContext == null && !Options.AutomaticAuthentication)
             {
-                return;
+                return Task.FromResult(0);
             }
 
             var baseUri = Request.Scheme + "://" + Request.Host + Request.PathBase;
@@ -209,6 +204,7 @@ namespace Microsoft.AspNet.Authentication.OAuth
                 Context, Options,
                 properties, authorizationEndpoint);
             Options.Notifications.ApplyRedirect(redirectContext);
+            return Task.FromResult(0);
         }
 
         protected virtual string BuildChallengeUrl(AuthenticationProperties properties, string redirectUri)
@@ -234,9 +230,10 @@ namespace Microsoft.AspNet.Authentication.OAuth
             return string.Join(" ", Options.Scope);
         }
 
-        protected override void ApplyResponseGrant()
+        protected override Task ApplyResponseGrantAsync()
         {
             // N/A - No SignIn or SignOut support.
+            return Task.FromResult(0);
         }
     }
 }

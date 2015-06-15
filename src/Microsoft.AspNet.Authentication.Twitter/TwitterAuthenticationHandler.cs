@@ -42,12 +42,7 @@ namespace Microsoft.AspNet.Authentication.Twitter
             return false;
         }
 
-        protected override AuthenticationTicket AuthenticateCore()
-        {
-            return AuthenticateCoreAsync().GetAwaiter().GetResult();
-        }
-
-        protected override async Task<AuthenticationTicket> AuthenticateCoreAsync()
+        public override async Task<AuthenticationTicket> AuthenticateAsync()
         {
             AuthenticationProperties properties = null;
             try
@@ -121,11 +116,6 @@ namespace Microsoft.AspNet.Authentication.Twitter
                 return new AuthenticationTicket(properties, Options.AuthenticationScheme);
             }
         }
-        protected override void ApplyResponseChallenge()
-        {
-            ApplyResponseChallengeAsync().GetAwaiter().GetResult();
-        }
-
         protected override async Task ApplyResponseChallengeAsync()
         {
             // REVIEW: should we check if status code is 401?
@@ -204,7 +194,7 @@ namespace Microsoft.AspNet.Authentication.Twitter
 
             if (context.SignInScheme != null && context.Principal != null)
             {
-                Context.Authentication.SignIn(context.SignInScheme, context.Principal, context.Properties);
+                await Context.Authentication.SignInAsync(context.SignInScheme, context.Principal, context.Properties);
             }
 
             if (!context.IsRequestCompleted && context.RedirectUri != null)
@@ -377,9 +367,10 @@ namespace Microsoft.AspNet.Authentication.Twitter
             }
         }
 
-        protected override void ApplyResponseGrant()
+        protected override Task ApplyResponseGrantAsync()
         {
             // N/A - No SignIn or SignOut support.
+            return Task.FromResult(0);
         }
     }
 }

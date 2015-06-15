@@ -80,24 +80,21 @@ namespace Microsoft.AspNet.Authentication.Cookies
 
         private Task SignInAsAlice(HttpContext context)
         {
-            context.Authentication.SignIn("Cookies",
+            return context.Authentication.SignInAsync("Cookies",
                 new ClaimsPrincipal(new ClaimsIdentity(new GenericIdentity("Alice", "Cookies"))),
                 new AuthenticationProperties());
-            return Task.FromResult<object>(null);
         }
 
         private Task SignInAsWrong(HttpContext context)
         {
-            context.Authentication.SignIn("Oops",
+            return context.Authentication.SignInAsync("Oops",
                 new ClaimsPrincipal(new ClaimsIdentity(new GenericIdentity("Alice", "Cookies"))),
                 new AuthenticationProperties());
-            return Task.FromResult<object>(null);
         }
 
         private Task SignOutAsWrong(HttpContext context)
         {
-            context.Authentication.SignOut("Oops");
-            return Task.FromResult<object>(null);
+            return context.Authentication.SignOutAsync("Oops");
         }
 
         [Fact]
@@ -305,12 +302,9 @@ namespace Microsoft.AspNet.Authentication.Cookies
                 options.SlidingExpiration = false;
             },
             context =>
-            {
-                context.Authentication.SignIn("Cookies",
+                context.Authentication.SignInAsync("Cookies",
                     new ClaimsPrincipal(new ClaimsIdentity(new GenericIdentity("Alice", "Cookies"))),
-                    new AuthenticationProperties() { ExpiresUtc = clock.UtcNow.Add(TimeSpan.FromMinutes(5)) });
-                    return Task.FromResult<object>(null);
-            });
+                    new AuthenticationProperties() { ExpiresUtc = clock.UtcNow.Add(TimeSpan.FromMinutes(5)) }));
 
             var transaction1 = await SendAsync(server, "http://example.com/testpath");
 
@@ -434,9 +428,8 @@ namespace Microsoft.AspNet.Authentication.Cookies
             context =>
             {
                 Assert.Equal(new PathString("/base"), context.Request.PathBase);
-                context.Authentication.SignIn("Cookies", 
+                return context.Authentication.SignInAsync("Cookies", 
                     new ClaimsPrincipal(new ClaimsIdentity(new GenericIdentity("Alice", "Cookies"))));
-                return Task.FromResult<object>(null);
             },
             new Uri("http://example.com/base"));
 
@@ -606,19 +599,19 @@ namespace Microsoft.AspNet.Authentication.Cookies
                     }
                     else if (req.Path == new PathString("/forbid")) // Simulate forbidden 
                     {
-                        context.Authentication.Forbid(CookieAuthenticationDefaults.AuthenticationScheme);
+                        await context.Authentication.ForbidAsync(CookieAuthenticationDefaults.AuthenticationScheme);
                     }
                     else if (req.Path == new PathString("/challenge"))
                     {
-                        context.Authentication.Challenge(CookieAuthenticationDefaults.AuthenticationScheme);
+                        await context.Authentication.ChallengeAsync(CookieAuthenticationDefaults.AuthenticationScheme);
                     }
                     else if (req.Path == new PathString("/unauthorized"))
                     {
-                        context.Authentication.Challenge(CookieAuthenticationDefaults.AuthenticationScheme, new AuthenticationProperties(), ChallengeBehavior.Unauthorized);
+                        await context.Authentication.ChallengeAsync(CookieAuthenticationDefaults.AuthenticationScheme, new AuthenticationProperties(), ChallengeBehavior.Unauthorized);
                     }
                     else if (req.Path == new PathString("/protected/CustomRedirect"))
                     {
-                        context.Authentication.Challenge(new AuthenticationProperties() { RedirectUri = "/CustomRedirect" });
+                        await context.Authentication.ChallengeAsync(new AuthenticationProperties() { RedirectUri = "/CustomRedirect" });
                     }
                     else if (req.Path == new PathString("/me"))
                     {

@@ -134,7 +134,7 @@ namespace Microsoft.AspNet.Authentication.Google
                     var res = context.Response;
                     if (req.Path == new PathString("/challenge2"))
                     {
-                        context.Authentication.Challenge("Google", new AuthenticationProperties(
+                        return context.Authentication.ChallengeAsync("Google", new AuthenticationProperties(
                             new Dictionary<string, string>()
                             {
                                 { "scope", "https://www.googleapis.com/auth/plus.login" },
@@ -474,7 +474,7 @@ namespace Microsoft.AspNet.Authentication.Google
                     var res = context.Response;
                     if (req.Path == new PathString("/challenge"))
                     {
-                        context.Authentication.Challenge("Google");
+                        await context.Authentication.ChallengeAsync("Google");
                     }
                     else if (req.Path == new PathString("/me"))
                     {
@@ -484,12 +484,12 @@ namespace Microsoft.AspNet.Authentication.Google
                     {
                         // Simulate Authorization failure 
                         var result = await context.Authentication.AuthenticateAsync("Google");
-                        context.Authentication.Challenge("Google");
+                        await context.Authentication.ChallengeAsync("Google");
                     }
                     else if (req.Path == new PathString("/unauthorizedAuto"))
                     {
                         var result = await context.Authentication.AuthenticateAsync("Google");
-                        context.Authentication.Challenge();
+                        await context.Authentication.ChallengeAsync();
                     }
                     else if (req.Path == new PathString("/401"))
                     {

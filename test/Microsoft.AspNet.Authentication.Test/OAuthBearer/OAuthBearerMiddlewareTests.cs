@@ -326,7 +326,7 @@ namespace Microsoft.AspNet.Authentication.OAuthBearer
                     {
                         // Simulate Authorization failure 
                         var result = await context.Authentication.AuthenticateAsync(OAuthBearerAuthenticationDefaults.AuthenticationScheme);
-                        context.Authentication.Challenge(OAuthBearerAuthenticationDefaults.AuthenticationScheme);
+                        await context.Authentication.ChallengeAsync(OAuthBearerAuthenticationDefaults.AuthenticationScheme);
                     }
 
                     else

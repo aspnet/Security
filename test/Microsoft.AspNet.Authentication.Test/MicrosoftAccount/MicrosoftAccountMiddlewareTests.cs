@@ -155,7 +155,7 @@ namespace Microsoft.AspNet.Authentication.Tests.MicrosoftAccount
                     var res = context.Response;
                     if (req.Path == new PathString("/challenge"))
                     {
-                        context.Authentication.Challenge("Microsoft");
+                        await context.Authentication.ChallengeAsync("Microsoft");
                     }
                     else if (req.Path == new PathString("/me"))
                     {
