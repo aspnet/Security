@@ -172,10 +172,10 @@ namespace Microsoft.AspNet.Authentication.Cookies
                 HeaderValueMinusOne);
         }
 
-        protected override async Task TeardownCoreAsync()
+        protected override async Task ApplyResponseStartingAsync()
         {
             // Only renew if requested, and neither sign in or sign out was called
-            if (!_shouldRenew || !SignInCalled || SignOutCalled)
+            if (!_shouldRenew || SignInCalled || SignOutCalled)
             {
                 return;
             }

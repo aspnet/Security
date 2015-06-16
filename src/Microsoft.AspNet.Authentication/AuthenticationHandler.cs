@@ -95,7 +95,17 @@ namespace Microsoft.AspNet.Authentication
         private static void OnSendingHeaderCallback(object state)
         {
             var handler = (AuthenticationHandler)state;
+            handler.ApplyResponseStartingAsync().GetAwaiter().GetResult();
             handler.ApplyResponseChallengeOnceAsync().GetAwaiter().GetResult();
+        }
+
+        /// <summary>
+        /// Hook that is called when the response about to be sent
+        /// </summary>
+        /// <returns></returns>
+        protected virtual Task ApplyResponseStartingAsync()
+        {
+            return Task.FromResult(0);
         }
 
         protected virtual Task InitializeCoreAsync()
@@ -221,13 +231,10 @@ namespace Microsoft.AspNet.Authentication
                 await PriorHandler.SignInAsync(context);
             }
         }
-
-        // REVIEW: We could just use SignInContext property instead of parameter
         protected virtual Task HandleSignInAsync(SignInContext context)
         {
             return Task.FromResult(0);
         }
-
 
         public virtual async Task SignOutAsync(SignOutContext context)
         {
