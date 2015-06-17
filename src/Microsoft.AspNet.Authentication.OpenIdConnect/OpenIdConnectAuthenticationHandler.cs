@@ -193,6 +193,12 @@ namespace Microsoft.AspNet.Authentication.OpenIdConnect
                 State = OpenIdConnectAuthenticationDefaults.AuthenticationPropertiesKey + "=" + UrlEncoder.UrlEncode(Options.StateDataFormat.Protect(properties))
             };
 
+            // if response_type=code, nonce is not required.
+            if (Options.ResponseType.Equals(OpenIdConnectResponseTypes.Code))
+            {
+                Options.ProtocolValidator.RequireNonce = false;
+            }
+
             if (Options.ProtocolValidator.RequireNonce)
             {
                 message.Nonce = Options.ProtocolValidator.GenerateNonce();
@@ -317,8 +323,8 @@ namespace Microsoft.AspNet.Authentication.OpenIdConnect
                     return null;
                 }
 
-                var isCodeOnlyFlow = (properties.Items.ContainsKey(OpenIdConnectParameterNames.ResponseType) ? 
-                    (properties.Items[OpenIdConnectParameterNames.ResponseType] == OpenIdConnectResponseTypes.CodeOnly) : false);
+                var isCodeOnlyFlow = properties.Items.ContainsKey(OpenIdConnectParameterNames.ResponseType) ?
+                    (properties.Items[OpenIdConnectParameterNames.ResponseType] == OpenIdConnectResponseTypes.Code) : false;
 
                 // devs will need to hook AuthenticationFailedNotification to avoid having 'raw' runtime errors displayed to users.
                 if (!string.IsNullOrWhiteSpace(message.Error))
@@ -341,7 +347,10 @@ namespace Microsoft.AspNet.Authentication.OpenIdConnect
                 {
                     Logger.LogDebug(Resources.OIDCH_0037_Redeeming_Auth_Code, message.Code);
 
-                    tokens = await RedeemAuthorizationCode(message.Code);
+                    var redirectUri = properties.Items.ContainsKey(OpenIdConnectAuthenticationDefaults.RedirectUriUsedForCodeKey) ? 
+                       properties.Items[OpenIdConnectAuthenticationDefaults.RedirectUriUsedForCodeKey] : Options.RedirectUri;
+
+                    tokens = await RedeemAuthorizationCode(message.Code, redirectUri);
                     if (tokens != null)
                     {
                         message.IdToken = tokens.IdToken;
@@ -462,33 +471,31 @@ namespace Microsoft.AspNet.Authentication.OpenIdConnect
                         return null;
                     }
 
-                    string nonce = jwt.Payload.Nonce;
-                    if (Options.NonceCache != null)
+                    // If id_token is received using code only flow, no need to validate chash and nonce.
+                    if (!isCodeOnlyFlow)
                     {
-                        // if the nonce cannot be removed, it was used
-                        if (!Options.NonceCache.TryRemoveNonce(nonce))
+                        string nonce = jwt.Payload.Nonce;
+                        if (Options.NonceCache != null)
                         {
-                            nonce = null;
+                            // if the nonce cannot be removed, it was used
+                            if (!Options.NonceCache.TryRemoveNonce(nonce))
+                            {
+                                nonce = null;
+                            }
                         }
-                    }
-                    else
-                    {
-                        nonce = ReadNonceCookie(nonce);
-                    }
+                        else
+                        {
+                            nonce = ReadNonceCookie(nonce);
+                        }
 
-                    var protocolValidationContext = new OpenIdConnectProtocolValidationContext
-                    {
-                        AuthorizationCode = message.Code,
-                        Nonce = nonce,
-                    };
-                    
-                    // If id_token is received using code only flow, no need to validate chash as it is not returned in the response. Setting authorizationCode to null will skip the validation of chash.
-                    if (isCodeOnlyFlow)
-                    {
-                        protocolValidationContext.AuthorizationCode = null;
-                    }
+                        var protocolValidationContext = new OpenIdConnectProtocolValidationContext
+                        {
+                            AuthorizationCode = message.Code,
+                            Nonce = nonce,
+                        };
 
-                    Options.ProtocolValidator.Validate(jwt, protocolValidationContext);
+                        Options.ProtocolValidator.Validate(jwt, protocolValidationContext);
+                    }
                 }
 
                 if (message.Code != null)
@@ -559,7 +566,7 @@ namespace Microsoft.AspNet.Authentication.OpenIdConnect
             }
         }
 
-        protected virtual async Task<OpenIdConnectMessage> RedeemAuthorizationCode(string authorizationCode)
+        protected virtual async Task<OpenIdConnectMessage> RedeemAuthorizationCode(string authorizationCode, string redirectUri)
         {
             var openIdMessage = new OpenIdConnectMessage()
             {
@@ -567,7 +574,7 @@ namespace Microsoft.AspNet.Authentication.OpenIdConnect
                 ClientSecret = Options.ClientSecret,
                 Code = authorizationCode,
                 GrantType = "authorization_code",
-                RedirectUri = Options.RedirectUri
+                RedirectUri = redirectUri
             };
 
             var requestMessage = new HttpRequestMessage(HttpMethod.Post, _configuration.TokenEndpoint);

@@ -7,6 +7,8 @@
 
 using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
+using System.IdentityModel.Tokens;
 using System.Net.Http;
 using System.Security.Claims;
 using System.Threading.Tasks;
@@ -64,7 +66,8 @@ namespace Microsoft.AspNet.Authentication.Tests.OpenIdConnect
                     { "OIDCH_0019:", LogLevel.Debug },
                     { "OIDCH_0020:", LogLevel.Debug },
                     { "OIDCH_0026:", LogLevel.Error },
-                    { "OIDCH_0037:", LogLevel.Debug }
+                    { "OIDCH_0037:", LogLevel.Debug },
+                    { "OIDCH_0039:", LogLevel.Debug }
                 };
 
             BuildLogEntryList();
@@ -163,6 +166,9 @@ namespace Microsoft.AspNet.Authentication.Tests.OpenIdConnect
             message.IdToken = null;
             logsEntriesExpected = new int[] { 0, 1, 7, 22, 20, 8};
             await RunVariation(LogLevel.Debug, message, CodeReceivedAndRedeemedHandledOptions, errors, logsEntriesExpected);
+
+            logsEntriesExpected = new int[] { 0, 1, 7, 22, 20, 23, 12 };
+            await RunVariation(LogLevel.Debug, message, GetUserInfoFromUIEndpoint, errors, logsEntriesExpected);
 
 #if _Verbose
             Console.WriteLine("\n ===== \n");
@@ -327,7 +333,8 @@ namespace Microsoft.AspNet.Authentication.Tests.OpenIdConnect
         private static void CodeReceivedAndRedeemedHandledOptions(OpenIdConnectAuthenticationOptions options)
         {
             DefaultOptions(options);
-            options.ResponseType = OpenIdConnectResponseTypes.CodeOnly;
+            options.ResponseType = OpenIdConnectResponseTypes.Code;
+            options.StateDataFormat = new CodeOnlyAuthenticationPropertiesFormater();
             options.Notifications =
                 new OpenIdConnectAuthenticationNotifications
                 {
@@ -359,6 +366,29 @@ namespace Microsoft.AspNet.Authentication.Tests.OpenIdConnect
             options.ConfigurationManager = ConfigurationManager.DefaultStaticConfigurationManager;
             options.StateDataFormat = new AuthenticationPropertiesFormater();
 
+        }
+
+        private static void GetUserInfoFromUIEndpoint(OpenIdConnectAuthenticationOptions options)
+        {
+            DefaultOptions(options);
+            options.ResponseType = OpenIdConnectResponseTypes.Code;
+            options.StateDataFormat = new CodeOnlyAuthenticationPropertiesFormater();
+            options.GetClaimsFromUserInfoEndpoint = true;
+            options.SecurityTokenValidators = new Collection<ISecurityTokenValidator> { new CustomSecurityTokenValidator() };
+            options.Notifications =
+                new OpenIdConnectAuthenticationNotifications
+                {
+                    SecurityTokenValidated = (notification) =>
+                    {
+                        var claimValue = notification.AuthenticationTicket.Principal.FindFirst("test claim");
+                        if (!claimValue.Value.Equals("test value"))
+                        {
+                            throw new Exception("GetUserInformationAsync: claim added from UI endpoint does not match.");
+                        }
+                        notification.HandleResponse();
+                        return Task.FromResult<object>(null);
+                    }
+                };
         }
 
         private static void MessageReceivedHandledOptions(OpenIdConnectAuthenticationOptions options)
@@ -597,13 +627,26 @@ namespace Microsoft.AspNet.Authentication.Tests.OpenIdConnect
             await Options.Notifications.RedirectToIdentityProvider(redirectToIdentityProviderNotification);
         }
 
-        protected override async Task<OpenIdConnectMessage> RedeemAuthorizationCode(string authorizationCode)
+        protected override async Task<OpenIdConnectMessage> RedeemAuthorizationCode(string authorizationCode, string redirectUri)
         {
             return new OpenIdConnectMessage()
             {
                 IdToken = "test token"
             };
         }
+
+        protected override async Task<AuthenticationTicket> GetUserInformationAsync(AuthenticationProperties properties, OpenIdConnectMessage message, AuthenticationTicket ticket)
+        {
+            var claimsIdentity = (ClaimsIdentity)ticket.Principal.Identity;
+            if (claimsIdentity == null)
+            {
+                claimsIdentity = new ClaimsIdentity();
+            }
+            claimsIdentity.AddClaim(new Claim("test claim", "test value"));
+            ticket.Principal.AddIdentity(claimsIdentity);
+            return ticket;
+        }
+
 
     }
 
@@ -759,6 +802,25 @@ namespace Microsoft.AspNet.Authentication.Tests.OpenIdConnect
     }
 
     /// <summary>
+    /// Processing a <see cref="OpenIdConnectMessage"/> requires 'unprotecting' the state.
+    /// This class side-steps that process.
+    /// </summary>
+    public class CodeOnlyAuthenticationPropertiesFormater : ISecureDataFormat<AuthenticationProperties>
+    {
+        public string Protect(AuthenticationProperties data)
+        {
+            return "protectedData";
+        }
+
+        AuthenticationProperties ISecureDataFormat<AuthenticationProperties>.Unprotect(string protectedText)
+        {
+            var properties = new AuthenticationProperties();
+            properties.Items.Add(OpenIdConnectParameterNames.ResponseType, OpenIdConnectResponseTypes.Code);
+            return properties;
+        }
+    }
+
+    /// <summary>
     /// Used to set up different configurations of metadata for different tests
     /// </summary>
     public class ConfigurationManager
@@ -769,6 +831,41 @@ namespace Microsoft.AspNet.Authentication.Tests.OpenIdConnect
         static public IConfigurationManager<OpenIdConnectConfiguration> DefaultStaticConfigurationManager
         {
            get { return new StaticConfigurationManager<OpenIdConnectConfiguration>(new OpenIdConnectConfiguration()); }
+        }
+    }
+
+    public class CustomSecurityTokenValidator : ISecurityTokenValidator
+    {
+        public bool CanValidateToken
+        {
+            get
+            {
+                return true;
+            }
+        }
+
+        public int MaximumTokenSizeInBytes
+        {
+            get
+            {
+                return TokenValidationParameters.DefaultMaximumTokenSizeInBytes;
+            }
+
+            set
+            {
+                MaximumTokenSizeInBytes = value;
+            }
+        }
+
+        public bool CanReadToken(string securityToken)
+        {
+            return true;
+        }
+
+        public ClaimsPrincipal ValidateToken(string securityToken, TokenValidationParameters validationParameters, out SecurityToken validatedToken)
+        {
+            validatedToken = new JwtSecurityToken();
+            return new ClaimsPrincipal();
         }
     }
 }
