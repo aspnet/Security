@@ -175,22 +175,11 @@ namespace Microsoft.AspNet.Authentication.OAuthBearer
             }
         }
 
-        protected override async Task HandleUnauthorizedAsync(ChallengeContext context)
+        protected override async Task<bool> HandleUnauthorizedAsync(ChallengeContext context)
         {
-            await base.HandleUnauthorizedAsync(context);
-
-            // REVIEW: GROSS!! See if we can remove this
+            Response.StatusCode = 401;
             await Options.Notifications.ApplyChallenge(new AuthenticationChallengeNotification<OAuthBearerAuthenticationOptions>(Context, Options));
-        }
-
-        protected override async Task ApplyResponseChallengeAsync()
-        {
-            if ((Response.StatusCode != 401) || (ChallengeContext == null && !Options.AutomaticAuthentication))
-            {
-                return;
-            }
-
-            await Options.Notifications.ApplyChallenge(new AuthenticationChallengeNotification<OAuthBearerAuthenticationOptions>(Context, Options));
+            return true;
         }
     }
 }

@@ -9,6 +9,7 @@ using System.Threading.Tasks;
 using Microsoft.AspNet.Http;
 using Microsoft.AspNet.Http.Authentication;
 using Microsoft.AspNet.Http.Features.Authentication;
+using Microsoft.Framework.Internal;
 using Microsoft.Framework.Logging;
 
 namespace Microsoft.AspNet.Authentication.Cookies
@@ -172,7 +173,7 @@ namespace Microsoft.AspNet.Authentication.Cookies
                 HeaderValueMinusOne);
         }
 
-        protected override async Task ApplyResponseStartingAsync()
+        protected override async Task FinishResponseAsync()
         {
             // Only renew if requested, and neither sign in or sign out was called
             if (!_shouldRenew || SignInCalled || SignOutCalled)
@@ -303,7 +304,6 @@ namespace Microsoft.AspNet.Authentication.Cookies
                     throw;
                 }
             }
-
         }
 
         protected override async Task HandleSignOutAsync(SignOutContext signOutContext)
@@ -382,7 +382,7 @@ namespace Microsoft.AspNet.Authentication.Cookies
             return path[0] == '/' && path[1] != '/' && path[1] != '\\';
         }
 
-        protected override Task HandleForbiddenAsync(ChallengeContext context)
+        protected override Task<bool> HandleForbiddenAsync(ChallengeContext context)
         {
             // HandleForbidden by redirecting to AccessDeniedPath if set
             if (Options.AccessDeniedPath.HasValue)
@@ -409,35 +409,22 @@ namespace Microsoft.AspNet.Authentication.Cookies
                         throw;
                     }
                 }
+                return Task.FromResult(true);
             }
             else
             {
                 return base.HandleForbiddenAsync(context);
             }
-            return Task.FromResult(0);
         }
 
-        protected override Task ApplyResponseChallengeAsync()
+        protected override Task<bool> HandleUnauthorizedAsync([NotNull] ChallengeContext context)
         {
-            // REVIEW: should we check if status code is 401?
-
             if (!Options.LoginPath.HasValue)
             {
-                return Task.FromResult(0);
+                return base.HandleUnauthorizedAsync(context);
             }
 
-            // Should redirect even if there wasn't an explicit challenge when Automatic.
-            if (ChallengeContext == null && !Options.AutomaticAuthentication)
-            {
-                return Task.FromResult(0);
-            }
-
-            var redirectUri = string.Empty;
-            if (ChallengeContext != null)
-            {
-                redirectUri = new AuthenticationProperties(ChallengeContext.Properties).RedirectUri;
-            }
-
+            var redirectUri = new AuthenticationProperties(context.Properties).RedirectUri;
             try
             {
                 if (string.IsNullOrWhiteSpace(redirectUri))
@@ -469,7 +456,7 @@ namespace Microsoft.AspNet.Authentication.Cookies
                     throw;
                 }
             }
-            return Task.FromResult(0);
+            return Task.FromResult(true);
         }
     }
 }

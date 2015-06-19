@@ -2,7 +2,6 @@
 // Licensed under the Apache License, Version 2.0. See License.txt in the project root for license information.
 
 using System;
-using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Net;
@@ -71,7 +70,8 @@ namespace Microsoft.AspNet.Authentication.Cookies
 
             var transaction = await SendAsync(server, "http://example.com/protected/CustomRedirect");
 
-            transaction.Response.StatusCode.ShouldBe(auto ? HttpStatusCode.Redirect : HttpStatusCode.Unauthorized);
+            // REVIEW: Now when Cookies are not in auto, noone handles the challenge so the Status stays OK, is that reasonable??
+            transaction.Response.StatusCode.ShouldBe(auto ? HttpStatusCode.Redirect : HttpStatusCode.OK);
             if (auto)
             {
                 var location = transaction.Response.Headers.Location;

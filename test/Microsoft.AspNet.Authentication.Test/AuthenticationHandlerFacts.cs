@@ -3,6 +3,7 @@
 
 using System;
 using System.Threading.Tasks;
+using Microsoft.AspNet.Http.Features.Authentication;
 using Microsoft.AspNet.Http.Internal;
 using Microsoft.Framework.Logging;
 using Xunit;
@@ -64,11 +65,6 @@ namespace Microsoft.AspNet.Authentication
             {
                 throw new NotImplementedException();
             }
-
-            protected override Task ApplyResponseChallengeAsync()
-            {
-                throw new NotImplementedException();
-            }
         }
 
         private class TestOptions : AuthenticationOptions { }
@@ -91,11 +87,6 @@ namespace Microsoft.AspNet.Authentication
             }
 
             public override Task<AuthenticationTicket> AuthenticateAsync()
-            {
-                throw new NotImplementedException();
-            }
-
-            protected override Task ApplyResponseChallengeAsync()
             {
                 throw new NotImplementedException();
             }

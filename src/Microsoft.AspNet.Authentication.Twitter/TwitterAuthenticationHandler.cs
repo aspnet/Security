@@ -12,8 +12,10 @@ using System.Threading.Tasks;
 using Microsoft.AspNet.Authentication.Twitter.Messages;
 using Microsoft.AspNet.Http;
 using Microsoft.AspNet.Http.Authentication;
+using Microsoft.AspNet.Http.Features.Authentication;
 using Microsoft.AspNet.Http.Internal;
 using Microsoft.AspNet.WebUtilities;
+using Microsoft.Framework.Internal;
 using Microsoft.Framework.Logging;
 
 namespace Microsoft.AspNet.Authentication.Twitter
@@ -116,40 +118,18 @@ namespace Microsoft.AspNet.Authentication.Twitter
                 return new AuthenticationTicket(properties, Options.AuthenticationScheme);
             }
         }
-        protected override async Task ApplyResponseChallengeAsync()
+        protected override async Task<bool> HandleUnauthorizedAsync([NotNull] ChallengeContext context)
         {
-            // REVIEW: should we check if status code is 401?
-
-            if (Response.StatusCode != 401)
-            {
-                return;
-            }
-
-            // When Automatic should redirect on 401 even if there wasn't an explicit challenge.
-            if (ChallengeContext == null && !Options.AutomaticAuthentication)
-            {
-                return;
-            }
-
             var requestPrefix = Request.Scheme + "://" + Request.Host;
             var callBackUrl = requestPrefix + RequestPathBase + Options.CallbackPath;
 
-            AuthenticationProperties properties;
-            if (ChallengeContext == null)
-            {
-                properties = new AuthenticationProperties();
-            }
-            else
-            {
-                properties = new AuthenticationProperties(ChallengeContext.Properties);
-            }
+            var properties = new AuthenticationProperties(context.Properties);
             if (string.IsNullOrEmpty(properties.RedirectUri))
             {
                 properties.RedirectUri = requestPrefix + Request.PathBase + Request.Path + Request.QueryString;
             }
 
             var requestToken = await ObtainRequestTokenAsync(Options.ConsumerKey, Options.ConsumerSecret, callBackUrl, properties);
-
             if (requestToken.CallbackConfirmed)
             {
                 var twitterAuthenticationEndpoint = AuthenticationEndpoint + requestToken.Token;
@@ -166,11 +146,13 @@ namespace Microsoft.AspNet.Authentication.Twitter
                     Context, Options,
                     properties, twitterAuthenticationEndpoint);
                 Options.Notifications.ApplyRedirect(redirectContext);
+                return true;
             }
             else
             {
                 Logger.LogError("requestToken CallbackConfirmed!=true");
             }
+            return false; // REVIEW: Make sure this should not stop other handlers
         }
 
         public async Task<bool> InvokeReturnPathAsync()

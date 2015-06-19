@@ -12,6 +12,7 @@ using Microsoft.AspNet.Authentication.Notifications;
 using Microsoft.AspNet.Http;
 using Microsoft.AspNet.Http.Authentication;
 using Microsoft.AspNet.Http.Features.Authentication;
+using Microsoft.Framework.Internal;
 using Microsoft.Framework.Logging;
 using Microsoft.IdentityModel.Protocols;
 
@@ -96,35 +97,14 @@ namespace Microsoft.AspNet.Authentication.OpenIdConnect
         /// </summary>
         /// <returns></returns>
         /// <remarks>Uses log id's OIDCH-0026 - OIDCH-0050, next num: 37</remarks>
-        protected override async Task ApplyResponseChallengeAsync()
+        protected override async Task<bool> HandleUnauthorizedAsync([NotNull] ChallengeContext context)
         {
             Logger.LogDebug(Resources.OIDCH_0026_ApplyResponseChallengeAsync, this.GetType());
-
-            if (Response.StatusCode != 401)
-            {
-                Logger.LogDebug(Resources.OIDCH_0028_StatusCodeNot401, Response.StatusCode);
-                return;
-            }
-
-            // When Automatic should redirect on 401 even if there wasn't an explicit challenge.
-            if (ChallengeContext == null && !Options.AutomaticAuthentication)
-            {
-                Logger.LogDebug(Resources.OIDCH_0029_ChallengeContextEqualsNull);
-                return;
-            }
 
             // order for local RedirectUri
             // 1. challenge.Properties.RedirectUri
             // 2. CurrentUri if Options.DefaultToCurrentUriOnRedirect is true)
-            AuthenticationProperties properties;
-            if (ChallengeContext == null)
-            {
-                properties = new AuthenticationProperties();
-            }
-            else
-            {
-                properties = new AuthenticationProperties(ChallengeContext.Properties);
-            }
+            AuthenticationProperties properties = new AuthenticationProperties(context.Properties);
 
             if (!string.IsNullOrWhiteSpace(properties.RedirectUri))
             {
@@ -192,12 +172,12 @@ namespace Microsoft.AspNet.Authentication.OpenIdConnect
             if (redirectToIdentityProviderNotification.HandledResponse)
             {
                 Logger.LogInformation(Resources.OIDCH_0034_RedirectToIdentityProviderNotificationHandledResponse);
-                return;
+                return true; // REVIEW: Make sure this should stop all other handlers
             }
             else if (redirectToIdentityProviderNotification.Skipped)
             {
                 Logger.LogInformation(Resources.OIDCH_0035_RedirectToIdentityProviderNotificationSkipped);
-                return;
+                return false; // REVIEW: Make sure this should not stop all other handlers
             }
 
             var redirectUri = redirectToIdentityProviderNotification.ProtocolMessage.CreateAuthenticationRequestUrl();
@@ -207,6 +187,7 @@ namespace Microsoft.AspNet.Authentication.OpenIdConnect
             }
 
             Response.Redirect(redirectUri);
+            return true;
         }
 
         /// <summary>

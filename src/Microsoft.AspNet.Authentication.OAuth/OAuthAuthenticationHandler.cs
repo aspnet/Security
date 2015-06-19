@@ -8,7 +8,9 @@ using System.Net.Http.Headers;
 using System.Threading.Tasks;
 using Microsoft.AspNet.Http.Authentication;
 using Microsoft.AspNet.Http.Extensions;
+using Microsoft.AspNet.Http.Features.Authentication;
 using Microsoft.AspNet.WebUtilities;
+using Microsoft.Framework.Internal;
 using Microsoft.Framework.Logging;
 using Newtonsoft.Json.Linq;
 
@@ -163,33 +165,13 @@ namespace Microsoft.AspNet.Authentication.OAuth
             return new AuthenticationTicket(context.Principal, context.Properties, Options.AuthenticationScheme);
         }
 
-        protected override Task ApplyResponseChallengeAsync()
+        protected override Task<bool> HandleUnauthorizedAsync([NotNull] ChallengeContext context)
         {
-            // REVIEW: do we need this 401 check?
-            if (Response.StatusCode != 401)
-            {
-                return Task.FromResult(0);
-            }
-
-            // When Automatic should redirect on 401 even if there wasn't an explicit challenge.
-            if (ChallengeContext == null && !Options.AutomaticAuthentication)
-            {
-                return Task.FromResult(0);
-            }
-
             var baseUri = Request.Scheme + "://" + Request.Host + Request.PathBase;
             var currentUri = baseUri + Request.Path + Request.QueryString;
             var redirectUri = baseUri + Options.CallbackPath;
 
-            AuthenticationProperties properties;
-            if (ChallengeContext == null)
-            {
-                properties = new AuthenticationProperties();
-            }
-            else
-            {
-                properties = new AuthenticationProperties(ChallengeContext.Properties);
-            }
+            var properties = new AuthenticationProperties(context.Properties);
             if (string.IsNullOrEmpty(properties.RedirectUri))
             {
                 properties.RedirectUri = currentUri;
@@ -204,7 +186,7 @@ namespace Microsoft.AspNet.Authentication.OAuth
                 Context, Options,
                 properties, authorizationEndpoint);
             Options.Notifications.ApplyRedirect(redirectContext);
-            return Task.FromResult(0);
+            return Task.FromResult(true);
         }
 
         protected virtual string BuildChallengeUrl(AuthenticationProperties properties, string redirectUri)
