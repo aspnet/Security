@@ -85,6 +85,7 @@ namespace Microsoft.AspNet.Authentication
                 var ticket = await AuthenticateAsync();
                 if (ticket?.Principal != null)
                 {
+                    AuthenticateCalled = true;
                     SecurityHelper.AddUserPrincipal(Context, ticket.Principal);
                 }
             }
