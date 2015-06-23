@@ -32,6 +32,8 @@ namespace Microsoft.AspNet.Authentication.OpenIdConnect
         /// <param name="next">The next middleware in the ASP.NET pipeline to invoke.</param>
         /// <param name="dataProtectionProvider"> provider for creating a data protector.</param>
         /// <param name="loggerFactory">factory for creating a <see cref="ILogger"/>.</param>
+        /// <param name="encoder"><see cref="IUrlEncoder"/> for encoding query strings.</param>
+        /// <param name="externalOptions"></param>
         /// <param name="options">a <see cref="IOptions{OpenIdConnectAuthenticationOptions}"/> instance that will supply <see cref="OpenIdConnectAuthenticationOptions"/> 
         /// if configureOptions is null.</param>
         /// <param name="configureOptions">a <see cref="ConfigureOptions{OpenIdConnectAuthenticationOptions}"/> instance that will be passed to an instance of <see cref="OpenIdConnectAuthenticationOptions"/>
@@ -39,11 +41,11 @@ namespace Microsoft.AspNet.Authentication.OpenIdConnect
         [SuppressMessage("Microsoft.Reliability", "CA2000:Dispose objects before losing scope", Justification = "Managed by caller")]
         public OpenIdConnectAuthenticationMiddleware(
             [NotNull] RequestDelegate next,
+            [NotNull] IOptions<OpenIdConnectAuthenticationOptions> options,
             [NotNull] IDataProtectionProvider dataProtectionProvider,
             [NotNull] ILoggerFactory loggerFactory,
             [NotNull] IUrlEncoder encoder,
             [NotNull] IOptions<ExternalAuthenticationOptions> externalOptions,
-            [NotNull] IOptions<OpenIdConnectAuthenticationOptions> options,
             ConfigureOptions<OpenIdConnectAuthenticationOptions> configureOptions = null)
             : base(next, options, loggerFactory, encoder, configureOptions)
         {
