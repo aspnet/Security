@@ -55,6 +55,7 @@ namespace Microsoft.AspNet.Authentication.OpenIdConnect
             AuthenticationScheme = authenticationScheme;
             BackchannelTimeout = TimeSpan.FromMinutes(1);
             Caption = OpenIdConnectAuthenticationDefaults.Caption;
+            GetClaimsFromUserInfoEndpoint = false;
             ProtocolValidator = new OpenIdConnectProtocolValidator();
             RefreshOnIssuerKeyNotFound = true;
             ResponseMode = OpenIdConnectResponseModes.FormPost;
@@ -162,6 +163,11 @@ namespace Microsoft.AspNet.Authentication.OpenIdConnect
         /// if AuthenticationProperties.RedirectUri is null or empty.
         /// </summary>
         public bool DefaultToCurrentUriOnRedirect { get; set; }
+
+        /// <summary>
+        /// Boolean to set whether the middleware should go to user info endpoint to retrieve claims or not.
+        /// </summary>
+        public bool GetClaimsFromUserInfoEndpoint { get; set; }
 
         /// <summary>
         /// Gets or sets the discovery endpoint for obtaining metadata

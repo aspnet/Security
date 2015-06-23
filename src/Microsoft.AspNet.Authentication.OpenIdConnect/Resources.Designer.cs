@@ -173,6 +173,30 @@ namespace Microsoft.AspNet.Authentication.OpenIdConnect
         }
 
         /// <summary>
+        /// OIDCH_0037: Id Token is null. Redeeming code : {0} for tokens.
+        /// </summary>
+        internal static string OIDCH_0037_Redeeming_Auth_Code
+        {
+            get { return ResourceManager.GetString("OIDCH_0037_Redeeming_Auth_Code"); }
+        }
+
+        /// <summary>
+        /// OIDCH_0038: Subject claim received from userinfo endpoint does not match the one in the id token.
+        /// </summary>
+        internal static string OIDCH_0038_Subject_Claim_Mismatch
+        {
+            get { return ResourceManager.GetString("OIDCH_0038_Subject_Claim_Mismatch"); }
+        }
+
+        /// <summary>
+        /// OIDCH_0038: Subject claim received from userinfo endpoint does not match the one in the id token.
+        /// </summary>
+        internal static string OIDCH_0039_Sending_Request_UIEndpoint
+        {
+            get { return ResourceManager.GetString("OIDCH_0039_Sending_Request_UIEndpoint"); }
+        }
+
+        /// <summary>
         /// OIDCH_0000: Entering: '{0}'.
         /// </summary>
         internal static string OIDCH_0000_AuthenticateCoreAsync
