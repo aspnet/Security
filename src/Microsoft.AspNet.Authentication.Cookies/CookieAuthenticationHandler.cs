@@ -176,7 +176,7 @@ namespace Microsoft.AspNet.Authentication.Cookies
         protected override async Task FinishResponseAsync()
         {
             // Only renew if requested, and neither sign in or sign out was called
-            if (!_shouldRenew || SignInCalled || SignOutCalled)
+            if (!_shouldRenew || SignInAccepted || SignOutAccepted)
             {
                 return;
             }

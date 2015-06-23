@@ -24,8 +24,8 @@ namespace Microsoft.AspNet.Authentication
         private bool _finishCalled;
         private AuthenticationOptions _baseOptions;
 
-        protected bool SignInCalled { get; set; }
-        protected bool SignOutCalled { get; set; }
+        protected bool SignInAccepted { get; set; }
+        protected bool SignOutAccepted { get; set; }
         protected bool ChallengeCalled { get; set; }
 
         protected HttpContext Context { get; private set; }
@@ -53,8 +53,6 @@ namespace Microsoft.AspNet.Authentication
 
         public IAuthenticationHandler PriorHandler { get; set; }
 
-        public bool Faulted { get; set; }
-
         protected async Task BaseInitializeAsync([NotNull] AuthenticationOptions options, [NotNull] HttpContext context, [NotNull] ILogger logger, [NotNull] IUrlEncoder encoder)
         {
             _baseOptions = options;
@@ -65,7 +63,7 @@ namespace Microsoft.AspNet.Authentication
 
             RegisterAuthenticationHandler();
 
-            Response.OnResponseStarting(OnResponseStartingCallback, this);
+            Response.OnResponseStarting(OnResponseStartingCallback);
 
             if (BaseOptions.AutomaticAuthentication)
             {
@@ -77,10 +75,10 @@ namespace Microsoft.AspNet.Authentication
             }
         }
 
-        private static async Task OnResponseStartingCallback(object state)
+        private async Task OnResponseStartingCallback()
         {
-            var handler = (AuthenticationHandler)state;
-            await handler.FinishResponseOnce();
+            //var handler = (AuthenticationHandler)state;
+            await FinishResponseOnce();
         }
 
         private async Task FinishResponseOnce()
@@ -184,7 +182,7 @@ namespace Microsoft.AspNet.Authentication
         {
             if (ShouldHandleScheme(context.AuthenticationScheme))
             {
-                SignInCalled = true;
+                SignInAccepted = true;
                 await HandleSignInAsync(context);
                 context.Accept();
             }
@@ -204,7 +202,7 @@ namespace Microsoft.AspNet.Authentication
         {
             if (ShouldHandleScheme(context.AuthenticationScheme))
             {
-                SignOutCalled = true;
+                SignOutAccepted = true;
                 await HandleSignOutAsync(context);
                 context.Accept();
             }
