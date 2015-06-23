@@ -39,15 +39,6 @@ namespace Microsoft.AspNet.Authentication
 
         }
 
-        public void Authenticate(AuthenticateContext context)
-        {
-            if (PriorHandler != null)
-            {
-                PriorHandler.Authenticate(context);
-                ApplyTransform(context);
-            }
-        }
-
         public async Task AuthenticateAsync(AuthenticateContext context)
         {
             if (PriorHandler != null)
@@ -57,12 +48,13 @@ namespace Microsoft.AspNet.Authentication
             }
         }
 
-        public void Challenge(ChallengeContext context)
+        public Task ChallengeAsync(ChallengeContext context)
         {
             if (PriorHandler != null)
             {
-                PriorHandler.Challenge(context);
+                return PriorHandler.ChallengeAsync(context);
             }
+            return Task.FromResult(0);
         }
 
         public void GetDescriptions(DescribeSchemesContext context)
@@ -73,20 +65,22 @@ namespace Microsoft.AspNet.Authentication
             }
         }
 
-        public void SignIn(SignInContext context)
+        public Task SignInAsync(SignInContext context)
         {
             if (PriorHandler != null)
             {
-                PriorHandler.SignIn(context);
+                return PriorHandler.SignInAsync(context);
             }
+            return Task.FromResult(0);
         }
 
-        public void SignOut(SignOutContext context)
+        public Task SignOutAsync(SignOutContext context)
         {
             if (PriorHandler != null)
             {
-                PriorHandler.SignOut(context);
+                return PriorHandler.SignOutAsync(context);
             }
+            return Task.FromResult(0);
         }
 
         public void RegisterAuthenticationHandler(IHttpAuthenticationFeature auth)

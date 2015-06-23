@@ -205,21 +205,20 @@ namespace Microsoft.AspNet.Authentication.Tests.OpenIdConnect
                     var res = context.Response;
                     if (req.Path == new PathString("/challenge"))
                     {
-                        context.Authentication.Challenge("OpenIdConnect");
-                        res.StatusCode = 401;
+                        await context.Authentication.ChallengeAsync("OpenIdConnect");
                     }
                     else if (req.Path == new PathString("/signin"))
                     {
                         // REVIEW: this used to just be res.SignIn()
-                        context.Authentication.SignIn("OpenIdConnect", new ClaimsPrincipal());
+                        await context.Authentication.SignInAsync("OpenIdConnect", new ClaimsPrincipal());
                     }
                     else if (req.Path == new PathString("/signout"))
                     {
-                        context.Authentication.SignOut(OpenIdConnectAuthenticationDefaults.AuthenticationScheme);
+                        await context.Authentication.SignOutAsync(OpenIdConnectAuthenticationDefaults.AuthenticationScheme);
                     }
                     else if (req.Path == new PathString("/signout_with_specific_redirect_uri"))
                     {
-                        context.Authentication.SignOut(
+                        await context.Authentication.SignOutAsync(
                             OpenIdConnectAuthenticationDefaults.AuthenticationScheme,
                             new AuthenticationProperties() { RedirectUri = "http://www.example.com/specific_redirect_uri" });
                     }
