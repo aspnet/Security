@@ -87,7 +87,7 @@ namespace Microsoft.AspNet.Authentication.Tests.OpenIdConnect
         /// </summary>
         /// <param name="userSetsState"></param>
         /// <returns></returns>
-        [Theory, MemberData("StateDataVariations")]
+        [Theory, MemberData("StateDataSet")]
         public async Task ChallengeSettingState(string userState, string challenge)
         {
             var queryValues = new ExpectedQueryValues(DefaultAuthority);
@@ -123,7 +123,7 @@ namespace Microsoft.AspNet.Authentication.Tests.OpenIdConnect
             queryValues.CheckValues(transaction.Response.Headers.Location.AbsoluteUri, DefaultParameters(new string[] { OpenIdConnectParameterNames.State }));
         }
 
-        public static TheoryData<string, string> StateDataVariations
+        public static TheoryData<string, string> StateDataSet
         {
             get
             {
