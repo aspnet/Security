@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Diagnostics;
 using System.IdentityModel.Tokens;
+using System.Linq;
 using System.Net.Http;
 using System.Security.Claims;
 using System.Threading.Tasks;
@@ -31,6 +32,8 @@ namespace Microsoft.AspNet.Authentication.Tests.OpenIdConnect
     {
         private const string nonceForJwt = "abc";
         private static SecurityToken specCompliantJwt = new JwtSecurityToken("issuer", "audience", new List<Claim> { new Claim("iat", EpochTime.GetIntDate(DateTime.UtcNow).ToString()), new Claim("nonce", nonceForJwt) }, DateTime.UtcNow, DateTime.UtcNow + TimeSpan.FromDays(1));
+        private const string ExpectedStateParameter = "expectedState";
+        private const string UserStateProperty = "userstate";
 
         /// <summary>
         /// Sanity check that logging is filtering, hi / low water marks are checked
@@ -55,7 +58,66 @@ namespace Microsoft.AspNet.Authentication.Tests.OpenIdConnect
             logger.IsEnabled(LogLevel.Warning).ShouldBe<bool>(false);
         }
 
-        [Theory, MemberData("AuthenticationCoreVariations")]
+        [Theory, MemberData("AuthenticateCoreStateDataSet")]
+        public async Task AuthenticateCoreState(Action<OpenIdConnectAuthenticationOptions> action, OpenIdConnectMessage message)
+        {
+            var handler = new OpenIdConnectAuthenticationHandlerForTestingAuthenticate(EmptyTask, EmptyTask);
+            var server = CreateServer(new ConfigureOptions<OpenIdConnectAuthenticationOptions>(action), UrlEncoder.Default, handler);
+            await server.CreateClient().PostAsync("http://localhost", new FormUrlEncodedContent(message.Parameters.Where(pair => pair.Value != null)));
+        }
+
+        public static TheoryData<Action<OpenIdConnectAuthenticationOptions>, OpenIdConnectMessage> AuthenticateCoreStateDataSet
+        {
+            get
+            {
+                var formater = new AuthenticationPropertiesFormaterKeyValue();
+                var properties = new AuthenticationProperties();
+                var dataset = new TheoryData<Action<OpenIdConnectAuthenticationOptions>, OpenIdConnectMessage>();
+
+                var message = new OpenIdConnectMessage();
+                message.State = UrlEncoder.Default.UrlEncode(formater.Protect(properties));
+                message.Code = Guid.NewGuid().ToString();
+                message.Parameters.Add(ExpectedStateParameter, null);
+                dataset.Add(SetStateOptions, message);
+
+                message = new OpenIdConnectMessage();
+                properties.Items.Clear();
+                var userState = Guid.NewGuid().ToString();
+                message.Code = Guid.NewGuid().ToString();
+                properties.Items.Add(UserStateProperty, userState);
+                message.State = UrlEncoder.Default.UrlEncode(formater.Protect(properties));
+                message.Parameters.Add(ExpectedStateParameter, userState);
+                dataset.Add(SetStateOptions, message);
+                return dataset;
+            }
+        }
+
+        // Setup a notification to check for expected state.
+        // The state gets set by the runtime after the message received notification
+        private static void SetStateOptions(OpenIdConnectAuthenticationOptions options)
+        {
+            options.AuthenticationScheme = "OpenIdConnectHandlerTest";
+            options.ConfigurationManager = ConfigurationManager.DefaultStaticConfigurationManager();
+            options.ClientId = Guid.NewGuid().ToString();
+            options.StateDataFormat = new AuthenticationPropertiesFormaterKeyValue();
+            options.Notifications = new OpenIdConnectAuthenticationNotifications
+            {
+                AuthorizationCodeReceived = notification =>
+                {
+                    if (notification.ProtocolMessage.State == null && !notification.ProtocolMessage.Parameters.ContainsKey(ExpectedStateParameter))
+                        return Task.FromResult<object>(null);
+
+                    if (notification.ProtocolMessage.State == null || !notification.ProtocolMessage.Parameters.ContainsKey(ExpectedStateParameter))
+                        Assert.True(false, "(notification.ProtocolMessage.State=!= null || !notification.ProtocolMessage.Parameters.ContainsKey(expectedState)");
+
+                    Assert.Equal(notification.ProtocolMessage.State, notification.ProtocolMessage.Parameters[ExpectedStateParameter]);
+                    return Task.FromResult<object>(null);
+                }
+
+            };
+        }
+
+        [Theory, MemberData("AuthenticateCoreDataSet")]
         public async Task AuthenticateCore(LogLevel logLevel, int[] expectedLogIndexes, Action<OpenIdConnectAuthenticationOptions> action, OpenIdConnectMessage message)
         {
             var errors = new List<Tuple<LogEntry, LogEntry>>();
@@ -70,7 +132,7 @@ namespace Microsoft.AspNet.Authentication.Tests.OpenIdConnect
             Assert.True(errors.Count == 0, LoggingUtilities.LoggingErrors(errors));
         }
 
-        public static TheoryData<LogLevel, int[], Action<OpenIdConnectAuthenticationOptions>, OpenIdConnectMessage> AuthenticationCoreVariations
+        public static TheoryData<LogLevel, int[], Action<OpenIdConnectAuthenticationOptions>, OpenIdConnectMessage> AuthenticateCoreDataSet
         {
             get
             {
@@ -78,7 +140,7 @@ namespace Microsoft.AspNet.Authentication.Tests.OpenIdConnect
                 var dataset = new TheoryData<LogLevel, int[], Action< OpenIdConnectAuthenticationOptions >, OpenIdConnectMessage>();
                 var properties = new AuthenticationProperties();
                 var message = new OpenIdConnectMessage();
-                var validState = OpenIdConnectAuthenticationDefaults.AuthenticationPropertiesKey + "=" + UrlEncoder.Default.UrlEncode(formater.Protect(properties));
+                var validState = UrlEncoder.Default.UrlEncode(formater.Protect(properties));
                 message.State = validState;
 
                 // MessageReceived - Handled / Skipped
@@ -357,12 +419,12 @@ namespace Microsoft.AspNet.Authentication.Tests.OpenIdConnect
 
 #endregion
 
-        private static TestServer CreateServer(IOptions<OpenIdConnectAuthenticationOptions> options, IUrlEncoder encoder, ILoggerFactory loggerFactory, OpenIdConnectAuthenticationHandler handler = null)
+        private static TestServer CreateServer(ConfigureOptions<OpenIdConnectAuthenticationOptions> options, IUrlEncoder encoder, OpenIdConnectAuthenticationHandler handler = null)
         {
             return TestServer.Create(
                 app =>
                 {
-                    app.UseMiddleware<OpenIdConnectAuthenticationMiddlewareForTestingAuthenticate>(options, encoder, loggerFactory, handler);
+                    app.UseMiddleware<OpenIdConnectAuthenticationMiddlewareForTestingAuthenticate>(options, encoder, handler);
                     app.Use(async (context, next) =>
                     {
                         await next();

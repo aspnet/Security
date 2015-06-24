@@ -23,6 +23,9 @@ namespace Microsoft.AspNet.Authentication.OpenIdConnect
     {
         private const string NonceProperty = "N";
         private const string UriSchemeDelimiter = "://";
+        // should we consider adding a first class property on AuthenticationProperties similar to RedirectUri.
+        // if we don't, then we may want to think about where to make this value public.
+        private const string UserState = "userstate";
         private OpenIdConnectConfiguration _configuration;
 
         private string CurrentUri
@@ -76,7 +79,7 @@ namespace Microsoft.AspNet.Authentication.OpenIdConnect
                     message.PostLogoutRedirectUri = Options.PostLogoutRedirectUri;
                 }
 
-                var notification = new RedirectToIdentityProviderNotification<OpenIdConnectMessage, OpenIdConnectAuthenticationOptions>(Context, Options, message, properties);
+                var notification = new RedirectToIdentityProviderNotification<OpenIdConnectMessage, OpenIdConnectAuthenticationOptions>(Context, Options, message);
                 if (Options.Notifications.RedirectToIdentityProvider != null)
                 {
                     await Options.Notifications.RedirectToIdentityProvider(notification);
@@ -187,7 +190,7 @@ namespace Microsoft.AspNet.Authentication.OpenIdConnect
             }
 
             var redirectToIdentityProviderNotification =
-                new RedirectToIdentityProviderNotification<OpenIdConnectMessage, OpenIdConnectAuthenticationOptions>(Context, Options, message, properties);
+                new RedirectToIdentityProviderNotification<OpenIdConnectMessage, OpenIdConnectAuthenticationOptions>(Context, Options, message);
 
             await Options.Notifications.RedirectToIdentityProvider(redirectToIdentityProviderNotification);
             if (redirectToIdentityProviderNotification.HandledResponse)
@@ -218,16 +221,12 @@ namespace Microsoft.AspNet.Authentication.OpenIdConnect
             }
 
             // If 'OpenIdConnectMessage.State' is null, then the user never set it in the notification. Just set the state
-            if (string.IsNullOrWhiteSpace(redirectToIdentityProviderNotification.ProtocolMessage.State))
+            if (!string.IsNullOrWhiteSpace(redirectToIdentityProviderNotification.ProtocolMessage.State))
             {
-                redirectToIdentityProviderNotification.ProtocolMessage.State = OpenIdConnectAuthenticationDefaults.AuthenticationPropertiesKey + "=" + Options.StateDataFormat.Protect(properties);
-            }
-            // the user did set 'OpenIdConnectMessage.State, add a parameter to the state
-            else
-            {
-                redirectToIdentityProviderNotification.ProtocolMessage.State = OpenIdConnectAuthenticationDefaults.AuthenticationPropertiesKey + "=" + Options.StateDataFormat.Protect(properties) + "&userstate=" + redirectToIdentityProviderNotification.ProtocolMessage.State;
+                properties.Items[UserState] = redirectToIdentityProviderNotification.ProtocolMessage.State;
             }
 
+            redirectToIdentityProviderNotification.ProtocolMessage.State = Options.StateDataFormat.Protect(properties);
             var redirectUri = redirectToIdentityProviderNotification.ProtocolMessage.CreateAuthenticationRequestUrl();
             if (!Uri.IsWellFormedUriString(redirectUri, UriKind.Absolute))
             {
@@ -313,7 +312,7 @@ namespace Microsoft.AspNet.Authentication.OpenIdConnect
                 }
                 else
                 {
-                    properties = GetPropertiesFromState(message.State);
+                    properties = SetUserStateOnMessage(message);
                     if (properties == null)
                     {
                         Logger.LogError(Resources.OIDCH_0005_MessageStateIsInvalid);
@@ -606,34 +605,19 @@ namespace Microsoft.AspNet.Authentication.OpenIdConnect
             return null;
         }
 
-        private AuthenticationProperties GetPropertiesFromState(string state)
+        private AuthenticationProperties SetUserStateOnMessage(OpenIdConnectMessage message)
         {
-            // assume a well formed query string: <a=b&>OpenIdConnectAuthenticationDefaults.AuthenticationPropertiesKey=kasjd;fljasldkjflksdj<&c=d>
-            var startIndex = 0;
-            if (string.IsNullOrWhiteSpace(state) || (startIndex = state.IndexOf(OpenIdConnectAuthenticationDefaults.AuthenticationPropertiesKey, StringComparison.Ordinal)) == -1)
+            var properties = Options.StateDataFormat.Unprotect(Uri.UnescapeDataString(message.State));
+            if (properties == null)
             {
-                return null;
+                return properties;
             }
 
-            var authenticationIndex = startIndex + OpenIdConnectAuthenticationDefaults.AuthenticationPropertiesKey.Length;
-            if (authenticationIndex == -1 || authenticationIndex == state.Length || state[authenticationIndex] != '=')
-            {
-                return null;
-            }
+            string userState = null;
+            properties.Items.TryGetValue(UserState, out userState);
+            message.State = userState;
 
-            // scan rest of string looking for '&'
-            authenticationIndex++;
-            var endIndex = state.Substring(authenticationIndex, state.Length - authenticationIndex).IndexOf("&", StringComparison.Ordinal);
-
-            // -1 => no other parameters are after the AuthenticationPropertiesKey
-            if (endIndex == -1)
-            {
-                return Options.StateDataFormat.Unprotect(Uri.UnescapeDataString(state.Substring(authenticationIndex).Replace('+', ' ')));
-            }
-            else
-            {
-                return Options.StateDataFormat.Unprotect(Uri.UnescapeDataString(state.Substring(authenticationIndex, endIndex).Replace('+', ' ')));
-            }
+            return properties;
         }
 
         /// <summary>

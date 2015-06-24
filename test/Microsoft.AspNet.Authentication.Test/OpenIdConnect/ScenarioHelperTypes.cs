@@ -42,14 +42,26 @@ namespace Microsoft.AspNet.Authentication.Tests.OpenIdConnect
 
         AuthenticationProperties ISecureDataFormat<AuthenticationProperties>.Unprotect(string protectedText)
         {
-            var propeties = new AuthenticationProperties();
-            if (protectedText != "null")
+            if (string.IsNullOrWhiteSpace(protectedText))
             {
-                string[] items = protectedText.Split(' ');
-                for (int i = 0; i < items.Length - 1; i+=2)
-                {
-                    propeties.Items.Add(items[i], items[i + 1]);
-                }
+                return null;
+            }
+
+            if (protectedText == "null")
+            {
+                return new AuthenticationProperties();
+            }
+
+            string[] items = protectedText.Split(' ');
+            if (items.Length % 2 != 0)
+            {
+                return null;
+            }
+
+            var propeties = new AuthenticationProperties();
+            for (int i = 0; i < items.Length - 1; i+=2)
+            {
+                propeties.Items.Add(items[i], items[i + 1]);
             }
 
             return propeties;
@@ -200,7 +212,9 @@ namespace Microsoft.AspNet.Authentication.Tests.OpenIdConnect
         : base(next, options, dataProtectionProvider, loggerFactory, encoder, externalOptions, configureOptions)
         {
             _handler = handler;
-            Logger = (loggerFactory as ReturnsLoggerLoggerFactory).Logger;
+            var customFactory = loggerFactory as ReturnsLoggerLoggerFactory;
+            if (customFactory != null)
+                Logger = customFactory.Logger;
         }
 
         protected override AuthenticationHandler<OpenIdConnectAuthenticationOptions> CreateHandler()

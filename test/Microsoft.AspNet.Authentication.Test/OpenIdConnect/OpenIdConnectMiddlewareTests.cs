@@ -87,56 +87,56 @@ namespace Microsoft.AspNet.Authentication.Tests.OpenIdConnect
         /// </summary>
         /// <param name="userSetsState"></param>
         /// <returns></returns>
-        [Theory]
-        [InlineData(true, Challenge)]
-        [InlineData(false, Challenge)]
-        [InlineData(true, ChallengeWithOutContext)]
-        [InlineData(false, ChallengeWithOutContext)]
-        [InlineData(true, ChallengeWithProperties)]
-        [InlineData(false, ChallengeWithProperties)]        
-        public async Task ChallengeSettingState(bool userSetsState, string challenge)
+        [Theory, MemberData("StateDataVariations")]
+        public async Task ChallengeSettingState(string userState, string challenge)
         {
             var queryValues = new ExpectedQueryValues(DefaultAuthority);
-            var localProperties = new AuthenticationProperties();
             var stateDataFormat = new AuthenticationPropertiesFormaterKeyValue();
-            AuthenticationProperties challengeProperties = null;
+            var properties = new AuthenticationProperties();
             if (challenge == ChallengeWithProperties)
             {
-                challengeProperties = new AuthenticationProperties();
-                challengeProperties.Items.Add("item1", Guid.NewGuid().ToString());
+                properties.Items.Add("item1", Guid.NewGuid().ToString());
+            }
+            else
+            {
+                properties.Items.Add(OpenIdConnectAuthenticationDefaults.RedirectUriUsedForCodeKey, queryValues.RedirectUri);
             }
 
             var server = CreateServer(options =>
             {
-                SetOptions(options, DefaultParameters(new string[] { OpenIdConnectParameterNames.State }), queryValues);
+                SetOptions(options, DefaultParameters(new string[] { OpenIdConnectParameterNames.State }), queryValues, stateDataFormat);
                 options.AutomaticAuthentication = challenge.Equals(ChallengeWithOutContext);
                 options.Notifications = new OpenIdConnectAuthenticationNotifications
                 {
                     RedirectToIdentityProvider = notification =>
                     {
-                        if (userSetsState)
-                        {
-                            notification.ProtocolMessage.State = queryValues.State;
-                        }
-                        localProperties = new AuthenticationProperties(notification.AuthenticationProperties.Items);
+                        notification.ProtocolMessage.State = userState;
                         return Task.FromResult<object>(null);
                     }
 
                 };
-            }, null, challengeProperties);
+            }, null, properties);
 
             var transaction = await SendAsync(server, DefaultHost + challenge);
             transaction.Response.StatusCode.ShouldBe(HttpStatusCode.Redirect);
-            if (userSetsState)
-            {
-                queryValues.State = OpenIdConnectAuthenticationDefaults.AuthenticationPropertiesKey + "=" + stateDataFormat.Protect(localProperties) + "&userstate=" + queryValues.State;
-            }
-            else
-            {
-                queryValues.State = OpenIdConnectAuthenticationDefaults.AuthenticationPropertiesKey + "=" + stateDataFormat.Protect(localProperties);
-            }
-
+            queryValues.State = stateDataFormat.Protect(properties);
             queryValues.CheckValues(transaction.Response.Headers.Location.AbsoluteUri, DefaultParameters(new string[] { OpenIdConnectParameterNames.State }));
+        }
+
+        public static TheoryData<string, string> StateDataVariations
+        {
+            get
+            {
+                var dataset = new TheoryData<string, string>();
+                dataset.Add(Guid.NewGuid().ToString(), Challenge);
+                dataset.Add(null, Challenge);
+                dataset.Add(Guid.NewGuid().ToString(), ChallengeWithOutContext);
+                dataset.Add(null, ChallengeWithOutContext);
+                dataset.Add(Guid.NewGuid().ToString(), ChallengeWithProperties);
+                dataset.Add(null, ChallengeWithProperties);
+
+                return dataset;
+            }
         }
 
         [Fact]
