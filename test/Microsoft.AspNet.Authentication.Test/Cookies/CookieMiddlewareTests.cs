@@ -241,17 +241,30 @@ namespace Microsoft.AspNet.Authentication.Cookies
             }, 
             SignInAsAlice, 
             baseAddress: null, 
-            claimsTransform: o => o.Transformation = (p =>
+            claimsTransform: o => o.Transformer = new ClaimsTransformer
             {
-                if (!p.Identities.Any(i => i.AuthenticationType == "xform"))
+                TransformSyncDelegate = p =>
                 {
-                    // REVIEW: Xform runs twice, once on Authenticate, and then once from the middleware
-                    var id = new ClaimsIdentity("xform");
-                    id.AddClaim(new Claim("xform", "yup"));
-                    p.AddIdentity(id);
+                    if (!p.Identities.Any(i => i.AuthenticationType == "xform"))
+                    {
+                        var id = new ClaimsIdentity("xform");
+                        id.AddClaim(new Claim("sync", "no"));
+                        p.AddIdentity(id);
+                    }
+                    return p;
+                },
+                TransformAsyncDelegate = p =>
+                {
+                    if (!p.Identities.Any(i => i.AuthenticationType == "xform"))
+                    {
+                        // REVIEW: Xform runs twice, once on Authenticate, and then once from the middleware
+                        var id = new ClaimsIdentity("xform");
+                        id.AddClaim(new Claim("xform", "yup"));
+                        p.AddIdentity(id);
+                    }
+                    return Task.FromResult(p);
                 }
-                return p;
-            }));
+            });
 
             var transaction1 = await SendAsync(server, "http://example.com/testpath");
 
@@ -259,6 +272,7 @@ namespace Microsoft.AspNet.Authentication.Cookies
 
             FindClaimValue(transaction2, ClaimTypes.Name).ShouldBe("Alice");
             FindClaimValue(transaction2, "xform").ShouldBe("yup");
+            FindClaimValue(transaction2, "sync").ShouldBe(null);
 
         }
 
