@@ -2,7 +2,6 @@
 // Licensed under the Apache License, Version 2.0. See License.txt in the project root for license information.
 
 using System;
-using System.Diagnostics;
 using System.Net;
 using System.Threading.Tasks;
 using Microsoft.AspNet.Builder;
@@ -63,6 +62,7 @@ namespace Microsoft.AspNet.Authentication.Facebook
             var query = transaction.Response.Headers.Location.Query;
             query.ShouldContain("custom=test");
         }
+
         [Fact]
         public async Task MapWillNotAffectRedirect()
         {
