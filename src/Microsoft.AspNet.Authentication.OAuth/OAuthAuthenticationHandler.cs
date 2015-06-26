@@ -117,7 +117,7 @@ namespace Microsoft.AspNet.Authentication.OAuth
                 }
 
                 var requestPrefix = Request.Scheme + "://" + Request.Host;
-                var redirectUri = requestPrefix + RequestPathBase + Options.CallbackPath;
+                var redirectUri = requestPrefix + OriginalPathBase + Options.CallbackPath;
 
                 var tokens = await ExchangeCodeAsync(code, redirectUri);
 
@@ -172,20 +172,16 @@ namespace Microsoft.AspNet.Authentication.OAuth
 
         protected override Task<bool> HandleUnauthorizedAsync([NotNull] ChallengeContext context)
         {
-            var baseUri = Request.Scheme + "://" + Request.Host + Request.PathBase;
-            var currentUri = baseUri + Request.Path + Request.QueryString;
-            var redirectUri = baseUri + Options.CallbackPath;
-
             var properties = new AuthenticationProperties(context.Properties);
             if (string.IsNullOrEmpty(properties.RedirectUri))
             {
-                properties.RedirectUri = currentUri;
+                properties.RedirectUri = CurrentUri;
             }
 
             // OAuth2 10.12 CSRF
             GenerateCorrelationId(properties);
 
-            var authorizationEndpoint = BuildChallengeUrl(properties, redirectUri);
+            var authorizationEndpoint = BuildChallengeUrl(properties, BuildRedirectUri(Options.CallbackPath));
 
             var redirectContext = new OAuthApplyRedirectContext(
                 Context, Options,
