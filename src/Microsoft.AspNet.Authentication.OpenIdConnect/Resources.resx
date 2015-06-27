@@ -174,8 +174,8 @@
   <data name="OIDCH_0003_MessageReceivedNotificationSkipped" xml:space="preserve">
     <value>OIDCH_0003: MessageReceivedNotification.Skipped</value>
   </data>
-  <data name="OIDCH_0004_MessageStateIsNullOrWhiteSpace" xml:space="preserve">
-    <value>OIDCH_0004: OpenIdConnectAuthenticationHandler: message.State is null or whitespace.</value>
+  <data name="OIDCH_0004_MessageStateIsNullOrEmpty" xml:space="preserve">
+    <value>OIDCH_0004: OpenIdConnectAuthenticationHandler: message.State is null or empty.</value>
   </data>
   <data name="OIDCH_0005_MessageStateIsInvalid" xml:space="preserve">
     <value>OIDCH_0005: Unable to unprotect the message.State.</value>
@@ -196,7 +196,7 @@
     <value>OIDCH_0010: Validated Security Token must be a JwtSecurityToken was: '{0}'.</value>
   </data>
   <data name="OIDCH_0011_UnableToValidateToken" xml:space="preserve">
-    <value>OIDCH_0011: Unable to validate the 'id_token', no suitable ISecurityTokenValidator was found for: {0}."</value>
+    <value>OIDCH_0011: Unable to validate the 'id_token', no suitable ISecurityTokenValidator was found for: '{0}'."</value>
   </data>
   <data name="OIDCH_0012_SecurityTokenValidatedNotificationHandledResponse" xml:space="preserve">
     <value>OIDCH_0012: SecurityTokenValidatedNotification.HandledResponse</value>

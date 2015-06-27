@@ -99,7 +99,7 @@ namespace Microsoft.AspNet.Authentication.Tests.OpenIdConnect
             }
             else
             {
-                properties.Items.Add(OpenIdConnectAuthenticationDefaults.RedirectUriUsedForCodeKey, queryValues.RedirectUri);
+                properties.Items.Add(OpenIdConnectAuthenticationDefaults.RedirectUriForCodePropertiesKey, queryValues.RedirectUri);
             }
 
             var server = CreateServer(options =>

@@ -221,11 +221,11 @@ namespace Microsoft.AspNet.Authentication.OpenIdConnect
         }
 
         /// <summary>
-        /// OIDCH_0004: OpenIdConnectAuthenticationHandler: message.State is null or whitespace.
+        /// OIDCH_0004: OpenIdConnectAuthenticationHandler: message.State is null or empty.
         /// </summary>
-        internal static string OIDCH_0004_MessageStateIsNullOrWhiteSpace
+        internal static string OIDCH_0004_MessageStateIsNullOrEmpty
         {
-            get { return ResourceManager.GetString("OIDCH_0004_MessageStateIsNullOrWhiteSpace"); }
+            get { return ResourceManager.GetString("OIDCH_0004_MessageStateIsNullOrEmpty"); }
         }
 
         /// <summary>
