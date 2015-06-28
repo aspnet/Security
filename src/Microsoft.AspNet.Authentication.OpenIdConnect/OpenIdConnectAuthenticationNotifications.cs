@@ -13,8 +13,6 @@ namespace Microsoft.AspNet.Authentication.OpenIdConnect
     /// </summary>
     public class OpenIdConnectAuthenticationNotifications
     {
-        Func<RedirectToIdentityProviderNotification<OpenIdConnectMessage, OpenIdConnectAuthenticationOptions>, Task> _redirectToIdentityProvider;
-
         /// <summary>
         /// Creates a new set of notifications. Each notification has a default no-op behavior unless otherwise documented.
         /// </summary>
@@ -25,7 +23,6 @@ namespace Microsoft.AspNet.Authentication.OpenIdConnect
             MessageReceived = notification => Task.FromResult(0);
             SecurityTokenReceived = notification => Task.FromResult(0);
             SecurityTokenValidated = notification => Task.FromResult(0);
-            RedirectToIdentityProvider = notification => Task.FromResult(0);
         }
 
         /// <summary>
@@ -46,19 +43,7 @@ namespace Microsoft.AspNet.Authentication.OpenIdConnect
         /// <summary>
         /// Invoked to manipulate redirects to the identity provider for SignIn, SignOut, or Challenge.
         /// </summary>
-        public Func<RedirectToIdentityProviderNotification<OpenIdConnectMessage, OpenIdConnectAuthenticationOptions>, Task> RedirectToIdentityProvider
-        {
-            get { return _redirectToIdentityProvider; }
-            set
-            {
-                if (value == null)
-                {
-                    throw new ArgumentNullException("value");
-                }
-
-                _redirectToIdentityProvider = value;
-            }
-        }
+        public Func<RedirectToIdentityProviderNotification<OpenIdConnectMessage, OpenIdConnectAuthenticationOptions>, Task> RedirectToIdentityProvider { get; set; }
 
         /// <summary>
         /// Invoked with the security token that has been extracted from the protocol message.

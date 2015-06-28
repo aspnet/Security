@@ -19,6 +19,7 @@ using Microsoft.AspNet.TestHost;
 using Microsoft.Framework.DependencyInjection;
 using Microsoft.Framework.WebEncoders;
 using Microsoft.IdentityModel.Protocols;
+using Moq;
 using Shouldly;
 using Xunit;
 
@@ -33,6 +34,8 @@ namespace Microsoft.AspNet.Authentication.Tests.OpenIdConnect
         const string ChallengeWithProperties = "/challengeWithProperties";
         const string DefaultHost = @"https://example.com";
         const string DefaultAuthority = @"https://login.windows.net/common";
+        const string ExpectedAuthorizeRequest = @"https://expectedauthorize.com/signin";
+        const string ExpectedLogoutRequest = @"https://expectedlogout.com/logout";
         const string Logout = "/logout";
         const string Signin = "/signin";
         const string Signout = "/signout";
@@ -78,6 +81,48 @@ namespace Microsoft.AspNet.Authentication.Tests.OpenIdConnect
             var transaction = await SendAsync(server, DefaultHost + Challenge);
             transaction.Response.StatusCode.ShouldBe(HttpStatusCode.Redirect);
             queryValues.CheckValues(transaction.Response.Headers.Location.AbsoluteUri, DefaultParameters());
+        }
+
+        /// <summary>
+        /// Tests RedirectToIdentityProviderNotification replaces the OpenIdConnectMesssage correctly.
+        /// </summary>
+        /// <returns>Task</returns>
+        [Theory]
+        [InlineData(Challenge, OpenIdConnectRequestType.AuthenticationRequest)]
+        [InlineData(Signout, OpenIdConnectRequestType.LogoutRequest)]
+        public async Task ChallengeSettingMessage(string challenge, OpenIdConnectRequestType requestType)
+        {
+            var configuration = new OpenIdConnectConfiguration
+            {
+                AuthorizationEndpoint = ExpectedAuthorizeRequest,
+                EndSessionEndpoint = ExpectedLogoutRequest
+            };
+
+            var queryValues = new ExpectedQueryValues(DefaultAuthority, configuration)
+            {
+                RequestType = requestType
+            };
+            var server = CreateServer(SetProtocolMessageOptions);
+            var transaction = await SendAsync(server, DefaultHost + challenge);
+            transaction.Response.StatusCode.ShouldBe(HttpStatusCode.Redirect);
+            queryValues.CheckValues(transaction.Response.Headers.Location.AbsoluteUri, new string[] {});
+        }
+
+        private static void SetProtocolMessageOptions(OpenIdConnectAuthenticationOptions options)
+        {
+            var mockOpenIdConnectMessage = new Mock<OpenIdConnectMessage>();
+            mockOpenIdConnectMessage.Setup(m => m.CreateAuthenticationRequestUrl()).Returns(ExpectedAuthorizeRequest);
+            mockOpenIdConnectMessage.Setup(m => m.CreateLogoutRequestUrl()).Returns(ExpectedLogoutRequest);
+            options.AutomaticAuthentication = true;
+            options.Notifications =
+                new OpenIdConnectAuthenticationNotifications
+                {
+                    RedirectToIdentityProvider = (notification) =>
+                    {
+                        notification.ProtocolMessage = mockOpenIdConnectMessage.Object;
+                        return Task.FromResult<object>(null);
+                    }
+                };
         }
 
         /// <summary>
@@ -202,6 +247,15 @@ namespace Microsoft.AspNet.Authentication.Tests.OpenIdConnect
             return parameters;
         }
 
+        private static void DefaultChallengeOptions(OpenIdConnectAuthenticationOptions options)
+        {
+            options.AuthenticationScheme = "OpenIdConnectHandlerTest";
+            options.AutomaticAuthentication = true;
+            options.ClientId = Guid.NewGuid().ToString();
+            options.ConfigurationManager = ConfigurationManager.DefaultStaticConfigurationManager();
+            options.StateDataFormat = new AuthenticationPropertiesFormaterKeyValue();
+        }
+
         [Fact]
         public async Task SignOutWithDefaultRedirectUri()
         {
@@ -322,23 +376,26 @@ namespace Microsoft.AspNet.Authentication.Tests.OpenIdConnect
             {
                 request.Headers.Add("Cookie", cookieHeader);
             }
+
             var transaction = new Transaction
             {
                 Request = request,
                 Response = await server.CreateClient().SendAsync(request),
             };
+
             if (transaction.Response.Headers.Contains("Set-Cookie"))
             {
                 transaction.SetCookie = transaction.Response.Headers.GetValues("Set-Cookie").ToList();
             }
-            transaction.ResponseText = await transaction.Response.Content.ReadAsStringAsync();
 
+            transaction.ResponseText = await transaction.Response.Content.ReadAsStringAsync();
             if (transaction.Response.Content != null &&
                 transaction.Response.Content.Headers.ContentType != null &&
                 transaction.Response.Content.Headers.ContentType.MediaType == "text/xml")
             {
                 transaction.ResponseElement = XElement.Parse(transaction.ResponseText);
             }
+
             return transaction;
         }
 

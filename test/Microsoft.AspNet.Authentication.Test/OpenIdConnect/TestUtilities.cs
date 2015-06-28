@@ -159,9 +159,9 @@ namespace Microsoft.AspNet.Authentication.Tests.OpenIdConnect
         public void CheckValues(string query, IEnumerable<string> parameters)
         {
             var errors = new List<string>();
-            if (!query.StartsWith(ExpectedAuthority))
+            if (!query.StartsWith(ExpectedEndpoint))
             {
-                errors.Add("ExpectedAuthority: " + ExpectedAuthority);
+                errors.Add("ExpectedEndpoint: " + ExpectedEndpoint);
             }
 
             foreach(var str in parameters)
@@ -249,17 +249,17 @@ namespace Microsoft.AspNet.Authentication.Tests.OpenIdConnect
 
         public string State { get; set; } = Guid.NewGuid().ToString();
 
-        public string ExpectedAuthority
+        public string ExpectedEndpoint
         {
             get
             {
                 if (RequestType == OpenIdConnectRequestType.TokenRequest)
                 {
-                    return Configuration?.EndSessionEndpoint ?? Authority + @"/oauth2/token";
+                    return Configuration?.TokenEndpoint ?? Authority + @"/oauth2/token";
                 }
                 else if (RequestType == OpenIdConnectRequestType.LogoutRequest)
                 {
-                    return Configuration?.TokenEndpoint ?? Authority + @"/oauth2/logout";
+                    return Configuration?.EndSessionEndpoint ?? Authority + @"/oauth2/logout";
                 }
 
                 return Configuration?.AuthorizationEndpoint ?? Authority + (@"/oauth2/authorize");
