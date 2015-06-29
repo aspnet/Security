@@ -16,6 +16,7 @@ namespace Microsoft.AspNet.Authentication
     /// </summary>
     public abstract class AuthenticationHandler : IAuthenticationHandler
     {
+        private Task<AuthenticationTicket> _authenticate;
         private bool _finishCalled;
         private AuthenticationOptions _baseOptions;
 
@@ -68,9 +69,10 @@ namespace Microsoft.AspNet.Authentication
 
             Response.OnStarting(OnStartingCallback, this);
 
-            if (BaseOptions.AutomaticAuthentication)
+            // Automatic authentication is the empty scheme
+            if (ShouldHandleScheme(string.Empty))
             {
-                var ticket = await AuthenticateAsync();
+                var ticket = await AuthenticateOnceAsync();
                 if (ticket?.Principal != null)
                 {
                     SecurityHelper.AddUserPrincipal(Context, ticket.Principal);
@@ -155,14 +157,24 @@ namespace Microsoft.AspNet.Authentication
             }
         }
 
+        protected Task<AuthenticationTicket> AuthenticateOnceAsync()
+        {
+            if (_authenticate == null)
+            {
+                _authenticate = AuthenticateAsync();
+            }
+            return _authenticate;
+        }
+
         public async Task AuthenticateAsync(AuthenticateContext context)
         {
             if (ShouldHandleScheme(context.AuthenticationScheme))
             {
-                var ticket = await AuthenticateAsync();
+                var ticket = await AuthenticateOnceAsync();
                 if (ticket?.Principal != null)
                 {
                     context.Authenticated(ticket.Principal, ticket.Properties.Items, BaseOptions.Description.Items);
+                    _authenticate = Task.FromResult(ticket);
                 }
                 else
                 {
@@ -180,7 +192,7 @@ namespace Microsoft.AspNet.Authentication
         /// Calling Authenticate more than once should always return the original value. 
         /// </summary>
         /// <returns>The ticket data provided by the authentication logic</returns>
-        public abstract Task<AuthenticationTicket> AuthenticateAsync();
+        protected abstract Task<AuthenticationTicket> AuthenticateAsync();
 
         public bool ShouldHandleScheme(string authenticationScheme)
         {
