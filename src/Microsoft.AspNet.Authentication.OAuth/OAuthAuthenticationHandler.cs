@@ -116,10 +116,7 @@ namespace Microsoft.AspNet.Authentication.OAuth
                     return new AuthenticationTicket(properties, Options.AuthenticationScheme);
                 }
 
-                var requestPrefix = Request.Scheme + "://" + Request.Host;
-                var redirectUri = requestPrefix + OriginalPathBase + Options.CallbackPath;
-
-                var tokens = await ExchangeCodeAsync(code, redirectUri);
+                var tokens = await ExchangeCodeAsync(code, BuildRedirectUri(Options.CallbackPath));
 
                 if (string.IsNullOrWhiteSpace(tokens.AccessToken))
                 {
