@@ -28,7 +28,7 @@ namespace Microsoft.AspNet.Authentication.Cookies
         private DateTimeOffset _renewExpiresUtc;
         private string _sessionKey;
 
-        public override async Task<AuthenticationTicket> AuthenticateAsync()
+        protected override async Task<AuthenticationTicket> AuthenticateAsync()
         {
             AuthenticationTicket ticket = null;
             try
@@ -77,13 +77,17 @@ namespace Microsoft.AspNet.Authentication.Cookies
                     return null;
                 }
 
+                var context = new CookieValidatePrincipalContext(Context, ticket, Options);
+
+                await Options.Notifications.ValidatePrincipal(context);
+
                 var allowRefresh = ticket.Properties.AllowRefresh ?? true;
                 if (issuedUtc != null && expiresUtc != null && Options.SlidingExpiration && allowRefresh)
                 {
                     var timeElapsed = currentUtc.Subtract(issuedUtc.Value);
                     var timeRemaining = expiresUtc.Value.Subtract(currentUtc);
 
-                    if (timeRemaining < timeElapsed)
+                    if (context.ShouldRenew || timeRemaining < timeElapsed)
                     {
                         _shouldRenew = true;
                         _renewIssuedUtc = currentUtc;
@@ -91,10 +95,6 @@ namespace Microsoft.AspNet.Authentication.Cookies
                         _renewExpiresUtc = currentUtc.Add(timeSpan);
                     }
                 }
-
-                var context = new CookieValidatePrincipalContext(Context, ticket, Options);
-
-                await Options.Notifications.ValidatePrincipal(context);
 
                 return new AuthenticationTicket(context.Principal, context.Properties, Options.AuthenticationScheme);
             }
@@ -134,8 +134,11 @@ namespace Microsoft.AspNet.Authentication.Cookies
         {
             var cookieOptions = BuildCookieOptions();
 
-            model.Properties.IssuedUtc = _renewIssuedUtc;
-            model.Properties.ExpiresUtc = _renewExpiresUtc;
+            if (_shouldRenew)
+            {
+                model.Properties.IssuedUtc = _renewIssuedUtc;
+                model.Properties.ExpiresUtc = _renewExpiresUtc;
+            }
 
             if (Options.SessionStore != null && _sessionKey != null)
             {
@@ -181,7 +184,7 @@ namespace Microsoft.AspNet.Authentication.Cookies
                 return;
             }
 
-            var model = await AuthenticateAsync();
+            var model = await AuthenticateOnceAsync();
             try
             {
                 await ApplyCookie(model);
