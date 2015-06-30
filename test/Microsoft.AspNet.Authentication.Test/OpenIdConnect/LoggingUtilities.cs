@@ -139,35 +139,4 @@ namespace Microsoft.AspNet.Authentication.Tests.OpenIdConnect
             return entries;
         }
     }
-
-    public class LogEntry
-    {
-        public LogEntry() { }
-
-        public int EventId { get; set; }
-
-        public Exception Exception { get; set; }
-
-        public Func<object, Exception, string> Formatter { get; set; }
-
-        public LogLevel Level { get; set; }
-
-        public object State { get; set; }
-
-        public override string ToString()
-        {
-            if (Formatter != null)
-            {
-                return Formatter(this.State, this.Exception);
-            }
-            else
-            {
-                string message = (Formatter != null ? Formatter(State, Exception) : (State?.ToString() ?? "null"));
-                message += ", LogLevel: " + Level.ToString();
-                message += ", EventId: " + EventId.ToString();
-                message += ", Exception: " + (Exception == null ? "null" : Exception.Message);
-                return message;
-            }
-        }
-    }    
 }

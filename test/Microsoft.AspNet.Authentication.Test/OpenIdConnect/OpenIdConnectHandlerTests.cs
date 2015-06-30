@@ -99,7 +99,7 @@ namespace Microsoft.AspNet.Authentication.Tests.OpenIdConnect
         private static void SetStateOptions(OpenIdConnectAuthenticationOptions options)
         {
             options.AuthenticationScheme = "OpenIdConnectHandlerTest";
-            options.ConfigurationManager = ConfigurationManager.DefaultStaticConfigurationManager();
+            options.ConfigurationManager = TestUtilities.DefaultOpenIdConnectConfigurationManager;
             options.ClientId = Guid.NewGuid().ToString();
             options.StateDataFormat = new AuthenticationPropertiesFormaterKeyValue();
             options.Notifications = new OpenIdConnectAuthenticationNotifications
@@ -124,7 +124,7 @@ namespace Microsoft.AspNet.Authentication.Tests.OpenIdConnect
             var errors = new List<Tuple<LogEntry, LogEntry>>();
             var expectedLogs = LoggingUtilities.PopulateLogEntries(expectedLogIndexes);
             var handler = new OpenIdConnectAuthenticationHandlerForTestingAuthenticate(EmptyTask, EmptyTask);
-            var loggerFactory = new ReturnsLoggerLoggerFactory(logLevel);
+            var loggerFactory = new InMemoryLoggerFactory(logLevel);
             var server = CreateServer(new ConfigureOptions<OpenIdConnectAuthenticationOptions>(action), UrlEncoder.Default, loggerFactory, handler);
 
             await server.CreateClient().PostAsync("http://localhost", new FormUrlEncodedContent(message.Parameters));
@@ -161,9 +161,9 @@ namespace Microsoft.AspNet.Authentication.Tests.OpenIdConnect
 
                 message = new OpenIdConnectMessage();
                 message.State = string.Empty;
-                dataset.Add(LogLevel.Debug, new int[] { 0, 1, 4, 7 }, StateNullOptions, message);
-                dataset.Add(LogLevel.Verbose, new int[] { 4, 7 }, StateNullOptions, message);
-                dataset.Add(LogLevel.Error, new int[] { }, StateNullOptions, message);
+                dataset.Add(LogLevel.Debug, new int[] { 0, 1, 4, 7 }, StateEmptyOptions, message);
+                dataset.Add(LogLevel.Verbose, new int[] { 4, 7 }, StateEmptyOptions, message);
+                dataset.Add(LogLevel.Error, new int[] { }, StateEmptyOptions, message);
 
                 message = new OpenIdConnectMessage();
                 message.State = Guid.NewGuid().ToString();
@@ -236,7 +236,7 @@ namespace Microsoft.AspNet.Authentication.Tests.OpenIdConnect
         private static void DefaultOptions(OpenIdConnectAuthenticationOptions options)
         {
             options.AuthenticationScheme = "OpenIdConnectHandlerTest";
-            options.ConfigurationManager = ConfigurationManager.DefaultStaticConfigurationManager();
+            options.ConfigurationManager = TestUtilities.DefaultOpenIdConnectConfigurationManager;
             options.ClientId = Guid.NewGuid().ToString();
             options.StateDataFormat = new AuthenticationPropertiesFormaterKeyValue();
         }
@@ -361,7 +361,7 @@ namespace Microsoft.AspNet.Authentication.Tests.OpenIdConnect
         private static void SecurityTokenValidatorCannotReadToken(OpenIdConnectAuthenticationOptions options)
         {
             AuthenticationErrorHandledOptions(options);
-            Mock<ISecurityTokenValidator> mockValidator = new Mock<ISecurityTokenValidator>();
+            var mockValidator = new Mock<ISecurityTokenValidator>();
             SecurityToken jwt = null;
             mockValidator.Setup(v => v.ValidateToken(It.IsAny<string>(), It.IsAny<TokenValidationParameters>(), out jwt)).Returns(new ClaimsPrincipal());
             mockValidator.Setup(v => v.CanReadToken(It.IsAny<string>())).Returns(false);
@@ -371,8 +371,8 @@ namespace Microsoft.AspNet.Authentication.Tests.OpenIdConnect
         private static void SecurityTokenValidatorThrows(OpenIdConnectAuthenticationOptions options)
         {
             AuthenticationErrorHandledOptions(options);
-            Mock<ISecurityTokenValidator> mockValidator = new Mock<ISecurityTokenValidator>();
-            SecurityToken jwt = new JwtSecurityToken();
+            var mockValidator = new Mock<ISecurityTokenValidator>();
+            SecurityToken jwt = null;
             mockValidator.Setup(v => v.ValidateToken(It.IsAny<string>(), It.IsAny<TokenValidationParameters>(), out jwt)).Throws<SecurityTokenSignatureKeyNotFoundException>();
             mockValidator.Setup(v => v.CanReadToken(It.IsAny<string>())).Returns(true);
             options.SecurityTokenValidators = new Collection<ISecurityTokenValidator> { mockValidator.Object };
@@ -381,10 +381,10 @@ namespace Microsoft.AspNet.Authentication.Tests.OpenIdConnect
         private static void SecurityTokenValidatorValidatesAllTokens(OpenIdConnectAuthenticationOptions options)
         {
             DefaultOptions(options);
-            Mock<ISecurityTokenValidator> mockValidator = new Mock<ISecurityTokenValidator>();
+            var mockValidator = new Mock<ISecurityTokenValidator>();
             mockValidator.Setup(v => v.ValidateToken(It.IsAny<string>(), It.IsAny<TokenValidationParameters>(), out specCompliantJwt)).Returns(new ClaimsPrincipal());
             mockValidator.Setup(v => v.CanReadToken(It.IsAny<string>())).Returns(true);
-            Mock<INonceCache> mockNonceCache = new Mock<INonceCache>();
+            var mockNonceCache = new Mock<INonceCache>();
             mockNonceCache.Setup(n => n.TryRemoveNonce(It.IsAny<string>())).Returns(true);
             options.SecurityTokenValidators = new Collection<ISecurityTokenValidator> { mockValidator.Object };
             options.NonceCache = mockNonceCache.Object;

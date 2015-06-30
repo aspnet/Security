@@ -32,7 +32,7 @@ namespace Microsoft.AspNet.Authentication.Tests.OpenIdConnect
         const string ChallengeWithOutContext = "/challengeWithOutContext";
         const string ChallengeWithProperties = "/challengeWithProperties";
         const string DefaultHost = @"https://example.com";
-        const string DefaultAuthority = @"https://login.windows.net/common";
+        const string DefaultAuthority = @"https://example.com/common";
         const string Logout = "/logout";
         const string Signin = "/signin";
         const string Signout = "/signout";
@@ -60,7 +60,7 @@ namespace Microsoft.AspNet.Authentication.Tests.OpenIdConnect
             {
                 options.Authority = DefaultAuthority;
                 options.ClientId = "Test Id";
-                options.Configuration = ConfigurationManager.DefaultOpenIdConnectConfiguration();
+                options.Configuration = TestUtilities.DefaultOpenIdConnectConfiguration;
             });
             var transaction = await SendAsync(server, DefaultHost + Challenge);
             transaction.SetCookie.Single().ShouldContain(OpenIdConnectAuthenticationDefaults.CookieNoncePrefix);
@@ -205,7 +205,7 @@ namespace Microsoft.AspNet.Authentication.Tests.OpenIdConnect
         [Fact]
         public async Task SignOutWithDefaultRedirectUri()
         {
-            var configuration = ConfigurationManager.DefaultOpenIdConnectConfiguration();
+            var configuration = TestUtilities.DefaultOpenIdConnectConfiguration;
             var server = CreateServer(options =>
             {
                 options.Authority = DefaultAuthority;
@@ -221,7 +221,7 @@ namespace Microsoft.AspNet.Authentication.Tests.OpenIdConnect
         [Fact]
         public async Task SignOutWithCustomRedirectUri()
         {
-            var configuration = ConfigurationManager.DefaultOpenIdConnectConfiguration();
+            var configuration = TestUtilities.DefaultOpenIdConnectConfiguration;
             var server = CreateServer(options =>
             {
                 options.Authority = DefaultAuthority;
@@ -238,7 +238,7 @@ namespace Microsoft.AspNet.Authentication.Tests.OpenIdConnect
         [Fact]
         public async Task SignOutWith_Specific_RedirectUri_From_Authentication_Properites()
         {
-            var configuration = ConfigurationManager.DefaultOpenIdConnectConfiguration();
+            var configuration = TestUtilities.DefaultOpenIdConnectConfiguration;
             var server = CreateServer(options =>
             {
                 options.Authority = DefaultAuthority;

@@ -300,7 +300,6 @@ namespace Microsoft.AspNet.Authentication.OpenIdConnect
 
                 var properties = new AuthenticationProperties();
 
-
                 // if state is missing, just log it
                 if (string.IsNullOrEmpty(message.State))
                 {
@@ -316,7 +315,9 @@ namespace Microsoft.AspNet.Authentication.OpenIdConnect
                         return null;
                     }
 
-                    properties = SetUserStateOnMessage(message, properties);
+                    string userstate = null;
+                    properties.Items.TryGetValue(OpenIdConnectAuthenticationDefaults.UserstatePropertiesKey, out userstate);
+                    message.State = userstate;
                 }
 
                 // if any of the error fields are set, return null
@@ -342,7 +343,7 @@ namespace Microsoft.AspNet.Authentication.OpenIdConnect
                     var securityTokenReceivedNotification =
                         new SecurityTokenReceivedNotification<OpenIdConnectMessage, OpenIdConnectAuthenticationOptions>(Context, Options)
                         {
-                            ProtocolMessage = message
+                            ProtocolMessage = message,
                         };
 
                     await Options.Notifications.SecurityTokenReceived(securityTokenReceivedNotification);
@@ -602,15 +603,6 @@ namespace Microsoft.AspNet.Authentication.OpenIdConnect
             }
 
             return null;
-        }
-
-        private AuthenticationProperties SetUserStateOnMessage(OpenIdConnectMessage message, AuthenticationProperties properties)
-        {
-            string userstate = null;
-            properties.Items.TryGetValue(OpenIdConnectAuthenticationDefaults.UserstatePropertiesKey, out userstate);
-            message.State = userstate;
-
-            return properties;
         }
 
         /// <summary>
