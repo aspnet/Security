@@ -400,18 +400,24 @@ namespace Microsoft.AspNet.Authentication.Cookies
 
             clock.Add(TimeSpan.FromMinutes(5));
 
-            var transaction3 = await SendAsync(server, "http://example.com/me/Cookies", transaction1.CookieNameValue);
+            var transaction3 = await SendAsync(server, "http://example.com/me/Cookies", transaction2.CookieNameValue);
 
             clock.Add(TimeSpan.FromMinutes(6));
 
             var transaction4 = await SendAsync(server, "http://example.com/me/Cookies", transaction1.CookieNameValue);
 
-            transaction2.SetCookie.ShouldBe(null);
+            clock.Add(TimeSpan.FromMinutes(5));
+
+            var transaction5 = await SendAsync(server, "http://example.com/me/Cookies", transaction2.CookieNameValue);
+
+            transaction2.SetCookie.ShouldNotBe(null);
             FindClaimValue(transaction2, ClaimTypes.Name).ShouldBe("Alice");
-            transaction3.SetCookie.ShouldBe(null);
+            transaction3.SetCookie.ShouldNotBe(null);
             FindClaimValue(transaction3, ClaimTypes.Name).ShouldBe("Alice");
             transaction4.SetCookie.ShouldBe(null);
             FindClaimValue(transaction4, ClaimTypes.Name).ShouldBe(null);
+            transaction5.SetCookie.ShouldBe(null);
+            FindClaimValue(transaction5, ClaimTypes.Name).ShouldBe(null);
         }
 
         [Fact]

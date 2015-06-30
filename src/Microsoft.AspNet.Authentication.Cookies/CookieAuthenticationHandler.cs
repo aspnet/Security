@@ -24,8 +24,8 @@ namespace Microsoft.AspNet.Authentication.Cookies
         private const string SessionIdClaim = "Microsoft.AspNet.Authentication.Cookies-SessionId";
 
         private bool _shouldRenew;
-        private DateTimeOffset _renewIssuedUtc;
-        private DateTimeOffset _renewExpiresUtc;
+        private DateTimeOffset? _renewIssuedUtc;
+        private DateTimeOffset? _renewExpiresUtc;
         private string _sessionKey;
 
         protected override async Task<AuthenticationTicket> AuthenticateAsync()
@@ -77,23 +77,28 @@ namespace Microsoft.AspNet.Authentication.Cookies
                     return null;
                 }
 
-                var context = new CookieValidatePrincipalContext(Context, ticket, Options);
-
-                await Options.Notifications.ValidatePrincipal(context);
-
                 var allowRefresh = ticket.Properties.AllowRefresh ?? true;
                 if (issuedUtc != null && expiresUtc != null && Options.SlidingExpiration && allowRefresh)
                 {
                     var timeElapsed = currentUtc.Subtract(issuedUtc.Value);
                     var timeRemaining = expiresUtc.Value.Subtract(currentUtc);
 
-                    if (context.ShouldRenew || timeRemaining < timeElapsed)
+                    if (timeRemaining < timeElapsed)
                     {
                         _shouldRenew = true;
                         _renewIssuedUtc = currentUtc;
                         var timeSpan = expiresUtc.Value.Subtract(issuedUtc.Value);
                         _renewExpiresUtc = currentUtc.Add(timeSpan);
                     }
+                }
+
+                var context = new CookieValidatePrincipalContext(Context, ticket, Options);
+
+                await Options.Notifications.ValidatePrincipal(context);
+
+                if (context.ShouldRenew)
+                {
+                    _shouldRenew = true;
                 }
 
                 return new AuthenticationTicket(context.Principal, context.Properties, Options.AuthenticationScheme);
@@ -134,9 +139,12 @@ namespace Microsoft.AspNet.Authentication.Cookies
         {
             var cookieOptions = BuildCookieOptions();
 
-            if (_shouldRenew)
+            if (_renewIssuedUtc.HasValue)
             {
                 model.Properties.IssuedUtc = _renewIssuedUtc;
+            }
+            if (_renewExpiresUtc.HasValue)
+            {
                 model.Properties.ExpiresUtc = _renewExpiresUtc;
             }
 
@@ -152,9 +160,9 @@ namespace Microsoft.AspNet.Authentication.Cookies
 
             var cookieValue = Options.TicketDataFormat.Protect(model);
 
-            if (model.Properties.IsPersistent)
+            if (model.Properties.IsPersistent && _renewExpiresUtc.HasValue)
             {
-                cookieOptions.Expires = _renewExpiresUtc.ToUniversalTime().DateTime;
+                cookieOptions.Expires = _renewExpiresUtc.Value.ToUniversalTime().DateTime;
             }
 
             Options.CookieManager.AppendResponseCookie(
