@@ -11,7 +11,7 @@ namespace Microsoft.AspNet.Authentication.DataHandler.Serializer
 {
     public class TicketSerializer : IDataSerializer<AuthenticationTicket>
     {
-        private const int FormatVersion = 2;
+        private const int FormatVersion = 3;
 
         public virtual byte[] Serialize(AuthenticationTicket model)
         {
