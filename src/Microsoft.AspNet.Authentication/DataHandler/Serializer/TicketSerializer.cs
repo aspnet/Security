@@ -80,7 +80,7 @@ namespace Microsoft.AspNet.Authentication.DataHandler.Serializer
             ClaimsPrincipal principal = null;
 
             // Negative values are used to signify null
-            if (identityCount > 0)
+            if (identityCount >= 0)
             {
                 var identities = new ClaimsIdentity[identityCount];
                 for (int i = 0; i != identityCount; ++i)
