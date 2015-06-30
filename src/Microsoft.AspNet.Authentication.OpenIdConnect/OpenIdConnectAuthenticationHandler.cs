@@ -77,19 +77,31 @@ namespace Microsoft.AspNet.Authentication.OpenIdConnect
                     message.PostLogoutRedirectUri = Options.PostLogoutRedirectUri;
                 }
 
-                var notification = new RedirectToIdentityProviderNotification<OpenIdConnectMessage, OpenIdConnectAuthenticationOptions>(Context, Options, message);
-                await Options.Notifications.RedirectToIdentityProvider(notification);
-
-                if (!notification.HandledResponse || !notification.Skipped)
+                if (Options.Notifications.RedirectToIdentityProvider != null)
                 {
-                    var redirectUri = notification.ProtocolMessage.CreateLogoutRequestUrl();
-                    if (!Uri.IsWellFormedUriString(redirectUri, UriKind.Absolute))
+                    var redirectToIdentityProviderNotification = new RedirectToIdentityProviderNotification<OpenIdConnectMessage, OpenIdConnectAuthenticationOptions>(Context, Options, message);
+                    await Options.Notifications.RedirectToIdentityProvider(redirectToIdentityProviderNotification);
+                    if (redirectToIdentityProviderNotification.HandledResponse)
                     {
-                        Logger.LogWarning(Resources.OIDCH_0051_RedirectUriLogoutIsNotWellFormed, redirectUri);
+                        Logger.LogVerbose(Resources.OIDCH_0034_RedirectToIdentityProviderNotificationHandledResponse);
+                        return;
+                    }
+                    else if (redirectToIdentityProviderNotification.Skipped)
+                    {
+                        Logger.LogVerbose(Resources.OIDCH_0035_RedirectToIdentityProviderNotificationSkipped);
+                        return;
                     }
 
-                    Response.Redirect(redirectUri);
+                    message = redirectToIdentityProviderNotification.ProtocolMessage;
                 }
+
+                var redirectUri = message.CreateLogoutRequestUrl();
+                if (!Uri.IsWellFormedUriString(redirectUri, UriKind.Absolute))
+                {
+                    Logger.LogWarning(Resources.OIDCH_0051_RedirectUriLogoutIsNotWellFormed, redirectUri);
+                }
+
+                Response.Redirect(redirectUri);
             }
         }
 
@@ -184,19 +196,29 @@ namespace Microsoft.AspNet.Authentication.OpenIdConnect
                 message.Nonce = Options.ProtocolValidator.GenerateNonce();
             }
 
-            var redirectToIdentityProviderNotification =
-                new RedirectToIdentityProviderNotification<OpenIdConnectMessage, OpenIdConnectAuthenticationOptions>(Context, Options, message);
+            if (Options.Notifications.RedirectToIdentityProvider != null)
+            {
+                var redirectToIdentityProviderNotification =
+                    new RedirectToIdentityProviderNotification<OpenIdConnectMessage, OpenIdConnectAuthenticationOptions>(Context, Options, message);
 
-            await Options.Notifications.RedirectToIdentityProvider(redirectToIdentityProviderNotification);
-            if (redirectToIdentityProviderNotification.HandledResponse)
-            {
-                Logger.LogVerbose(Resources.OIDCH_0034_RedirectToIdentityProviderNotificationHandledResponse);
-                return;
-            }
-            else if (redirectToIdentityProviderNotification.Skipped)
-            {
-                Logger.LogVerbose(Resources.OIDCH_0035_RedirectToIdentityProviderNotificationSkipped);
-                return;
+                await Options.Notifications.RedirectToIdentityProvider(redirectToIdentityProviderNotification);
+                if (redirectToIdentityProviderNotification.HandledResponse)
+                {
+                    Logger.LogVerbose(Resources.OIDCH_0034_RedirectToIdentityProviderNotificationHandledResponse);
+                    return;
+                }
+                else if (redirectToIdentityProviderNotification.Skipped)
+                {
+                    Logger.LogVerbose(Resources.OIDCH_0035_RedirectToIdentityProviderNotificationSkipped);
+                    return;
+                }
+
+                if (!string.IsNullOrEmpty(redirectToIdentityProviderNotification.ProtocolMessage.State))
+                {
+                    properties.Items[OpenIdConnectAuthenticationDefaults.UserstatePropertiesKey] = redirectToIdentityProviderNotification.ProtocolMessage.State;
+                }
+
+                message = redirectToIdentityProviderNotification.ProtocolMessage;
             }
 
             if (!string.IsNullOrEmpty(message.Nonce))
@@ -216,13 +238,8 @@ namespace Microsoft.AspNet.Authentication.OpenIdConnect
             }
 
             // If 'OpenIdConnectMessage.State' is null, then the user never set it in the notification. Just set the state
-            if (!string.IsNullOrEmpty(redirectToIdentityProviderNotification.ProtocolMessage.State))
-            {
-                properties.Items[OpenIdConnectAuthenticationDefaults.UserstatePropertiesKey] = redirectToIdentityProviderNotification.ProtocolMessage.State;
-            }
-
-            redirectToIdentityProviderNotification.ProtocolMessage.State = Options.StateDataFormat.Protect(properties);
-            var redirectUri = redirectToIdentityProviderNotification.ProtocolMessage.CreateAuthenticationRequestUrl();
+            message.State = Options.StateDataFormat.Protect(properties);
+            var redirectUri = message.CreateAuthenticationRequestUrl();
             if (!Uri.IsWellFormedUriString(redirectUri, UriKind.Absolute))
             {
                 Logger.LogWarning(Resources.OIDCH_0036_UriIsNotWellFormed, redirectUri);

@@ -229,9 +229,7 @@ namespace Microsoft.AspNet.Authentication.Tests.OpenIdConnect
             }
         }
 
-        private static Task EmptyTask() { return Task.FromResult(0); }
-
-#region Configure Options
+#region Configure Options for AuthenticateCore variations
 
         private static void DefaultOptions(OpenIdConnectAuthenticationOptions options)
         {
@@ -435,6 +433,8 @@ namespace Microsoft.AspNet.Authentication.Tests.OpenIdConnect
         }
 
 #endregion
+
+        private static Task EmptyTask() { return Task.FromResult(0); }
 
         private static TestServer CreateServer(ConfigureOptions<OpenIdConnectAuthenticationOptions> options, IUrlEncoder encoder, OpenIdConnectAuthenticationHandler handler = null)
         {
