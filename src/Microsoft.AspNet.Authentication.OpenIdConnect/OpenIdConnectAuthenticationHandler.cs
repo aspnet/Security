@@ -106,7 +106,7 @@ namespace Microsoft.AspNet.Authentication.OpenIdConnect
             // 2. CurrentUri if Options.DefaultToCurrentUriOnRedirect is true)
             AuthenticationProperties properties = new AuthenticationProperties(context.Properties);
 
-            if (!string.IsNullOrWhiteSpace(properties.RedirectUri))
+            if (!string.IsNullOrEmpty(properties.RedirectUri))
             {
                 Logger.LogDebug(Resources.OIDCH_0030_Using_Properties_RedirectUri, properties.RedirectUri);
             }
@@ -116,13 +116,13 @@ namespace Microsoft.AspNet.Authentication.OpenIdConnect
                 properties.RedirectUri = CurrentUri;
             }
 
-            if (!string.IsNullOrWhiteSpace(Options.RedirectUri))
+            if (!string.IsNullOrEmpty(Options.RedirectUri))
             {
                 Logger.LogDebug(Resources.OIDCH_0031_Using_Options_RedirectUri, Options.RedirectUri);
             }
 
             // When redeeming a 'code' for an AccessToken, this value is needed
-            if (!string.IsNullOrWhiteSpace(Options.RedirectUri))
+            if (!string.IsNullOrEmpty(Options.RedirectUri))
             {
                 properties.Items.Add(OpenIdConnectAuthenticationDefaults.RedirectUriForCodePropertiesKey, Options.RedirectUri);
             }
@@ -193,8 +193,9 @@ namespace Microsoft.AspNet.Authentication.OpenIdConnect
                 }
 
                 message = redirectToIdentityProviderNotification.ProtocolMessage;
-                message.State = Options.StateDataFormat.Protect(properties);
             }
+
+            message.State = Options.StateDataFormat.Protect(properties);
 
             var redirectUri = message.CreateAuthenticationRequestUrl();
             if (!Uri.IsWellFormedUriString(redirectUri, UriKind.Absolute))
