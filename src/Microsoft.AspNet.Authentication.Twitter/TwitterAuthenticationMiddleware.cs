@@ -45,11 +45,11 @@ namespace Microsoft.AspNet.Authentication.Twitter
         {
             if (string.IsNullOrWhiteSpace(Options.ConsumerSecret))
             {
-                throw new ArgumentException(string.Format(CultureInfo.CurrentCulture, Resources.Exception_OptionMustBeProvided, nameof(Options.ConsumerSecret)));
+                throw new ArgumentException(string.Format(CultureInfo.CurrentCulture, Resources.Exception_OptionMustBeProvided, nameof(Options)));
             }
             if (string.IsNullOrWhiteSpace(Options.ConsumerKey))
             {
-                throw new ArgumentException(string.Format(CultureInfo.CurrentCulture, Resources.Exception_OptionMustBeProvided, nameof(Options.ConsumerKey)));
+                throw new ArgumentException(string.Format(CultureInfo.CurrentCulture, Resources.Exception_OptionMustBeProvided, nameof(Options)));
             }
 
             if (Options.Notifications == null)
@@ -72,7 +72,7 @@ namespace Microsoft.AspNet.Authentication.Twitter
             }
             if (string.IsNullOrEmpty(Options.SignInScheme))
             {
-                throw new ArgumentException(string.Format(CultureInfo.CurrentCulture, Resources.Exception_OptionMustBeProvided, "SignInScheme"));
+                throw new ArgumentException(string.Format(CultureInfo.CurrentCulture, Resources.Exception_OptionMustBeProvided, nameof(Options)));
             }
 
             _httpClient = new HttpClient(ResolveHttpMessageHandler(Options));

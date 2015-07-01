@@ -43,27 +43,27 @@ namespace Microsoft.AspNet.Authentication.OAuth
             // todo: review error handling
             if (string.IsNullOrWhiteSpace(Options.AuthenticationScheme))
             {
-                throw new ArgumentException(string.Format(CultureInfo.CurrentCulture, Resources.Exception_OptionMustBeProvided, nameof(Options.AuthenticationScheme)));
+                throw new ArgumentException(string.Format(CultureInfo.CurrentCulture, Resources.Exception_OptionMustBeProvided, nameof(Options)));
             }
 
             if (string.IsNullOrWhiteSpace(Options.ClientId))
             {
-                throw new ArgumentException(string.Format(CultureInfo.CurrentCulture, Resources.Exception_OptionMustBeProvided, nameof(Options.ClientId)));
+                throw new ArgumentException(string.Format(CultureInfo.CurrentCulture, Resources.Exception_OptionMustBeProvided, nameof(Options)));
             }
 
             if (string.IsNullOrWhiteSpace(Options.ClientSecret))
             {
-                throw new ArgumentException(string.Format(CultureInfo.CurrentCulture, Resources.Exception_OptionMustBeProvided, nameof(Options.ClientSecret)));
+                throw new ArgumentException(string.Format(CultureInfo.CurrentCulture, Resources.Exception_OptionMustBeProvided, nameof(Options)));
             }
 
             if (string.IsNullOrWhiteSpace(Options.AuthorizationEndpoint))
             {
-                throw new ArgumentException(string.Format(CultureInfo.CurrentCulture, Resources.Exception_OptionMustBeProvided, "AuthorizationEndpoint"));
+                throw new ArgumentException(string.Format(CultureInfo.CurrentCulture, Resources.Exception_OptionMustBeProvided, nameof(Options)));
             }
 
             if (string.IsNullOrWhiteSpace(Options.TokenEndpoint))
             {
-                throw new ArgumentException(string.Format(CultureInfo.CurrentCulture, Resources.Exception_OptionMustBeProvided, "TokenEndpoint"));
+                throw new ArgumentException(string.Format(CultureInfo.CurrentCulture, Resources.Exception_OptionMustBeProvided, nameof(Options)));
             }
 
             if (Options.StateDataFormat == null)
@@ -84,7 +84,7 @@ namespace Microsoft.AspNet.Authentication.OAuth
             }
             if (string.IsNullOrEmpty(Options.SignInScheme))
             {
-                throw new ArgumentException(string.Format(CultureInfo.CurrentCulture, Resources.Exception_OptionMustBeProvided, "SignInScheme"));
+                throw new ArgumentException(string.Format(CultureInfo.CurrentCulture, Resources.Exception_OptionMustBeProvided, nameof(Options)));
             }
         }
 
