@@ -15,29 +15,14 @@ namespace Microsoft.AspNet.Authentication.Notifications
     /// <typeparam name="TOptions">protocol specific options.</typeparam>
     public class RedirectToIdentityProviderNotification<TMessage, TOptions> : BaseNotification<TOptions>
     {
-        TMessage _message;
-
-        public RedirectToIdentityProviderNotification([NotNull] HttpContext context, [NotNull] TOptions options, [NotNull] TMessage protocolMessage) : base(context, options)
+        public RedirectToIdentityProviderNotification([NotNull] HttpContext context, [NotNull] TOptions options) : base(context, options)
         {
-            ProtocolMessage = protocolMessage;
         }
 
         /// <summary>
         /// Gets or sets the <see cref="{TMessage}"/>.
         /// </summary>
         /// <exception cref="ArgumentNullException">if 'value' is null.</exception>
-        public TMessage ProtocolMessage
-        {
-            get { return _message; }
-            set
-            {
-                if (value == null)
-                {
-                    throw new ArgumentNullException("value");
-                }
-
-                _message = value;
-            }
-        }
+        public TMessage ProtocolMessage { get; [param: NotNull] set; }
     }
 }

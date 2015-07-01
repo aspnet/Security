@@ -62,7 +62,11 @@ namespace Microsoft.AspNet.Authentication.OpenIdConnect
 
                 if (Options.Notifications.RedirectToIdentityProvider != null)
                 {
-                    var redirectToIdentityProviderNotification = new RedirectToIdentityProviderNotification<OpenIdConnectMessage, OpenIdConnectAuthenticationOptions>(Context, Options, message);
+                    var redirectToIdentityProviderNotification = new RedirectToIdentityProviderNotification<OpenIdConnectMessage, OpenIdConnectAuthenticationOptions>(Context, Options)
+                    {
+                        ProtocolMessage = message
+                    };
+
                     await Options.Notifications.RedirectToIdentityProvider(redirectToIdentityProviderNotification);
                     if (redirectToIdentityProviderNotification.HandledResponse)
                     {
@@ -166,7 +170,10 @@ namespace Microsoft.AspNet.Authentication.OpenIdConnect
             if (Options.Notifications.RedirectToIdentityProvider != null)
             {
                 var redirectToIdentityProviderNotification =
-                    new RedirectToIdentityProviderNotification<OpenIdConnectMessage, OpenIdConnectAuthenticationOptions>(Context, Options, message);
+                    new RedirectToIdentityProviderNotification<OpenIdConnectMessage, OpenIdConnectAuthenticationOptions>(Context, Options)
+                    {
+                        ProtocolMessage = message
+                    };
 
                 await Options.Notifications.RedirectToIdentityProvider(redirectToIdentityProviderNotification);
                 if (redirectToIdentityProviderNotification.HandledResponse)

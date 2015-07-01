@@ -23,7 +23,6 @@ namespace Microsoft.AspNet.Authentication.OpenIdConnect
             MessageReceived = notification => Task.FromResult(0);
             SecurityTokenReceived = notification => Task.FromResult(0);
             SecurityTokenValidated = notification => Task.FromResult(0);
-            RedirectToIdentityProvider = notification => Task.FromResult(0);
         }
 
         /// <summary>
