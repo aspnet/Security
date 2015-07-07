@@ -161,7 +161,7 @@ namespace Microsoft.AspNet.Authentication
         {
             if (_authenticateTask == null)
             {
-                _authenticateTask = AuthenticateAsync();
+                _authenticateTask = HandleAuthenticateAsync();
             }
             return _authenticateTask;
         }
@@ -189,12 +189,12 @@ namespace Microsoft.AspNet.Authentication
             }
         }
 
-        protected abstract Task<AuthenticationTicket> AuthenticateAsync();
+        protected abstract Task<AuthenticationTicket> HandleAuthenticateAsync();
 
         public bool ShouldHandleScheme(string authenticationScheme)
         {
             return string.Equals(BaseOptions.AuthenticationScheme, authenticationScheme, StringComparison.Ordinal) ||
-                (BaseOptions.AutomaticAuthentication && string.IsNullOrWhiteSpace(authenticationScheme));
+                (BaseOptions.AutomaticAuthentication && authenticationScheme == string.Empty);
         }
 
         public async Task SignInAsync(SignInContext context)
@@ -270,7 +270,7 @@ namespace Microsoft.AspNet.Authentication
                 {
                     case ChallengeBehavior.Automatic:
                         // If there is a principal already, invoke the forbidden code path
-                        var ticket = await AuthenticateAsync();
+                        var ticket = await AuthenticateOnceAsync();
                         if (ticket?.Principal != null)
                         {
                             handled = await HandleForbiddenAsync(context);

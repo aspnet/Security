@@ -2,6 +2,7 @@
 // Licensed under the Apache License, Version 2.0. See License.txt in the project root for license information.
 
 using System;
+using System.Diagnostics;
 using System.Globalization;
 using System.IdentityModel.Tokens;
 using System.IO;
@@ -212,7 +213,7 @@ namespace Microsoft.AspNet.Authentication.OpenIdConnect
         /// </summary>
         /// <returns>An <see cref="AuthenticationTicket"/> if successful.</returns>
         /// <remarks>Uses log id's OIDCH-0000 - OIDCH-0025</remarks>
-        protected override async Task<AuthenticationTicket> AuthenticateAsync()
+        protected override async Task<AuthenticationTicket> HandleAuthenticateAsync()
         {
             Logger.LogDebug(Resources.OIDCH_0000_AuthenticateCoreAsync, this.GetType());
 
@@ -620,7 +621,7 @@ namespace Microsoft.AspNet.Authentication.OpenIdConnect
 
         private async Task<bool> InvokeReplyPathAsync()
         {
-            var ticket = await AuthenticateAsync();
+            var ticket = await AuthenticateOnceAsync();
             if (ticket != null)
             {
                 if (ticket.Principal != null)

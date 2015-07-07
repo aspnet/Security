@@ -28,7 +28,7 @@ namespace Microsoft.AspNet.Authentication.Cookies
         private DateTimeOffset? _renewExpiresUtc;
         private string _sessionKey;
 
-        protected override async Task<AuthenticationTicket> AuthenticateAsync()
+        protected override async Task<AuthenticationTicket> HandleAuthenticateAsync()
         {
             AuthenticationTicket ticket = null;
             try
@@ -202,7 +202,8 @@ namespace Microsoft.AspNet.Authentication.Cookies
 
         protected override async Task HandleSignInAsync(SignInContext signin)
         {
-            var model = await AuthenticateAsync();
+            // This has side effects like reading _sessionKey
+            var ticket = await AuthenticateOnceAsync();
             try
             {
                 var cookieOptions = BuildCookieOptions();
@@ -239,21 +240,21 @@ namespace Microsoft.AspNet.Authentication.Cookies
                     signInContext.CookieOptions.Expires = expiresUtc.ToUniversalTime().DateTime;
                 }
 
-                model = new AuthenticationTicket(signInContext.Principal, signInContext.Properties, signInContext.AuthenticationScheme);
+                ticket = new AuthenticationTicket(signInContext.Principal, signInContext.Properties, signInContext.AuthenticationScheme);
                 if (Options.SessionStore != null)
                 {
                     if (_sessionKey != null)
                     {
                         await Options.SessionStore.RemoveAsync(_sessionKey);
                     }
-                    _sessionKey = await Options.SessionStore.StoreAsync(model);
+                    _sessionKey = await Options.SessionStore.StoreAsync(ticket);
                     var principal = new ClaimsPrincipal(
                         new ClaimsIdentity(
                             new[] { new Claim(SessionIdClaim, _sessionKey, ClaimValueTypes.String, Options.ClaimsIssuer) },
                             Options.ClaimsIssuer));
-                    model = new AuthenticationTicket(principal, null, Options.AuthenticationScheme);
+                    ticket = new AuthenticationTicket(principal, null, Options.AuthenticationScheme);
                 }
-                var cookieValue = Options.TicketDataFormat.Protect(model);
+                var cookieValue = Options.TicketDataFormat.Protect(ticket);
 
                 Options.CookieManager.AppendResponseCookie(
                     Context,
@@ -299,7 +300,7 @@ namespace Microsoft.AspNet.Authentication.Cookies
             catch (Exception exception)
             {
                 var exceptionContext = new CookieExceptionContext(Context, Options,
-                    CookieExceptionContext.ExceptionLocation.ApplyResponseGrant, exception, model);
+                    CookieExceptionContext.ExceptionLocation.ApplyResponseGrant, exception, ticket);
                 Options.Notifications.Exception(exceptionContext);
                 if (exceptionContext.Rethrow)
                 {
@@ -310,7 +311,8 @@ namespace Microsoft.AspNet.Authentication.Cookies
 
         protected override async Task HandleSignOutAsync(SignOutContext signOutContext)
         {
-            var model = await AuthenticateAsync();
+            // This has side effects like reading _sessionKey
+            var ticket = await AuthenticateOnceAsync();
             try
             {
                 var cookieOptions = BuildCookieOptions();
@@ -361,7 +363,7 @@ namespace Microsoft.AspNet.Authentication.Cookies
             catch (Exception exception)
             {
                 var exceptionContext = new CookieExceptionContext(Context, Options,
-                    CookieExceptionContext.ExceptionLocation.ApplyResponseGrant, exception, model);
+                    CookieExceptionContext.ExceptionLocation.ApplyResponseGrant, exception, ticket);
                 Options.Notifications.Exception(exceptionContext);
                 if (exceptionContext.Rethrow)
                 {
