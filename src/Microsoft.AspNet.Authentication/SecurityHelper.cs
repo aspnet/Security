@@ -1,9 +1,7 @@
 // Copyright (c) .NET Foundation. All rights reserved.
 // Licensed under the Apache License, Version 2.0. See License.txt in the project root for license information.
 
-using System.Linq;
 using System.Security.Claims;
-using Microsoft.AspNet.Http;
 using Microsoft.Framework.Internal;
 
 namespace Microsoft.AspNet.Authentication
@@ -21,16 +19,7 @@ namespace Microsoft.AspNet.Authentication
         /// <param name="identity"></param>
         public static ClaimsPrincipal MergeUserPrincipal([NotNull] ClaimsPrincipal existingPrincipal, [NotNull] ClaimsPrincipal additionalPrincipal)
         {
-            var newPrincipal = new ClaimsPrincipal();
-            // New principal identities go first
-            newPrincipal.AddIdentities(additionalPrincipal.Identities);
-
-            // Then add any existing non empty or authenticated identities
-            if (existingPrincipal != null)
-            {
-                newPrincipal.AddIdentities(existingPrincipal.Identities.Where(i => i.IsAuthenticated || i.Claims.Count() > 0));
-            }
-            return newPrincipal;
+            return Microsoft.Framework.Internal.SecurityHelper.MergeUserPrincipal(existingPrincipal, additionalPrincipal);
         }
     }
 }
