@@ -33,6 +33,20 @@ namespace Microsoft.AspNet.Authentication
         }
 
         [Fact]
+        public void AutomaticHandlerIgnoresNullScheme()
+        {
+            var handler = new TestAutoHandler("ignored", true);
+            Assert.False(handler.ShouldHandleScheme(null));
+        }
+
+        [Fact]
+        public void AutomaticHandlerIgnoresWhitespaceScheme()
+        {
+            var handler = new TestAutoHandler("ignored", true);
+            Assert.False(handler.ShouldHandleScheme("    "));
+        }
+
+        [Fact]
         public void AutomaticHandlerShouldHandleSchemeWhenSchemeMatches()
         {
             var handler = new TestAutoHandler("Alpha", true);
@@ -51,6 +65,37 @@ namespace Microsoft.AspNet.Authentication
         {
             var handler = new TestAutoHandler(null, true);
             Assert.False(handler.ShouldHandleScheme("Alpha"));
+        }
+
+        [Theory]
+        [InlineData("Alpha")]
+        [InlineData("")]
+        public async Task AuthHandlerAuthenticateCachesTicket(string scheme)
+        {
+            var handler = new CountHandler(scheme);
+            var context = new AuthenticateContext(scheme);
+            await handler.AuthenticateAsync(context);
+            await handler.AuthenticateAsync(context);
+            Assert.Equal(1, handler.AuthCount);
+        }
+
+        private class CountHandler : AuthenticationHandler<AuthenticationOptions>
+        {
+            public int AuthCount = 0;
+
+            public CountHandler(string scheme)
+            {
+                Initialize(new TestOptions(), new DefaultHttpContext(), new LoggerFactory().CreateLogger("TestHandler"), Framework.WebEncoders.UrlEncoder.Default);
+                Options.AuthenticationScheme = scheme;
+                Options.AutomaticAuthentication = true;
+            }
+
+            protected override Task<AuthenticationTicket> HandleAuthenticateAsync()
+            {
+                AuthCount++;
+                return Task.FromResult(new AuthenticationTicket(null, null));
+            }
+
         }
 
         private class TestHandler : AuthenticationHandler<AuthenticationOptions>
