@@ -620,7 +620,7 @@ namespace Microsoft.AspNet.Authentication.OpenIdConnect
 
         private async Task<bool> InvokeReplyPathAsync()
         {
-            var ticket = await AuthenticateOnceAsync();
+            var ticket = await HandleAuthenticateOnceAsync();
             if (ticket != null)
             {
                 if (ticket.Principal != null)

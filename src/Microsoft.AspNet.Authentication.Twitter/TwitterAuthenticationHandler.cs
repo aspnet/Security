@@ -169,7 +169,7 @@ namespace Microsoft.AspNet.Authentication.Twitter
 
         public async Task<bool> InvokeReturnPathAsync()
         {
-            var model = await AuthenticateOnceAsync();
+            var model = await HandleAuthenticateOnceAsync();
             if (model == null)
             {
                 Logger.LogWarning("Invalid return state, unable to redirect.");

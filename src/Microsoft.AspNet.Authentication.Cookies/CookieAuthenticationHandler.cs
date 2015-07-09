@@ -183,7 +183,7 @@ namespace Microsoft.AspNet.Authentication.Cookies
                 return;
             }
 
-            var ticket = await AuthenticateOnceAsync();
+            var ticket = await HandleAuthenticateOnceAsync();
             try
             {
                 await ApplyCookie(ticket);
@@ -203,7 +203,7 @@ namespace Microsoft.AspNet.Authentication.Cookies
         protected override async Task HandleSignInAsync(SignInContext signin)
         {
             // This has side effects like reading _sessionKey
-            var ticket = await AuthenticateOnceAsync();
+            var ticket = await HandleAuthenticateOnceAsync();
             try
             {
                 var cookieOptions = BuildCookieOptions();
@@ -312,7 +312,7 @@ namespace Microsoft.AspNet.Authentication.Cookies
         protected override async Task HandleSignOutAsync(SignOutContext signOutContext)
         {
             // This has side effects like reading _sessionKey
-            var ticket = await AuthenticateOnceAsync();
+            var ticket = await HandleAuthenticateOnceAsync();
             try
             {
                 var cookieOptions = BuildCookieOptions();

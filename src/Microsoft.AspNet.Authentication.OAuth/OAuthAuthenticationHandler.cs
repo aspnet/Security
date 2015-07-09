@@ -42,7 +42,7 @@ namespace Microsoft.AspNet.Authentication.OAuth
 
         public async Task<bool> InvokeReturnPathAsync()
         {
-            var ticket = await AuthenticateOnceAsync();
+            var ticket = await HandleAuthenticateOnceAsync();
             if (ticket == null)
             {
                 Logger.LogWarning("Invalid return state, unable to redirect.");
