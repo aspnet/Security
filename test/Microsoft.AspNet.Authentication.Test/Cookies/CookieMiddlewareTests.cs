@@ -539,6 +539,27 @@ namespace Microsoft.AspNet.Authentication.Cookies
         }
 
         [Fact]
+        public async Task CookieIsPersistent()
+        {
+            var expected = " expires=Tue, 11 Jun 2013 12:40:56 GMT";
+            var clock = new TestClock();
+            var server = CreateServer(options =>
+            {
+                options.SystemClock = clock;
+            },
+            context =>
+                context.Authentication.SignInAsync("Cookies",
+                    new ClaimsPrincipal(new ClaimsIdentity(new GenericIdentity("Alice", "Cookies"))),
+                    new AuthenticationProperties() { ExpiresUtc = clock.UtcNow.AddMinutes(6), IsPersistent = true }));
+
+            var transaction1 = await SendAsync(server, "http://example.com/testpath");
+            var transaction2 = await SendAsync(server, "http://example.com/me/Cookies", transaction1.CookieNameValue);
+            transaction1.SetCookie.ShouldContain(expected);
+            transaction2.SetCookie.ShouldBe(null);
+            FindClaimValue(transaction2, ClaimTypes.Name).ShouldBe("Alice");
+        }
+
+        [Fact]
         public async Task AjaxRedirectsAsExtraHeaderOnTwoHundred()
         {
             var server = CreateServer(options =>
