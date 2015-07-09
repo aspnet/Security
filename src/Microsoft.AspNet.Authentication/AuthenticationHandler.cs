@@ -160,7 +160,7 @@ namespace Microsoft.AspNet.Authentication
         public bool ShouldHandleScheme(string authenticationScheme)
         {
             return string.Equals(BaseOptions.AuthenticationScheme, authenticationScheme, StringComparison.Ordinal) ||
-                (BaseOptions.AutomaticAuthentication && authenticationScheme == string.Empty);
+                (BaseOptions.AutomaticAuthentication && string.IsNullOrEmpty(authenticationScheme));
         }
 
         public async Task AuthenticateAsync(AuthenticateContext context)

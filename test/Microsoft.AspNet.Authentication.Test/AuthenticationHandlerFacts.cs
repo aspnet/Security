@@ -33,10 +33,10 @@ namespace Microsoft.AspNet.Authentication
         }
 
         [Fact]
-        public void AutomaticHandlerIgnoresNullScheme()
+        public void AutomaticHandlerHandlesNullScheme()
         {
             var handler = new TestAutoHandler("ignored", true);
-            Assert.False(handler.ShouldHandleScheme(null));
+            Assert.True(handler.ShouldHandleScheme(null));
         }
 
         [Fact]
