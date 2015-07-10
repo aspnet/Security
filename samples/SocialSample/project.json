@@ -1,15 +1,15 @@
 {
     "dependencies": {
-        "Microsoft.AspNet.Authentication.Cookies": "1.0.0-*",
-        "Microsoft.AspNet.Authentication.Facebook": "1.0.0-*",
-        "Microsoft.AspNet.Authentication.Google": "1.0.0-*",
-        "Microsoft.AspNet.Authentication.MicrosoftAccount": "1.0.0-*",
-        "Microsoft.AspNet.Authentication.Twitter": "1.0.0-*",
-        "Microsoft.AspNet.DataProtection": "1.0.0-*",
-        "Microsoft.AspNet.Server.IIS": "1.0.0-*",
-        "Microsoft.AspNet.Server.WebListener": "1.0.0-*",
-        "Microsoft.Framework.Logging.Console": "1.0.0-*",
-        "Kestrel": "1.0.0-*"
+        "Microsoft.AspNet.Authentication.Cookies": "1.0.0-beta5",
+        "Microsoft.AspNet.Authentication.Facebook": "1.0.0-beta5",
+        "Microsoft.AspNet.Authentication.Google": "1.0.0-beta5",
+        "Microsoft.AspNet.Authentication.MicrosoftAccount": "1.0.0-beta5",
+        "Microsoft.AspNet.Authentication.Twitter": "1.0.0-beta5",
+        "Microsoft.AspNet.DataProtection": "1.0.0-beta5",
+        "Microsoft.AspNet.Server.IIS": "1.0.0-beta5",
+        "Microsoft.AspNet.Server.WebListener": "1.0.0-beta5",
+        "Microsoft.Framework.Logging.Console": "1.0.0-beta5",
+        "Kestrel": "1.0.0-beta5"
     },
     "commands": {
         "web": "Microsoft.AspNet.Hosting server=Microsoft.AspNet.Server.WebListener server.urls=http://localhost:54540",
