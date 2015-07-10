@@ -2,6 +2,7 @@
 // Licensed under the Apache License, Version 2.0. See License.txt in the project root for license information.
 
 using System;
+using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.AspNet.Http;
 using Microsoft.AspNet.Http.Features.Authentication;
@@ -17,6 +18,9 @@ namespace Microsoft.AspNet.Authentication
     public abstract class AuthenticationHandler : IAuthenticationHandler
     {
         private Task<AuthenticationTicket> _authenticateTask;
+        private bool _authenticateInitialized;
+        private object _authenticateSyncLock;
+
         private bool _finishCalled;
         private AuthenticationOptions _baseOptions;
 
@@ -187,11 +191,11 @@ namespace Microsoft.AspNet.Authentication
 
         protected Task<AuthenticationTicket> HandleAuthenticateOnceAsync()
         {
-            if (_authenticateTask == null)
-            {
-                _authenticateTask = HandleAuthenticateAsync();
-            }
-            return _authenticateTask;
+            return LazyInitializer.EnsureInitialized(
+                            ref _authenticateTask,
+                            ref _authenticateInitialized,
+                            ref _authenticateSyncLock,
+                            HandleAuthenticateAsync);
         }
 
         protected abstract Task<AuthenticationTicket> HandleAuthenticateAsync();

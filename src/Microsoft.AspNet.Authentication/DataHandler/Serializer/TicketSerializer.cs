@@ -43,8 +43,7 @@ namespace Microsoft.AspNet.Authentication.DataHandler.Serializer
             var principal = model.Principal;
             if (principal == null)
             {
-                // Use -1 to signal null
-                writer.Write(-1);
+                throw new ArgumentNullException("model.Principal");
             }
             else
             {
@@ -77,35 +76,34 @@ namespace Microsoft.AspNet.Authentication.DataHandler.Serializer
             }
             string authenticationScheme = reader.ReadString();
             int identityCount = reader.ReadInt32();
-            ClaimsPrincipal principal = null;
 
-            // Negative values are used to signify null
-            if (identityCount >= 0)
+            if (identityCount < 0)
             {
-                var identities = new ClaimsIdentity[identityCount];
-                for (int i = 0; i != identityCount; ++i)
+                return null;
+            }
+
+            var identities = new ClaimsIdentity[identityCount];
+            for (int i = 0; i != identityCount; ++i)
+            {
+                string authenticationType = reader.ReadString();
+                string nameClaimType = ReadWithDefault(reader, DefaultValues.NameClaimType);
+                string roleClaimType = ReadWithDefault(reader, DefaultValues.RoleClaimType);
+                int count = reader.ReadInt32();
+                var claims = new Claim[count];
+                for (int index = 0; index != count; ++index)
                 {
-                    string authenticationType = reader.ReadString();
-                    string nameClaimType = ReadWithDefault(reader, DefaultValues.NameClaimType);
-                    string roleClaimType = ReadWithDefault(reader, DefaultValues.RoleClaimType);
-                    int count = reader.ReadInt32();
-                    var claims = new Claim[count];
-                    for (int index = 0; index != count; ++index)
-                    {
-                        string type = ReadWithDefault(reader, nameClaimType);
-                        string value = reader.ReadString();
-                        string valueType = ReadWithDefault(reader, DefaultValues.StringValueType);
-                        string issuer = ReadWithDefault(reader, DefaultValues.LocalAuthority);
-                        string originalIssuer = ReadWithDefault(reader, issuer);
-                        claims[index] = new Claim(type, value, valueType, issuer, originalIssuer);
-                    }
-                    identities[i] = new ClaimsIdentity(claims, authenticationType, nameClaimType, roleClaimType);
+                    string type = ReadWithDefault(reader, nameClaimType);
+                    string value = reader.ReadString();
+                    string valueType = ReadWithDefault(reader, DefaultValues.StringValueType);
+                    string issuer = ReadWithDefault(reader, DefaultValues.LocalAuthority);
+                    string originalIssuer = ReadWithDefault(reader, issuer);
+                    claims[index] = new Claim(type, value, valueType, issuer, originalIssuer);
                 }
-                principal = new ClaimsPrincipal(identities);
+                identities[i] = new ClaimsIdentity(claims, authenticationType, nameClaimType, roleClaimType);
             }
 
             var properties = PropertiesSerializer.Read(reader);
-            return new AuthenticationTicket(principal, properties, authenticationScheme);
+            return new AuthenticationTicket(new ClaimsPrincipal(identities), properties, authenticationScheme);
         }
 
         private static void WriteWithDefault(BinaryWriter writer, string value, string defaultValue)
