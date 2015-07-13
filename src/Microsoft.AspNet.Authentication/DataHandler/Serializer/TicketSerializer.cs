@@ -74,8 +74,8 @@ namespace Microsoft.AspNet.Authentication.DataHandler.Serializer
             {
                 return null;
             }
-            string authenticationScheme = reader.ReadString();
-            int identityCount = reader.ReadInt32();
+            var authenticationScheme = reader.ReadString();
+            var identityCount = reader.ReadInt32();
 
             if (identityCount < 0)
             {
@@ -83,20 +83,20 @@ namespace Microsoft.AspNet.Authentication.DataHandler.Serializer
             }
 
             var identities = new ClaimsIdentity[identityCount];
-            for (int i = 0; i != identityCount; ++i)
+            for (var i = 0; i != identityCount; ++i)
             {
-                string authenticationType = reader.ReadString();
-                string nameClaimType = ReadWithDefault(reader, DefaultValues.NameClaimType);
-                string roleClaimType = ReadWithDefault(reader, DefaultValues.RoleClaimType);
-                int count = reader.ReadInt32();
+                var authenticationType = reader.ReadString();
+                var nameClaimType = ReadWithDefault(reader, DefaultValues.NameClaimType);
+                var roleClaimType = ReadWithDefault(reader, DefaultValues.RoleClaimType);
+                var count = reader.ReadInt32();
                 var claims = new Claim[count];
                 for (int index = 0; index != count; ++index)
                 {
-                    string type = ReadWithDefault(reader, nameClaimType);
-                    string value = reader.ReadString();
-                    string valueType = ReadWithDefault(reader, DefaultValues.StringValueType);
-                    string issuer = ReadWithDefault(reader, DefaultValues.LocalAuthority);
-                    string originalIssuer = ReadWithDefault(reader, issuer);
+                    var type = ReadWithDefault(reader, nameClaimType);
+                    var value = reader.ReadString();
+                    var valueType = ReadWithDefault(reader, DefaultValues.StringValueType);
+                    var issuer = ReadWithDefault(reader, DefaultValues.LocalAuthority);
+                    var originalIssuer = ReadWithDefault(reader, issuer);
                     claims[index] = new Claim(type, value, valueType, issuer, originalIssuer);
                 }
                 identities[i] = new ClaimsIdentity(claims, authenticationType, nameClaimType, roleClaimType);
@@ -120,7 +120,7 @@ namespace Microsoft.AspNet.Authentication.DataHandler.Serializer
 
         private static string ReadWithDefault(BinaryReader reader, string defaultValue)
         {
-            string value = reader.ReadString();
+            var value = reader.ReadString();
             if (string.Equals(value, DefaultValues.DefaultStringPlaceholder, StringComparison.Ordinal))
             {
                 return defaultValue;
