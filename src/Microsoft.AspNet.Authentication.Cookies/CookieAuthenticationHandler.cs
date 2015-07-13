@@ -28,10 +28,10 @@ namespace Microsoft.AspNet.Authentication.Cookies
         private DateTimeOffset? _renewExpiresUtc;
         private string _sessionKey;
         private Task<AuthenticationTicket> _cookieTicketTask;
-        private bool _cookieRead;
 
         private Task<AuthenticationTicket> EnsureCookieTicket()
         {
+            // We only need to read the ticket once
             if (_cookieTicketTask == null)
             {
                 _cookieTicketTask = ReadCookieTicket();
