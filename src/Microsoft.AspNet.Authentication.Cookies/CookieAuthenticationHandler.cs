@@ -39,7 +39,6 @@ namespace Microsoft.AspNet.Authentication.Cookies
             return _cookieTicketTask;
         }
 
-
         private async Task<AuthenticationTicket> ReadCookieTicket()
         {
             var cookie = Options.CookieManager.GetRequestCookie(Context, Options.CookieName);
