@@ -27,81 +27,81 @@ namespace Microsoft.AspNet.Authentication.Cookies
         private DateTimeOffset? _renewIssuedUtc;
         private DateTimeOffset? _renewExpiresUtc;
         private string _sessionKey;
-        private AuthenticationTicket _cookieTicket;
+        private Task<AuthenticationTicket> _cookieTicketTask;
         private bool _cookieRead;
 
-        private async Task EnsureCookieTicket()
+        private Task<AuthenticationTicket> EnsureCookieTicket()
         {
-            if (!_cookieRead)
+            if (_cookieTicketTask == null)
             {
-                try
+                _cookieTicketTask = ReadCookieTicket();
+            }
+            return _cookieTicketTask;
+        }
+
+
+        private async Task<AuthenticationTicket> ReadCookieTicket()
+        {
+            var cookie = Options.CookieManager.GetRequestCookie(Context, Options.CookieName);
+            if (string.IsNullOrEmpty(cookie))
+            {
+                return null;
+            }
+
+            var ticket = Options.TicketDataFormat.Unprotect(cookie);
+            if (ticket == null)
+            {
+                Logger.LogWarning(@"Unprotect ticket failed");
+                return null;
+            }
+
+            if (Options.SessionStore != null)
+            {
+                var claim = ticket.Principal.Claims.FirstOrDefault(c => c.Type.Equals(SessionIdClaim));
+                if (claim == null)
                 {
-                    var cookie = Options.CookieManager.GetRequestCookie(Context, Options.CookieName);
-                    if (string.IsNullOrEmpty(cookie))
-                    {
-                        return;
-                    }
-
-                    var ticket = Options.TicketDataFormat.Unprotect(cookie);
-                    if (ticket == null)
-                    {
-                        Logger.LogWarning(@"Unprotect ticket failed");
-                        return;
-                    }
-
-                    if (Options.SessionStore != null)
-                    {
-                        var claim = ticket.Principal.Claims.FirstOrDefault(c => c.Type.Equals(SessionIdClaim));
-                        if (claim == null)
-                        {
-                            Logger.LogWarning(@"SessionId missing");
-                            return;
-                        }
-                        _sessionKey = claim.Value;
-                        ticket = await Options.SessionStore.RetrieveAsync(_sessionKey);
-                        if (ticket == null)
-                        {
-                            Logger.LogWarning(@"Identity missing in session store");
-                            return;
-                        }
-                    }
-
-                    var currentUtc = Options.SystemClock.UtcNow;
-                    var issuedUtc = ticket.Properties.IssuedUtc;
-                    var expiresUtc = ticket.Properties.ExpiresUtc;
-
-                    if (expiresUtc != null && expiresUtc.Value < currentUtc)
-                    {
-                        if (Options.SessionStore != null)
-                        {
-                            await Options.SessionStore.RemoveAsync(_sessionKey);
-                        }
-                        return;
-                    }
-
-                    var allowRefresh = ticket.Properties.AllowRefresh ?? true;
-                    if (issuedUtc != null && expiresUtc != null && Options.SlidingExpiration && allowRefresh)
-                    {
-                        var timeElapsed = currentUtc.Subtract(issuedUtc.Value);
-                        var timeRemaining = expiresUtc.Value.Subtract(currentUtc);
-
-                        if (timeRemaining < timeElapsed)
-                        {
-                            _shouldRenew = true;
-                            _renewIssuedUtc = currentUtc;
-                            var timeSpan = expiresUtc.Value.Subtract(issuedUtc.Value);
-                            _renewExpiresUtc = currentUtc.Add(timeSpan);
-                        }
-                    }
-
-                    // Finally we have a valid ticket
-                    _cookieTicket = ticket;
+                    Logger.LogWarning(@"SessionId missing");
+                    return null;
                 }
-                finally
+                _sessionKey = claim.Value;
+                ticket = await Options.SessionStore.RetrieveAsync(_sessionKey);
+                if (ticket == null)
                 {
-                    _cookieRead = true;
+                    Logger.LogWarning(@"Identity missing in session store");
+                    return null;
                 }
             }
+
+            var currentUtc = Options.SystemClock.UtcNow;
+            var issuedUtc = ticket.Properties.IssuedUtc;
+            var expiresUtc = ticket.Properties.ExpiresUtc;
+
+            if (expiresUtc != null && expiresUtc.Value < currentUtc)
+            {
+                if (Options.SessionStore != null)
+                {
+                    await Options.SessionStore.RemoveAsync(_sessionKey);
+                }
+                return null;
+            }
+
+            var allowRefresh = ticket.Properties.AllowRefresh ?? true;
+            if (issuedUtc != null && expiresUtc != null && Options.SlidingExpiration && allowRefresh)
+            {
+                var timeElapsed = currentUtc.Subtract(issuedUtc.Value);
+                var timeRemaining = expiresUtc.Value.Subtract(currentUtc);
+
+                if (timeRemaining < timeElapsed)
+                {
+                    _shouldRenew = true;
+                    _renewIssuedUtc = currentUtc;
+                    var timeSpan = expiresUtc.Value.Subtract(issuedUtc.Value);
+                    _renewExpiresUtc = currentUtc.Add(timeSpan);
+                }
+            }
+
+            // Finally we have a valid ticket
+            return ticket;
         }
 
         protected override async Task<AuthenticationTicket> HandleAuthenticateAsync()
@@ -109,8 +109,7 @@ namespace Microsoft.AspNet.Authentication.Cookies
             AuthenticationTicket ticket = null;
             try
             {
-                await EnsureCookieTicket();
-                ticket = _cookieTicket;
+                ticket = await EnsureCookieTicket();
                 if (ticket == null)
                 {
                     return null;
@@ -223,8 +222,7 @@ namespace Microsoft.AspNet.Authentication.Cookies
 
         protected override async Task HandleSignInAsync(SignInContext signin)
         {
-            await EnsureCookieTicket();
-            var ticket = _cookieTicket;
+            var ticket = await EnsureCookieTicket();
             try
             {
                 var cookieOptions = BuildCookieOptions();
@@ -309,12 +307,10 @@ namespace Microsoft.AspNet.Authentication.Cookies
 
         protected override async Task HandleSignOutAsync(SignOutContext signOutContext)
         {
-            await EnsureCookieTicket();
-            var ticket = _cookieTicket;
+            var ticket = await EnsureCookieTicket();
             try
             {
                 var cookieOptions = BuildCookieOptions();
-
                 if (Options.SessionStore != null && _sessionKey != null)
                 {
                     await Options.SessionStore.RemoveAsync(_sessionKey);
