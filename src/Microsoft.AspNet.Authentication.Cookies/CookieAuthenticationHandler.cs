@@ -382,36 +382,34 @@ namespace Microsoft.AspNet.Authentication.Cookies
         protected override Task<bool> HandleForbiddenAsync(ChallengeContext context)
         {
             // HandleForbidden by redirecting to AccessDeniedPath if set
-            if (Options.AccessDeniedPath.HasValue)
-            {
-                try
-                {
-                    var accessDeniedUri =
-                        Request.Scheme +
-                        "://" +
-                        Request.Host +
-                        Request.PathBase +
-                        Options.AccessDeniedPath;
-
-                    var redirectContext = new CookieApplyRedirectContext(Context, Options, accessDeniedUri);
-                    Options.Notifications.ApplyRedirect(redirectContext);
-                }
-                catch (Exception exception)
-                {
-                    var exceptionContext = new CookieExceptionContext(Context, Options,
-                        CookieExceptionContext.ExceptionLocation.Forbidden, exception, ticket: null);
-                    Options.Notifications.Exception(exceptionContext);
-                    if (exceptionContext.Rethrow)
-                    {
-                        throw;
-                    }
-                }
-                return Task.FromResult(true);
-            }
-            else
+            if (!Options.AccessDeniedPath.HasValue)
             {
                 return base.HandleForbiddenAsync(context);
             }
+
+            try
+            {
+                var accessDeniedUri =
+                    Request.Scheme +
+                    "://" +
+                    Request.Host +
+                    Request.PathBase +
+                    Options.AccessDeniedPath;
+
+                var redirectContext = new CookieApplyRedirectContext(Context, Options, accessDeniedUri);
+                Options.Notifications.ApplyRedirect(redirectContext);
+            }
+            catch (Exception exception)
+            {
+                var exceptionContext = new CookieExceptionContext(Context, Options,
+                    CookieExceptionContext.ExceptionLocation.Forbidden, exception, ticket: null);
+                Options.Notifications.Exception(exceptionContext);
+                if (exceptionContext.Rethrow)
+                {
+                    throw;
+                }
+            }
+            return Task.FromResult(true);
         }
 
         protected override Task<bool> HandleUnauthorizedAsync([NotNull] ChallengeContext context)
