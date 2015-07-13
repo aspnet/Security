@@ -388,7 +388,7 @@ namespace Microsoft.AspNet.Authentication.Cookies
                     Request.Scheme +
                     "://" +
                     Request.Host +
-                    Request.PathBase +
+                    OriginalPathBase +
                     Options.AccessDeniedPath;
 
                 var redirectContext = new CookieApplyRedirectContext(Context, Options, accessDeniedUri);
@@ -420,7 +420,7 @@ namespace Microsoft.AspNet.Authentication.Cookies
                 if (string.IsNullOrEmpty(redirectUri))
                 {
                     redirectUri =
-                        Request.PathBase +
+                        OriginalPathBase +
                         Request.Path +
                         Request.QueryString;
                 }
@@ -429,7 +429,7 @@ namespace Microsoft.AspNet.Authentication.Cookies
                     Request.Scheme +
                     "://" +
                     Request.Host +
-                    Request.PathBase +
+                    OriginalPathBase +
                     Options.LoginPath +
                     QueryString.Create(Options.ReturnUrlParameter, redirectUri);
 

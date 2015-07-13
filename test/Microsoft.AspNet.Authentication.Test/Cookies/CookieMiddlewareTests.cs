@@ -701,6 +701,79 @@ namespace Microsoft.AspNet.Authentication.Cookies
             transaction2.Response.StatusCode.ShouldBe(HttpStatusCode.Unauthorized);
         }
 
+        [Fact]
+        public async Task MapWillNotAffectLogin()
+        {
+            var server = TestServer.Create(app =>
+                {
+                    app.UseCookieAuthentication(options => options.LoginPath = new PathString("/page"));
+                    app.Map("/login", signoutApp => signoutApp.Run(context => context.Authentication.ChallengeAsync("Cookies", new AuthenticationProperties() { RedirectUri = "/" })));
+                },
+                services => services.AddAuthentication());
+
+            var transaction = await server.SendAsync("http://example.com/login");
+
+            transaction.Response.StatusCode.ShouldBe(HttpStatusCode.Redirect);
+
+            var location = transaction.Response.Headers.Location;
+            location.LocalPath.ShouldBe("/page");
+            location.Query.ShouldBe("?ReturnUrl=%2F");
+        }
+
+        [Fact]
+        public async Task MapWillNotAffectAccessDenied()
+        {
+            var server = TestServer.Create(app =>
+                {
+                    app.UseCookieAuthentication(options => options.AccessDeniedPath = new PathString("/denied"));
+                    app.Map("/forbid", signoutApp => signoutApp.Run(context => context.Authentication.ForbidAsync("Cookies")));
+                },
+                services => services.AddAuthentication());
+            var transaction = await server.SendAsync("http://example.com/forbid");
+
+            transaction.Response.StatusCode.ShouldBe(HttpStatusCode.Redirect);
+
+            var location = transaction.Response.Headers.Location;
+            location.LocalPath.ShouldBe("/denied");
+        }
+
+        [Fact]
+        public async Task NestedMapWillNotAffectLogin()
+        {
+            var server = TestServer.Create(app =>
+                app.Map("/base", map =>
+                {
+                    map.UseCookieAuthentication(options => options.LoginPath = new PathString("/page"));
+                    map.Map("/login", signoutApp => signoutApp.Run(context => context.Authentication.ChallengeAsync("Cookies", new AuthenticationProperties() { RedirectUri = "/" })));
+                }),
+                services => services.AddAuthentication());
+            var transaction = await server.SendAsync("http://example.com/base/login");
+
+            transaction.Response.StatusCode.ShouldBe(HttpStatusCode.Redirect);
+
+            var location = transaction.Response.Headers.Location;
+            location.LocalPath.ShouldBe("/base/page");
+            location.Query.ShouldBe("?ReturnUrl=%2F");
+        }
+
+        [Fact]
+        public async Task NestedMapWillNotAffectAccessDenied()
+        {
+            var server = TestServer.Create(app =>
+                app.Map("/base", map =>
+                {
+                    map.UseCookieAuthentication(options => options.AccessDeniedPath = new PathString("/denied"));
+                    map.Map("/forbid", signoutApp => signoutApp.Run(context => context.Authentication.ForbidAsync("Cookies")));
+                }),
+                services => services.AddAuthentication());
+            var transaction = await server.SendAsync("http://example.com/base/forbid");
+
+            transaction.Response.StatusCode.ShouldBe(HttpStatusCode.Redirect);
+
+            var location = transaction.Response.Headers.Location;
+            location.LocalPath.ShouldBe("/base/denied");
+        }
+
         private static string FindClaimValue(Transaction transaction, string claimType)
         {
             var claim = transaction.ResponseElement.Elements("claim").SingleOrDefault(elt => elt.Attribute("type").Value == claimType);
