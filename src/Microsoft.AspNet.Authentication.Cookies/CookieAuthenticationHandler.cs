@@ -207,9 +207,7 @@ namespace Microsoft.AspNet.Authentication.Cookies
                     cookieValue,
                     cookieOptions);
 
-                Response.Headers.Set(HeaderNameCacheControl, HeaderValueNoCache);
-                Response.Headers.Set(HeaderNamePragma, HeaderValueNoCache);
-                Response.Headers.Set(HeaderNameExpires, HeaderValueMinusOne);
+                ApplyHeaders();
             }
             catch (Exception exception)
             {
@@ -349,19 +347,11 @@ namespace Microsoft.AspNet.Authentication.Cookies
             }
         }
 
-        private void ApplyHeaders(bool shouldRedirectToReturnUrl)
+        private void ApplyHeaders(bool shouldRedirectToReturnUrl = false)
         {
-            Response.Headers.Set(
-                HeaderNameCacheControl,
-                HeaderValueNoCache);
-
-            Response.Headers.Set(
-                HeaderNamePragma,
-                HeaderValueNoCache);
-
-            Response.Headers.Set(
-                HeaderNameExpires,
-                HeaderValueMinusOne);
+            Response.Headers.Set(HeaderNameCacheControl, HeaderValueNoCache);
+            Response.Headers.Set(HeaderNamePragma, HeaderValueNoCache);
+            Response.Headers.Set(HeaderNameExpires, HeaderValueMinusOne);
 
             if (shouldRedirectToReturnUrl && Response.StatusCode == 200)
             {
