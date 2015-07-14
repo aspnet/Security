@@ -3,7 +3,6 @@
 
 
 using System;
-using System.Diagnostics;
 using System.Linq;
 using System.Security.Claims;
 using System.Threading.Tasks;
@@ -420,21 +419,11 @@ namespace Microsoft.AspNet.Authentication.Cookies
             {
                 if (string.IsNullOrEmpty(redirectUri))
                 {
-                    redirectUri =
-                        OriginalPathBase +
-                        Request.Path +
-                        Request.QueryString;
+                    redirectUri = OriginalPathBase + Request.Path + Request.QueryString;
                 }
 
-                var loginUri =
-                    Request.Scheme +
-                    "://" +
-                    Request.Host +
-                    OriginalPathBase +
-                    Options.LoginPath +
-                    QueryString.Create(Options.ReturnUrlParameter, redirectUri);
-
-                var redirectContext = new CookieApplyRedirectContext(Context, Options, loginUri);
+                var loginUri = Options.LoginPath + QueryString.Create(Options.ReturnUrlParameter, redirectUri);
+                var redirectContext = new CookieApplyRedirectContext(Context, Options, BuildRedirectUri(loginUri));
                 Options.Notifications.ApplyRedirect(redirectContext);
             }
             catch (Exception exception)
