@@ -702,7 +702,7 @@ namespace Microsoft.AspNet.Authentication.Cookies
         }
 
         [Fact]
-        public async Task MapWillNotAffectLogin()
+        public async Task MapWillNotAffectChallenge()
         {
             var server = TestServer.Create(app =>
                 {
@@ -718,6 +718,76 @@ namespace Microsoft.AspNet.Authentication.Cookies
             var location = transaction.Response.Headers.Location;
             location.LocalPath.ShouldBe("/page");
             location.Query.ShouldBe("?ReturnUrl=%2F");
+        }
+
+        [Fact]
+        public async Task MapWithSignInOnlyRedirectToReturnUrlOnLoginPath()
+        {
+            var server = TestServer.Create(app =>
+            {
+                app.UseCookieAuthentication(options => options.LoginPath = new PathString("/login"));
+                app.Map("/notlogin", signoutApp => signoutApp.Run(context => context.Authentication.SignInAsync("Cookies", 
+                    new ClaimsPrincipal())));
+            },
+                services => services.AddAuthentication());
+
+            var transaction = await server.SendAsync("http://example.com/notlogin?ReturnUrl=%2Fpage");
+            transaction.Response.StatusCode.ShouldBe(HttpStatusCode.OK);
+            transaction.SetCookie.ShouldNotBe(null);
+        }
+
+        [Fact]
+        public async Task MapWillNotAffectSignInRedirectToReturnUrl()
+        {
+            var server = TestServer.Create(app =>
+            {
+                app.UseCookieAuthentication(options => options.LoginPath = new PathString("/login"));
+                app.Map("/login", signoutApp => signoutApp.Run(context => context.Authentication.SignInAsync("Cookies",
+                    new ClaimsPrincipal())));
+            },
+            services => services.AddAuthentication());
+
+            var transaction = await server.SendAsync("http://example.com/login?ReturnUrl=%2Fpage");
+
+            transaction.Response.StatusCode.ShouldBe(HttpStatusCode.Redirect);
+            transaction.SetCookie.ShouldNotBe(null);
+
+            var location = transaction.Response.Headers.Location;
+            location.OriginalString.ShouldBe("/page");
+        }
+
+        [Fact]
+        public async Task MapWithSignOutOnlyRedirectToReturnUrlOnLogoutPath()
+        {
+            var server = TestServer.Create(app =>
+            {
+                app.UseCookieAuthentication(options => options.LogoutPath = new PathString("/logout"));
+                app.Map("/notlogout", signoutApp => signoutApp.Run(context => context.Authentication.SignOutAsync("Cookies")));
+            },
+            services => services.AddAuthentication());
+
+            var transaction = await server.SendAsync("http://example.com/notlogout?ReturnUrl=%2Fpage");
+            transaction.Response.StatusCode.ShouldBe(HttpStatusCode.OK);
+            transaction.SetCookie[0].ShouldContain(".AspNet.Cookies=; expires=");
+        }
+
+        [Fact]
+        public async Task MapWillNotAffectSignOutRedirectToReturnUrl()
+        {
+            var server = TestServer.Create(app =>
+            {
+                app.UseCookieAuthentication(options => options.LogoutPath = new PathString("/logout"));
+                app.Map("/logout", signoutApp => signoutApp.Run(context => context.Authentication.SignOutAsync("Cookies")));
+            },
+            services => services.AddAuthentication());
+
+            var transaction = await server.SendAsync("http://example.com/logout?ReturnUrl=%2Fpage");
+
+            transaction.Response.StatusCode.ShouldBe(HttpStatusCode.Redirect);
+            transaction.SetCookie[0].ShouldContain(".AspNet.Cookies=; expires=");
+
+            var location = transaction.Response.Headers.Location;
+            location.OriginalString.ShouldBe("/page");
         }
 
         [Fact]

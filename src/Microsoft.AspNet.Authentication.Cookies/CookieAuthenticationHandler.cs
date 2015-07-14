@@ -3,6 +3,7 @@
 
 
 using System;
+using System.Diagnostics;
 using System.Linq;
 using System.Security.Claims;
 using System.Threading.Tasks;
@@ -289,7 +290,7 @@ namespace Microsoft.AspNet.Authentication.Cookies
 
                 Options.Notifications.ResponseSignedIn(signedInContext);
 
-                var shouldLoginRedirect = Options.LoginPath.HasValue && Request.Path == Options.LoginPath;
+                var shouldLoginRedirect = Options.LoginPath.HasValue && OriginalPath == Options.LoginPath;
                 ApplyHeaders(shouldLoginRedirect);
             }
             catch (Exception exception)
@@ -327,7 +328,7 @@ namespace Microsoft.AspNet.Authentication.Cookies
                     Options.CookieName,
                     context.CookieOptions);
 
-                var shouldLogoutRedirect = Options.LogoutPath.HasValue && Request.Path == Options.LogoutPath;
+                var shouldLogoutRedirect = Options.LogoutPath.HasValue && OriginalPath == Options.LogoutPath;
                 ApplyHeaders(shouldLogoutRedirect);
             }
             catch (Exception exception)

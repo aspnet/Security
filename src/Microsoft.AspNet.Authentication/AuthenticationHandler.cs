@@ -38,6 +38,8 @@ namespace Microsoft.AspNet.Authentication
 
         protected PathString OriginalPathBase { get; private set; }
 
+        protected PathString OriginalPath { get; private set; }
+
         protected ILogger Logger { get; private set; }
 
         protected IUrlEncoder UrlEncoder { get; private set; }
@@ -62,6 +64,7 @@ namespace Microsoft.AspNet.Authentication
             _baseOptions = options;
             Context = context;
             OriginalPathBase = Request.PathBase;
+            OriginalPath = Request.Path;
             Logger = logger;
             UrlEncoder = encoder;
 
