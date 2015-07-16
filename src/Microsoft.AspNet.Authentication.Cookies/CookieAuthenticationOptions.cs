@@ -149,7 +149,7 @@ namespace Microsoft.AspNet.Authentication.Cookies
         public ICookieManager CookieManager { get; set; }
 
         /// <summary>
-        /// If specified, this protected will be used instead of creating a new one
+        /// If specified, this protector will be used instead of creating a new one
         /// </summary>
         public IDataProtector DataProtector { get; set; }
 
