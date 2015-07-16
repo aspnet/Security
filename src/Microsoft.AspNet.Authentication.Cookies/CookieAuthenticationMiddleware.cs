@@ -32,8 +32,8 @@ namespace Microsoft.AspNet.Authentication.Cookies
             }
             if (Options.TicketDataFormat == null)
             {
-                var dataProtector = dataProtectionProvider.CreateProtector(
-                    typeof(CookieAuthenticationMiddleware).FullName, Options.AuthenticationScheme, "v2");
+                var dataProtector = Options.DataProtector ??
+                    dataProtectionProvider.CreateProtector(typeof(CookieAuthenticationMiddleware).FullName, Options.AuthenticationScheme, "v2");
                 Options.TicketDataFormat = new TicketDataFormat(dataProtector);
             }
             if (Options.CookieManager == null)

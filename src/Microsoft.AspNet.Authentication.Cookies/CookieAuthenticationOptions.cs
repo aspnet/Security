@@ -3,6 +3,7 @@
 
 using System;
 using System.Diagnostics.CodeAnalysis;
+using Microsoft.AspNet.DataProtection;
 using Microsoft.AspNet.Http;
 using Microsoft.Framework.Internal;
 
@@ -146,6 +147,11 @@ namespace Microsoft.AspNet.Authentication.Cookies
         /// ChunkingCookieManager will be used by default.
         /// </summary>
         public ICookieManager CookieManager { get; set; }
+
+        /// <summary>
+        /// If specified, this protected will be used instead of creating a new one
+        /// </summary>
+        public IDataProtector DataProtector { get; set; }
 
         /// <summary>
         /// An optional container in which to store the identity across requests. When used, only a session identifier is sent
