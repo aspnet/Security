@@ -26,7 +26,7 @@ namespace Microsoft.AspNet.Authentication.Tests.OpenIdConnect
             ILoggerFactory loggerFactory,
             IUrlEncoder encoder,
             IServiceProvider services,
-            IOptions<ExternalAuthenticationOptions> externalOptions,
+            IOptions<SharedAuthenticationOptions> externalOptions,
             IOptions<OpenIdConnectAuthenticationOptions> options,
             ConfigureOptions<OpenIdConnectAuthenticationOptions> configureOptions = null,
             OpenIdConnectAuthenticationHandler handler = null
