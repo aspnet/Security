@@ -4,7 +4,6 @@
 using System;
 using Microsoft.AspNet.Authentication.Twitter;
 using Microsoft.Framework.Internal;
-using Microsoft.Framework.OptionsModel;
 
 namespace Microsoft.AspNet.Builder
 {
@@ -13,13 +12,28 @@ namespace Microsoft.AspNet.Builder
     /// </summary>
     public static class TwitterAppBuilderExtensions
     {
-        public static IApplicationBuilder UseTwitterAuthentication([NotNull] this IApplicationBuilder app, Action<TwitterAuthenticationOptions> configureOptions = null, string optionsName = "")
+        /// <summary>
+        /// Authenticate users using Twitter.
+        /// </summary>
+        /// <param name="app">The <see cref="IApplicationBuilder"/> passed to the configure method.</param>
+        /// <param name="configureOptions">configures the options for the middleware</param>
+        /// <returns>The updated <see cref="IApplicationBuilder"/>.</returns>
+        public static IApplicationBuilder UseTwitterAuthentication([NotNull] this IApplicationBuilder app, [NotNull] Action<TwitterAuthenticationOptions> configureOptions)
         {
-            return app.UseMiddleware<TwitterAuthenticationMiddleware>(
-                 new ConfigureOptions<TwitterAuthenticationOptions>(configureOptions ?? (o => { }))
-                 {
-                     Name = optionsName
-                 });
+            var options = new TwitterAuthenticationOptions();
+            configureOptions(options);
+            return app.UseTwitterAuthentication(options);
+        }
+
+        /// <summary>
+        /// Authenticate users using Twitter.
+        /// </summary>
+        /// <param name="app">The <see cref="IApplicationBuilder"/> passed to the configure method.</param>
+        /// <param name="options">the options for the middleware</param>
+        /// <returns>The updated <see cref="IApplicationBuilder"/>.</returns>
+        public static IApplicationBuilder UseTwitterAuthentication([NotNull] this IApplicationBuilder app, [NotNull] TwitterAuthenticationOptions options)
+        {
+            return app.UseMiddleware<TwitterAuthenticationMiddleware>(options);
         }
     }
 }

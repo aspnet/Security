@@ -61,7 +61,9 @@ namespace Microsoft.AspNet.Authentication.Tests.OpenIdConnect
         public async Task AuthenticateCoreState(Action<OpenIdConnectAuthenticationOptions> action, OpenIdConnectMessage message)
         {
             var handler = new OpenIdConnectAuthenticationHandlerForTestingAuthenticate();
-            var server = CreateServer(new ConfigureOptions<OpenIdConnectAuthenticationOptions>(action), UrlEncoder.Default, handler);
+            var options = new OpenIdConnectAuthenticationOptions();
+            action(options);
+            var server = CreateServer(options, UrlEncoder.Default, handler);
             await server.CreateClient().PostAsync("http://localhost", new FormUrlEncodedContent(message.Parameters.Where(pair => pair.Value != null)));
         }
 
@@ -126,7 +128,9 @@ namespace Microsoft.AspNet.Authentication.Tests.OpenIdConnect
             var expectedLogs = LoggingUtilities.PopulateLogEntries(expectedLogIndexes);
             var handler = new OpenIdConnectAuthenticationHandlerForTestingAuthenticate();
             var loggerFactory = new InMemoryLoggerFactory(logLevel);
-            var server = CreateServer(new ConfigureOptions<OpenIdConnectAuthenticationOptions>(action), UrlEncoder.Default, loggerFactory, handler);
+            var options = new OpenIdConnectAuthenticationOptions();
+            action(options);
+            var server = CreateServer(options, UrlEncoder.Default, loggerFactory, handler);
 
             await server.CreateClient().PostAsync("http://localhost", new FormUrlEncodedContent(message.Parameters));
             LoggingUtilities.CheckLogs(loggerFactory.Logger.Logs, expectedLogs, errors);
@@ -535,7 +539,7 @@ namespace Microsoft.AspNet.Authentication.Tests.OpenIdConnect
 
         private static Task EmptyTask() { return Task.FromResult(0); }
 
-        private static TestServer CreateServer(ConfigureOptions<OpenIdConnectAuthenticationOptions> options, IUrlEncoder encoder, OpenIdConnectAuthenticationHandler handler = null)
+        private static TestServer CreateServer(OpenIdConnectAuthenticationOptions options, IUrlEncoder encoder, OpenIdConnectAuthenticationHandler handler = null)
         {
             return TestServer.Create(
                 app =>
@@ -554,7 +558,7 @@ namespace Microsoft.AspNet.Authentication.Tests.OpenIdConnect
             );
         }
 
-        private static TestServer CreateServer(ConfigureOptions<OpenIdConnectAuthenticationOptions> configureOptions, IUrlEncoder encoder, ILoggerFactory loggerFactory, OpenIdConnectAuthenticationHandler handler = null)
+        private static TestServer CreateServer(OpenIdConnectAuthenticationOptions configureOptions, IUrlEncoder encoder, ILoggerFactory loggerFactory, OpenIdConnectAuthenticationHandler handler = null)
         {
             return TestServer.Create(
                 app =>

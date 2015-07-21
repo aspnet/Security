@@ -53,10 +53,5 @@ namespace Microsoft.AspNet.Authentication.Tests.OpenIdConnect
             claimsIdentity.AddClaim(new Claim("test claim", "test value"));
             return new AuthenticationTicket(new ClaimsPrincipal(claimsIdentity), ticket.Properties, ticket.AuthenticationScheme);
         }
-
-        //public override bool ShouldHandleScheme(string authenticationScheme)
-        //{
-        //    return true;
-        //}
     }
 }
