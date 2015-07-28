@@ -27,10 +27,7 @@ namespace Microsoft.AspNet.Builder
         public static IApplicationBuilder UseOAuthBearerAuthentication([NotNull] this IApplicationBuilder app, Action<OAuthBearerAuthenticationOptions> configureOptions = null, string optionsName = "")
         {
             return app.UseMiddleware<OAuthBearerAuthenticationMiddleware>(
-                new ConfigureOptions<OAuthBearerAuthenticationOptions>(configureOptions ?? (o => { }))
-                {
-                    Name = optionsName
-                });
+                new ConfigureOptions<OAuthBearerAuthenticationOptions>(configureOptions ?? (o => { })));
         }
     }
 }
