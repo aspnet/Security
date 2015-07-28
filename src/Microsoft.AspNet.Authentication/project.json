@@ -1,25 +1,31 @@
 {
-    "version": "1.0.0-*",
+    "version": "1.0.0-beta6",
     "description": "ASP.NET 5 common types used by the various authentication middleware.",
     "repository": {
         "type": "git",
         "url": "git://github.com/aspnet/security"
     },
     "dependencies": {
-        "Microsoft.AspNet.DataProtection": "1.0.0-*",
-        "Microsoft.AspNet.Http": "1.0.0-*",
-        "Microsoft.AspNet.Http.Extensions": "1.0.0-*",
-        "Microsoft.Framework.Logging.Abstractions": "1.0.0-*",
-        "Microsoft.Framework.NotNullAttribute.Sources": { "type": "build", "version": "1.0.0-*" },
-        "Microsoft.Framework.SecurityHelper.Sources": { "type": "build", "version": "1.0.0-*" },
-        "Microsoft.Framework.OptionsModel": "1.0.0-*",
-        "Microsoft.Framework.WebEncoders": "1.0.0-*"
+        "Microsoft.AspNet.DataProtection": "1.0.0-beta6",
+        "Microsoft.AspNet.Http": "1.0.0-beta6",
+        "Microsoft.AspNet.Http.Extensions": "1.0.0-beta6",
+        "Microsoft.Framework.Logging.Abstractions": "1.0.0-beta6",
+        "Microsoft.Framework.NotNullAttribute.Sources": {
+            "type": "build",
+            "version": "1.0.0-beta6"
+        },
+        "Microsoft.Framework.SecurityHelper.Sources": {
+            "type": "build",
+            "version": "1.0.0-beta6"
+        },
+        "Microsoft.Framework.OptionsModel": "1.0.0-beta6",
+        "Microsoft.Framework.WebEncoders": "1.0.0-beta6"
     },
     "frameworks": {
-        "dnx451": { },
+        "dnx451": {},
         "dnxcore50": {
             "dependencies": {
-                "System.Security.Cryptography.RandomNumberGenerator": "4.0.0-beta-*"
+                "System.Security.Cryptography.RandomNumberGenerator": "4.0.0-beta-23109"
             }
         }
     }

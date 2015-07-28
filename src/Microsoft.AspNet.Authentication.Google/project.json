@@ -1,16 +1,19 @@
 {
-    "version": "1.0.0-*",
+    "version": "1.0.0-beta6",
     "description": "ASP.NET 5 contains middlewares to support Google's OpenId and OAuth 2.0 authentication workflows.",
     "repository": {
         "type": "git",
         "url": "git://github.com/aspnet/security"
     },
     "dependencies": {
-        "Microsoft.AspNet.Authentication.OAuth": "1.0.0-*",
-        "Microsoft.Framework.NotNullAttribute.Sources": { "type": "build", "version": "1.0.0-*" }
+        "Microsoft.AspNet.Authentication.OAuth": "1.0.0-beta6",
+        "Microsoft.Framework.NotNullAttribute.Sources": {
+            "type": "build",
+            "version": "1.0.0-beta6"
+        }
     },
     "frameworks": {
-        "dnx451": { },
-        "dnxcore50": { }
+        "dnx451": {},
+        "dnxcore50": {}
     }
 }
