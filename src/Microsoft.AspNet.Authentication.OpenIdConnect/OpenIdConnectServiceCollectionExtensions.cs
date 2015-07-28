@@ -15,22 +15,12 @@ namespace Microsoft.Framework.DependencyInjection
     {
         public static IServiceCollection ConfigureOpenIdConnectAuthentication([NotNull] this IServiceCollection services, [NotNull] Action<OpenIdConnectAuthenticationOptions> configure)
         {
-            return ConfigureOpenIdConnectAuthentication(services, configure, null);
-        }
-
-        public static IServiceCollection ConfigureOpenIdConnectAuthentication([NotNull] this IServiceCollection services, [NotNull] Action<OpenIdConnectAuthenticationOptions> configure, string optionsName)
-        {
-            return services.Configure(configure, optionsName);
+            return services.Configure(configure);
         }
 
         public static IServiceCollection ConfigureOpenIdConnectAuthentication([NotNull] this IServiceCollection services, [NotNull] IConfiguration config)
         {
-            return ConfigureOpenIdConnectAuthentication(services, config, null);
-        }
-
-        public static IServiceCollection ConfigureOpenIdConnectAuthentication([NotNull] this IServiceCollection services, [NotNull] IConfiguration config, string optionsName)
-        {
-            return services.Configure<OpenIdConnectAuthenticationOptions>(config, optionsName);
+            return services.Configure<OpenIdConnectAuthenticationOptions>(config);
         }
     }
 }

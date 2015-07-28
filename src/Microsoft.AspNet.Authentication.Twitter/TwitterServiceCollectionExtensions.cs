@@ -15,22 +15,12 @@ namespace Microsoft.Framework.DependencyInjection
     {
         public static IServiceCollection ConfigureTwitterAuthentication([NotNull] this IServiceCollection services, [NotNull] Action<TwitterAuthenticationOptions> configure)
         {
-            return services.ConfigureTwitterAuthentication(configure, optionsName: "");
-        }
-
-        public static IServiceCollection ConfigureTwitterAuthentication([NotNull] this IServiceCollection services, [NotNull] Action<TwitterAuthenticationOptions> configure, string optionsName)
-        {
-            return services.Configure(configure, optionsName);
+            return services.Configure(configure);
         }
 
         public static IServiceCollection ConfigureTwitterAuthentication([NotNull] this IServiceCollection services, [NotNull] IConfiguration config)
         {
-            return services.ConfigureTwitterAuthentication(config, optionsName: "");
-        }
-
-        public static IServiceCollection ConfigureTwitterAuthentication([NotNull] this IServiceCollection services, [NotNull] IConfiguration config, string optionsName)
-        {
-            return services.Configure<TwitterAuthenticationOptions>(config, optionsName);
+            return services.Configure<TwitterAuthenticationOptions>(config);
         }
     }
 }
