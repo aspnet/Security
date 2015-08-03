@@ -15,7 +15,7 @@ namespace Microsoft.Framework.DependencyInjection
     {
         public static IServiceCollection ConfigureCookieAuthentication([NotNull] this IServiceCollection services, [NotNull] Action<CookieAuthenticationOptions> configure)
         {
-            return services.ConfigureCookieAuthentication(configure);
+            return services.Configure(configure);
         }
 
         public static IServiceCollection ConfigureCookieAuthentication([NotNull] this IServiceCollection services, [NotNull] IConfiguration config)
