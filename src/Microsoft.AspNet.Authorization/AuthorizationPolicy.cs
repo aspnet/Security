@@ -46,7 +46,7 @@ namespace Microsoft.AspNet.Authorization
             {
                 any = true;
                 var useDefaultPolicy = true;
-                if (!string.IsNullOrWhiteSpace(authorizeAttribute.Policy))
+                if (!string.IsNullOrEmpty(authorizeAttribute.Policy))
                 {
                     var policy = options.GetPolicy(authorizeAttribute.Policy);
                     if (policy == null)
