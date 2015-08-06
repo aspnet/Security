@@ -18,20 +18,11 @@ namespace Microsoft.AspNet.Authentication
 
         protected AuthenticationMiddleware(
             [NotNull] RequestDelegate next, 
-            [NotNull] IOptions<TOptions> options, 
             [NotNull] ILoggerFactory loggerFactory,
             [NotNull] IUrlEncoder encoder,
-            ConfigureOptions<TOptions> configureOptions)
+            [NotNull] TOptions options)
         {
-            if (configureOptions != null)
-            {
-                Options = options.GetNamedOptions(configureOptions.Name);
-                configureOptions.Configure(Options, configureOptions.Name);
-            }
-            else
-            {
-                Options = options.Options;
-            }
+            Options = options;
             Logger = loggerFactory.CreateLogger(this.GetType().FullName);
             UrlEncoder = encoder;
 

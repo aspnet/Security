@@ -32,9 +32,8 @@ namespace Microsoft.AspNet.Authentication.MicrosoftAccount
             [NotNull] ILoggerFactory loggerFactory,
             [NotNull] IUrlEncoder encoder,
             [NotNull] IOptions<SharedAuthenticationOptions> sharedOptions,
-            [NotNull] IOptions<MicrosoftAccountAuthenticationOptions> options,
-            ConfigureOptions<MicrosoftAccountAuthenticationOptions> configureOptions = null)
-            : base(next, dataProtectionProvider, loggerFactory, encoder, sharedOptions, options, configureOptions)
+            [NotNull] MicrosoftAccountAuthenticationOptions options)
+            : base(next, dataProtectionProvider, loggerFactory, encoder, sharedOptions, options)
         {
             if (Options.Scope.Count == 0)
             {

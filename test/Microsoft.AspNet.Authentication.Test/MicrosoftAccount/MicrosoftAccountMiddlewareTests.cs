@@ -215,14 +215,7 @@ namespace Microsoft.AspNet.Authentication.Tests.MicrosoftAccount
                     }
                 });
             },
-            services =>
-            {
-                services.AddAuthentication();
-                services.Configure<SharedAuthenticationOptions>(options =>
-                {
-                    options.SignInScheme = TestExtensions.CookieAuthenticationScheme;
-                });
-            });
+            services => services.AddAuthentication(options => options.SignInScheme = TestExtensions.CookieAuthenticationScheme));
         }
 
         private static HttpResponseMessage ReturnJsonResponse(object content)

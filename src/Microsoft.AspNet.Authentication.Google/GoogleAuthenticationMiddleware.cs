@@ -34,9 +34,8 @@ namespace Microsoft.AspNet.Authentication.Google
             [NotNull] ILoggerFactory loggerFactory,
             [NotNull] IUrlEncoder encoder,
             [NotNull] IOptions<SharedAuthenticationOptions> sharedOptions,
-            [NotNull] IOptions<GoogleAuthenticationOptions> options,
-            ConfigureOptions<GoogleAuthenticationOptions> configureOptions = null)
-            : base(next, dataProtectionProvider, loggerFactory, encoder, sharedOptions, options, configureOptions)
+            [NotNull] GoogleAuthenticationOptions options)
+            : base(next, dataProtectionProvider, loggerFactory, encoder, sharedOptions, options)
         {
             if (Options.Scope.Count == 0)
             {

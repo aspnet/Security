@@ -38,15 +38,14 @@ namespace Microsoft.AspNet.Authentication.Twitter
             [NotNull] ILoggerFactory loggerFactory,
             [NotNull] IUrlEncoder encoder,
             [NotNull] IOptions<SharedAuthenticationOptions> sharedOptions,
-            [NotNull] IOptions<TwitterAuthenticationOptions> options,
-            ConfigureOptions<TwitterAuthenticationOptions> configureOptions = null)
-            : base(next, options, loggerFactory, encoder, configureOptions)
+            [NotNull] TwitterAuthenticationOptions options)
+            : base(next, loggerFactory, encoder, options)
         {
-            if (string.IsNullOrWhiteSpace(Options.ConsumerSecret))
+            if (string.IsNullOrEmpty(Options.ConsumerSecret))
             {
                 throw new ArgumentException(string.Format(CultureInfo.CurrentCulture, Resources.Exception_OptionMustBeProvided, nameof(Options.ConsumerSecret)));
             }
-            if (string.IsNullOrWhiteSpace(Options.ConsumerKey))
+            if (string.IsNullOrEmpty(Options.ConsumerKey))
             {
                 throw new ArgumentException(string.Format(CultureInfo.CurrentCulture, Resources.Exception_OptionMustBeProvided, nameof(Options.ConsumerKey)));
             }

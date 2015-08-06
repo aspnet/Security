@@ -17,16 +17,24 @@ namespace Microsoft.AspNet.Builder
         /// Authenticate users using Google OAuth 2.0.
         /// </summary>
         /// <param name="app">The <see cref="IApplicationBuilder"/> passed to the configure method.</param>
-        /// <param name="configureOptions">Used to configure Middleware options.</param>
-        /// <param name="optionsName">Name of the options instance to be used</param>
+        /// <param name="configureOptions">configures the options for the middleware</param>
         /// <returns>The updated <see cref="IApplicationBuilder"/>.</returns>
-        public static IApplicationBuilder UseGoogleAuthentication([NotNull] this IApplicationBuilder app, Action<GoogleAuthenticationOptions> configureOptions = null, string optionsName = "")
+        public static IApplicationBuilder UseGoogleAuthentication([NotNull] this IApplicationBuilder app, [NotNull] Action<GoogleAuthenticationOptions> configureOptions)
         {
-            return app.UseMiddleware<GoogleAuthenticationMiddleware>(
-                 new ConfigureOptions<GoogleAuthenticationOptions>(configureOptions ?? (o => { }))
-                 {
-                     Name = optionsName
-                 });
+            var options = new GoogleAuthenticationOptions();
+            configureOptions(options);
+            return app.UseGoogleAuthentication(options);
+        }
+
+        /// <summary>
+        /// Authenticate users using Google OAuth 2.0.
+        /// </summary>
+        /// <param name="app">The <see cref="IApplicationBuilder"/> passed to the configure method.</param>
+        /// <param name="options">the options for the middleware</param>
+        /// <returns>The updated <see cref="IApplicationBuilder"/>.</returns>
+        public static IApplicationBuilder UseGoogleAuthentication([NotNull] this IApplicationBuilder app, [NotNull] GoogleAuthenticationOptions options)
+        {
+            return app.UseMiddleware<GoogleAuthenticationMiddleware>(options);
         }
     }
 }

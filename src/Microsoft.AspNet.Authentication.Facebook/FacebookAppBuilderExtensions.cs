@@ -4,7 +4,6 @@
 using System;
 using Microsoft.AspNet.Authentication.Facebook;
 using Microsoft.Framework.Internal;
-using Microsoft.Framework.OptionsModel;
 
 namespace Microsoft.AspNet.Builder
 {
@@ -17,14 +16,24 @@ namespace Microsoft.AspNet.Builder
         /// Authenticate users using Facebook.
         /// </summary>
         /// <param name="app">The <see cref="IApplicationBuilder"/> passed to the configure method.</param>
+        /// <param name="configureOptions">configures the options for the middleware</param>
         /// <returns>The updated <see cref="IApplicationBuilder"/>.</returns>
-        public static IApplicationBuilder UseFacebookAuthentication([NotNull] this IApplicationBuilder app, Action<FacebookAuthenticationOptions> configureOptions = null, string optionsName = "")
+        public static IApplicationBuilder UseFacebookAuthentication([NotNull] this IApplicationBuilder app, [NotNull] Action<FacebookAuthenticationOptions> configureOptions)
         {
-            return app.UseMiddleware<FacebookAuthenticationMiddleware>(
-                 new ConfigureOptions<FacebookAuthenticationOptions>(configureOptions ?? (o => { }))
-                 {
-                     Name = optionsName
-                 });
+            var options = new FacebookAuthenticationOptions();
+            configureOptions(options);
+            return app.UseFacebookAuthentication(options);
+        }
+
+        /// <summary>
+        /// Authenticate users using Facebook.
+        /// </summary>
+        /// <param name="app">The <see cref="IApplicationBuilder"/> passed to the configure method.</param>
+        /// <param name="options">the options for the middleware</param>
+        /// <returns>The updated <see cref="IApplicationBuilder"/>.</returns>
+        public static IApplicationBuilder UseFacebookAuthentication([NotNull] this IApplicationBuilder app, [NotNull] FacebookAuthenticationOptions options)
+        {
+            return app.UseMiddleware<FacebookAuthenticationMiddleware>(options);
         }
     }
 }

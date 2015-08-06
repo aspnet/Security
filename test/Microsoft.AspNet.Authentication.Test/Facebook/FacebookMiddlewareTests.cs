@@ -30,13 +30,7 @@ namespace Microsoft.AspNet.Authentication.Facebook
             var server = CreateServer(
                 app =>
                 {
-                    app.UseFacebookAuthentication();
-                    app.UseCookieAuthentication();
-                },
-                services =>
-                {
-                    services.AddAuthentication();
-                    services.ConfigureFacebookAuthentication(options =>
+                    app.UseFacebookAuthentication(options =>
                     {
                         options.AppId = "Test App Id";
                         options.AppSecret = "Test App Secret";
@@ -48,16 +42,13 @@ namespace Microsoft.AspNet.Authentication.Facebook
                             }
                         };
                     });
-                    services.ConfigureCookieAuthentication(options =>
+                    app.UseCookieAuthentication(options =>
                     {
                         options.AuthenticationScheme = "External";
                         options.AutomaticAuthentication = true;
                     });
-                    services.Configure<SharedAuthenticationOptions>(options =>
-                    {
-                        options.SignInScheme = "External";
-                    });
                 },
+                services => services.AddAuthentication(options => options.SignInScheme = TestExtensions.CookieAuthenticationScheme),
                 context =>
                 {
                     // REVIEW: Gross.
@@ -75,19 +66,15 @@ namespace Microsoft.AspNet.Authentication.Facebook
         {
             var server = CreateServer(app =>
                 app.Map("/base", map => {
-                    map.UseFacebookAuthentication();
-                    map.Map("/login", signoutApp => signoutApp.Run(context => context.Authentication.ChallengeAsync("Facebook", new AuthenticationProperties() { RedirectUri = "/" })));
-                }),
-                services =>
-                {
-                    services.AddAuthentication();
-                    services.ConfigureFacebookAuthentication(options =>
+                    map.UseFacebookAuthentication(options =>
                     {
                         options.AppId = "Test App Id";
                         options.AppSecret = "Test App Secret";
                         options.SignInScheme = "External";
                     });
-                },
+                    map.Map("/login", signoutApp => signoutApp.Run(context => context.Authentication.ChallengeAsync("Facebook", new AuthenticationProperties() { RedirectUri = "/" })));
+                }),
+                services => services.AddAuthentication(),
                 handler: null);
             var transaction = await server.SendAsync("http://example.com/base/login");
             transaction.Response.StatusCode.ShouldBe(HttpStatusCode.Redirect);
@@ -106,19 +93,15 @@ namespace Microsoft.AspNet.Authentication.Facebook
             var server = CreateServer(
                 app =>
                 {
-                    app.UseFacebookAuthentication();
-                    app.Map("/login", signoutApp => signoutApp.Run(context => context.Authentication.ChallengeAsync("Facebook", new AuthenticationProperties() { RedirectUri = "/" })));
-                },
-                services =>
-                {
-                    services.AddAuthentication();
-                    services.ConfigureFacebookAuthentication(options =>
+                    app.UseFacebookAuthentication(options =>
                     {
                         options.AppId = "Test App Id";
                         options.AppSecret = "Test App Secret";
                         options.SignInScheme = "External";
                     });
+                    app.Map("/login", signoutApp => signoutApp.Run(context => context.Authentication.ChallengeAsync("Facebook", new AuthenticationProperties() { RedirectUri = "/" })));
                 },
+                services => services.AddAuthentication(),
                 handler: null);
             var transaction = await server.SendAsync("http://example.com/login");
             transaction.Response.StatusCode.ShouldBe(HttpStatusCode.Redirect);
@@ -137,26 +120,17 @@ namespace Microsoft.AspNet.Authentication.Facebook
             var server = CreateServer(
                 app =>
                 {
-                    app.UseFacebookAuthentication();
-                    app.UseCookieAuthentication();
-                },
-                services =>
-                {
-                    services.AddAuthentication();
-                    services.ConfigureFacebookAuthentication(options =>
+                    app.UseFacebookAuthentication(options =>
                     {
                         options.AppId = "Test App Id";
                         options.AppSecret = "Test App Secret";
                     });
-                    services.ConfigureCookieAuthentication(options =>
+                    app.UseCookieAuthentication(options =>
                     {
                         options.AuthenticationScheme = "External";
                     });
-                    services.Configure<SharedAuthenticationOptions>(options =>
-                    {
-                        options.SignInScheme = "External";
-                    });
                 },
+                services => services.AddAuthentication(options => options.SignInScheme = TestExtensions.CookieAuthenticationScheme),
                 context =>
                 {
                     // REVIEW: gross

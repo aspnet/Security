@@ -15,22 +15,36 @@ namespace Microsoft.AspNet.Builder
     {
         /// <summary>
         /// Adds Bearer token processing to an HTTP application pipeline. This middleware understands appropriately
-        /// formatted and secured tokens which appear in the request header. If the Options.AuthenticationMode is Active, the
-        /// claims within the bearer token are added to the current request's IPrincipal User. If the Options.AuthenticationMode 
-        /// is Passive, then the current request is not modified, but IAuthenticationManager AuthenticateAsync may be used at
+        /// formatted and secured tokens which appear in the request header. If the Options.AutomaticAuthentication is true, the
+        /// claims within the bearer token are added to the current request's IPrincipal User. If the Options.AutomaticAuthentication 
+        /// is false, then the current request is not modified, but IAuthenticationManager AuthenticateAsync may be used at
+        /// any time to obtain the claims from the request's bearer token.
+        /// See also http://tools.ietf.org/html/rfc6749
+        /// </summary>
+        /// <param name="app">The application builder</param>
+        /// <param name="configureOptions">Configures the options which control the processing of the bearer header.</param>
+        /// <returns>The application builder</returns>
+        public static IApplicationBuilder UseOAuthBearerAuthentication([NotNull] this IApplicationBuilder app, [NotNull] Action<OAuthBearerAuthenticationOptions> configureOptions)
+        {
+            var options = new OAuthBearerAuthenticationOptions();
+            configureOptions(options);
+            return app.UseOAuthBearerAuthentication(options);
+        }
+
+        /// <summary>
+        /// Adds Bearer token processing to an HTTP application pipeline. This middleware understands appropriately
+        /// formatted and secured tokens which appear in the request header. If the Options.AutomaticAuthentication is true, the
+        /// claims within the bearer token are added to the current request's IPrincipal User. If the Options.AutomaticAuthentication 
+        /// is false, then the current request is not modified, but IAuthenticationManager AuthenticateAsync may be used at
         /// any time to obtain the claims from the request's bearer token.
         /// See also http://tools.ietf.org/html/rfc6749
         /// </summary>
         /// <param name="app">The application builder</param>
         /// <param name="options">Options which control the processing of the bearer header.</param>
         /// <returns>The application builder</returns>
-        public static IApplicationBuilder UseOAuthBearerAuthentication([NotNull] this IApplicationBuilder app, Action<OAuthBearerAuthenticationOptions> configureOptions = null, string optionsName = "")
+        public static IApplicationBuilder UseOAuthBearerAuthentication([NotNull] this IApplicationBuilder app, [NotNull] OAuthBearerAuthenticationOptions options)
         {
-            return app.UseMiddleware<OAuthBearerAuthenticationMiddleware>(
-                new ConfigureOptions<OAuthBearerAuthenticationOptions>(configureOptions ?? (o => { }))
-                {
-                    Name = optionsName
-                });
+            return app.UseMiddleware<OAuthBearerAuthenticationMiddleware>(options);
         }
     }
 }

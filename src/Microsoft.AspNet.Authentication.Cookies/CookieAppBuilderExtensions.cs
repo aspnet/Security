@@ -4,7 +4,6 @@
 using System;
 using Microsoft.AspNet.Authentication.Cookies;
 using Microsoft.Framework.Internal;
-using Microsoft.Framework.OptionsModel;
 
 namespace Microsoft.AspNet.Builder
 {
@@ -17,16 +16,34 @@ namespace Microsoft.AspNet.Builder
         /// Adds a cookie-based authentication middleware to your web application pipeline.
         /// </summary>
         /// <param name="app">The IApplicationBuilder passed to your configuration method</param>
-        /// <param name="configureOptions">Used to configure the options for the middleware</param>
-        /// <param name="optionsName">The name of the options class that controls the middleware behavior, null will use the default options</param>
         /// <returns>The original app parameter</returns>
-        public static IApplicationBuilder UseCookieAuthentication([NotNull] this IApplicationBuilder app, Action<CookieAuthenticationOptions> configureOptions = null, string optionsName = "")
+        public static IApplicationBuilder UseCookieAuthentication([NotNull] this IApplicationBuilder app)
         {
-            return app.UseMiddleware<CookieAuthenticationMiddleware>(
-                new ConfigureOptions<CookieAuthenticationOptions>(configureOptions ?? (o => { }))
-                {
-                    Name = optionsName
-                });
+            return app.UseCookieAuthentication(new CookieAuthenticationOptions());
+        }
+
+        /// <summary>
+        /// Adds a cookie-based authentication middleware to your web application pipeline.
+        /// </summary>
+        /// <param name="app">The IApplicationBuilder passed to your configuration method</param>
+        /// <param name="configureOptions">configures the options for the middleware</param>
+        /// <returns>The original app parameter</returns>
+        public static IApplicationBuilder UseCookieAuthentication([NotNull] this IApplicationBuilder app, [NotNull] Action<CookieAuthenticationOptions> configureOptions)
+        {
+            var options = new CookieAuthenticationOptions();
+            configureOptions(options);
+            return app.UseCookieAuthentication(options);
+        }
+
+        /// <summary>
+        /// Adds a cookie-based authentication middleware to your web application pipeline.
+        /// </summary>
+        /// <param name="app">The IApplicationBuilder passed to your configuration method</param>
+        /// <param name="options">the options for the middleware</param>
+        /// <returns>The original app parameter</returns>
+        public static IApplicationBuilder UseCookieAuthentication([NotNull] this IApplicationBuilder app, CookieAuthenticationOptions options)
+        {
+            return app.UseMiddleware<CookieAuthenticationMiddleware>(options);
         }
     }
 }

@@ -168,14 +168,7 @@ namespace Microsoft.AspNet.Authentication.Twitter
                     }
                 });
             },
-            services =>
-            {
-                services.AddAuthentication();
-                services.Configure<SharedAuthenticationOptions>(options =>
-                {
-                    options.SignInScheme = "External";
-                });
-            });
+            services => services.AddAuthentication(options => options.SignInScheme = TestExtensions.CookieAuthenticationScheme));
         }
     }
 }

@@ -34,15 +34,14 @@ namespace Microsoft.AspNet.Authentication.Facebook
             [NotNull] ILoggerFactory loggerFactory,
             [NotNull] IUrlEncoder encoder,
             [NotNull] IOptions<SharedAuthenticationOptions> sharedOptions,
-            [NotNull] IOptions<FacebookAuthenticationOptions> options,
-            ConfigureOptions<FacebookAuthenticationOptions> configureOptions = null)
-            : base(next, dataProtectionProvider, loggerFactory, encoder, sharedOptions, options, configureOptions)
+            [NotNull] FacebookAuthenticationOptions options)
+            : base(next, dataProtectionProvider, loggerFactory, encoder, sharedOptions, options)
         {
-            if (string.IsNullOrWhiteSpace(Options.AppId))
+            if (string.IsNullOrEmpty(Options.AppId))
             {
                 throw new ArgumentException(string.Format(CultureInfo.CurrentCulture, Resources.Exception_OptionMustBeProvided, nameof(Options.AppId)));
             }
-            if (string.IsNullOrWhiteSpace(Options.AppSecret))
+            if (string.IsNullOrEmpty(Options.AppSecret))
             {
                 throw new ArgumentException(string.Format(CultureInfo.CurrentCulture, Resources.Exception_OptionMustBeProvided, nameof(Options.AppSecret)));
             }

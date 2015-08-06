@@ -4,7 +4,6 @@
 using System;
 using Microsoft.AspNet.Authentication.MicrosoftAccount;
 using Microsoft.Framework.Internal;
-using Microsoft.Framework.OptionsModel;
 
 namespace Microsoft.AspNet.Builder
 {
@@ -13,13 +12,28 @@ namespace Microsoft.AspNet.Builder
     /// </summary>
     public static class MicrosoftAccountAuthenticationExtensions
     {
-        public static IApplicationBuilder UseMicrosoftAccountAuthentication([NotNull] this IApplicationBuilder app, Action<MicrosoftAccountAuthenticationOptions> configureOptions = null, string optionsName = "")
+        /// <summary>
+        /// Authenticate users using MicrosoftAccount.
+        /// </summary>
+        /// <param name="app">The <see cref="IApplicationBuilder"/> passed to the configure method.</param>
+        /// <param name="configureOptions">configures the options for the middleware</param>
+        /// <returns>The updated <see cref="IApplicationBuilder"/>.</returns>
+        public static IApplicationBuilder UseMicrosoftAccountAuthentication([NotNull] this IApplicationBuilder app, [NotNull] Action<MicrosoftAccountAuthenticationOptions> configureOptions)
         {
-            return app.UseMiddleware<MicrosoftAccountAuthenticationMiddleware>(
-                 new ConfigureOptions<MicrosoftAccountAuthenticationOptions>(configureOptions ?? (o => { }))
-                 {
-                     Name = optionsName
-                 });
+            var options = new MicrosoftAccountAuthenticationOptions();
+            configureOptions(options);
+            return app.UseMicrosoftAccountAuthentication(options);
+        }
+
+        /// <summary>
+        /// Authenticate users using MicrosoftAccount.
+        /// </summary>
+        /// <param name="app">The <see cref="IApplicationBuilder"/> passed to the configure method.</param>
+        /// <param name="options">the options for the middleware</param>
+        /// <returns>The updated <see cref="IApplicationBuilder"/>.</returns>
+        public static IApplicationBuilder UseMicrosoftAccountAuthentication([NotNull] this IApplicationBuilder app, [NotNull] MicrosoftAccountAuthenticationOptions options)
+        {
+            return app.UseMiddleware<MicrosoftAccountAuthenticationMiddleware>(options);
         }
     }
 }

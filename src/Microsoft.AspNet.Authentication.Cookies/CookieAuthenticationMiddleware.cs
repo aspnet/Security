@@ -18,15 +18,14 @@ namespace Microsoft.AspNet.Authentication.Cookies
             [NotNull] IDataProtectionProvider dataProtectionProvider,
             [NotNull] ILoggerFactory loggerFactory,
             [NotNull] IUrlEncoder urlEncoder,
-            [NotNull] IOptions<CookieAuthenticationOptions> options,
-            ConfigureOptions<CookieAuthenticationOptions> configureOptions)
-            : base(next, options, loggerFactory, urlEncoder, configureOptions)
+            [NotNull] CookieAuthenticationOptions options)
+            : base(next, loggerFactory, urlEncoder, options)
         {
             if (Options.Notifications == null)
             {
                 Options.Notifications = new CookieAuthenticationNotifications();
             }
-            if (String.IsNullOrEmpty(Options.CookieName))
+            if (string.IsNullOrEmpty(Options.CookieName))
             {
                 Options.CookieName = CookieAuthenticationDefaults.CookiePrefix + Options.AuthenticationScheme;
             }
