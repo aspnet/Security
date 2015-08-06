@@ -9,7 +9,7 @@ using System.Threading.Tasks;
 using Microsoft.Framework.DependencyInjection;
 using Xunit;
 
-namespace Microsoft.AspNet.Authorization.Test
+namespace Microsoft.AspNet.Authorization.Tests
 {
     public class DefaultAuthorizationServiceTests
     {
