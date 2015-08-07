@@ -14,12 +14,12 @@ namespace Microsoft.AspNet.Builder
     public static class OAuthAuthenticationExtensions
     {
         /// <summary>
-        /// Authenticate users using OAuth.
+        /// Authorize your application with an external service using OAuth2.
         /// </summary>
         /// <param name="app">The <see cref="IApplicationBuilder"/> passed to the configure method.</param>
         /// <param name="options">The middleware configuration options.</param>
         /// <returns>The updated <see cref="IApplicationBuilder"/>.</returns>
-        public static IApplicationBuilder UseOAuthAuthentication([NotNull] this IApplicationBuilder app, [NotNull] string authenticationScheme, Action<OAuthAuthenticationOptions> configureOptions = null)
+        public static IApplicationBuilder UseOAuth([NotNull] this IApplicationBuilder app, [NotNull] string authenticationScheme, Action<OAuthAuthenticationOptions> configureOptions = null)
         {
             return app.UseMiddleware<OAuthAuthenticationMiddleware<OAuthAuthenticationOptions>>(
                 new ConfigureOptions<OAuthAuthenticationOptions>(options =>
@@ -30,7 +30,7 @@ namespace Microsoft.AspNet.Builder
                     {
                         configureOptions(options);
                     }
-                }) 
+                })
                 {
                     Name = authenticationScheme,
                 });

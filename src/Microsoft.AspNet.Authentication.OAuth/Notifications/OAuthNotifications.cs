@@ -2,21 +2,19 @@
 // Licensed under the Apache License, Version 2.0. See License.txt in the project root for license information.
 
 using System;
-using System.Security.Claims;
 using System.Threading.Tasks;
-using Microsoft.AspNet.Http.Authentication;
 
 namespace Microsoft.AspNet.Authentication.OAuth
 {
     /// <summary>
-    /// Default <see cref="IOAuthAuthenticationNotifications"/> implementation.
+    /// Default <see cref="IOAuthNotifications"/> implementation.
     /// </summary>
-    public class OAuthAuthenticationNotifications : IOAuthAuthenticationNotifications
+    public class OAuthNotifications : IOAuthNotifications
     {
         /// <summary>
-        /// Gets or sets the function that is invoked when the Authenticated method is invoked.
+        /// Gets or sets the function that is invoked when the AccessTokenReceived method is invoked.
         /// </summary>
-        public Func<OAuthAuthenticatedContext, Task> OnAuthenticated { get; set; } = context => Task.FromResult(0);
+        public Func<OAuthAccessTokenReceivedContext, Task> OnAccessTokenReceived { get; set; } = context => Task.FromResult(0);
 
         /// <summary>
         /// Gets or sets the function that is invoked when the ReturnEndpoint method is invoked.
@@ -29,11 +27,12 @@ namespace Microsoft.AspNet.Authentication.OAuth
         public Action<OAuthApplyRedirectContext> OnApplyRedirect { get; set; } = context => context.Response.Redirect(context.RedirectUri);
 
         /// <summary>
-        /// Invoked after the provider successfully authenticates a user.
+        /// Invoked after the provider successfully authorizes your application. This can be used to retrieve user information.
+        /// This notification may not be invoked by sub-classes of OAuthAuthenticationHandler if they override CreateTicketAsync.
         /// </summary>
         /// <param name="context">Contains information about the login session as well as the user <see cref="ClaimsIdentity"/>.</param>
         /// <returns>A <see cref="Task"/> representing the completed operation.</returns>
-        public virtual Task Authenticated(OAuthAuthenticatedContext context) => OnAuthenticated(context);
+        public virtual Task AccessTokenReceived(OAuthAccessTokenReceivedContext context) => OnAccessTokenReceived(context);
 
         /// <summary>
         /// Invoked prior to the <see cref="ClaimsIdentity"/> being saved in a local cookie and the browser being redirected to the originally requested URL.

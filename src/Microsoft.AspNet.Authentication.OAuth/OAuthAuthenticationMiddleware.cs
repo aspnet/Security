@@ -15,7 +15,7 @@ using Microsoft.Framework.WebEncoders;
 namespace Microsoft.AspNet.Authentication.OAuth
 {
     /// <summary>
-    /// An ASP.NET middleware for authenticating users using OAuth services.
+    /// An ASP.NET middleware for authorizing your application using OAuth services.
     /// </summary>
     [SuppressMessage("Microsoft.Design", "CA1001:TypesThatOwnDisposableFieldsShouldBeDisposable", Justification = "Middleware are not disposable.")]
     public class OAuthAuthenticationMiddleware<TOptions> : AuthenticationMiddleware<TOptions> where TOptions : OAuthAuthenticationOptions, new()
