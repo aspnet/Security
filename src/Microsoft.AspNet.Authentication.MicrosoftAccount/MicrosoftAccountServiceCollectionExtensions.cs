@@ -15,22 +15,12 @@ namespace Microsoft.Framework.DependencyInjection
     {
         public static IServiceCollection ConfigureMicrosoftAccountAuthentication([NotNull] this IServiceCollection services, [NotNull] Action<MicrosoftAccountAuthenticationOptions> configure)
         {
-            return services.ConfigureMicrosoftAccountAuthentication(configure, optionsName: "");
-        }
-
-        public static IServiceCollection ConfigureMicrosoftAccountAuthentication([NotNull] this IServiceCollection services, [NotNull] Action<MicrosoftAccountAuthenticationOptions> configure, string optionsName)
-        {
-            return services.Configure(configure, optionsName);
+            return services.Configure(configure);
         }
 
         public static IServiceCollection ConfigureMicrosoftAccountAuthentication([NotNull] this IServiceCollection services, [NotNull] IConfiguration config)
         {
-            return services.ConfigureMicrosoftAccountAuthentication(config, optionsName: "");
-        }
-
-        public static IServiceCollection ConfigureMicrosoftAccountAuthentication([NotNull] this IServiceCollection services, [NotNull] IConfiguration config, string optionsName)
-        {
-            return services.Configure<MicrosoftAccountAuthenticationOptions>(config, optionsName);
+            return services.Configure<MicrosoftAccountAuthenticationOptions>(config);
         }
     }
 }

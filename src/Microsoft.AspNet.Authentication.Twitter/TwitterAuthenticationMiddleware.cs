@@ -42,11 +42,11 @@ namespace Microsoft.AspNet.Authentication.Twitter
             ConfigureOptions<TwitterAuthenticationOptions> configureOptions = null)
             : base(next, options, loggerFactory, encoder, configureOptions)
         {
-            if (string.IsNullOrWhiteSpace(Options.ConsumerSecret))
+            if (string.IsNullOrEmpty(Options.ConsumerSecret))
             {
                 throw new ArgumentException(string.Format(CultureInfo.CurrentCulture, Resources.Exception_OptionMustBeProvided, nameof(Options.ConsumerSecret)));
             }
-            if (string.IsNullOrWhiteSpace(Options.ConsumerKey))
+            if (string.IsNullOrEmpty(Options.ConsumerKey))
             {
                 throw new ArgumentException(string.Format(CultureInfo.CurrentCulture, Resources.Exception_OptionMustBeProvided, nameof(Options.ConsumerKey)));
             }
@@ -67,7 +67,7 @@ namespace Microsoft.AspNet.Authentication.Twitter
 
             if (string.IsNullOrEmpty(Options.SignInScheme))
             {
-                Options.SignInScheme = sharedOptions.Options.SignInScheme;
+                Options.SignInScheme = sharedOptions.Value.SignInScheme;
             }
             if (string.IsNullOrEmpty(Options.SignInScheme))
             {

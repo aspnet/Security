@@ -15,22 +15,12 @@ namespace Microsoft.Framework.DependencyInjection
     {
         public static IServiceCollection ConfigureOAuthBearerAuthentication([NotNull] this IServiceCollection services, [NotNull] Action<OAuthBearerAuthenticationOptions> configure)
         {
-            return services.ConfigureOAuthBearerAuthentication(configure, optionsName: "");
-        }
-
-        public static IServiceCollection ConfigureOAuthBearerAuthentication([NotNull] this IServiceCollection services, [NotNull] Action<OAuthBearerAuthenticationOptions> configure, string optionsName)
-        {
-            return services.Configure(configure, optionsName);
+            return services.Configure(configure);
         }
 
         public static IServiceCollection ConfigureOAuthBearerAuthentication([NotNull] this IServiceCollection services, [NotNull] IConfiguration config)
         {
-            return services.ConfigureOAuthBearerAuthentication(config, optionsName: "");
-        }
-
-        public static IServiceCollection ConfigureOAuthBearerAuthentication([NotNull] this IServiceCollection services, [NotNull] IConfiguration config, string optionsName)
-        {
-            return services.Configure<OAuthBearerAuthenticationOptions>(config, optionsName);
+            return services.Configure<OAuthBearerAuthenticationOptions>(config);
         }
     }
 }
