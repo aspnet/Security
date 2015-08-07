@@ -291,7 +291,6 @@ namespace Microsoft.AspNet.Authentication.Cookies
 
                 var shouldLoginRedirect = Options.LoginPath.HasValue && OriginalPath == Options.LoginPath;
                 ApplyHeaders(shouldLoginRedirect);
-                signin.Accept();
             }
             catch (Exception exception)
             {
@@ -426,7 +425,6 @@ namespace Microsoft.AspNet.Authentication.Cookies
                     throw;
                 }
             }
-            context.Accept();
             return Task.FromResult(true);
         }
     }
