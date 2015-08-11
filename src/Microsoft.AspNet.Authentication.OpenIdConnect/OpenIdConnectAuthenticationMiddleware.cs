@@ -52,9 +52,9 @@ namespace Microsoft.AspNet.Authentication.OpenIdConnect
             ConfigureOptions<OpenIdConnectAuthenticationOptions> configureOptions = null)
             : base(next, options, loggerFactory, encoder, configureOptions)
         {
-            if (string.IsNullOrEmpty(Options.SignInScheme) && !string.IsNullOrEmpty(sharedOptions.Options.SignInScheme))
+            if (string.IsNullOrEmpty(Options.SignInScheme) && !string.IsNullOrEmpty(sharedOptions.Value.SignInScheme))
             {
-                Options.SignInScheme = sharedOptions.Options.SignInScheme;
+                Options.SignInScheme = sharedOptions.Value.SignInScheme;
             }
 
             if (Options.StateDataFormat == null)
@@ -100,7 +100,7 @@ namespace Microsoft.AspNet.Authentication.OpenIdConnect
                 Options.Notifications = new OpenIdConnectAuthenticationNotifications();
             }
 
-            if (string.IsNullOrWhiteSpace(Options.TokenValidationParameters.ValidAudience) && !string.IsNullOrWhiteSpace(Options.ClientId))
+            if (string.IsNullOrEmpty(Options.TokenValidationParameters.ValidAudience) && !string.IsNullOrEmpty(Options.ClientId))
             {
                 Options.TokenValidationParameters.ValidAudience = Options.ClientId;
             }
@@ -116,9 +116,9 @@ namespace Microsoft.AspNet.Authentication.OpenIdConnect
                 {
                     Options.ConfigurationManager = new StaticConfigurationManager<OpenIdConnectConfiguration>(Options.Configuration);
                 }
-                else if (!(string.IsNullOrWhiteSpace(Options.MetadataAddress) && string.IsNullOrWhiteSpace(Options.Authority)))
+                else if (!(string.IsNullOrEmpty(Options.MetadataAddress) && string.IsNullOrEmpty(Options.Authority)))
                 {
-                    if (string.IsNullOrWhiteSpace(Options.MetadataAddress) && !string.IsNullOrWhiteSpace(Options.Authority))
+                    if (string.IsNullOrEmpty(Options.MetadataAddress) && !string.IsNullOrEmpty(Options.Authority))
                     {
                         Options.MetadataAddress = Options.Authority;
                         if (!Options.MetadataAddress.EndsWith("/", StringComparison.Ordinal))

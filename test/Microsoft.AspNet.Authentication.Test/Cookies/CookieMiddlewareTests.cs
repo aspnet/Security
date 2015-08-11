@@ -721,6 +721,38 @@ namespace Microsoft.AspNet.Authentication.Cookies
         }
 
         [Fact]
+        public async Task UseCookieWithInstanceDoesntUseSharedOptions()
+        {
+            var server = TestServer.Create(app =>
+            {
+                app.UseCookieAuthentication(options => options.CookieName = "One");
+                app.UseCookieAuthentication(new CookieAuthenticationOptions());
+                app.Run(context => context.Authentication.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme, new ClaimsPrincipal(new ClaimsIdentity())));
+            }, services => services.AddAuthentication());
+
+            var transaction = await server.SendAsync("http://example.com");
+
+            transaction.Response.StatusCode.ShouldBe(HttpStatusCode.OK);
+            Assert.True(transaction.SetCookie[0].StartsWith(".AspNet.Cookies="));
+        }
+
+        [Fact]
+        public async Task UseCookieWithOutInstanceDoesUseSharedOptions()
+        {
+            var server = TestServer.Create(app =>
+            {
+                app.UseCookieAuthentication(options => options.CookieName = "One");
+                app.UseCookieAuthentication(options => options.AuthenticationScheme = "Two");
+                app.Run(context => context.Authentication.SignInAsync("Two", new ClaimsPrincipal(new ClaimsIdentity())));
+            }, services => services.AddAuthentication());
+
+            var transaction = await server.SendAsync("http://example.com");
+
+            transaction.Response.StatusCode.ShouldBe(HttpStatusCode.OK);
+            Assert.True(transaction.SetCookie[0].StartsWith("One="));
+        }
+
+        [Fact]
         public async Task MapWithSignInOnlyRedirectToReturnUrlOnLoginPath()
         {
             var server = TestServer.Create(app =>
@@ -870,6 +902,7 @@ namespace Microsoft.AspNet.Authentication.Cookies
             var server = TestServer.Create(app =>
             {
                 app.UseCookieAuthentication(configureOptions);
+                app.UseCookieAuthentication(new CookieAuthenticationOptions { AuthenticationScheme = "Cookie2" });
 
                 if (claimsTransform != null)
                 {
