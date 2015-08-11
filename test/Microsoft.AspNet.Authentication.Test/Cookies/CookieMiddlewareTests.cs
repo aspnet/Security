@@ -855,7 +855,7 @@ namespace Microsoft.AspNet.Authentication.Cookies
             {
                 app.UseCookieAuthentication(options =>
                 {
-                    options.DataProtector = dp;
+                    options.TicketDataFormat = new TicketDataFormat(dp);
                     options.CookieName = "Cookie";
                 });
                 app.Use((context, next) =>
@@ -874,7 +874,7 @@ namespace Microsoft.AspNet.Authentication.Cookies
                 {
                     options.AuthenticationScheme = "Cookies";
                     options.CookieName = "Cookie";
-                    options.DataProtector = dp;
+                    options.TicketDataFormat = new TicketDataFormat(dp);
                 });
                 app.Use(async (context, next) =>
                 {
