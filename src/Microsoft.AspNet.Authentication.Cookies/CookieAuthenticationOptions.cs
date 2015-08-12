@@ -3,6 +3,7 @@
 
 using System;
 using System.Diagnostics.CodeAnalysis;
+using Microsoft.AspNet.DataProtection;
 using Microsoft.AspNet.Http;
 using Microsoft.Framework.Internal;
 
