@@ -4,7 +4,6 @@
 using System;
 using System.Collections.Generic;
 using System.Net.Http;
-using System.Security.Claims;
 using Microsoft.AspNet.Http;
 using Microsoft.AspNet.Http.Authentication;
 using Microsoft.Framework.Internal;
@@ -81,9 +80,9 @@ namespace Microsoft.AspNet.Authentication.OAuth
         public HttpMessageHandler BackchannelHttpHandler { get; set; }
 
         /// <summary>
-        /// Gets or sets the <see cref="IOAuthAuthenticationNotifications"/> used to handle authentication events.
+        /// Gets or sets the <see cref="IOAuthNotifications"/> used to handle protocol events.
         /// </summary>
-        public IOAuthAuthenticationNotifications Notifications { get; [param: NotNull] set; } = new OAuthAuthenticationNotifications();
+        public IOAuthNotifications Notifications { get; [param: NotNull] set; } = new OAuthNotifications();
 
         /// <summary>
         /// A list of permissions to request.

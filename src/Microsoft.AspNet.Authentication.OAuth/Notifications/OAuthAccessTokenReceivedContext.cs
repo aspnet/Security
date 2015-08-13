@@ -15,16 +15,16 @@ namespace Microsoft.AspNet.Authentication.OAuth
     /// <summary>
     /// Contains information about the login session as well as the user <see cref="System.Security.Claims.ClaimsIdentity"/>.
     /// </summary>
-    public class OAuthAuthenticatedContext : BaseContext<OAuthAuthenticationOptions>
+    public class OAuthAccessTokenReceivedContext : BaseContext<OAuthAuthenticationOptions>
     {
         /// <summary>
-        /// Initializes a new <see cref="OAuthAuthenticatedContext"/>.
+        /// Initializes a new <see cref="OAuthAccessTokenReceivedContext"/>.
         /// </summary>
         /// <param name="context">The HTTP environment.</param>
         /// <param name="options">The options used by the authentication middleware.</param>
         /// <param name="backchannel">The HTTP client used by the authentication middleware</param>
         /// <param name="tokens">The tokens returned from the token endpoint.</param>
-        public OAuthAuthenticatedContext(
+        public OAuthAccessTokenReceivedContext(
             [NotNull] HttpContext context,
             [NotNull] OAuthAuthenticationOptions options,
             [NotNull] HttpClient backchannel,
@@ -34,14 +34,14 @@ namespace Microsoft.AspNet.Authentication.OAuth
         }
 
         /// <summary>
-        /// Initializes a new <see cref="OAuthAuthenticatedContext"/>.
+        /// Initializes a new <see cref="OAuthAccessTokenReceivedContext"/>.
         /// </summary>
         /// <param name="context">The HTTP environment.</param>
         /// <param name="options">The options used by the authentication middleware.</param>
         /// <param name="backchannel">The HTTP client used by the authentication middleware</param>
         /// <param name="tokens">The tokens returned from the token endpoint.</param>
         /// <param name="user">The JSON-serialized user.</param>
-        public OAuthAuthenticatedContext(
+        public OAuthAccessTokenReceivedContext(
             [NotNull] HttpContext context,
             [NotNull] OAuthAuthenticationOptions options,
             [NotNull] HttpClient backchannel,
@@ -96,7 +96,7 @@ namespace Microsoft.AspNet.Authentication.OAuth
                 return null;
             }
         }
-        
+
         /// <summary>
         /// Gets the backchannel used to communicate with the provider.
         /// </summary>

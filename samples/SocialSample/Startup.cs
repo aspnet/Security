@@ -52,7 +52,7 @@ namespace CookieSample
                 options.AppSecret = "a124463c4719c94b4228d9a240e5dc1a";
             });
 
-            app.UseOAuthAuthentication("Google-AccessToken", options =>
+            app.UseOAuth("Google-AccessToken", options =>
             {
                 options.ClientId = "560027070069-37ldt4kfuohhu3m495hk2j4pjp92d382.apps.googleusercontent.com";
                 options.ClientSecret = "n2Q-GEw9RQjzcRbU3qhfTj8f";
@@ -95,7 +95,7 @@ namespace CookieSample
             The sample app can then be run via:
              dnx . web
             */
-            app.UseOAuthAuthentication("Microsoft-AccessToken", options =>
+            app.UseOAuth("Microsoft-AccessToken", options =>
             {
                 options.Caption = "MicrosoftAccount-AccessToken - Requires project changes";
                 options.ClientId = "00000000480FF62E";
@@ -115,7 +115,7 @@ namespace CookieSample
             });
 
             // https://github.com/settings/applications/
-            app.UseOAuthAuthentication("GitHub-AccessToken", options =>
+            app.UseOAuth("GitHub-AccessToken", options =>
             {
                 options.ClientId = "8c0c5a572abe8fe89588";
                 options.ClientSecret = "e1d95eaf03461d27acd6f49d4fc7bf19d6ac8cda";
@@ -124,7 +124,7 @@ namespace CookieSample
                 options.TokenEndpoint = "https://github.com/login/oauth/access_token";
             });
 
-            app.UseOAuthAuthentication("GitHub", options =>
+            app.UseOAuth("GitHub", options =>
             {
                 options.ClientId = "49e302895d8b09ea5656";
                 options.ClientSecret = "98f1bf028608901e9df91d64ee61536fe562064b";
@@ -135,9 +135,9 @@ namespace CookieSample
                 options.ClaimsIssuer = "OAuth2-Github";
                 options.SaveTokensAsClaims = false;
                 // Retrieving user information is unique to each provider.
-                options.Notifications = new OAuthAuthenticationNotifications
+                options.Notifications = new OAuthNotifications
                 {
-                    OnAuthenticated = async notification =>
+                    OnAccessTokenReceived = async notification =>
                     {
                         // Get the GitHub user
                         var request = new HttpRequestMessage(HttpMethod.Get, notification.Options.UserInformationEndpoint);

@@ -31,7 +31,7 @@ namespace Microsoft.AspNet.Authentication.Tests.MicrosoftAccount
                 {
                     options.ClientId = "Test Client Id";
                     options.ClientSecret = "Test Client Secret";
-                    options.Notifications = new OAuthAuthenticationNotifications
+                    options.Notifications = new OAuthNotifications
                     {
                         OnApplyRedirect = context =>
                         {
@@ -143,9 +143,9 @@ namespace Microsoft.AspNet.Authentication.Tests.MicrosoftAccount
                             return null;
                         }
                     };
-                    options.Notifications = new OAuthAuthenticationNotifications
+                    options.Notifications = new OAuthNotifications
                     {
-                        OnAuthenticated = context =>
+                        OnAccessTokenReceived = context =>
                         {
                             var refreshToken = context.RefreshToken;
                             context.Principal.AddIdentity(new ClaimsIdentity(new Claim[] { new Claim("RefreshToken", refreshToken, ClaimValueTypes.String, "Microsoft") }, "Microsoft"));

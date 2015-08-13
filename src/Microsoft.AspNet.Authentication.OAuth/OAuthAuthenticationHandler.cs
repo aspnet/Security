@@ -182,13 +182,13 @@ namespace Microsoft.AspNet.Authentication.OAuth
 
         protected virtual async Task<AuthenticationTicket> CreateTicketAsync(ClaimsIdentity identity, AuthenticationProperties properties, OAuthTokenResponse tokens)
         {
-            var notification = new OAuthAuthenticatedContext(Context, Options, Backchannel, tokens)
+            var notification = new OAuthAccessTokenReceivedContext(Context, Options, Backchannel, tokens)
             {
                 Principal = new ClaimsPrincipal(identity),
                 Properties = properties
             };
             
-            await Options.Notifications.Authenticated(notification);
+            await Options.Notifications.AccessTokenReceived(notification);
 
             if (notification.Principal?.Identity == null)
             {
