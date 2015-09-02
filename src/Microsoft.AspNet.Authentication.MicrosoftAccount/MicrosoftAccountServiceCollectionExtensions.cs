@@ -13,12 +13,12 @@ namespace Microsoft.Framework.DependencyInjection
     /// </summary>
     public static class MicrosoftAccountServiceCollectionExtensions
     {
-        public static IServiceCollection ConfigureMicrosoftAccountAuthentication([NotNull] this IServiceCollection services, [NotNull] Action<MicrosoftAccountAuthenticationOptions> configure)
+        public static IServiceCollection AddMicrosoftAccountAuthentication([NotNull] this IServiceCollection services, [NotNull] Action<MicrosoftAccountAuthenticationOptions> configure)
         {
             return services.Configure(configure);
         }
 
-        public static IServiceCollection ConfigureMicrosoftAccountAuthentication([NotNull] this IServiceCollection services, [NotNull] IConfiguration config)
+        public static IServiceCollection AddMicrosoftAccountAuthentication([NotNull] this IServiceCollection services, [NotNull] IConfiguration config)
         {
             return services.Configure<MicrosoftAccountAuthenticationOptions>(config);
         }

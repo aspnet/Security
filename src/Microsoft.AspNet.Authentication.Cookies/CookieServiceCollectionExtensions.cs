@@ -13,12 +13,12 @@ namespace Microsoft.Framework.DependencyInjection
     /// </summary>
     public static class CookieServiceCollectionExtensions
     {
-        public static IServiceCollection ConfigureCookieAuthentication([NotNull] this IServiceCollection services, [NotNull] Action<CookieAuthenticationOptions> configure)
+        public static IServiceCollection AddCookieAuthentication([NotNull] this IServiceCollection services, [NotNull] Action<CookieAuthenticationOptions> configure)
         {
             return services.Configure(configure);
         }
 
-        public static IServiceCollection ConfigureCookieAuthentication([NotNull] this IServiceCollection services, [NotNull] IConfiguration config)
+        public static IServiceCollection AddCookieAuthentication([NotNull] this IServiceCollection services, [NotNull] IConfiguration config)
         {
             return services.Configure<CookieAuthenticationOptions>(config);
         }

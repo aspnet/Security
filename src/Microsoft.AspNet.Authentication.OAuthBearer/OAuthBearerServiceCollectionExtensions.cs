@@ -13,12 +13,12 @@ namespace Microsoft.Framework.DependencyInjection
     /// </summary>
     public static class OAuthBearerServiceCollectionExtensions
     {
-        public static IServiceCollection ConfigureOAuthBearerAuthentication([NotNull] this IServiceCollection services, [NotNull] Action<OAuthBearerAuthenticationOptions> configure)
+        public static IServiceCollection AddOAuthBearerAuthentication([NotNull] this IServiceCollection services, [NotNull] Action<OAuthBearerAuthenticationOptions> configure)
         {
             return services.Configure(configure);
         }
 
-        public static IServiceCollection ConfigureOAuthBearerAuthentication([NotNull] this IServiceCollection services, [NotNull] IConfiguration config)
+        public static IServiceCollection AddOAuthBearerAuthentication([NotNull] this IServiceCollection services, [NotNull] IConfiguration config)
         {
             return services.Configure<OAuthBearerAuthenticationOptions>(config);
         }
