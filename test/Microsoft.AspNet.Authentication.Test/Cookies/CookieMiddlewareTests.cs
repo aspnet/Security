@@ -340,7 +340,7 @@ namespace Microsoft.AspNet.Authentication.Cookies
             {
                 options.SystemClock = clock;
                 options.ExpireTimeSpan = TimeSpan.FromMinutes(10);
-                options.Events = new CookieAuthenticationEvents
+                options.Events = new CookieEvents
                 {
                     OnValidatePrincipal = ctx =>
                     {
@@ -371,7 +371,7 @@ namespace Microsoft.AspNet.Authentication.Cookies
                 options.SystemClock = clock;
                 options.ExpireTimeSpan = TimeSpan.FromMinutes(10);
                 options.SlidingExpiration = false;
-                options.Events = new CookieAuthenticationEvents
+                options.Events = new CookieEvents
                 {
                     OnValidatePrincipal = ctx =>
                     {
@@ -401,7 +401,7 @@ namespace Microsoft.AspNet.Authentication.Cookies
                 options.SystemClock = clock;
                 options.ExpireTimeSpan = TimeSpan.FromMinutes(10);
                 options.SlidingExpiration = false;
-                options.Events = new CookieAuthenticationEvents
+                options.Events = new CookieEvents
                 {
                     OnValidatePrincipal = ctx =>
                     {
@@ -447,7 +447,7 @@ namespace Microsoft.AspNet.Authentication.Cookies
             {
                 options.SystemClock = clock;
                 options.ExpireTimeSpan = TimeSpan.FromMinutes(10);
-                options.Events = new CookieAuthenticationEvents
+                options.Events = new CookieEvents
                 {
                     OnValidatePrincipal = ctx =>
                     {
@@ -494,7 +494,7 @@ namespace Microsoft.AspNet.Authentication.Cookies
                 options.SystemClock = clock;
                 options.ExpireTimeSpan = TimeSpan.FromMinutes(10);
                 options.SlidingExpiration = false;
-                options.Events = new CookieAuthenticationEvents()
+                options.Events = new CookieEvents()
                 {
                     OnResponseSignIn = context =>
                     {
@@ -993,15 +993,15 @@ namespace Microsoft.AspNet.Authentication.Cookies
                     }
                     else if (req.Path == new PathString("/forbid")) // Simulate forbidden 
                     {
-                        await context.Authentication.ForbidAsync(CookieAuthenticationDefaults.AuthenticationScheme);
+                        await context.Authentication.ForbidAsync(CookieDefaults.AuthenticationScheme);
                     }
                     else if (req.Path == new PathString("/challenge"))
                     {
-                        await context.Authentication.ChallengeAsync(CookieAuthenticationDefaults.AuthenticationScheme);
+                        await context.Authentication.ChallengeAsync(CookieDefaults.AuthenticationScheme);
                     }
                     else if (req.Path == new PathString("/unauthorized"))
                     {
-                        await context.Authentication.ChallengeAsync(CookieAuthenticationDefaults.AuthenticationScheme, new AuthenticationProperties(), ChallengeBehavior.Unauthorized);
+                        await context.Authentication.ChallengeAsync(CookieDefaults.AuthenticationScheme, new AuthenticationProperties(), ChallengeBehavior.Unauthorized);
                     }
                     else if (req.Path == new PathString("/protected/CustomRedirect"))
                     {
@@ -1009,7 +1009,7 @@ namespace Microsoft.AspNet.Authentication.Cookies
                     }
                     else if (req.Path == new PathString("/me"))
                     {
-                        var authContext = new AuthenticateContext(CookieAuthenticationDefaults.AuthenticationScheme);
+                        var authContext = new AuthenticateContext(CookieDefaults.AuthenticationScheme);
                         authContext.Authenticated(context.User, properties: null, description: null);
                         Describe(res, authContext);
                     }

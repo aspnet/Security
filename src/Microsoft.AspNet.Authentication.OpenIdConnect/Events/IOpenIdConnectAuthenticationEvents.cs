@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 namespace Microsoft.AspNet.Authentication.OpenIdConnect
 {
     /// <summary>
-    /// Specifies events which the <see cref="OpenIdConnectAuthenticationMiddleware" />invokes to enable developer control over the authentication process.
+    /// Specifies events which the <see cref="OpenIdConnectMiddleware" />invokes to enable developer control over the authentication process.
     /// </summary>
     public interface IOpenIdConnectAuthenticationEvents
     {

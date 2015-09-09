@@ -20,11 +20,11 @@ using Newtonsoft.Json.Linq;
 
 namespace Microsoft.AspNet.Authentication.OAuth
 {
-    public class OAuthAuthenticationHandler<TOptions> : AuthenticationHandler<TOptions> where TOptions : OAuthAuthenticationOptions
+    public class OAuthHandler<TOptions> : AuthenticationHandler<TOptions> where TOptions : OAuthOptions
     {
         private static readonly RandomNumberGenerator CryptoRandom = RandomNumberGenerator.Create();
 
-        public OAuthAuthenticationHandler(HttpClient backchannel)
+        public OAuthHandler(HttpClient backchannel)
         {
             Backchannel = backchannel;
         }

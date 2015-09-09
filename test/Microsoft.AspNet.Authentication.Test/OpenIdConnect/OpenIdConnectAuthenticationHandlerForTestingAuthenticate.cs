@@ -15,7 +15,7 @@ namespace Microsoft.AspNet.Authentication.Tests.OpenIdConnect
     /// <summary>
     ///  Allows for custom processing of ApplyResponseChallenge, ApplyResponseGrant and AuthenticateCore
     /// </summary>
-    public class OpenIdConnectAuthenticationHandlerForTestingAuthenticate : OpenIdConnectAuthenticationHandler
+    public class OpenIdConnectAuthenticationHandlerForTestingAuthenticate : OpenIdConnectHandler
     {
         public OpenIdConnectAuthenticationHandlerForTestingAuthenticate()
                     : base(null)

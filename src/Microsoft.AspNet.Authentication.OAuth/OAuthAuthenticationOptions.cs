@@ -11,9 +11,9 @@ using Microsoft.Framework.OptionsModel;
 namespace Microsoft.AspNet.Authentication.OAuth
 {
     /// <summary>
-    /// Configuration options for <see cref="OAuthAuthenticationMiddleware"/>.
+    /// Configuration options for <see cref="OAuthMiddleware"/>.
     /// </summary>
-    public class OAuthAuthenticationOptions : AuthenticationOptions, IOptions<OAuthAuthenticationOptions>
+    public class OAuthOptions : AuthenticationOptions, IOptions<OAuthOptions>
     {
         /// <summary>
         /// Gets or sets the provider-assigned client id.
@@ -116,7 +116,7 @@ namespace Microsoft.AspNet.Authentication.OAuth
         /// </summary>
         public bool SaveTokensAsClaims { get; set; } = true;
 
-        OAuthAuthenticationOptions IOptions<OAuthAuthenticationOptions>.Value
+        OAuthOptions IOptions<OAuthOptions>.Value
         {
             get
             {

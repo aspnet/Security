@@ -175,7 +175,7 @@ namespace Microsoft.AspNet.Authentication.Tests.MicrosoftAccount
             transaction.FindClaimValue("RefreshToken").ShouldBe("Test Refresh Token");
         }
 
-        private static TestServer CreateServer(Action<MicrosoftAccountAuthenticationOptions> configureOptions)
+        private static TestServer CreateServer(Action<MicrosoftAccountOptions> configureOptions)
         {
             return TestServer.Create(app =>
             {

@@ -22,7 +22,7 @@ namespace Microsoft.AspNet.Builder
         /// <returns>The original app parameter</returns>
         public static IApplicationBuilder UseCookieAuthentication([NotNull] this IApplicationBuilder app, Action<CookieAuthenticationOptions> configureOptions = null)
         {
-            return app.UseMiddleware<CookieAuthenticationMiddleware>(
+            return app.UseMiddleware<CookieMiddleware>(
                 new ConfigureOptions<CookieAuthenticationOptions>(configureOptions ?? (o => { })));
         }
 
@@ -35,7 +35,7 @@ namespace Microsoft.AspNet.Builder
         /// <returns>The original app parameter</returns>
         public static IApplicationBuilder UseCookieAuthentication([NotNull] this IApplicationBuilder app, IOptions<CookieAuthenticationOptions> options)
         {
-            return app.UseMiddleware<CookieAuthenticationMiddleware>(options,
+            return app.UseMiddleware<CookieMiddleware>(options,
                 new ConfigureOptions<CookieAuthenticationOptions>(o => { }));
         }
 

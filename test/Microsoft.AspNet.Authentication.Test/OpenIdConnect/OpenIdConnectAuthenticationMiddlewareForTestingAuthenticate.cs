@@ -13,12 +13,12 @@ namespace Microsoft.AspNet.Authentication.Tests.OpenIdConnect
 {
 
     /// <summary>
-    /// pass a <see cref="OpenIdConnectAuthenticationHandler"/> as the AuthenticationHandler
+    /// pass a <see cref="OpenIdConnectHandler"/> as the AuthenticationHandler
     /// configured to handle certain messages.
     /// </summary>
-    public class OpenIdConnectAuthenticationMiddlewareForTestingAuthenticate : OpenIdConnectAuthenticationMiddleware
+    public class OpenIdConnectAuthenticationMiddlewareForTestingAuthenticate : OpenIdConnectMiddleware
     {
-        OpenIdConnectAuthenticationHandler _handler;
+        OpenIdConnectHandler _handler;
 
         public OpenIdConnectAuthenticationMiddlewareForTestingAuthenticate(
             RequestDelegate next,            
@@ -27,9 +27,9 @@ namespace Microsoft.AspNet.Authentication.Tests.OpenIdConnect
             IUrlEncoder encoder,
             IServiceProvider services,
             IOptions<SharedAuthenticationOptions> sharedOptions,
-            IOptions<OpenIdConnectAuthenticationOptions> options,
-            ConfigureOptions<OpenIdConnectAuthenticationOptions> configureOptions = null,
-            OpenIdConnectAuthenticationHandler handler = null
+            IOptions<OpenIdConnectOptions> options,
+            ConfigureOptions<OpenIdConnectOptions> configureOptions = null,
+            OpenIdConnectHandler handler = null
             )
         : base(next, dataProtectionProvider, loggerFactory, encoder, services, sharedOptions, options, configureOptions)
         {
@@ -39,7 +39,7 @@ namespace Microsoft.AspNet.Authentication.Tests.OpenIdConnect
                 Logger = customFactory.Logger;
         }
 
-        protected override AuthenticationHandler<OpenIdConnectAuthenticationOptions> CreateHandler()
+        protected override AuthenticationHandler<OpenIdConnectOptions> CreateHandler()
         {
             return _handler ?? base.CreateHandler();
         }

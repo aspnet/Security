@@ -294,7 +294,7 @@ namespace Microsoft.AspNet.Authentication.Google
             var authCookie = transaction.AuthenticationCookieValue;
             transaction = await server.SendAsync("https://example.com/me", authCookie);
             transaction.Response.StatusCode.ShouldBe(HttpStatusCode.OK);
-            var expectedIssuer = claimsIssuer ?? GoogleAuthenticationDefaults.AuthenticationScheme;
+            var expectedIssuer = claimsIssuer ?? GoogleDefaults.AuthenticationScheme;
             transaction.FindClaimValue(ClaimTypes.Name, expectedIssuer).ShouldBe("Test Name");
             transaction.FindClaimValue(ClaimTypes.NameIdentifier, expectedIssuer).ShouldBe("Test User ID");
             transaction.FindClaimValue(ClaimTypes.GivenName, expectedIssuer).ShouldBe("Test Given Name");
@@ -463,11 +463,11 @@ namespace Microsoft.AspNet.Authentication.Google
                         Assert.Equal(context.AccessToken, "Test Access Token");
                         Assert.Equal(context.RefreshToken, "Test Refresh Token");
                         Assert.Equal(context.ExpiresIn, TimeSpan.FromSeconds(3600));
-                        Assert.Equal(GoogleAuthenticationHelper.GetEmail(context.User), "Test email");
-                        Assert.Equal(GoogleAuthenticationHelper.GetId(context.User), "Test User ID");
-                        Assert.Equal(GoogleAuthenticationHelper.GetName(context.User), "Test Name");
-                        Assert.Equal(GoogleAuthenticationHelper.GetFamilyName(context.User), "Test Family Name");
-                        Assert.Equal(GoogleAuthenticationHelper.GetGivenName(context.User), "Test Given Name");
+                        Assert.Equal(GoogleHelper.GetEmail(context.User), "Test email");
+                        Assert.Equal(GoogleHelper.GetId(context.User), "Test User ID");
+                        Assert.Equal(GoogleHelper.GetName(context.User), "Test Name");
+                        Assert.Equal(GoogleHelper.GetFamilyName(context.User), "Test Family Name");
+                        Assert.Equal(GoogleHelper.GetGivenName(context.User), "Test Given Name");
                         return Task.FromResult(0);
                     }
                 };
@@ -538,7 +538,7 @@ namespace Microsoft.AspNet.Authentication.Google
             return res;
         }
 
-        private static TestServer CreateServer(Action<GoogleAuthenticationOptions> configureOptions, Func<HttpContext, Task> testpath = null)
+        private static TestServer CreateServer(Action<GoogleOptions> configureOptions, Func<HttpContext, Task> testpath = null)
         {
             return TestServer.Create(app =>
             {

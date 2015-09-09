@@ -24,7 +24,7 @@ namespace CookieSample
             services.AddAuthentication();
             services.Configure<SharedAuthenticationOptions>(options =>
             {
-                options.SignInScheme = CookieAuthenticationDefaults.AuthenticationScheme;
+                options.SignInScheme = CookieDefaults.AuthenticationScheme;
             });
             services.AddClaimsTransformation(p =>
             {
@@ -52,15 +52,15 @@ namespace CookieSample
                 options.AppSecret = "a124463c4719c94b4228d9a240e5dc1a";
             });
 
-            var googleOptions = new OAuthAuthenticationOptions
+            var googleOptions = new OAuthOptions
             {
                 AuthenticationScheme = "Google-AccessToken",
                 Caption = "Google-AccessToken",
                 ClientId = "560027070069-37ldt4kfuohhu3m495hk2j4pjp92d382.apps.googleusercontent.com",
                 ClientSecret = "n2Q-GEw9RQjzcRbU3qhfTj8f",
                 CallbackPath = new PathString("/signin-google-token"),
-                AuthorizationEndpoint = GoogleAuthenticationDefaults.AuthorizationEndpoint,
-                TokenEndpoint = GoogleAuthenticationDefaults.TokenEndpoint
+                AuthorizationEndpoint = GoogleDefaults.AuthorizationEndpoint,
+                TokenEndpoint = GoogleDefaults.TokenEndpoint
             };
             googleOptions.Scope.Add("openid");
             googleOptions.Scope.Add("profile");
@@ -99,15 +99,15 @@ namespace CookieSample
             The sample app can then be run via:
              dnx . web
             */
-            var msOAuthOptions = new OAuthAuthenticationOptions
+            var msOAuthOptions = new OAuthOptions
             {
                 AuthenticationScheme = "Microsoft-AccessToken",
                 Caption = "MicrosoftAccount-AccessToken - Requires project changes",
                 ClientId = "00000000480FF62E",
                 ClientSecret = "bLw2JIvf8Y1TaToipPEqxTVlOeJwCUsr",
                 CallbackPath = new PathString("/signin-microsoft-token"),
-                AuthorizationEndpoint = MicrosoftAccountAuthenticationDefaults.AuthorizationEndpoint,
-                TokenEndpoint = MicrosoftAccountAuthenticationDefaults.TokenEndpoint
+                AuthorizationEndpoint = MicrosoftAccountDefaults.AuthorizationEndpoint,
+                TokenEndpoint = MicrosoftAccountDefaults.TokenEndpoint
             };
             msOAuthOptions.Scope.Add("wl.basic");
             app.UseOAuthAuthentication(msOAuthOptions);
@@ -121,7 +121,7 @@ namespace CookieSample
             });
 
             // https://github.com/settings/applications/
-            app.UseOAuthAuthentication(new OAuthAuthenticationOptions
+            app.UseOAuthAuthentication(new OAuthOptions
             {
                 AuthenticationScheme = "GitHub-AccessToken",
                 Caption = "Github-AccessToken",
@@ -132,7 +132,7 @@ namespace CookieSample
                 TokenEndpoint = "https://github.com/login/oauth/access_token"
             });
 
-            app.UseOAuthAuthentication(new OAuthAuthenticationOptions
+            app.UseOAuthAuthentication(new OAuthOptions
             {
                 AuthenticationScheme = "GitHub",
                 Caption = "Github",
@@ -225,7 +225,7 @@ namespace CookieSample
                 signoutApp.Run(async context =>
                 {
                     context.Response.ContentType = "text/html";
-                    await context.Authentication.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
+                    await context.Authentication.SignOutAsync(CookieDefaults.AuthenticationScheme);
                     await context.Response.WriteAsync("<html><body>");
                     await context.Response.WriteAsync("You have been logged out. Goodbye " + context.User.Identity.Name + "<br>");
                     await context.Response.WriteAsync("<a href=\"/\">Home</a>");

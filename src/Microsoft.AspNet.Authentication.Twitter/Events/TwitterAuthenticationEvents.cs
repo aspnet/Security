@@ -7,9 +7,9 @@ using System.Threading.Tasks;
 namespace Microsoft.AspNet.Authentication.Twitter
 {
     /// <summary>
-    /// Default <see cref="ITwitterAuthenticationEvents"/> implementation.
+    /// Default <see cref="ITwitterEvents"/> implementation.
     /// </summary>
-    public class TwitterAuthenticationEvents : ITwitterAuthenticationEvents
+    public class TwitterEvents : ITwitterEvents
     {
         /// <summary>
         /// Gets or sets the function that is invoked when the Authenticated method is invoked.

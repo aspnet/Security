@@ -1,0 +1,61 @@
+// Copyright (c) .NET Foundation. All rights reserved.
+// Licensed under the Apache License, Version 2.0. See License.txt in the project root for license information.
+
+using System;
+using Microsoft.AspNet.Builder;
+using Microsoft.AspNet.DataProtection;
+using Microsoft.Framework.Internal;
+using Microsoft.Framework.Logging;
+using Microsoft.Framework.OptionsModel;
+using Microsoft.Framework.WebEncoders;
+
+namespace Microsoft.AspNet.Authentication.Cookies
+{
+    public class CookieMiddleware : AuthenticationMiddleware<CookieAuthenticationOptions>
+    {
+        public CookieMiddleware(
+            [NotNull] RequestDelegate next,
+            [NotNull] IDataProtectionProvider dataProtectionProvider,
+            [NotNull] ILoggerFactory loggerFactory,
+            [NotNull] IUrlEncoder urlEncoder,
+            [NotNull] IOptions<CookieAuthenticationOptions> options,
+            ConfigureOptions<CookieAuthenticationOptions> configureOptions)
+            : base(next, options, loggerFactory, urlEncoder, configureOptions)
+        {
+            if (Options.Events == null)
+            {
+                Options.Events = new CookieEvents();
+            }
+            if (String.IsNullOrEmpty(Options.CookieName))
+            {
+                Options.CookieName = CookieDefaults.CookiePrefix + Options.AuthenticationScheme;
+            }
+            if (Options.TicketDataFormat == null)
+            {
+                var dataProtector = dataProtectionProvider.CreateProtector(typeof(CookieMiddleware).FullName, Options.AuthenticationScheme, "v2");
+                Options.TicketDataFormat = new TicketDataFormat(dataProtector);
+            }
+            if (Options.CookieManager == null)
+            {
+                Options.CookieManager = new ChunkingCookieManager(urlEncoder);
+            }
+            if (!Options.LoginPath.HasValue)
+            {
+                Options.LoginPath = CookieDefaults.LoginPath;
+            }
+            if (!Options.LogoutPath.HasValue)
+            {
+                Options.LogoutPath = CookieDefaults.LogoutPath;
+            }
+            if (!Options.AccessDeniedPath.HasValue)
+            {
+                Options.AccessDeniedPath = CookieDefaults.AccessDeniedPath;
+            }
+        }
+
+        protected override AuthenticationHandler<CookieAuthenticationOptions> CreateHandler()
+        {
+            return new CookieHandler();
+        }
+    }
+}

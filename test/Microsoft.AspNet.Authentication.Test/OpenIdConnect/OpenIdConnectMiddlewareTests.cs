@@ -48,7 +48,7 @@ namespace Microsoft.AspNet.Authentication.Tests.OpenIdConnect
                 options.Authority = DefaultAuthority;
                 options.ClientId = "Test Id";
                 options.Configuration = TestUtilities.DefaultOpenIdConnectConfiguration;
-                options.AuthenticationMethod = OpenIdConnectAuthenticationMethod.FormPost;
+                options.AuthenticationMethod = OpenIdConnectMethod.FormPost;
             });
             var transaction = await SendAsync(server, DefaultHost + Challenge);
             transaction.Response.StatusCode.ShouldBe(HttpStatusCode.OK);
@@ -61,7 +61,7 @@ namespace Microsoft.AspNet.Authentication.Tests.OpenIdConnect
         {
             var stateDataFormat = new AuthenticationPropertiesFormaterKeyValue();
             var queryValues = ExpectedQueryValues.Defaults(DefaultAuthority);
-            queryValues.State = OpenIdConnectAuthenticationDefaults.AuthenticationPropertiesKey + "=" + stateDataFormat.Protect(new AuthenticationProperties());
+            queryValues.State = OpenIdConnectDefaults.AuthenticationPropertiesKey + "=" + stateDataFormat.Protect(new AuthenticationProperties());
             var server = CreateServer(options =>
             {
                 SetOptions(options, DefaultParameters(), queryValues);
@@ -82,7 +82,7 @@ namespace Microsoft.AspNet.Authentication.Tests.OpenIdConnect
                 options.Configuration = TestUtilities.DefaultOpenIdConnectConfiguration;
             });
             var transaction = await SendAsync(server, DefaultHost + Challenge);
-            transaction.SetCookie.Single().ShouldContain(OpenIdConnectAuthenticationDefaults.CookieNoncePrefix);
+            transaction.SetCookie.Single().ShouldContain(OpenIdConnectDefaults.CookieNoncePrefix);
         }
 
         [Fact]
@@ -124,7 +124,7 @@ namespace Microsoft.AspNet.Authentication.Tests.OpenIdConnect
             queryValues.CheckValues(transaction.Response.Headers.Location.AbsoluteUri, new string[] {});
         }
 
-        private static void SetProtocolMessageOptions(OpenIdConnectAuthenticationOptions options)
+        private static void SetProtocolMessageOptions(OpenIdConnectOptions options)
         {
             var mockOpenIdConnectMessage = new Mock<OpenIdConnectMessage>();
             mockOpenIdConnectMessage.Setup(m => m.CreateAuthenticationRequestUrl()).Returns(ExpectedAuthorizeRequest);
@@ -180,9 +180,9 @@ namespace Microsoft.AspNet.Authentication.Tests.OpenIdConnect
             {
                 if (userState != null)
                 {
-                    properties.Items.Add(OpenIdConnectAuthenticationDefaults.UserstatePropertiesKey, userState);
+                    properties.Items.Add(OpenIdConnectDefaults.UserstatePropertiesKey, userState);
                 }
-                properties.Items.Add(OpenIdConnectAuthenticationDefaults.RedirectUriForCodePropertiesKey, queryValues.RedirectUri);
+                properties.Items.Add(OpenIdConnectDefaults.RedirectUriForCodePropertiesKey, queryValues.RedirectUri);
             }
 
             queryValues.State = stateDataFormat.Protect(properties);
@@ -231,7 +231,7 @@ namespace Microsoft.AspNet.Authentication.Tests.OpenIdConnect
             queryValuesSetInEvent.CheckValues(transaction.Response.Headers.Location.AbsoluteUri, DefaultParameters());
         }
 
-        private void SetOptions(OpenIdConnectAuthenticationOptions options, List<string> parameters, ExpectedQueryValues queryValues, ISecureDataFormat<AuthenticationProperties> secureDataFormat = null)
+        private void SetOptions(OpenIdConnectOptions options, List<string> parameters, ExpectedQueryValues queryValues, ISecureDataFormat<AuthenticationProperties> secureDataFormat = null)
         {
             foreach (var param in parameters)
             {
@@ -273,7 +273,7 @@ namespace Microsoft.AspNet.Authentication.Tests.OpenIdConnect
             return parameters;
         }
 
-        private static void DefaultChallengeOptions(OpenIdConnectAuthenticationOptions options)
+        private static void DefaultChallengeOptions(OpenIdConnectOptions options)
         {
             options.AuthenticationScheme = "OpenIdConnectHandlerTest";
             options.AutomaticAuthentication = true;
@@ -332,13 +332,13 @@ namespace Microsoft.AspNet.Authentication.Tests.OpenIdConnect
             transaction.Response.Headers.Location.AbsoluteUri.ShouldContain(UrlEncoder.Default.UrlEncode("http://www.example.com/specific_redirect_uri"));
         }
 
-        private static TestServer CreateServer(Action<OpenIdConnectAuthenticationOptions> configureOptions, Func<HttpContext, Task> handler = null, AuthenticationProperties properties = null)
+        private static TestServer CreateServer(Action<OpenIdConnectOptions> configureOptions, Func<HttpContext, Task> handler = null, AuthenticationProperties properties = null)
         {
             return TestServer.Create(app =>
             {
                 app.UseCookieAuthentication(options =>
                 {
-                    options.AuthenticationScheme = OpenIdConnectAuthenticationDefaults.AuthenticationScheme;
+                    options.AuthenticationScheme = OpenIdConnectDefaults.AuthenticationScheme;
                 });
                 app.UseOpenIdConnectAuthentication(configureOptions);
                 app.Use(async (context, next) =>
@@ -348,11 +348,11 @@ namespace Microsoft.AspNet.Authentication.Tests.OpenIdConnect
 
                     if (req.Path == new PathString(Challenge))
                     {
-                        await context.Authentication.ChallengeAsync(OpenIdConnectAuthenticationDefaults.AuthenticationScheme);
+                        await context.Authentication.ChallengeAsync(OpenIdConnectDefaults.AuthenticationScheme);
                     }
                     else if (req.Path == new PathString(ChallengeWithProperties))
                     {
-                        await context.Authentication.ChallengeAsync(OpenIdConnectAuthenticationDefaults.AuthenticationScheme, properties);
+                        await context.Authentication.ChallengeAsync(OpenIdConnectDefaults.AuthenticationScheme, properties);
                     }
                     else if (req.Path == new PathString(ChallengeWithOutContext))
                     {
@@ -361,16 +361,16 @@ namespace Microsoft.AspNet.Authentication.Tests.OpenIdConnect
                     else if (req.Path == new PathString(Signin))
                     {
                         // REVIEW: this used to just be res.SignIn()
-                        await context.Authentication.SignInAsync(OpenIdConnectAuthenticationDefaults.AuthenticationScheme, new ClaimsPrincipal());
+                        await context.Authentication.SignInAsync(OpenIdConnectDefaults.AuthenticationScheme, new ClaimsPrincipal());
                     }
                     else if (req.Path == new PathString(Signout))
                     {
-                        await context.Authentication.SignOutAsync(OpenIdConnectAuthenticationDefaults.AuthenticationScheme);
+                        await context.Authentication.SignOutAsync(OpenIdConnectDefaults.AuthenticationScheme);
                     }
                     else if (req.Path == new PathString("/signout_with_specific_redirect_uri"))
                     {
                         await context.Authentication.SignOutAsync(
-                            OpenIdConnectAuthenticationDefaults.AuthenticationScheme,
+                            OpenIdConnectDefaults.AuthenticationScheme,
                             new AuthenticationProperties() { RedirectUri = "http://www.example.com/specific_redirect_uri" });
                     }
                     else if (handler != null)
@@ -388,7 +388,7 @@ namespace Microsoft.AspNet.Authentication.Tests.OpenIdConnect
                 services.AddAuthentication();
                 services.Configure<SharedAuthenticationOptions>(options =>
                 {
-                    options.SignInScheme = CookieAuthenticationDefaults.AuthenticationScheme;
+                    options.SignInScheme = CookieDefaults.AuthenticationScheme;
                 });
             });
         }

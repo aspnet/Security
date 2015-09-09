@@ -197,7 +197,7 @@ namespace Microsoft.AspNet.Authentication.Facebook
                         {
                             Sender = req =>
                             {
-                                if (req.RequestUri.GetLeftPart(UriPartial.Path) == FacebookAuthenticationDefaults.TokenEndpoint)
+                                if (req.RequestUri.GetLeftPart(UriPartial.Path) == FacebookDefaults.TokenEndpoint)
                                 {
                                     var res = new HttpResponseMessage(HttpStatusCode.OK);
                                     var tokenResponse = new Dictionary<string, string>

@@ -21,14 +21,14 @@ namespace Microsoft.AspNet.Authentication.Cookies
         /// </summary>
         public CookieAuthenticationOptions()
         {
-            AuthenticationScheme = CookieAuthenticationDefaults.AuthenticationScheme;
-            ReturnUrlParameter = CookieAuthenticationDefaults.ReturnUrlParameter;
+            AuthenticationScheme = CookieDefaults.AuthenticationScheme;
+            ReturnUrlParameter = CookieDefaults.ReturnUrlParameter;
             ExpireTimeSpan = TimeSpan.FromDays(14);
             SlidingExpiration = true;
             CookieHttpOnly = true;
             CookieSecure = CookieSecureOption.SameAsRequest;
             SystemClock = new SystemClock();
-            Events = new CookieAuthenticationEvents();
+            Events = new CookieEvents();
         }
 
         /// <summary>
@@ -119,7 +119,7 @@ namespace Microsoft.AspNet.Authentication.Cookies
         /// calls methods on the provider which give the application control at certain points where processing is occurring. 
         /// If it is not provided a default instance is supplied which does nothing when the methods are called.
         /// </summary>
-        public ICookieAuthenticationEvents Events { get; set; }
+        public ICookieEvents Events { get; set; }
 
         /// <summary>
         /// The TicketDataFormat is used to protect and unprotect the identity and other properties which are stored in the
