@@ -19,22 +19,6 @@ namespace Microsoft.AspNet.Builder
         /// <param name="app">The <see cref="IApplicationBuilder"/> passed to the configure method.</param>
         /// <param name="options">The middleware configuration options.</param>
         /// <returns>The updated <see cref="IApplicationBuilder"/>.</returns>
-        public static IApplicationBuilder UseOAuthAuthentication([NotNull] this IApplicationBuilder app, [NotNull] string authenticationScheme)
-        {
-            return app.UseMiddleware<OAuthAuthenticationMiddleware<OAuthAuthenticationOptions>>(
-                new OAuthAuthenticationOptions {
-                    AuthenticationScheme = authenticationScheme,
-                    Caption = authenticationScheme
-                },
-                new ConfigureOptions<OAuthAuthenticationOptions>(options => { }));
-        }
-
-        /// <summary>
-        /// Authenticate users using OAuth.
-        /// </summary>
-        /// <param name="app">The <see cref="IApplicationBuilder"/> passed to the configure method.</param>
-        /// <param name="options">The middleware configuration options.</param>
-        /// <returns>The updated <see cref="IApplicationBuilder"/>.</returns>
         public static IApplicationBuilder UseOAuthAuthentication([NotNull] this IApplicationBuilder app, [NotNull] IOptions<OAuthAuthenticationOptions> options)
         {
             return app.UseMiddleware<OAuthAuthenticationMiddleware<OAuthAuthenticationOptions>>(
