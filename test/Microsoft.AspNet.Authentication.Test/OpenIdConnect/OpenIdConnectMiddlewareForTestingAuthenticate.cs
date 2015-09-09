@@ -16,11 +16,11 @@ namespace Microsoft.AspNet.Authentication.Tests.OpenIdConnect
     /// pass a <see cref="OpenIdConnectHandler"/> as the AuthenticationHandler
     /// configured to handle certain messages.
     /// </summary>
-    public class OpenIdConnectAuthenticationMiddlewareForTestingAuthenticate : OpenIdConnectMiddleware
+    public class OpenIdConnectMiddlewareForTestingAuthenticate : OpenIdConnectMiddleware
     {
         OpenIdConnectHandler _handler;
 
-        public OpenIdConnectAuthenticationMiddlewareForTestingAuthenticate(
+        public OpenIdConnectMiddlewareForTestingAuthenticate(
             RequestDelegate next,            
             IDataProtectionProvider dataProtectionProvider,
             ILoggerFactory loggerFactory,

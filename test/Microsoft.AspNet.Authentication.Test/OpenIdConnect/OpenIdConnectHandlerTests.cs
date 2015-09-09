@@ -60,7 +60,7 @@ namespace Microsoft.AspNet.Authentication.Tests.OpenIdConnect
         [Theory, MemberData("AuthenticateCoreStateDataSet")]
         public async Task AuthenticateCoreState(Action<OpenIdConnectOptions> action, OpenIdConnectMessage message)
         {
-            var handler = new OpenIdConnectAuthenticationHandlerForTestingAuthenticate();
+            var handler = new OpenIdConnectHandlerForTestingAuthenticate();
             var server = CreateServer(new ConfigureOptions<OpenIdConnectOptions>(action), UrlEncoder.Default, handler);
             await server.CreateClient().PostAsync("http://localhost", new FormUrlEncodedContent(message.Parameters.Where(pair => pair.Value != null)));
         }
@@ -124,7 +124,7 @@ namespace Microsoft.AspNet.Authentication.Tests.OpenIdConnect
         {
             var errors = new List<Tuple<LogEntry, LogEntry>>();
             var expectedLogs = LoggingUtilities.PopulateLogEntries(expectedLogIndexes);
-            var handler = new OpenIdConnectAuthenticationHandlerForTestingAuthenticate();
+            var handler = new OpenIdConnectHandlerForTestingAuthenticate();
             var loggerFactory = new InMemoryLoggerFactory(logLevel);
             var server = CreateServer(new ConfigureOptions<OpenIdConnectOptions>(action), UrlEncoder.Default, loggerFactory, handler);
 
@@ -528,7 +528,7 @@ namespace Microsoft.AspNet.Authentication.Tests.OpenIdConnect
             return TestServer.Create(
                 app =>
                 {
-                    app.UseMiddleware<OpenIdConnectAuthenticationMiddlewareForTestingAuthenticate>(options, encoder, handler);
+                    app.UseMiddleware<OpenIdConnectMiddlewareForTestingAuthenticate>(options, encoder, handler);
                     app.Use(async (context, next) =>
                     {
                         await next();
@@ -547,7 +547,7 @@ namespace Microsoft.AspNet.Authentication.Tests.OpenIdConnect
             return TestServer.Create(
                 app =>
                 {
-                    app.UseMiddleware<OpenIdConnectAuthenticationMiddlewareForTestingAuthenticate>(configureOptions, encoder, loggerFactory, handler);
+                    app.UseMiddleware<OpenIdConnectMiddlewareForTestingAuthenticate>(configureOptions, encoder, loggerFactory, handler);
                     app.Use(async (context, next) =>
                     {
                         await next();
