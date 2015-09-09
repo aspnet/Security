@@ -80,9 +80,9 @@ namespace Microsoft.AspNet.Authentication.OAuth
         public HttpMessageHandler BackchannelHttpHandler { get; set; }
 
         /// <summary>
-        /// Gets or sets the <see cref="IOAuthAuthenticationEvents"/> used to handle authentication events.
+        /// Gets or sets the <see cref="IOAuthEvents"/> used to handle authentication events.
         /// </summary>
-        public IOAuthAuthenticationEvents Events { get; set; } = new OAuthAuthenticationEvents();
+        public IOAuthEvents Events { get; set; } = new OAuthEvents();
 
         /// <summary>
         /// A list of permissions to request.

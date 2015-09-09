@@ -28,8 +28,8 @@ namespace CookieSample
             {
                 if (!context.User.Identities.Any(identity => identity.IsAuthenticated))
                 {
-                    var user = new ClaimsPrincipal(new ClaimsIdentity(new[] { new Claim(ClaimTypes.Name, "bob") }, CookieDefaults.AuthenticationScheme));
-                    await context.Authentication.SignInAsync(CookieDefaults.AuthenticationScheme, user);
+                    var user = new ClaimsPrincipal(new ClaimsIdentity(new[] { new Claim(ClaimTypes.Name, "bob") }, CookieAuthenticationDefaults.AuthenticationScheme));
+                    await context.Authentication.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme, user);
 
                     context.Response.ContentType = "text/plain";
                     await context.Response.WriteAsync("Hello First timer");

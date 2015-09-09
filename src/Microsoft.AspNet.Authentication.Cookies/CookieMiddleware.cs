@@ -28,7 +28,7 @@ namespace Microsoft.AspNet.Authentication.Cookies
             }
             if (String.IsNullOrEmpty(Options.CookieName))
             {
-                Options.CookieName = CookieDefaults.CookiePrefix + Options.AuthenticationScheme;
+                Options.CookieName = CookieAuthenticationDefaults.CookiePrefix + Options.AuthenticationScheme;
             }
             if (Options.TicketDataFormat == null)
             {
@@ -41,15 +41,15 @@ namespace Microsoft.AspNet.Authentication.Cookies
             }
             if (!Options.LoginPath.HasValue)
             {
-                Options.LoginPath = CookieDefaults.LoginPath;
+                Options.LoginPath = CookieAuthenticationDefaults.LoginPath;
             }
             if (!Options.LogoutPath.HasValue)
             {
-                Options.LogoutPath = CookieDefaults.LogoutPath;
+                Options.LogoutPath = CookieAuthenticationDefaults.LogoutPath;
             }
             if (!Options.AccessDeniedPath.HasValue)
             {
-                Options.AccessDeniedPath = CookieDefaults.AccessDeniedPath;
+                Options.AccessDeniedPath = CookieAuthenticationDefaults.AccessDeniedPath;
             }
         }
 

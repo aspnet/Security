@@ -102,7 +102,7 @@ namespace Microsoft.AspNet.Authentication.Tests.OpenIdConnect
             options.ConfigurationManager = TestUtilities.DefaultOpenIdConnectConfigurationManager;
             options.ClientId = Guid.NewGuid().ToString();
             options.StateDataFormat = new AuthenticationPropertiesFormaterKeyValue();
-            options.Events = new OpenIdConnectAuthenticationEvents()
+            options.Events = new OpenIdConnectEvents()
             {
                 OnAuthorizationCodeRedeemed = context =>
                 {
@@ -274,7 +274,7 @@ namespace Microsoft.AspNet.Authentication.Tests.OpenIdConnect
             DefaultOptions(options);
             options.SecurityTokenValidator = MockSecurityTokenValidator();
             options.ProtocolValidator = MockProtocolValidator();
-            options.Events = new OpenIdConnectAuthenticationEvents()
+            options.Events = new OpenIdConnectEvents()
             {
                 OnAuthorizationCodeReceived = (context) =>
                 {
@@ -289,7 +289,7 @@ namespace Microsoft.AspNet.Authentication.Tests.OpenIdConnect
             DefaultOptions(options);
             options.SecurityTokenValidator = MockSecurityTokenValidator();
             options.ProtocolValidator = MockProtocolValidator();
-            options.Events = new OpenIdConnectAuthenticationEvents()
+            options.Events = new OpenIdConnectEvents()
             {
                 OnAuthorizationCodeReceived = (context) =>
                 {
@@ -304,7 +304,7 @@ namespace Microsoft.AspNet.Authentication.Tests.OpenIdConnect
             DefaultOptions(options);
             options.SecurityTokenValidator = MockSecurityTokenValidator();
             options.ProtocolValidator = MockProtocolValidator();
-            options.Events = new OpenIdConnectAuthenticationEvents()
+            options.Events = new OpenIdConnectEvents()
             {
                 OnAuthenticationFailed = (context) =>
                 {
@@ -319,7 +319,7 @@ namespace Microsoft.AspNet.Authentication.Tests.OpenIdConnect
             DefaultOptions(options);
             options.SecurityTokenValidator = MockSecurityTokenValidator();
             options.ProtocolValidator = MockProtocolValidator();
-            options.Events = new OpenIdConnectAuthenticationEvents()
+            options.Events = new OpenIdConnectEvents()
             {
                 OnAuthenticationFailed = (context) =>
                 {
@@ -332,7 +332,7 @@ namespace Microsoft.AspNet.Authentication.Tests.OpenIdConnect
         private static void MessageReceivedHandledOptions(OpenIdConnectOptions options)
         {
             DefaultOptions(options);
-            options.Events = new OpenIdConnectAuthenticationEvents()
+            options.Events = new OpenIdConnectEvents()
             {
                 OnMessageReceived = (context) =>
                 {
@@ -347,7 +347,7 @@ namespace Microsoft.AspNet.Authentication.Tests.OpenIdConnect
             DefaultOptions(options);
             options.ResponseType = OpenIdConnectResponseTypes.Code;
             options.StateDataFormat = new AuthenticationPropertiesFormaterKeyValue();
-            options.Events = new OpenIdConnectAuthenticationEvents()
+            options.Events = new OpenIdConnectEvents()
             {
                 OnAuthorizationCodeRedeemed = (context) =>
                 {
@@ -362,7 +362,7 @@ namespace Microsoft.AspNet.Authentication.Tests.OpenIdConnect
             DefaultOptions(options);
             options.ResponseType = OpenIdConnectResponseTypes.Code;
             options.StateDataFormat = new AuthenticationPropertiesFormaterKeyValue();
-            options.Events = new OpenIdConnectAuthenticationEvents()
+            options.Events = new OpenIdConnectEvents()
             {
                 OnAuthorizationCodeRedeemed = (context) =>
                 {
@@ -380,7 +380,7 @@ namespace Microsoft.AspNet.Authentication.Tests.OpenIdConnect
             options.StateDataFormat = new AuthenticationPropertiesFormaterKeyValue();
             options.GetClaimsFromUserInfoEndpoint = true;
             options.SecurityTokenValidator = MockSecurityTokenValidator();
-            options.Events = new OpenIdConnectAuthenticationEvents()
+            options.Events = new OpenIdConnectEvents()
             {
                 OnSecurityTokenValidated = (context) =>
                 {
@@ -394,7 +394,7 @@ namespace Microsoft.AspNet.Authentication.Tests.OpenIdConnect
         private static void MessageReceivedSkippedOptions(OpenIdConnectOptions options)
         {
             DefaultOptions(options);
-            options.Events = new OpenIdConnectAuthenticationEvents()
+            options.Events = new OpenIdConnectEvents()
             {
                 OnMessageReceived = (context) =>
                 {
@@ -412,7 +412,7 @@ namespace Microsoft.AspNet.Authentication.Tests.OpenIdConnect
         private static void SecurityTokenReceivedHandledOptions(OpenIdConnectOptions options)
         {
             DefaultOptions(options);
-            options.Events = new OpenIdConnectAuthenticationEvents()
+            options.Events = new OpenIdConnectEvents()
             {
                 OnSecurityTokenReceived = (context) =>
                 {
@@ -425,7 +425,7 @@ namespace Microsoft.AspNet.Authentication.Tests.OpenIdConnect
         private static void SecurityTokenReceivedSkippedOptions(OpenIdConnectOptions options)
         {
             DefaultOptions(options);
-            options.Events = new OpenIdConnectAuthenticationEvents()
+            options.Events = new OpenIdConnectEvents()
             {
                 OnSecurityTokenReceived = (context) =>
                 {
@@ -481,7 +481,7 @@ namespace Microsoft.AspNet.Authentication.Tests.OpenIdConnect
         private static void SecurityTokenValidatedHandledOptions(OpenIdConnectOptions options)
         {
             SecurityTokenValidatorValidatesAllTokens(options);
-            options.Events = new OpenIdConnectAuthenticationEvents()
+            options.Events = new OpenIdConnectEvents()
             {
                 OnSecurityTokenValidated = (context) =>
                 {
@@ -494,7 +494,7 @@ namespace Microsoft.AspNet.Authentication.Tests.OpenIdConnect
         private static void SecurityTokenValidatedSkippedOptions(OpenIdConnectOptions options)
         {
             SecurityTokenValidatorValidatesAllTokens(options);
-            options.Events = new OpenIdConnectAuthenticationEvents()
+            options.Events = new OpenIdConnectEvents()
             {
                 OnSecurityTokenValidated = (context) =>
                 {

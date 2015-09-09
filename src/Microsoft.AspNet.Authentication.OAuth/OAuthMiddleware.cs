@@ -65,7 +65,7 @@ namespace Microsoft.AspNet.Authentication.OAuth
 
             if (Options.Events == null)
             {
-                Options.Events = new OAuthAuthenticationEvents();
+                Options.Events = new OAuthEvents();
             }
 
             if (Options.StateDataFormat == null)

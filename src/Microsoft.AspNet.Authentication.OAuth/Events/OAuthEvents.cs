@@ -7,9 +7,9 @@ using System.Threading.Tasks;
 namespace Microsoft.AspNet.Authentication.OAuth
 {
     /// <summary>
-    /// Default <see cref="IOAuthAuthenticationEvents"/> implementation.
+    /// Default <see cref="IOAuthEvents"/> implementation.
     /// </summary>
-    public class OAuthAuthenticationEvents : IOAuthAuthenticationEvents
+    public class OAuthEvents : IOAuthEvents
     {
         /// <summary>
         /// Gets or sets the function that is invoked when the Authenticated method is invoked.

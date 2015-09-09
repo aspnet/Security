@@ -993,15 +993,15 @@ namespace Microsoft.AspNet.Authentication.Cookies
                     }
                     else if (req.Path == new PathString("/forbid")) // Simulate forbidden 
                     {
-                        await context.Authentication.ForbidAsync(CookieDefaults.AuthenticationScheme);
+                        await context.Authentication.ForbidAsync(CookieAuthenticationDefaults.AuthenticationScheme);
                     }
                     else if (req.Path == new PathString("/challenge"))
                     {
-                        await context.Authentication.ChallengeAsync(CookieDefaults.AuthenticationScheme);
+                        await context.Authentication.ChallengeAsync(CookieAuthenticationDefaults.AuthenticationScheme);
                     }
                     else if (req.Path == new PathString("/unauthorized"))
                     {
-                        await context.Authentication.ChallengeAsync(CookieDefaults.AuthenticationScheme, new AuthenticationProperties(), ChallengeBehavior.Unauthorized);
+                        await context.Authentication.ChallengeAsync(CookieAuthenticationDefaults.AuthenticationScheme, new AuthenticationProperties(), ChallengeBehavior.Unauthorized);
                     }
                     else if (req.Path == new PathString("/protected/CustomRedirect"))
                     {
@@ -1009,7 +1009,7 @@ namespace Microsoft.AspNet.Authentication.Cookies
                     }
                     else if (req.Path == new PathString("/me"))
                     {
-                        var authContext = new AuthenticateContext(CookieDefaults.AuthenticationScheme);
+                        var authContext = new AuthenticateContext(CookieAuthenticationDefaults.AuthenticationScheme);
                         authContext.Authenticated(context.User, properties: null, description: null);
                         Describe(res, authContext);
                     }

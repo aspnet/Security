@@ -6,9 +6,9 @@ using System.Threading.Tasks;
 namespace Microsoft.AspNet.Authentication.OAuth
 {
     /// <summary>
-    /// Specifies callback methods which the <see cref="OAuthAuthenticationMiddleware"/> invokes to enable developer control over the authentication process.
+    /// Specifies callback methods which the <see cref="OAuthMiddleware"/> invokes to enable developer control over the authentication process.
     /// </summary>
-    public interface IOAuthAuthenticationEvents
+    public interface IOAuthEvents
     {
         /// <summary>
         /// Invoked after the provider successfully authenticates a user. This can be used to retrieve user information.

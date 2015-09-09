@@ -94,7 +94,7 @@ namespace Microsoft.AspNet.Authentication.OpenIdConnect
 
             if (Options.Events == null)
             {
-                Options.Events = new OpenIdConnectAuthenticationEvents();
+                Options.Events = new OpenIdConnectEvents();
             }
 
             if (string.IsNullOrEmpty(Options.TokenValidationParameters.ValidAudience) && !string.IsNullOrEmpty(Options.ClientId))

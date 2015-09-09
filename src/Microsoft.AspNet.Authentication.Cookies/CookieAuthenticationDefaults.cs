@@ -9,7 +9,7 @@ namespace Microsoft.AspNet.Authentication.Cookies
     /// <summary>
     /// Default values related to cookie-based authentication middleware
     /// </summary>
-    public static class CookieDefaults
+    public static class CookieAuthenticationDefaults
     {
         /// <summary>
         /// The default value used for CookieAuthenticationOptions.AuthenticationScheme

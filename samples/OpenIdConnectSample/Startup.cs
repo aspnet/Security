@@ -17,7 +17,7 @@ namespace OpenIdConnectSample
             services.AddAuthentication();
             services.Configure<SharedAuthenticationOptions>(options =>
             {
-                options.SignInScheme = CookieDefaults.AuthenticationScheme;
+                options.SignInScheme = CookieAuthenticationDefaults.AuthenticationScheme;
             });
         }
 

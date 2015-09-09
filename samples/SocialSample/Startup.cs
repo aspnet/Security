@@ -24,7 +24,7 @@ namespace CookieSample
             services.AddAuthentication();
             services.Configure<SharedAuthenticationOptions>(options =>
             {
-                options.SignInScheme = CookieDefaults.AuthenticationScheme;
+                options.SignInScheme = CookieAuthenticationDefaults.AuthenticationScheme;
             });
             services.AddClaimsTransformation(p =>
             {
@@ -145,7 +145,7 @@ namespace CookieSample
                 ClaimsIssuer = "OAuth2-Github",
                 SaveTokensAsClaims = false,
                 // Retrieving user information is unique to each provider.
-                Events = new OAuthAuthenticationEvents
+                Events = new OAuthEvents
                 {
                     OnAuthenticated = async context =>
                     {
@@ -225,7 +225,7 @@ namespace CookieSample
                 signoutApp.Run(async context =>
                 {
                     context.Response.ContentType = "text/html";
-                    await context.Authentication.SignOutAsync(CookieDefaults.AuthenticationScheme);
+                    await context.Authentication.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
                     await context.Response.WriteAsync("<html><body>");
                     await context.Response.WriteAsync("You have been logged out. Goodbye " + context.User.Identity.Name + "<br>");
                     await context.Response.WriteAsync("<a href=\"/\">Home</a>");

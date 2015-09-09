@@ -21,8 +21,8 @@ namespace Microsoft.AspNet.Authentication.Cookies
         /// </summary>
         public CookieAuthenticationOptions()
         {
-            AuthenticationScheme = CookieDefaults.AuthenticationScheme;
-            ReturnUrlParameter = CookieDefaults.ReturnUrlParameter;
+            AuthenticationScheme = CookieAuthenticationDefaults.AuthenticationScheme;
+            ReturnUrlParameter = CookieAuthenticationDefaults.ReturnUrlParameter;
             ExpireTimeSpan = TimeSpan.FromDays(14);
             SlidingExpiration = true;
             CookieHttpOnly = true;

@@ -9,7 +9,7 @@ namespace Microsoft.AspNet.Authentication.OpenIdConnect
     /// <summary>
     /// Specifies events which the <see cref="OpenIdConnectMiddleware" />invokes to enable developer control over the authentication process.
     /// </summary>
-    public class OpenIdConnectAuthenticationEvents : IOpenIdConnectAuthenticationEvents
+    public class OpenIdConnectEvents : IOpenIdConnectEvents
     {
         /// <summary>
         /// Invoked if exceptions are thrown during request processing. The exceptions will be re-thrown after this event unless suppressed.
