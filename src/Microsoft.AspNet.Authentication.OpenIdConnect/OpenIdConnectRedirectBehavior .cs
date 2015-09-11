@@ -4,7 +4,7 @@
     /// Lists the different authentication methods used to
     /// redirect the user agent to the identity provider.
     /// </summary>
-    public enum OpenIdConnectMethod
+    public enum OpenIdConnectRedirectBehavior
     {
         /// <summary>
         /// Emits a 302 response to redirect the user agent to

@@ -107,7 +107,7 @@ namespace Microsoft.AspNet.Authentication.OpenIdConnect
 
                 message = redirectToIdentityProviderContext.ProtocolMessage;
 
-                if (Options.AuthenticationMethod == OpenIdConnectMethod.RedirectGet)
+                if (Options.AuthenticationMethod == OpenIdConnectRedirectBehavior.RedirectGet)
                 {
                     var redirectUri = message.CreateLogoutRequestUrl();
                     if (!Uri.IsWellFormedUriString(redirectUri, UriKind.Absolute))
@@ -117,7 +117,7 @@ namespace Microsoft.AspNet.Authentication.OpenIdConnect
 
                     Response.Redirect(redirectUri);
                 }
-                else if (Options.AuthenticationMethod == OpenIdConnectMethod.FormPost)
+                else if (Options.AuthenticationMethod == OpenIdConnectRedirectBehavior.FormPost)
                 {
                     var inputs = new StringBuilder();
                     foreach (var parameter in message.Parameters)
@@ -258,7 +258,7 @@ namespace Microsoft.AspNet.Authentication.OpenIdConnect
 
             message.State = Options.StateDataFormat.Protect(properties);
 
-            if (Options.AuthenticationMethod == OpenIdConnectMethod.RedirectGet)
+            if (Options.AuthenticationMethod == OpenIdConnectRedirectBehavior.RedirectGet)
             {
                 var redirectUri = message.CreateAuthenticationRequestUrl();
                 if (!Uri.IsWellFormedUriString(redirectUri, UriKind.Absolute))
@@ -270,7 +270,7 @@ namespace Microsoft.AspNet.Authentication.OpenIdConnect
 
                 return true;
             }
-            else if (Options.AuthenticationMethod == OpenIdConnectMethod.FormPost)
+            else if (Options.AuthenticationMethod == OpenIdConnectRedirectBehavior.FormPost)
             {
                 var inputs = new StringBuilder();
                 foreach (var parameter in message.Parameters)

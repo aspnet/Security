@@ -48,7 +48,7 @@ namespace Microsoft.AspNet.Authentication.Tests.OpenIdConnect
                 options.Authority = DefaultAuthority;
                 options.ClientId = "Test Id";
                 options.Configuration = TestUtilities.DefaultOpenIdConnectConfiguration;
-                options.AuthenticationMethod = OpenIdConnectMethod.FormPost;
+                options.AuthenticationMethod = OpenIdConnectRedirectBehavior.FormPost;
             });
             var transaction = await SendAsync(server, DefaultHost + Challenge);
             transaction.Response.StatusCode.ShouldBe(HttpStatusCode.OK);

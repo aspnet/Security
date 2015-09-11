@@ -193,7 +193,7 @@ namespace Microsoft.AspNet.Authentication.OpenIdConnect
         /// <summary>
         /// Gets or sets the method used to redirect the user agent to the identity provider.
         /// </summary>
-        public OpenIdConnectMethod AuthenticationMethod { get; set; }
+        public OpenIdConnectRedirectBehavior AuthenticationMethod { get; set; }
 
         /// <summary>
         /// Gets or sets the 'resource'.
