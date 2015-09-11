@@ -22,7 +22,7 @@ namespace Microsoft.AspNet.Builder
         /// <returns>The original app parameter</returns>
         public static IApplicationBuilder UseCookieAuthentication([NotNull] this IApplicationBuilder app, Action<CookieAuthenticationOptions> configureOptions = null)
         {
-            return app.UseMiddleware<CookieMiddleware>(
+            return app.UseMiddleware<CookieAuthenticationMiddleware>(
                 new ConfigureOptions<CookieAuthenticationOptions>(configureOptions ?? (o => { })));
         }
 
@@ -35,9 +35,21 @@ namespace Microsoft.AspNet.Builder
         /// <returns>The original app parameter</returns>
         public static IApplicationBuilder UseCookieAuthentication([NotNull] this IApplicationBuilder app, IOptions<CookieAuthenticationOptions> options)
         {
-            return app.UseMiddleware<CookieMiddleware>(options,
+            return app.UseMiddleware<CookieAuthenticationMiddleware>(options,
                 new ConfigureOptions<CookieAuthenticationOptions>(o => { }));
         }
+
+
+        //UseXyz() => DI (If you want from DI)
+        //    UseXyz(Action<XyzOptions>) DI? (Remove entirely) - Kill this
+
+        //    UseXyz(new XyzOptions) Instance (NO DI) (Required for any middleware can be > 1 instance)
+
+        //    new Option
+        //    option.Xyz.Foo
+
+
+        //                UseXyz(XyzOptions) Instance(NO DI)
 
     }
 }

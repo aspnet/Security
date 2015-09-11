@@ -45,6 +45,8 @@ namespace CookieSample
                 options.LoginPath = new PathString("/login");
             });
 
+            //app.UseFacebookAuthentication(app.GetOptions<FacebookOptions>()));
+
             // https://developers.facebook.com/apps/
             app.UseFacebookAuthentication(options =>
             {
@@ -52,7 +54,7 @@ namespace CookieSample
                 options.AppSecret = "a124463c4719c94b4228d9a240e5dc1a";
             });
 
-            var googleOptions = new OAuthOptions
+            app.UseOAuthAuthentication(new OAuthOptions
             {
                 AuthenticationScheme = "Google-AccessToken",
                 Caption = "Google-AccessToken",
@@ -60,13 +62,9 @@ namespace CookieSample
                 ClientSecret = "n2Q-GEw9RQjzcRbU3qhfTj8f",
                 CallbackPath = new PathString("/signin-google-token"),
                 AuthorizationEndpoint = GoogleDefaults.AuthorizationEndpoint,
-                TokenEndpoint = GoogleDefaults.TokenEndpoint
-            };
-            googleOptions.Scope.Add("openid");
-            googleOptions.Scope.Add("profile");
-            googleOptions.Scope.Add("email");
-
-            app.UseOAuthAuthentication(googleOptions);
+                TokenEndpoint = GoogleDefaults.TokenEndpoint,
+                Scope = { "openid", "profile", "email" }
+            });
 
             // https://console.developers.google.com/project
             app.UseGoogleAuthentication(options =>

@@ -11,9 +11,9 @@ using Microsoft.Framework.WebEncoders;
 
 namespace Microsoft.AspNet.Authentication.Cookies
 {
-    public class CookieMiddleware : AuthenticationMiddleware<CookieAuthenticationOptions>
+    public class CookieAuthenticationMiddleware : AuthenticationMiddleware<CookieAuthenticationOptions>
     {
-        public CookieMiddleware(
+        public CookieAuthenticationMiddleware(
             [NotNull] RequestDelegate next,
             [NotNull] IDataProtectionProvider dataProtectionProvider,
             [NotNull] ILoggerFactory loggerFactory,
@@ -24,7 +24,7 @@ namespace Microsoft.AspNet.Authentication.Cookies
         {
             if (Options.Events == null)
             {
-                Options.Events = new CookieEvents();
+                Options.Events = new CookieAuthenticationEvents();
             }
             if (String.IsNullOrEmpty(Options.CookieName))
             {
@@ -32,7 +32,7 @@ namespace Microsoft.AspNet.Authentication.Cookies
             }
             if (Options.TicketDataFormat == null)
             {
-                var dataProtector = dataProtectionProvider.CreateProtector(typeof(CookieMiddleware).FullName, Options.AuthenticationScheme, "v2");
+                var dataProtector = dataProtectionProvider.CreateProtector(typeof(CookieAuthenticationMiddleware).FullName, Options.AuthenticationScheme, "v2");
                 Options.TicketDataFormat = new TicketDataFormat(dataProtector);
             }
             if (Options.CookieManager == null)

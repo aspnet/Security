@@ -340,7 +340,7 @@ namespace Microsoft.AspNet.Authentication.Cookies
             {
                 options.SystemClock = clock;
                 options.ExpireTimeSpan = TimeSpan.FromMinutes(10);
-                options.Events = new CookieEvents
+                options.Events = new CookieAuthenticationEvents
                 {
                     OnValidatePrincipal = ctx =>
                     {
@@ -371,7 +371,7 @@ namespace Microsoft.AspNet.Authentication.Cookies
                 options.SystemClock = clock;
                 options.ExpireTimeSpan = TimeSpan.FromMinutes(10);
                 options.SlidingExpiration = false;
-                options.Events = new CookieEvents
+                options.Events = new CookieAuthenticationEvents
                 {
                     OnValidatePrincipal = ctx =>
                     {
@@ -401,7 +401,7 @@ namespace Microsoft.AspNet.Authentication.Cookies
                 options.SystemClock = clock;
                 options.ExpireTimeSpan = TimeSpan.FromMinutes(10);
                 options.SlidingExpiration = false;
-                options.Events = new CookieEvents
+                options.Events = new CookieAuthenticationEvents
                 {
                     OnValidatePrincipal = ctx =>
                     {
@@ -447,7 +447,7 @@ namespace Microsoft.AspNet.Authentication.Cookies
             {
                 options.SystemClock = clock;
                 options.ExpireTimeSpan = TimeSpan.FromMinutes(10);
-                options.Events = new CookieEvents
+                options.Events = new CookieAuthenticationEvents
                 {
                     OnValidatePrincipal = ctx =>
                     {
@@ -494,11 +494,12 @@ namespace Microsoft.AspNet.Authentication.Cookies
                 options.SystemClock = clock;
                 options.ExpireTimeSpan = TimeSpan.FromMinutes(10);
                 options.SlidingExpiration = false;
-                options.Events = new CookieEvents()
+                options.Events = new CookieAuthenticationEvents()
                 {
                     OnResponseSignIn = context =>
                     {
                         context.Properties.ExpiresUtc = clock.UtcNow.Add(TimeSpan.FromMinutes(5));
+                        return Task.FromResult(0);
                     }
                 };
             }, SignInAsAlice);
