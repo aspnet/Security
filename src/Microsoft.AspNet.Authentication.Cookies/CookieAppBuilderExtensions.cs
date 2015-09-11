@@ -38,18 +38,5 @@ namespace Microsoft.AspNet.Builder
             return app.UseMiddleware<CookieAuthenticationMiddleware>(options,
                 new ConfigureOptions<CookieAuthenticationOptions>(o => { }));
         }
-
-
-        //UseXyz() => DI (If you want from DI)
-        //    UseXyz(Action<XyzOptions>) DI? (Remove entirely) - Kill this
-
-        //    UseXyz(new XyzOptions) Instance (NO DI) (Required for any middleware can be > 1 instance)
-
-        //    new Option
-        //    option.Xyz.Foo
-
-
-        //                UseXyz(XyzOptions) Instance(NO DI)
-
     }
 }
