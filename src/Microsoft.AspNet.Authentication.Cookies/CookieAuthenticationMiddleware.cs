@@ -55,7 +55,7 @@ namespace Microsoft.AspNet.Authentication.Cookies
 
         protected override AuthenticationHandler<CookieAuthenticationOptions> CreateHandler()
         {
-            return new CookieHandler();
+            return new CookieAuthenticationHandler();
         }
     }
 }

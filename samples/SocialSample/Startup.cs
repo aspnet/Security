@@ -45,8 +45,6 @@ namespace CookieSample
                 options.LoginPath = new PathString("/login");
             });
 
-            //app.UseFacebookAuthentication(app.GetOptions<FacebookOptions>()));
-
             // https://developers.facebook.com/apps/
             app.UseFacebookAuthentication(options =>
             {
@@ -97,7 +95,7 @@ namespace CookieSample
             The sample app can then be run via:
              dnx . web
             */
-            var msOAuthOptions = new OAuthOptions
+            app.UseOAuthAuthentication(new OAuthOptions
             {
                 AuthenticationScheme = "Microsoft-AccessToken",
                 Caption = "MicrosoftAccount-AccessToken - Requires project changes",
@@ -105,10 +103,9 @@ namespace CookieSample
                 ClientSecret = "bLw2JIvf8Y1TaToipPEqxTVlOeJwCUsr",
                 CallbackPath = new PathString("/signin-microsoft-token"),
                 AuthorizationEndpoint = MicrosoftAccountDefaults.AuthorizationEndpoint,
-                TokenEndpoint = MicrosoftAccountDefaults.TokenEndpoint
-            };
-            msOAuthOptions.Scope.Add("wl.basic");
-            app.UseOAuthAuthentication(msOAuthOptions);
+                TokenEndpoint = MicrosoftAccountDefaults.TokenEndpoint,
+                Scope = { "wl.basic" }
+            });
 
             app.UseMicrosoftAccountAuthentication(options =>
             {
