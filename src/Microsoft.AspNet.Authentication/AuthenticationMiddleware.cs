@@ -5,7 +5,6 @@ using System;
 using System.Threading.Tasks;
 using Microsoft.AspNet.Builder;
 using Microsoft.AspNet.Http;
-using Microsoft.Framework.Internal;
 using Microsoft.Framework.Logging;
 using Microsoft.Framework.OptionsModel;
 using Microsoft.Framework.WebEncoders;
@@ -17,12 +16,32 @@ namespace Microsoft.AspNet.Authentication
         private readonly RequestDelegate _next;
 
         protected AuthenticationMiddleware(
-            [NotNull] RequestDelegate next, 
-            [NotNull] IOptions<TOptions> options, 
-            [NotNull] ILoggerFactory loggerFactory,
-            [NotNull] IUrlEncoder encoder,
+            RequestDelegate next,
+            IOptions<TOptions> options,
+            ILoggerFactory loggerFactory,
+            IUrlEncoder encoder,
             ConfigureOptions<TOptions> configureOptions)
         {
+            if (next == null)
+            {
+                throw new ArgumentNullException(nameof(next));
+            }
+
+            if (options == null)
+            {
+                throw new ArgumentNullException(nameof(options));
+            }
+
+            if (loggerFactory == null)
+            {
+                throw new ArgumentNullException(nameof(loggerFactory));
+            }
+
+            if (encoder == null)
+            {
+                throw new ArgumentNullException(nameof(encoder));
+            }
+
             Options = options.Value;
             if (configureOptions != null)
             {

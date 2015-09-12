@@ -3,7 +3,6 @@
 
 using System;
 using Microsoft.AspNet.Authentication.MicrosoftAccount;
-using Microsoft.Framework.Internal;
 using Microsoft.Framework.OptionsModel;
 
 namespace Microsoft.AspNet.Builder
@@ -13,8 +12,13 @@ namespace Microsoft.AspNet.Builder
     /// </summary>
     public static class MicrosoftAccountAuthenticationExtensions
     {
-        public static IApplicationBuilder UseMicrosoftAccountAuthentication([NotNull] this IApplicationBuilder app, Action<MicrosoftAccountAuthenticationOptions> configureOptions = null)
+        public static IApplicationBuilder UseMicrosoftAccountAuthentication(this IApplicationBuilder app, Action<MicrosoftAccountAuthenticationOptions> configureOptions = null)
         {
+            if (app == null)
+            {
+                throw new ArgumentNullException(nameof(app));
+            }
+
             return app.UseMiddleware<MicrosoftAccountAuthenticationMiddleware>(
                  new ConfigureOptions<MicrosoftAccountAuthenticationOptions>(configureOptions ?? (o => { })));
         }

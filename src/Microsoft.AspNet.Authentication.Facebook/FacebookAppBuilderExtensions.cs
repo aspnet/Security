@@ -3,7 +3,6 @@
 
 using System;
 using Microsoft.AspNet.Authentication.Facebook;
-using Microsoft.Framework.Internal;
 using Microsoft.Framework.OptionsModel;
 
 namespace Microsoft.AspNet.Builder
@@ -18,8 +17,13 @@ namespace Microsoft.AspNet.Builder
         /// </summary>
         /// <param name="app">The <see cref="IApplicationBuilder"/> passed to the configure method.</param>
         /// <returns>The updated <see cref="IApplicationBuilder"/>.</returns>
-        public static IApplicationBuilder UseFacebookAuthentication([NotNull] this IApplicationBuilder app, Action<FacebookAuthenticationOptions> configureOptions = null)
+        public static IApplicationBuilder UseFacebookAuthentication(this IApplicationBuilder app, Action<FacebookAuthenticationOptions> configureOptions = null)
         {
+            if (app == null)
+            {
+                throw new ArgumentNullException(nameof(app));
+            }
+
             return app.UseMiddleware<FacebookAuthenticationMiddleware>(
                  new ConfigureOptions<FacebookAuthenticationOptions>(configureOptions ?? (o => { })));
         }

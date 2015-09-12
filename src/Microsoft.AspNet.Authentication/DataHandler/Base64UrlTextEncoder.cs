@@ -2,19 +2,28 @@
 // Licensed under the Apache License, Version 2.0. See License.txt in the project root for license information.
 
 using System;
-using Microsoft.Framework.Internal;
 
 namespace Microsoft.AspNet.Authentication
 {
     public class Base64UrlTextEncoder : ITextEncoder
     {
-        public string Encode([NotNull] byte[] data)
+        public string Encode(byte[] data)
         {
+            if (data == null)
+            {
+                throw new ArgumentNullException(nameof(data));
+            }
+
             return Convert.ToBase64String(data).TrimEnd('=').Replace('+', '-').Replace('/', '_');
         }
 
-        public byte[] Decode([NotNull] string text)
+        public byte[] Decode(string text)
         {
+            if (text == null)
+            {
+                throw new ArgumentNullException(nameof(text));
+            }
+
             return Convert.FromBase64String(Pad(text.Replace('-', '+').Replace('_', '/')));
         }
 

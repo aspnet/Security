@@ -6,7 +6,6 @@ using System.Collections.Generic;
 using System.Globalization;
 using System.IdentityModel.Tokens;
 using System.IdentityModel.Tokens.Jwt;
-using System.IO;
 using System.Linq;
 using System.Net.Http;
 using System.Net.Http.Headers;
@@ -18,7 +17,6 @@ using Microsoft.AspNet.Http;
 using Microsoft.AspNet.Http.Authentication;
 using Microsoft.AspNet.Http.Features.Authentication;
 using Microsoft.Framework.Caching.Distributed;
-using Microsoft.Framework.Internal;
 using Microsoft.Framework.Logging;
 using Microsoft.IdentityModel.Protocols.OpenIdConnect;
 using Microsoft.Net.Http.Headers;
@@ -156,8 +154,13 @@ namespace Microsoft.AspNet.Authentication.OpenIdConnect
         /// </summary>
         /// <returns></returns>
         /// <remarks>Uses log id's OIDCH-0026 - OIDCH-0050, next num: 37</remarks>
-        protected override async Task<bool> HandleUnauthorizedAsync([NotNull] ChallengeContext context)
+        protected override async Task<bool> HandleUnauthorizedAsync(ChallengeContext context)
         {
+            if (context == null)
+            {
+                throw new ArgumentNullException(nameof(context));
+            }
+
             Logger.LogDebug(Resources.OIDCH_0026_ApplyResponseChallengeAsync, this.GetType());
 
             // order for local RedirectUri
@@ -724,8 +727,13 @@ namespace Microsoft.AspNet.Authentication.OpenIdConnect
             return null;
         }
 
-        private void GenerateCorrelationId([NotNull] AuthenticationProperties properties)
+        private void GenerateCorrelationId(AuthenticationProperties properties)
         {
+            if (properties == null)
+            {
+                throw new ArgumentNullException(nameof(properties));
+            }
+
             var correlationKey = OpenIdConnectAuthenticationDefaults.CookieStatePrefix;
 
             var nonceBytes = new byte[32];
@@ -744,8 +752,13 @@ namespace Microsoft.AspNet.Authentication.OpenIdConnect
             Response.Cookies.Append(correlationKey + correlationId, NonceProperty, cookieOptions);
         }
 
-        private bool ValidateCorrelationId([NotNull] AuthenticationProperties properties)
+        private bool ValidateCorrelationId(AuthenticationProperties properties)
         {
+            if (properties == null)
+            {
+                throw new ArgumentNullException(nameof(properties));
+            }
+
             var correlationKey = OpenIdConnectAuthenticationDefaults.CookieStatePrefix;
 
             string correlationId;

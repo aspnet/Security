@@ -3,7 +3,6 @@
 
 using System;
 using Microsoft.AspNet.Authentication.Cookies;
-using Microsoft.Framework.Internal;
 using Microsoft.Framework.OptionsModel;
 
 namespace Microsoft.AspNet.Builder
@@ -20,8 +19,13 @@ namespace Microsoft.AspNet.Builder
         /// <param name="configureOptions">Used to configure the options for the middleware</param>
         /// <param name="optionsName">The name of the options class that controls the middleware behavior, null will use the default options</param>
         /// <returns>The original app parameter</returns>
-        public static IApplicationBuilder UseCookieAuthentication([NotNull] this IApplicationBuilder app, Action<CookieAuthenticationOptions> configureOptions = null)
+        public static IApplicationBuilder UseCookieAuthentication(this IApplicationBuilder app, Action<CookieAuthenticationOptions> configureOptions = null)
         {
+            if (app == null)
+            {
+                throw new ArgumentNullException(nameof(app));
+            }
+
             return app.UseMiddleware<CookieAuthenticationMiddleware>(
                 new ConfigureOptions<CookieAuthenticationOptions>(configureOptions ?? (o => { })));
         }
@@ -33,8 +37,13 @@ namespace Microsoft.AspNet.Builder
         /// <param name="configureOptions">Used to configure the options for the middleware</param>
         /// <param name="optionsName">The name of the options class that controls the middleware behavior, null will use the default options</param>
         /// <returns>The original app parameter</returns>
-        public static IApplicationBuilder UseCookieAuthentication([NotNull] this IApplicationBuilder app, IOptions<CookieAuthenticationOptions> options)
+        public static IApplicationBuilder UseCookieAuthentication(this IApplicationBuilder app, IOptions<CookieAuthenticationOptions> options)
         {
+            if (app == null)
+            {
+                throw new ArgumentNullException(nameof(app));
+            }
+
             return app.UseMiddleware<CookieAuthenticationMiddleware>(options,
                 new ConfigureOptions<CookieAuthenticationOptions>(o => { }));
         }

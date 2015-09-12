@@ -3,7 +3,6 @@
 
 using System;
 using Microsoft.AspNet.Authentication;
-using Microsoft.Framework.Internal;
 using Microsoft.Framework.OptionsModel;
 
 namespace Microsoft.AspNet.Builder
@@ -29,8 +28,13 @@ namespace Microsoft.AspNet.Builder
         /// <param name="app">The IApplicationBuilder passed to your configuration method</param>
         /// <param name="configureOptions">Used to configure the options for the middleware</param>
         /// <returns>The original app parameter</returns>
-        public static IApplicationBuilder UseClaimsTransformation(this IApplicationBuilder app, [NotNull] Action<ClaimsTransformationOptions> configureOptions)
+        public static IApplicationBuilder UseClaimsTransformation(this IApplicationBuilder app, Action<ClaimsTransformationOptions> configureOptions)
         {
+            if (configureOptions == null)
+            {
+                throw new ArgumentNullException(nameof(configureOptions));
+            }
+
             return app.UseMiddleware<ClaimsTransformationMiddleware>(
                 new ConfigureOptions<ClaimsTransformationOptions>(configureOptions));
         }

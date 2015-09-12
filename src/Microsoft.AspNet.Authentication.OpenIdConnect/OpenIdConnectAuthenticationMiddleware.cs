@@ -10,7 +10,6 @@ using Microsoft.AspNet.DataProtection;
 using Microsoft.AspNet.Http;
 using Microsoft.Framework.Caching.Distributed;
 using Microsoft.Framework.DependencyInjection;
-using Microsoft.Framework.Internal;
 using Microsoft.Framework.Logging;
 using Microsoft.Framework.OptionsModel;
 using Microsoft.Framework.WebEncoders;
@@ -39,16 +38,51 @@ namespace Microsoft.AspNet.Authentication.OpenIdConnect
         /// that is retrieved by calling <see cref="IOptions{OpenIdConnectAuthenticationOptions}.GetNamedOptions(string)"/> where string == <see cref="ConfigureOptions{OpenIdConnectAuthenticationOptions}.Name"/> provides runtime configuration.</param>
         [SuppressMessage("Microsoft.Reliability", "CA2000:Dispose objects before losing scope", Justification = "Managed by caller")]
         public OpenIdConnectAuthenticationMiddleware(
-            [NotNull] RequestDelegate next,
-            [NotNull] IDataProtectionProvider dataProtectionProvider,
-            [NotNull] ILoggerFactory loggerFactory,
-            [NotNull] IUrlEncoder encoder,
-            [NotNull] IServiceProvider services,
-            [NotNull] IOptions<SharedAuthenticationOptions> sharedOptions,
-            [NotNull] IOptions<OpenIdConnectAuthenticationOptions> options,
+            RequestDelegate next,
+            IDataProtectionProvider dataProtectionProvider,
+            ILoggerFactory loggerFactory,
+            IUrlEncoder encoder,
+            IServiceProvider services,
+            IOptions<SharedAuthenticationOptions> sharedOptions,
+            IOptions<OpenIdConnectAuthenticationOptions> options,
             ConfigureOptions<OpenIdConnectAuthenticationOptions> configureOptions = null)
             : base(next, options, loggerFactory, encoder, configureOptions)
         {
+            if (next == null)
+            {
+                throw new ArgumentNullException(nameof(next));
+            }
+
+            if (dataProtectionProvider == null)
+            {
+                throw new ArgumentNullException(nameof(dataProtectionProvider));
+            }
+
+            if (loggerFactory == null)
+            {
+                throw new ArgumentNullException(nameof(loggerFactory));
+            }
+
+            if (encoder == null)
+            {
+                throw new ArgumentNullException(nameof(encoder));
+            }
+
+            if (services == null)
+            {
+                throw new ArgumentNullException(nameof(services));
+            }
+
+            if (sharedOptions == null)
+            {
+                throw new ArgumentNullException(nameof(sharedOptions));
+            }
+
+            if (options == null)
+            {
+                throw new ArgumentNullException(nameof(options));
+            }
+
             if (string.IsNullOrEmpty(Options.SignInScheme) && !string.IsNullOrEmpty(sharedOptions.Value.SignInScheme))
             {
                 Options.SignInScheme = sharedOptions.Value.SignInScheme;
@@ -80,7 +114,7 @@ namespace Microsoft.AspNet.Authentication.OpenIdConnect
 
                 Options.StringDataFormat = new SecureDataFormat<string>(new StringSerializer(), dataProtector, TextEncodings.Base64Url);
             }
-            
+
             // if the user has not set the AuthorizeCallback, set it from the redirect_uri
             if (!Options.CallbackPath.HasValue)
             {
