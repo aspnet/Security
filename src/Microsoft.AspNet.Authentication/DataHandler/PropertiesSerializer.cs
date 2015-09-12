@@ -1,11 +1,11 @@
 // Copyright (c) .NET Foundation. All rights reserved.
 // Licensed under the Apache License, Version 2.0. See License.txt in the project root for license information.
 
+using System;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using Microsoft.AspNet.Http.Authentication;
-using Microsoft.Framework.Internal;
 
 namespace Microsoft.AspNet.Authentication
 {
@@ -39,8 +39,18 @@ namespace Microsoft.AspNet.Authentication
             }
         }
 
-        public static void Write([NotNull] BinaryWriter writer, [NotNull] AuthenticationProperties properties)
+        public static void Write(BinaryWriter writer, AuthenticationProperties properties)
         {
+            if (writer == null)
+            {
+                throw new ArgumentNullException(nameof(writer));
+            }
+
+            if (properties == null)
+            {
+                throw new ArgumentNullException(nameof(properties));
+            }
+
             writer.Write(FormatVersion);
             writer.Write(properties.Items.Count);
             foreach (var kv in properties.Items)
@@ -50,8 +60,13 @@ namespace Microsoft.AspNet.Authentication
             }
         }
 
-        public static AuthenticationProperties Read([NotNull] BinaryReader reader)
+        public static AuthenticationProperties Read(BinaryReader reader)
         {
+            if (reader == null)
+            {
+                throw new ArgumentNullException(nameof(reader));
+            }
+
             if (reader.ReadInt32() != FormatVersion)
             {
                 return null;

@@ -4,7 +4,6 @@
 using System;
 using System.Net.Http;
 using Microsoft.AspNet.Builder;
-using Microsoft.Framework.Internal;
 using Microsoft.Framework.Logging;
 using Microsoft.Framework.OptionsModel;
 using Microsoft.Framework.WebEncoders;
@@ -26,13 +25,33 @@ namespace Microsoft.AspNet.Authentication.JwtBearer
         /// extension method.
         /// </summary>
         public JwtBearerAuthenticationMiddleware(
-            [NotNull] RequestDelegate next,
-            [NotNull] ILoggerFactory loggerFactory,
-            [NotNull] IUrlEncoder encoder,
-            [NotNull] IOptions<JwtBearerAuthenticationOptions> options,
+            RequestDelegate next,
+            ILoggerFactory loggerFactory,
+            IUrlEncoder encoder,
+            IOptions<JwtBearerAuthenticationOptions> options,
             ConfigureOptions<JwtBearerAuthenticationOptions> configureOptions)
             : base(next, options, loggerFactory, encoder, configureOptions)
         {
+            if (next == null)
+            {
+                throw new ArgumentNullException(nameof(next));
+            }
+
+            if (loggerFactory == null)
+            {
+                throw new ArgumentNullException(nameof(loggerFactory));
+            }
+
+            if (encoder == null)
+            {
+                throw new ArgumentNullException(nameof(encoder));
+            }
+
+            if (options == null)
+            {
+                throw new ArgumentNullException(nameof(options));
+            }
+
             if (Options.Events == null)
             {
                 Options.Events = new JwtBearerAuthenticationEvents();

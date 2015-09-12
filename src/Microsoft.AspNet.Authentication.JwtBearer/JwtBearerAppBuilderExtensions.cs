@@ -3,7 +3,6 @@
 
 using System;
 using Microsoft.AspNet.Authentication.JwtBearer;
-using Microsoft.Framework.Internal;
 using Microsoft.Framework.OptionsModel;
 
 namespace Microsoft.AspNet.Builder
@@ -24,8 +23,13 @@ namespace Microsoft.AspNet.Builder
         /// <param name="app">The application builder</param>
         /// <param name="options">Options which control the processing of the bearer header.</param>
         /// <returns>The application builder</returns>
-        public static IApplicationBuilder UseJwtBearerAuthentication([NotNull] this IApplicationBuilder app, Action<JwtBearerAuthenticationOptions> configureOptions = null, string optionsName = "")
+        public static IApplicationBuilder UseJwtBearerAuthentication(this IApplicationBuilder app, Action<JwtBearerAuthenticationOptions> configureOptions = null, string optionsName = "")
         {
+            if (app == null)
+            {
+                throw new ArgumentNullException(nameof(app));
+            }
+
             return app.UseMiddleware<JwtBearerAuthenticationMiddleware>(
                 new ConfigureOptions<JwtBearerAuthenticationOptions>(configureOptions ?? (o => { })));
         }

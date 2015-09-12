@@ -7,7 +7,6 @@ using System.Globalization;
 using System.Net.Http;
 using Microsoft.AspNet.Builder;
 using Microsoft.AspNet.DataProtection;
-using Microsoft.Framework.Internal;
 using Microsoft.Framework.Logging;
 using Microsoft.Framework.OptionsModel;
 using Microsoft.Framework.WebEncoders;
@@ -28,15 +27,45 @@ namespace Microsoft.AspNet.Authentication.OAuth
         /// <param name="loggerFactory"></param>
         /// <param name="options">Configuration options for the middleware.</param>
         public OAuthAuthenticationMiddleware(
-            [NotNull] RequestDelegate next,
-            [NotNull] IDataProtectionProvider dataProtectionProvider,
-            [NotNull] ILoggerFactory loggerFactory,
-            [NotNull] IUrlEncoder encoder,
-            [NotNull] IOptions<SharedAuthenticationOptions> sharedOptions,
-            [NotNull] IOptions<TOptions> options,
+            RequestDelegate next,
+            IDataProtectionProvider dataProtectionProvider,
+            ILoggerFactory loggerFactory,
+            IUrlEncoder encoder,
+            IOptions<SharedAuthenticationOptions> sharedOptions,
+            IOptions<TOptions> options,
             ConfigureOptions<TOptions> configureOptions = null)
             : base(next, options, loggerFactory, encoder, configureOptions)
         {
+            if (next == null)
+            {
+                throw new ArgumentNullException(nameof(next));
+            }
+
+            if (dataProtectionProvider == null)
+            {
+                throw new ArgumentNullException(nameof(dataProtectionProvider));
+            }
+
+            if (loggerFactory == null)
+            {
+                throw new ArgumentNullException(nameof(loggerFactory));
+            }
+
+            if (encoder == null)
+            {
+                throw new ArgumentNullException(nameof(encoder));
+            }
+
+            if (sharedOptions == null)
+            {
+                throw new ArgumentNullException(nameof(sharedOptions));
+            }
+
+            if (options == null)
+            {
+                throw new ArgumentNullException(nameof(options));
+            }
+
             // todo: review error handling
             if (string.IsNullOrEmpty(Options.AuthenticationScheme))
             {

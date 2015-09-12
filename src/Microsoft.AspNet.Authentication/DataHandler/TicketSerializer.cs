@@ -5,7 +5,6 @@ using System;
 using System.IO;
 using System.Linq;
 using System.Security.Claims;
-using Microsoft.Framework.Internal;
 
 namespace Microsoft.AspNet.Authentication
 {
@@ -36,8 +35,18 @@ namespace Microsoft.AspNet.Authentication
             }
         }
 
-        public static void Write([NotNull] BinaryWriter writer, [NotNull] AuthenticationTicket model)
+        public static void Write(BinaryWriter writer, AuthenticationTicket model)
         {
+            if (writer == null)
+            {
+                throw new ArgumentNullException(nameof(writer));
+            }
+
+            if (model == null)
+            {
+                throw new ArgumentNullException(nameof(model));
+            }
+
             writer.Write(FormatVersion);
             writer.Write(model.AuthenticationScheme);
             var principal = model.Principal;
@@ -79,8 +88,13 @@ namespace Microsoft.AspNet.Authentication
             PropertiesSerializer.Write(writer, model.Properties);
         }
 
-        public static AuthenticationTicket Read([NotNull] BinaryReader reader)
+        public static AuthenticationTicket Read(BinaryReader reader)
         {
+            if (reader == null)
+            {
+                throw new ArgumentNullException(nameof(reader));
+            }
+
             if (reader.ReadInt32() != FormatVersion)
             {
                 return null;

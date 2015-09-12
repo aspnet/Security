@@ -3,7 +3,6 @@
 
 using System;
 using Microsoft.AspNet.Authentication.OAuth;
-using Microsoft.Framework.Internal;
 using Microsoft.Framework.OptionsModel;
 
 namespace Microsoft.AspNet.Builder
@@ -19,8 +18,18 @@ namespace Microsoft.AspNet.Builder
         /// <param name="app">The <see cref="IApplicationBuilder"/> passed to the configure method.</param>
         /// <param name="options">The middleware configuration options.</param>
         /// <returns>The updated <see cref="IApplicationBuilder"/>.</returns>
-        public static IApplicationBuilder UseOAuthAuthentication([NotNull] this IApplicationBuilder app, [NotNull] IOptions<OAuthAuthenticationOptions> options)
+        public static IApplicationBuilder UseOAuthAuthentication(this IApplicationBuilder app, IOptions<OAuthAuthenticationOptions> options)
         {
+            if (app == null)
+            {
+                throw new ArgumentNullException(nameof(app));
+            }
+
+            if (options == null)
+            {
+                throw new ArgumentNullException(nameof(options));
+            }
+
             return app.UseMiddleware<OAuthAuthenticationMiddleware<OAuthAuthenticationOptions>>(
                 options,
                 new ConfigureOptions<OAuthAuthenticationOptions>(o => { }));

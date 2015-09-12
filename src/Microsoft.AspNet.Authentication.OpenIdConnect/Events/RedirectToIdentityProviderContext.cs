@@ -3,7 +3,6 @@
 
 using System;
 using Microsoft.AspNet.Http;
-using Microsoft.Framework.Internal;
 using Microsoft.IdentityModel.Protocols.OpenIdConnect;
 
 namespace Microsoft.AspNet.Authentication.OpenIdConnect
@@ -16,15 +15,38 @@ namespace Microsoft.AspNet.Authentication.OpenIdConnect
     /// <typeparam name="TOptions">protocol specific options.</typeparam>
     public class RedirectToIdentityProviderContext : BaseControlContext<OpenIdConnectAuthenticationOptions>
     {
-        public RedirectToIdentityProviderContext([NotNull] HttpContext context, [NotNull] OpenIdConnectAuthenticationOptions options)
+        private OpenIdConnectMessage _protocolMessage;
+
+        public RedirectToIdentityProviderContext(HttpContext context, OpenIdConnectAuthenticationOptions options)
             : base(context, options)
         {
+            if (context == null)
+            {
+                throw new ArgumentNullException(nameof(context));
+            }
+
+            if (options == null)
+            {
+                throw new ArgumentNullException(nameof(options));
+            }
         }
 
         /// <summary>
         /// Gets or sets the <see cref="OpenIdConnectMessage"/>.
         /// </summary>
         /// <exception cref="ArgumentNullException">if 'value' is null.</exception>
-        public OpenIdConnectMessage ProtocolMessage { get; [param: NotNull] set; }
+        public OpenIdConnectMessage ProtocolMessage
+        {
+            get { return _protocolMessage; }
+            set
+            {
+                if (value == null)
+                {
+                    throw new ArgumentNullException(nameof(value));
+                }
+
+                _protocolMessage = value;
+            }
+        }
     }
 }
