@@ -157,7 +157,7 @@ namespace Microsoft.AspNet.Authentication.Twitter
                 var redirectContext = new TwitterApplyRedirectContext(
                     Context, Options,
                     properties, twitterAuthenticationEndpoint);
-                Options.Events.ApplyRedirect(redirectContext);
+                await Options.Events.ApplyRedirect(redirectContext);
                 return true;
             }
             else
