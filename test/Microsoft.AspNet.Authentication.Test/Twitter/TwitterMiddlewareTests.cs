@@ -29,6 +29,7 @@ namespace Microsoft.AspNet.Authentication.Twitter
                         OnApplyRedirect = context =>
                         {
                             context.Response.Redirect(context.RedirectUri + "&custom=test");
+                            return Task.FromResult(0);
                         }
                     };
                     options.BackchannelHttpHandler = new TestHttpMessageHandler

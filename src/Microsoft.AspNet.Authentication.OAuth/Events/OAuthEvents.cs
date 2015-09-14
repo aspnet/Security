@@ -24,7 +24,11 @@ namespace Microsoft.AspNet.Authentication.OAuth
         /// <summary>
         /// Gets or sets the delegate that is invoked when the ApplyRedirect method is invoked.
         /// </summary>
-        public Action<OAuthApplyRedirectContext> OnApplyRedirect { get; set; } = context => context.Response.Redirect(context.RedirectUri);
+        public Func<OAuthApplyRedirectContext, Task> OnApplyRedirect { get; set; } = context =>
+        {
+            context.Response.Redirect(context.RedirectUri);
+            return Task.FromResult(0);
+        };
 
         /// <summary>
         /// Invoked after the provider successfully authenticates a user.
@@ -44,6 +48,6 @@ namespace Microsoft.AspNet.Authentication.OAuth
         /// Called when a Challenge causes a redirect to authorize endpoint in the OAuth middleware.
         /// </summary>
         /// <param name="context">Contains redirect URI and <see cref="AuthenticationProperties"/> of the challenge.</param>
-        public virtual void ApplyRedirect(OAuthApplyRedirectContext context) => OnApplyRedirect(context);
+        public virtual Task ApplyRedirect(OAuthApplyRedirectContext context) => OnApplyRedirect(context);
     }
 }

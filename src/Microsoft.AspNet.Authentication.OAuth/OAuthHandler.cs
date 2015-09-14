@@ -199,7 +199,7 @@ namespace Microsoft.AspNet.Authentication.OAuth
             return new AuthenticationTicket(context.Principal, context.Properties, Options.AuthenticationScheme);
         }
 
-        protected override Task<bool> HandleUnauthorizedAsync([NotNull] ChallengeContext context)
+        protected override async Task<bool> HandleUnauthorizedAsync([NotNull] ChallengeContext context)
         {
             var properties = new AuthenticationProperties(context.Properties);
             if (string.IsNullOrEmpty(properties.RedirectUri))
@@ -215,8 +215,8 @@ namespace Microsoft.AspNet.Authentication.OAuth
             var redirectContext = new OAuthApplyRedirectContext(
                 Context, Options,
                 properties, authorizationEndpoint);
-            Options.Events.ApplyRedirect(redirectContext);
-            return Task.FromResult(true);
+            await Options.Events.ApplyRedirect(redirectContext);
+            return true;
         }
 
         protected override Task HandleSignOutAsync(SignOutContext context)

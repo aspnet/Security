@@ -24,7 +24,11 @@ namespace Microsoft.AspNet.Authentication.Twitter
         /// <summary>
         /// Gets or sets the delegate that is invoked when the ApplyRedirect method is invoked.
         /// </summary>
-        public Action<TwitterApplyRedirectContext> OnApplyRedirect { get; set; } = context => context.Response.Redirect(context.RedirectUri);
+        public Func<TwitterApplyRedirectContext, Task> OnApplyRedirect { get; set; } = context =>
+        {
+            context.Response.Redirect(context.RedirectUri);
+            return Task.FromResult(0);
+        };
 
         /// <summary>
         /// Invoked whenever Twitter successfully authenticates a user
@@ -44,6 +48,6 @@ namespace Microsoft.AspNet.Authentication.Twitter
         /// Called when a Challenge causes a redirect to authorize endpoint in the Twitter middleware
         /// </summary>
         /// <param name="context">Contains redirect URI and <see cref="AuthenticationProperties"/> of the challenge </param>
-        public virtual void ApplyRedirect(TwitterApplyRedirectContext context) => OnApplyRedirect(context);
+        public virtual Task ApplyRedirect(TwitterApplyRedirectContext context) => OnApplyRedirect(context);
     }
 }

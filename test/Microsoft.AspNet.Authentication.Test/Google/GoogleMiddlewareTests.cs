@@ -201,9 +201,10 @@ namespace Microsoft.AspNet.Authentication.Google
                 options.Events = new OAuthEvents
                 {
                     OnApplyRedirect = context =>
-                        {
-                            context.Response.Redirect(context.RedirectUri + "&custom=test");
-                        }
+                    {
+                        context.Response.Redirect(context.RedirectUri + "&custom=test");
+                        return Task.FromResult(0);
+                    }
                 };
             });
             var transaction = await server.SendAsync("https://example.com/challenge");
