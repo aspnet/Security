@@ -28,6 +28,6 @@ namespace Microsoft.AspNet.Authentication.Twitter
         /// Called when a Challenge causes a redirect to authorize endpoint in the Twitter middleware
         /// </summary>
         /// <param name="context">Contains redirect URI and <see cref="AuthenticationProperties"/> of the challenge </param>
-        void ApplyRedirect(TwitterApplyRedirectContext context);
+        Task ApplyRedirect(TwitterApplyRedirectContext context);
     }
 }

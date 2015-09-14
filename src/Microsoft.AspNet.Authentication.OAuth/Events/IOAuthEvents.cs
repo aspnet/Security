@@ -29,6 +29,6 @@ namespace Microsoft.AspNet.Authentication.OAuth
         /// Called when a Challenge causes a redirect to the authorize endpoint.
         /// </summary>
         /// <param name="context">Contains redirect URI and <see cref="AuthenticationProperties"/> of the challenge.</param>
-        void ApplyRedirect(OAuthApplyRedirectContext context);
+        Task ApplyRedirect(OAuthApplyRedirectContext context);
     }
 }

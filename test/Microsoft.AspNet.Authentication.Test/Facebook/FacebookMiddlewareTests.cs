@@ -48,6 +48,7 @@ namespace Microsoft.AspNet.Authentication.Facebook
                             OnApplyRedirect = context =>
                             {
                                 context.Response.Redirect(context.RedirectUri + "&custom=test");
+                                return Task.FromResult(0);
                             }
                         };
                     });

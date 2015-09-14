@@ -37,6 +37,7 @@ namespace Microsoft.AspNet.Authentication.Tests.MicrosoftAccount
                         OnApplyRedirect = context =>
                         {
                             context.Response.Redirect(context.RedirectUri + "&custom=test");
+                            return Task.FromResult(0);
                         }
                     };
                 });
