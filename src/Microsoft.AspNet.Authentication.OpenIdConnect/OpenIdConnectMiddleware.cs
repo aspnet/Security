@@ -43,9 +43,8 @@ namespace Microsoft.AspNet.Authentication.OpenIdConnect
             [NotNull] IUrlEncoder encoder,
             [NotNull] IServiceProvider services,
             [NotNull] IOptions<SharedAuthenticationOptions> sharedOptions,
-            [NotNull] IOptions<OpenIdConnectOptions> options,
-            ConfigureOptions<OpenIdConnectOptions> configureOptions = null)
-            : base(next, options, loggerFactory, encoder, configureOptions)
+            [NotNull] OpenIdConnectOptions options)
+            : base(next, options, loggerFactory, encoder)
         {
             if (string.IsNullOrEmpty(Options.SignInScheme) && !string.IsNullOrEmpty(sharedOptions.Value.SignInScheme))
             {
