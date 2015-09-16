@@ -12,7 +12,7 @@ namespace Microsoft.AspNet.Builder
     public static class CookiePolicyAppBuilderExtensions
     {
         /// <summary>
-        /// Adds a claims transformation middleware to your web application pipeline.
+        /// Adds a cookie policy middleware to your web application pipeline.
         /// </summary>
         /// <param name="app">The IApplicationBuilder passed to your configuration method</param>
         /// <returns>The original app parameter</returns>
@@ -22,7 +22,7 @@ namespace Microsoft.AspNet.Builder
         }
 
         /// <summary>
-        /// Adds a claims transformation middleware to your web application pipeline.
+        /// Adds a cookie policy middleware to your web application pipeline.
         /// </summary>
         /// <param name="app">The IApplicationBuilder passed to your configuration method</param>
         /// <param name="configureOptions">Used to configure the options for the middleware</param>
