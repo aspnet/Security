@@ -12,36 +12,11 @@ namespace Microsoft.AspNet.CookiePolicy.Test
     public class CookiePolicyTests
     {
         [Fact]
-        public async Task CookiePolicySecureAlwaysSetsSecure()
+        public async Task UseMapToTestSecurePolicyAndHttpOnlyModes()
         {
             var server = TestServer.Create(app =>
             {
-                app.UseCookiePolicy(options => options.Secure = SecurePolicy.Always);
-                app.Run(context =>
-                {
-                    context.Response.Cookies.Append("A", "A");
-                    context.Response.Cookies.Append("B", "B", new CookieOptions { Secure = false });
-                    context.Response.Cookies.Append("C", "C", new CookieOptions());
-                    context.Response.Cookies.Append("D", "D", new CookieOptions { Secure = true });
-                    return Task.FromResult(0);
-                });
-            });
-
-            var transaction = await server.SendAsync("http://example.com/login");
-
-            Assert.NotNull(transaction.SetCookie);
-            Assert.Equal("A=A; path=/; secure", transaction.SetCookie[0]);
-            Assert.Equal("B=B; path=/; secure", transaction.SetCookie[1]);
-            Assert.Equal("C=C; path=/; secure", transaction.SetCookie[2]);
-            Assert.Equal("D=D; path=/; secure", transaction.SetCookie[3]);
-        }
-
-        [Fact]
-        public async Task CanMapTwoCookiePolicies()
-        {
-            var server = TestServer.Create(app =>
-            {
-                app.Map("/always", map =>
+                app.Map("/secureAlways", map =>
                 {
                     map.UseCookiePolicy(options => options.Secure = SecurePolicy.Always);
                     map.Run(context =>
@@ -53,7 +28,7 @@ namespace Microsoft.AspNet.CookiePolicy.Test
                         return Task.FromResult(0);
                     });
                 });
-                app.Map("/none", map =>
+                app.Map("/secureNone", map =>
                 {
                     map.UseCookiePolicy(options => options.Secure = SecurePolicy.None);
                     map.Run(context =>
@@ -65,10 +40,46 @@ namespace Microsoft.AspNet.CookiePolicy.Test
                         return Task.FromResult(0);
                     });
                 });
+                app.Map("/secureSame", map =>
+                {
+                    map.UseCookiePolicy(options => options.Secure = SecurePolicy.SameAsRequest);
+                    map.Run(context =>
+                    {
+                        context.Response.Cookies.Append("A", "A");
+                        context.Response.Cookies.Append("B", "B", new CookieOptions { Secure = false });
+                        context.Response.Cookies.Append("C", "C", new CookieOptions());
+                        context.Response.Cookies.Append("D", "D", new CookieOptions { Secure = true });
+                        return Task.FromResult(0);
+                    });
+                });
+                app.Map("/httpOnlyNone", map =>
+                {
+                    map.UseCookiePolicy(options => options.HttpOnly = HttpOnlyPolicy.None);
+                    map.Run(context =>
+                    {
+                        context.Response.Cookies.Append("A", "A");
+                        context.Response.Cookies.Append("B", "B", new CookieOptions { HttpOnly = false });
+                        context.Response.Cookies.Append("C", "C", new CookieOptions());
+                        context.Response.Cookies.Append("D", "D", new CookieOptions { HttpOnly = true });
+                        return Task.FromResult(0);
+                    });
+                });
+                app.Map("/httpOnlyAlways", map =>
+                {
+                    map.UseCookiePolicy(options => options.HttpOnly = HttpOnlyPolicy.Always);
+                    map.Run(context =>
+                    {
+                        context.Response.Cookies.Append("A", "A");
+                        context.Response.Cookies.Append("B", "B", new CookieOptions { HttpOnly = false });
+                        context.Response.Cookies.Append("C", "C", new CookieOptions());
+                        context.Response.Cookies.Append("D", "D", new CookieOptions { HttpOnly = true });
+                        return Task.FromResult(0);
+                    });
+                });
 
             });
 
-            var transaction = await server.SendAsync("http://example.com/Always");
+            var transaction = await server.SendAsync("http://example.com/secureAlways");
 
             Assert.NotNull(transaction.SetCookie);
             Assert.Equal("A=A; path=/; secure", transaction.SetCookie[0]);
@@ -76,7 +87,7 @@ namespace Microsoft.AspNet.CookiePolicy.Test
             Assert.Equal("C=C; path=/; secure", transaction.SetCookie[2]);
             Assert.Equal("D=D; path=/; secure", transaction.SetCookie[3]);
 
-            transaction = await server.SendAsync("http://example.com/None");
+            transaction = await server.SendAsync("http://example.com/secureNone");
 
             Assert.NotNull(transaction.SetCookie);
             Assert.Equal("A=A; path=/", transaction.SetCookie[0]);
@@ -84,132 +95,38 @@ namespace Microsoft.AspNet.CookiePolicy.Test
             Assert.Equal("C=C; path=/", transaction.SetCookie[2]);
             Assert.Equal("D=D; path=/; secure", transaction.SetCookie[3]);
 
-        }
-
-
-        [Fact]
-        public async Task CookiePolicySecureNoneLeavesSecureAlone()
-        {
-            var server = TestServer.Create(app =>
-            {
-                app.UseCookiePolicy(options => options.Secure = SecurePolicy.None);
-                app.Run(context =>
-                {
-                    context.Response.Cookies.Append("A", "A");
-                    context.Response.Cookies.Append("B", "B", new CookieOptions { Secure = false });
-                    context.Response.Cookies.Append("C", "C", new CookieOptions());
-                    context.Response.Cookies.Append("D", "D", new CookieOptions { Secure = true });
-                    return Task.FromResult(0);
-                });
-            });
-
-            var transaction = await server.SendAsync("http://example.com/login");
-
-            Assert.NotNull(transaction.SetCookie);
-            Assert.Equal("A=A; path=/", transaction.SetCookie[0]);
-            Assert.Equal("B=B; path=/", transaction.SetCookie[1]);
-            Assert.Equal("C=C; path=/", transaction.SetCookie[2]);
-            Assert.Equal("D=D; path=/; secure", transaction.SetCookie[3]);
-        }
-
-        [Fact]
-        public async Task CookiePolicySecureSameAsRequestIsFalseOnHttp()
-        {
-            var server = TestServer.Create(app =>
-            {
-                app.UseCookiePolicy(options => options.Secure = SecurePolicy.SameAsRequest);
-                app.Run(context =>
-                {
-                    context.Response.Cookies.Append("A", "A");
-                    context.Response.Cookies.Append("B", "B", new CookieOptions { Secure = false });
-                    context.Response.Cookies.Append("C", "C", new CookieOptions());
-                    context.Response.Cookies.Append("D", "D", new CookieOptions { Secure = true });
-                    return Task.FromResult(0);
-                });
-            });
-
-            var transaction = await server.SendAsync("http://example.com/login");
+            transaction = await server.SendAsync("http://example.com/secureSame");
 
             Assert.NotNull(transaction.SetCookie);
             Assert.Equal("A=A; path=/", transaction.SetCookie[0]);
             Assert.Equal("B=B; path=/", transaction.SetCookie[1]);
             Assert.Equal("C=C; path=/", transaction.SetCookie[2]);
             Assert.Equal("D=D; path=/", transaction.SetCookie[3]);
-        }
 
-        [Fact]
-        public async Task CookiePolicySecureSameAsRequestIsTrueOnHttps()
-        {
-            var server = TestServer.Create(app =>
-            {
-                app.UseCookiePolicy(options => options.Secure = SecurePolicy.SameAsRequest);
-                app.Run(context =>
-                {
-                    context.Response.Cookies.Append("A", "A");
-                    context.Response.Cookies.Append("B", "B", new CookieOptions { Secure = false });
-                    context.Response.Cookies.Append("C", "C", new CookieOptions());
-                    context.Response.Cookies.Append("D", "D", new CookieOptions { Secure = true });
-                    return Task.FromResult(0);
-                });
-            });
-
-            var transaction = await server.SendAsync("https://example.com/login");
+            transaction = await server.SendAsync("https://example.com/secureSame");
 
             Assert.NotNull(transaction.SetCookie);
             Assert.Equal("A=A; path=/; secure", transaction.SetCookie[0]);
             Assert.Equal("B=B; path=/; secure", transaction.SetCookie[1]);
             Assert.Equal("C=C; path=/; secure", transaction.SetCookie[2]);
             Assert.Equal("D=D; path=/; secure", transaction.SetCookie[3]);
-        }
 
-        [Fact]
-        public async Task CookiePolicyHttpOnlyAlwaysSetsHttpOnly()
-        {
-            var server = TestServer.Create(app =>
-            {
-                app.UseCookiePolicy(options => options.HttpOnly = HttpOnlyPolicy.Always);
-                app.Run(context =>
-                {
-                    context.Response.Cookies.Append("A", "A");
-                    context.Response.Cookies.Append("B", "B", new CookieOptions { HttpOnly = false });
-                    context.Response.Cookies.Append("C", "C", new CookieOptions());
-                    context.Response.Cookies.Append("D", "D", new CookieOptions { HttpOnly = true });
-                    return Task.FromResult(0);
-                });
-            });
-
-            var transaction = await server.SendAsync("http://example.com/login");
+            transaction = await server.SendAsync("http://example.com/httpOnlyAlways");
 
             Assert.NotNull(transaction.SetCookie);
             Assert.Equal("A=A; path=/; httponly", transaction.SetCookie[0]);
             Assert.Equal("B=B; path=/; httponly", transaction.SetCookie[1]);
             Assert.Equal("C=C; path=/; httponly", transaction.SetCookie[2]);
             Assert.Equal("D=D; path=/; httponly", transaction.SetCookie[3]);
-        }
 
-        [Fact]
-        public async Task CookiePolicyHttpOnlyNoneLeavesItAlone()
-        {
-            var server = TestServer.Create(app =>
-            {
-                app.UseCookiePolicy(options => options.HttpOnly = HttpOnlyPolicy.None);
-                app.Run(context =>
-                {
-                    context.Response.Cookies.Append("A", "A");
-                    context.Response.Cookies.Append("B", "B", new CookieOptions { HttpOnly = false });
-                    context.Response.Cookies.Append("C", "C", new CookieOptions());
-                    context.Response.Cookies.Append("D", "D", new CookieOptions { HttpOnly = true });
-                    return Task.FromResult(0);
-                });
-            });
-
-            var transaction = await server.SendAsync("http://example.com/login");
+            transaction = await server.SendAsync("http://example.com/httpOnlyNone");
 
             Assert.NotNull(transaction.SetCookie);
             Assert.Equal("A=A; path=/", transaction.SetCookie[0]);
             Assert.Equal("B=B; path=/", transaction.SetCookie[1]);
             Assert.Equal("C=C; path=/", transaction.SetCookie[2]);
             Assert.Equal("D=D; path=/; httponly", transaction.SetCookie[3]);
+
         }
 
         [Fact]
