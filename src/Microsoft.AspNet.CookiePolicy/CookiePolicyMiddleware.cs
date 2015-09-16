@@ -1,12 +1,10 @@
 // Copyright (c) .NET Foundation. All rights reserved.
 // Licensed under the Apache License, Version 2.0. See License.txt in the project root for license information.
 
-using System;
 using System.Threading.Tasks;
 using Microsoft.AspNet.Builder;
 using Microsoft.AspNet.Http;
 using Microsoft.AspNet.Http.Features;
-using Microsoft.Framework.OptionsModel;
 using Microsoft.AspNet.Http.Features.Internal;
 
 namespace Microsoft.AspNet.CookiePolicy
@@ -17,14 +15,9 @@ namespace Microsoft.AspNet.CookiePolicy
 
         public CookiePolicyMiddleware(
             RequestDelegate next,
-            IOptions<CookiePolicyOptions> options,
-            Action<CookiePolicyOptions> configureOptions)
+            CookiePolicyOptions options)
         {
-            Options = options.Value ?? new CookiePolicyOptions(); // REVIEW: or should we throw ArgumentNull exception?
-            if (configureOptions != null)
-            {
-                configureOptions(Options);
-            }
+            Options = options;
             _next = next;
         }
 

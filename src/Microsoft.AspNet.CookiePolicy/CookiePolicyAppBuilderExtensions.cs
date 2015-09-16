@@ -15,10 +15,11 @@ namespace Microsoft.AspNet.Builder
         /// Adds a cookie policy middleware to your web application pipeline.
         /// </summary>
         /// <param name="app">The IApplicationBuilder passed to your configuration method</param>
+        /// <param name="options">The options for the middleware</param>
         /// <returns>The original app parameter</returns>
-        public static IApplicationBuilder UseCookiePolicy(this IApplicationBuilder app)
+        public static IApplicationBuilder UseCookiePolicy(this IApplicationBuilder app, CookiePolicyOptions options)
         {
-            return app.UseCookiePolicy(configureOptions: o => { });
+            return app.UseMiddleware<CookiePolicyMiddleware>(options);
         }
 
         /// <summary>
@@ -29,7 +30,12 @@ namespace Microsoft.AspNet.Builder
         /// <returns>The original app parameter</returns>
         public static IApplicationBuilder UseCookiePolicy(this IApplicationBuilder app, Action<CookiePolicyOptions> configureOptions)
         {
-            return app.UseMiddleware<CookiePolicyMiddleware>(configureOptions);
+            var options = new CookiePolicyOptions();
+            if (configureOptions != null)
+            {
+                configureOptions(options);
+            }
+            return app.UseCookiePolicy(options);
         }
     }
 }

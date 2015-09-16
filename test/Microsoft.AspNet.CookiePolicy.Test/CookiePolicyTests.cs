@@ -5,7 +5,6 @@ using System.Threading.Tasks;
 using Microsoft.AspNet.Builder;
 using Microsoft.AspNet.Http;
 using Microsoft.AspNet.TestHost;
-using Microsoft.Framework.DependencyInjection;
 using Xunit;
 
 namespace Microsoft.AspNet.CookiePolicy.Test
@@ -18,7 +17,6 @@ namespace Microsoft.AspNet.CookiePolicy.Test
             var server = TestServer.Create(app =>
             {
                 app.UseCookiePolicy(options => options.Secure = SecurePolicy.Always);
-                app.UseCookieAuthentication(options => options.LoginPath = new PathString("/page"));
                 app.Run(context =>
                 {
                     context.Response.Cookies.Append("A", "A");
@@ -27,8 +25,7 @@ namespace Microsoft.AspNet.CookiePolicy.Test
                     context.Response.Cookies.Append("D", "D", new CookieOptions { Secure = true });
                     return Task.FromResult(0);
                 });
-            },
-                services => services.AddAuthentication());
+            });
 
             var transaction = await server.SendAsync("http://example.com/login");
 
@@ -40,12 +37,62 @@ namespace Microsoft.AspNet.CookiePolicy.Test
         }
 
         [Fact]
+        public async Task CanMapTwoCookiePolicies()
+        {
+            var server = TestServer.Create(app =>
+            {
+                app.Map("/always", map =>
+                {
+                    map.UseCookiePolicy(options => options.Secure = SecurePolicy.Always);
+                    map.Run(context =>
+                    {
+                        context.Response.Cookies.Append("A", "A");
+                        context.Response.Cookies.Append("B", "B", new CookieOptions { Secure = false });
+                        context.Response.Cookies.Append("C", "C", new CookieOptions());
+                        context.Response.Cookies.Append("D", "D", new CookieOptions { Secure = true });
+                        return Task.FromResult(0);
+                    });
+                });
+                app.Map("/none", map =>
+                {
+                    map.UseCookiePolicy(options => options.Secure = SecurePolicy.None);
+                    map.Run(context =>
+                    {
+                        context.Response.Cookies.Append("A", "A");
+                        context.Response.Cookies.Append("B", "B", new CookieOptions { Secure = false });
+                        context.Response.Cookies.Append("C", "C", new CookieOptions());
+                        context.Response.Cookies.Append("D", "D", new CookieOptions { Secure = true });
+                        return Task.FromResult(0);
+                    });
+                });
+
+            });
+
+            var transaction = await server.SendAsync("http://example.com/Always");
+
+            Assert.NotNull(transaction.SetCookie);
+            Assert.Equal("A=A; path=/; secure", transaction.SetCookie[0]);
+            Assert.Equal("B=B; path=/; secure", transaction.SetCookie[1]);
+            Assert.Equal("C=C; path=/; secure", transaction.SetCookie[2]);
+            Assert.Equal("D=D; path=/; secure", transaction.SetCookie[3]);
+
+            transaction = await server.SendAsync("http://example.com/None");
+
+            Assert.NotNull(transaction.SetCookie);
+            Assert.Equal("A=A; path=/", transaction.SetCookie[0]);
+            Assert.Equal("B=B; path=/", transaction.SetCookie[1]);
+            Assert.Equal("C=C; path=/", transaction.SetCookie[2]);
+            Assert.Equal("D=D; path=/; secure", transaction.SetCookie[3]);
+
+        }
+
+
+        [Fact]
         public async Task CookiePolicySecureNoneLeavesSecureAlone()
         {
             var server = TestServer.Create(app =>
             {
                 app.UseCookiePolicy(options => options.Secure = SecurePolicy.None);
-                app.UseCookieAuthentication(options => options.LoginPath = new PathString("/page"));
                 app.Run(context =>
                 {
                     context.Response.Cookies.Append("A", "A");
@@ -54,8 +101,7 @@ namespace Microsoft.AspNet.CookiePolicy.Test
                     context.Response.Cookies.Append("D", "D", new CookieOptions { Secure = true });
                     return Task.FromResult(0);
                 });
-            },
-                services => services.AddAuthentication());
+            });
 
             var transaction = await server.SendAsync("http://example.com/login");
 
@@ -72,7 +118,6 @@ namespace Microsoft.AspNet.CookiePolicy.Test
             var server = TestServer.Create(app =>
             {
                 app.UseCookiePolicy(options => options.Secure = SecurePolicy.SameAsRequest);
-                app.UseCookieAuthentication(options => options.LoginPath = new PathString("/page"));
                 app.Run(context =>
                 {
                     context.Response.Cookies.Append("A", "A");
@@ -81,8 +126,7 @@ namespace Microsoft.AspNet.CookiePolicy.Test
                     context.Response.Cookies.Append("D", "D", new CookieOptions { Secure = true });
                     return Task.FromResult(0);
                 });
-            },
-                services => services.AddAuthentication());
+            });
 
             var transaction = await server.SendAsync("http://example.com/login");
 
@@ -99,7 +143,6 @@ namespace Microsoft.AspNet.CookiePolicy.Test
             var server = TestServer.Create(app =>
             {
                 app.UseCookiePolicy(options => options.Secure = SecurePolicy.SameAsRequest);
-                app.UseCookieAuthentication(options => options.LoginPath = new PathString("/page"));
                 app.Run(context =>
                 {
                     context.Response.Cookies.Append("A", "A");
@@ -108,8 +151,7 @@ namespace Microsoft.AspNet.CookiePolicy.Test
                     context.Response.Cookies.Append("D", "D", new CookieOptions { Secure = true });
                     return Task.FromResult(0);
                 });
-            },
-                services => services.AddAuthentication());
+            });
 
             var transaction = await server.SendAsync("https://example.com/login");
 
@@ -126,7 +168,6 @@ namespace Microsoft.AspNet.CookiePolicy.Test
             var server = TestServer.Create(app =>
             {
                 app.UseCookiePolicy(options => options.HttpOnly = HttpOnlyPolicy.Always);
-                app.UseCookieAuthentication(options => options.LoginPath = new PathString("/page"));
                 app.Run(context =>
                 {
                     context.Response.Cookies.Append("A", "A");
@@ -135,8 +176,7 @@ namespace Microsoft.AspNet.CookiePolicy.Test
                     context.Response.Cookies.Append("D", "D", new CookieOptions { HttpOnly = true });
                     return Task.FromResult(0);
                 });
-            },
-                services => services.AddAuthentication());
+            });
 
             var transaction = await server.SendAsync("http://example.com/login");
 
@@ -153,7 +193,6 @@ namespace Microsoft.AspNet.CookiePolicy.Test
             var server = TestServer.Create(app =>
             {
                 app.UseCookiePolicy(options => options.HttpOnly = HttpOnlyPolicy.None);
-                app.UseCookieAuthentication(options => options.LoginPath = new PathString("/page"));
                 app.Run(context =>
                 {
                     context.Response.Cookies.Append("A", "A");
@@ -162,8 +201,7 @@ namespace Microsoft.AspNet.CookiePolicy.Test
                     context.Response.Cookies.Append("D", "D", new CookieOptions { HttpOnly = true });
                     return Task.FromResult(0);
                 });
-            },
-                services => services.AddAuthentication());
+            });
 
             var transaction = await server.SendAsync("http://example.com/login");
 
@@ -180,7 +218,6 @@ namespace Microsoft.AspNet.CookiePolicy.Test
             var server = TestServer.Create(app =>
             {
                 app.UseCookiePolicy(options => options.OnAppendCookie = ctx => ctx.CookieName = ctx.CookieValue = "Hao");
-                app.UseCookieAuthentication(options => options.LoginPath = new PathString("/page"));
                 app.Run(context =>
                 {
                     context.Response.Cookies.Append("A", "A");
@@ -189,8 +226,7 @@ namespace Microsoft.AspNet.CookiePolicy.Test
                     context.Response.Cookies.Append("D", "D", new CookieOptions { Secure = true });
                     return Task.FromResult(0);
                 });
-            },
-                services => services.AddAuthentication());
+            });
 
             var transaction = await server.SendAsync("http://example.com/login");
 
@@ -207,7 +243,6 @@ namespace Microsoft.AspNet.CookiePolicy.Test
             var server = TestServer.Create(app =>
             {
                 app.UseCookiePolicy(options => options.OnDeleteCookie = ctx => ctx.CookieName = "A");
-                app.UseCookieAuthentication(options => options.LoginPath = new PathString("/page"));
                 app.Run(context =>
                 {
                     context.Response.Cookies.Delete("A");
@@ -216,8 +251,7 @@ namespace Microsoft.AspNet.CookiePolicy.Test
                     context.Response.Cookies.Delete("D", new CookieOptions { Secure = true });
                     return Task.FromResult(0);
                 });
-            },
-                services => services.AddAuthentication());
+            });
 
             var transaction = await server.SendAsync("http://example.com/login");
 
