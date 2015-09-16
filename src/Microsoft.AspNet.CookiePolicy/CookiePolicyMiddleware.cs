@@ -133,7 +133,6 @@ namespace Microsoft.AspNet.CookiePolicy
                 Cookies.Delete(key, options);
             }
 
-            // Returns true if cookie options need to be applied
             private void ApplyPolicy(CookieOptions options)
             {
                 switch (Policy.Secure)
