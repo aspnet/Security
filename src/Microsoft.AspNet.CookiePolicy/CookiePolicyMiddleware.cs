@@ -71,18 +71,10 @@ namespace Microsoft.AspNet.CookiePolicy
 
             public void Append(string key, string value)
             {
-                if (PolicyRequiresCookieOptions())
+                if (PolicyRequiresCookieOptions() || Policy.OnAppendCookie != null)
                 {
                     Append(key, value, new CookieOptions());
                     return;
-                }
-
-                if (Policy.OnAppendCookie != null)
-                {
-                    var context = new AppendCookieContext(Context, options: null, name: key, value: value);
-                    Policy.OnAppendCookie(context);
-                    key = context.CookieName;
-                    value = context.CookieValue;
                 }
                 Cookies.Append(key, value);
             }
@@ -102,12 +94,11 @@ namespace Microsoft.AspNet.CookiePolicy
 
             public void Delete(string key)
             {
-                if (PolicyRequiresCookieOptions())
+                if (PolicyRequiresCookieOptions() || Policy.OnDeleteCookie != null)
                 {
                     Delete(key, new CookieOptions());
                     return;
                 }
-
 
                 if (Policy.OnDeleteCookie != null)
                 {
