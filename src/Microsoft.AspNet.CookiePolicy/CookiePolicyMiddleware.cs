@@ -25,11 +25,8 @@ namespace Microsoft.AspNet.CookiePolicy
 
         public Task Invoke(HttpContext context)
         {
-            // Check if there is a SendFile feature already present
-            if (context.Features.Get<IHttpSendFileFeature>() == null)
-            {
-                context.Features.Set<IResponseCookiesFeature>(new CookiesWrapperFeature(context, Options));
-            }
+            // REVIEW: Do we need to check if there is a Cookie feature already present like SendFile??
+            context.Features.Set<IResponseCookiesFeature>(new CookiesWrapperFeature(context, Options));
 
             return _next(context);
         }
