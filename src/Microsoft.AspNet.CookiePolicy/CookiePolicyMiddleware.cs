@@ -1,6 +1,7 @@
 // Copyright (c) .NET Foundation. All rights reserved.
 // Licensed under the Apache License, Version 2.0. See License.txt in the project root for license information.
 
+using System;
 using System.Threading.Tasks;
 using Microsoft.AspNet.Builder;
 using Microsoft.AspNet.Http;
@@ -35,7 +36,7 @@ namespace Microsoft.AspNet.CookiePolicy
         {
             public CookiesWrapperFeature(HttpContext context, CookiePolicyOptions options)
             {
-                Wrapper = new CookiesWrapper(context, options, context.Response.Cookies);
+                Wrapper = new CookiesWrapper(context, options);
             }
 
             public IResponseCookies Wrapper { get; }
@@ -51,16 +52,23 @@ namespace Microsoft.AspNet.CookiePolicy
 
         private class CookiesWrapper : IResponseCookies
         {
-            public CookiesWrapper(HttpContext context, CookiePolicyOptions options, IResponseCookies cookies)
+            public CookiesWrapper(HttpContext context, CookiePolicyOptions options)
             {
                 Context = context;
-                Cookies = cookies;
+                Feature = context.Features.Get<IResponseCookiesFeature>() ?? new ResponseCookiesFeature(context.Features);
                 Policy = options;
             }
 
             public HttpContext Context { get; }
 
-            public IResponseCookies Cookies { get; }
+            public IResponseCookiesFeature Feature { get; }
+
+            public IResponseCookies Cookies {
+                get
+                {
+                    return Feature.Cookies;
+                }
+            }
 
             public CookiePolicyOptions Policy { get; }
 
@@ -74,13 +82,21 @@ namespace Microsoft.AspNet.CookiePolicy
                 if (PolicyRequiresCookieOptions() || Policy.OnAppendCookie != null)
                 {
                     Append(key, value, new CookieOptions());
-                    return;
                 }
-                Cookies.Append(key, value);
+                else
+                {
+                    Cookies.Append(key, value);
+
+                }
             }
 
             public void Append(string key, string value, CookieOptions options)
             {
+                if (options == null)
+                {
+                    throw new ArgumentNullException(nameof(options));
+                }
+
                 ApplyPolicy(options);
                 if (Policy.OnAppendCookie != null)
                 {
@@ -97,20 +113,20 @@ namespace Microsoft.AspNet.CookiePolicy
                 if (PolicyRequiresCookieOptions() || Policy.OnDeleteCookie != null)
                 {
                     Delete(key, new CookieOptions());
-                    return;
                 }
-
-                if (Policy.OnDeleteCookie != null)
+                else
                 {
-                    var context = new DeleteCookieContext(Context, options: null, name: key);
-                    Policy.OnDeleteCookie(context);
-                    key = context.CookieName;
+                    Cookies.Delete(key);
                 }
-                Cookies.Delete(key);
             }
 
             public void Delete(string key, CookieOptions options)
             {
+                if (options == null)
+                {
+                    throw new ArgumentNullException(nameof(options));
+                }
+
                 ApplyPolicy(options);
                 if (Policy.OnDeleteCookie != null)
                 {
@@ -133,6 +149,8 @@ namespace Microsoft.AspNet.CookiePolicy
                         break;
                     case SecurePolicy.None:
                         break;
+                    default:
+                        throw new InvalidOperationException();
                 }
                 switch (Policy.HttpOnly)
                 {
@@ -141,6 +159,8 @@ namespace Microsoft.AspNet.CookiePolicy
                         break;
                     case HttpOnlyPolicy.None:
                         break;
+                    default:
+                        throw new InvalidOperationException();
                 }
             }
         }
