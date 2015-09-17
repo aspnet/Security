@@ -1,10 +1,9 @@
 // Copyright (c) Microsoft Open Technologies, Inc. All rights reserved.
 // Licensed under the Apache License, Version 2.0. See License.txt in the project root for license information.
 
-using System;
 using Microsoft.AspNet.DataProtection;
 
-namespace Microsoft.Owin.Security.Cookies.Shareable
+namespace Microsoft.Owin.Security.Cookies.Interop
 {
     /// <summary>
     /// Converts an <see cref="IDataProtector"/> to an

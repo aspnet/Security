@@ -3,18 +3,17 @@
 
 using System;
 using Microsoft.AspNet.DataProtection;
-using Microsoft.Framework.Internal;
 using Microsoft.Owin.Security.Cookies;
-using Microsoft.Owin.Security.Cookies.Shareable;
+using Microsoft.Owin.Security.Cookies.Interop;
 
 namespace Owin
 {
     public static class CookieAuthenticationExtensions
     {
         public static IAppBuilder UseCookieAuthentication(
-            [NotNull] this IAppBuilder app,
-            [NotNull] CookieAuthenticationOptions options,
-            [NotNull] DataProtectionProvider dataProtectionProvider,
+            this IAppBuilder app,
+            CookieAuthenticationOptions options,
+            DataProtectionProvider dataProtectionProvider,
             PipelineStage stage = PipelineStage.Authenticate,
             string authenticationScheme = null)
         {
@@ -33,7 +32,7 @@ namespace Owin
                 }
             }
 
-            IDataProtector dataProtector = dataProtectionProvider.CreateProtector(
+            var dataProtector = dataProtectionProvider.CreateProtector(
                 "Microsoft.AspNet.Authentication.Cookies.CookieAuthenticationMiddleware", // full name of the ASP.NET 5 type
                 authenticationScheme, "v2");
             options.TicketDataFormat = new AspNet5TicketDataFormat(new DataProtectorShim(dataProtector), authenticationScheme);

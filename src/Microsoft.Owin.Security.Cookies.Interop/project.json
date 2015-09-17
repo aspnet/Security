@@ -2,7 +2,6 @@
     "version": "1.0.0-*",
     "description": "A compatibility layer for sharing authentication tickets between Microsoft.Owin.Security.Cookies and Microsoft.AspNet.Authentication.Cookies.",
     "dependencies": {
-        "Microsoft.Framework.NotNullAttribute.Internal": { "type": "build", "version": "1.0.0-*" }
     },
     "frameworks": {
         "net451": {

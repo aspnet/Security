@@ -5,10 +5,9 @@ using System;
 using System.IO;
 using System.Linq;
 using System.Security.Claims;
-using Microsoft.Framework.Internal;
 using Microsoft.Owin.Security.DataHandler.Serializer;
 
-namespace Microsoft.Owin.Security.Cookies.Shareable
+namespace Microsoft.Owin.Security.Cookies.Interop
 {
     public class AspNet5TicketSerializer : IDataSerializer<AuthenticationTicket>
     {
@@ -44,7 +43,7 @@ namespace Microsoft.Owin.Security.Cookies.Shareable
             }
         }
 
-        private void Write([NotNull] BinaryWriter writer, [NotNull] AuthenticationTicket model)
+        private void Write(BinaryWriter writer, AuthenticationTicket model)
         {
             writer.Write(FormatVersion);
             writer.Write(_authenticationScheme);
@@ -67,7 +66,7 @@ namespace Microsoft.Owin.Security.Cookies.Shareable
             PropertiesSerializer.Write(writer, model.Properties);
         }
 
-        private static AuthenticationTicket Read([NotNull] BinaryReader reader)
+        private static AuthenticationTicket Read(BinaryReader reader)
         {
             if (reader.ReadInt32() != FormatVersion)
             {

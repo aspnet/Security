@@ -6,7 +6,7 @@ using Microsoft.Owin.Security.DataHandler;
 using Microsoft.Owin.Security.DataHandler.Encoder;
 using Microsoft.Owin.Security.DataProtection;
 
-namespace Microsoft.Owin.Security.Cookies.Shareable
+namespace Microsoft.Owin.Security.Cookies.Interop
 {
     public class AspNet5TicketDataFormat : SecureDataFormat<AuthenticationTicket>
     {
