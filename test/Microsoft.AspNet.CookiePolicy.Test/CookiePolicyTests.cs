@@ -1,9 +1,13 @@
 // Copyright (c) .NET Foundation. All rights reserved.
 // Licensed under the Apache License, Version 2.0. See License.txt in the project root for license information.
 
+using System;
 using System.Threading.Tasks;
 using Microsoft.AspNet.Builder;
 using Microsoft.AspNet.Http;
+using Microsoft.AspNet.Http.Features;
+using Microsoft.AspNet.Http.Features.Internal;
+using Microsoft.AspNet.Http.Internal;
 using Microsoft.AspNet.TestHost;
 using Xunit;
 
@@ -130,6 +134,59 @@ namespace Microsoft.AspNet.CookiePolicy.Test
             Assert.NotNull(transaction.SetCookie);
             Assert.Equal(1, transaction.SetCookie.Count);
             Assert.Equal("A=; expires=Thu, 01 Jan 1970 00:00:00 GMT; path=/", transaction.SetCookie[0]);
+        }
+
+        [Fact]
+        public async Task CookiePolicyCallsCookieFeature()
+        {
+            var server = TestServer.Create(app =>
+            {
+                app.Use(next => context =>
+                {
+                    context.Features.Set<IResponseCookiesFeature>(new TestCookieFeature());
+                    return next(context);
+                });
+                app.UseCookiePolicy(options => options.OnDeleteCookie = ctx => ctx.CookieName = "A");
+                app.Run(context =>
+                {
+                    Assert.Throws<NotImplementedException>(() => context.Response.Cookies.Delete("A"));
+                    Assert.Throws<NotImplementedException>(() => context.Response.Cookies.Delete("A", new CookieOptions()));
+                    Assert.Throws<NotImplementedException>(() => context.Response.Cookies.Append("A", "A"));
+                    Assert.Throws<NotImplementedException>(() => context.Response.Cookies.Append("A", "A", new CookieOptions()));
+                    return context.Response.WriteAsync("Done");
+                });
+            });
+
+            var transaction = await server.SendAsync("http://example.com/login");
+            Assert.Equal("Done", transaction.ResponseText);
+        }
+
+        private class TestCookieFeature : IResponseCookiesFeature
+        {
+            public IResponseCookies Cookies { get; } = new BadCookies();
+
+            private class BadCookies : IResponseCookies
+            {
+                public void Append(string key, string value)
+                {
+                    throw new NotImplementedException();
+                }
+
+                public void Append(string key, string value, CookieOptions options)
+                {
+                    throw new NotImplementedException();
+                }
+
+                public void Delete(string key)
+                {
+                    throw new NotImplementedException();
+                }
+
+                public void Delete(string key, CookieOptions options)
+                {
+                    throw new NotImplementedException();
+                }
+            }
         }
 
         private TestServer CreateTestServer()
