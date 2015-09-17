@@ -31,22 +31,21 @@ namespace Microsoft.AspNet.CookiePolicy.Test
             return Task.FromResult(0);
         };
 
-
         [Fact]
         public async Task SecureAlwaysSetsSecure()
         {
             await RunTest("/secureAlways",
                 options => options.Secure = SecurePolicy.Always,
                 SecureCookieAppends,
-                async server =>
+                new RequestTest("http://example.com/secureAlways",
+                transaction =>
                 {
-                    var transaction = await server.SendAsync("http://example.com/secureAlways");
                     Assert.NotNull(transaction.SetCookie);
                     Assert.Equal("A=A; path=/; secure", transaction.SetCookie[0]);
                     Assert.Equal("B=B; path=/; secure", transaction.SetCookie[1]);
                     Assert.Equal("C=C; path=/; secure", transaction.SetCookie[2]);
                     Assert.Equal("D=D; path=/; secure", transaction.SetCookie[3]);
-                });
+                }));
         }
 
         [Fact]
@@ -55,16 +54,16 @@ namespace Microsoft.AspNet.CookiePolicy.Test
             await RunTest("/secureNone",
                 options => options.Secure = SecurePolicy.None,
                 SecureCookieAppends,
-                async server =>
+                new RequestTest("http://example.com/secureNone",
+                transaction =>
                 {
-                    var transaction = await server.SendAsync("http://example.com/secureNone");
                     Assert.NotNull(transaction.SetCookie);
                     Assert.NotNull(transaction.SetCookie);
                     Assert.Equal("A=A; path=/", transaction.SetCookie[0]);
                     Assert.Equal("B=B; path=/", transaction.SetCookie[1]);
                     Assert.Equal("C=C; path=/", transaction.SetCookie[2]);
                     Assert.Equal("D=D; path=/; secure", transaction.SetCookie[3]);
-                });
+                }));
         }
 
         [Fact]
@@ -73,24 +72,24 @@ namespace Microsoft.AspNet.CookiePolicy.Test
             await RunTest("/secureSame",
                 options => options.Secure = SecurePolicy.SameAsRequest,
                 SecureCookieAppends,
-                async server =>
+                new RequestTest("http://example.com/secureSame",
+                transaction =>
                 {
-                    var transaction = await server.SendAsync("http://example.com/secureSame");
-
                     Assert.NotNull(transaction.SetCookie);
                     Assert.Equal("A=A; path=/", transaction.SetCookie[0]);
                     Assert.Equal("B=B; path=/", transaction.SetCookie[1]);
                     Assert.Equal("C=C; path=/", transaction.SetCookie[2]);
                     Assert.Equal("D=D; path=/", transaction.SetCookie[3]);
-
-                    transaction = await server.SendAsync("https://example.com/secureSame");
-
+                }),
+                new RequestTest("https://example.com/secureSame",
+                transaction =>
+                {
                     Assert.NotNull(transaction.SetCookie);
                     Assert.Equal("A=A; path=/; secure", transaction.SetCookie[0]);
                     Assert.Equal("B=B; path=/; secure", transaction.SetCookie[1]);
                     Assert.Equal("C=C; path=/; secure", transaction.SetCookie[2]);
                     Assert.Equal("D=D; path=/; secure", transaction.SetCookie[3]);
-                });
+                }));
         }
 
         [Fact]
@@ -99,16 +98,15 @@ namespace Microsoft.AspNet.CookiePolicy.Test
             await RunTest("/httpOnlyAlways",
                 options => options.HttpOnly = HttpOnlyPolicy.Always,
                 HttpCookieAppends,
-                async server =>
+                new RequestTest("http://example.com/httpOnlyAlways",
+                transaction =>
                 {
-                    var transaction = await server.SendAsync("http://example.com/httpOnlyAlways");
-
                     Assert.NotNull(transaction.SetCookie);
                     Assert.Equal("A=A; path=/; httponly", transaction.SetCookie[0]);
                     Assert.Equal("B=B; path=/; httponly", transaction.SetCookie[1]);
                     Assert.Equal("C=C; path=/; httponly", transaction.SetCookie[2]);
                     Assert.Equal("D=D; path=/; httponly", transaction.SetCookie[3]);
-                });
+                }));
         }
 
         [Fact]
@@ -117,16 +115,15 @@ namespace Microsoft.AspNet.CookiePolicy.Test
             await RunTest("/httpOnlyNone",
                 options => options.HttpOnly = HttpOnlyPolicy.None,
                 HttpCookieAppends,
-                async server =>
+                new RequestTest("http://example.com/httpOnlyNone",
+                transaction =>
                 {
-                    var transaction = await server.SendAsync("http://example.com/httpOnlyNone");
-
                     Assert.NotNull(transaction.SetCookie);
                     Assert.Equal("A=A; path=/", transaction.SetCookie[0]);
                     Assert.Equal("B=B; path=/", transaction.SetCookie[1]);
                     Assert.Equal("C=C; path=/", transaction.SetCookie[2]);
                     Assert.Equal("D=D; path=/; httponly", transaction.SetCookie[3]);
-                });
+                }));
         }
 
         [Fact]
@@ -230,11 +227,29 @@ namespace Microsoft.AspNet.CookiePolicy.Test
             }
         }
 
-        private Task RunTest(
+        private class RequestTest
+        {
+            public RequestTest(string testUri, Action<Transaction> verify)
+            {
+                TestUri = testUri;
+                Verification = verify;
+            }
+
+            public async Task Execute(TestServer server)
+            {
+                var transaction = await server.SendAsync(TestUri);
+                Verification(transaction);
+            }
+
+            public string TestUri { get; set; }
+            public Action<Transaction> Verification { get; set; }
+        }
+
+        private async Task RunTest(
             string path, 
             Action<CookiePolicyOptions> configureCookiePolicy,
             RequestDelegate configureSetup,
-            Func<TestServer, Task> configureTest)
+            params RequestTest[] tests)
         {
             var server = TestServer.Create(app =>
             {
@@ -244,7 +259,10 @@ namespace Microsoft.AspNet.CookiePolicy.Test
                     map.Run(configureSetup);
                 });
             });
-            return configureTest(server);
+            foreach (var test in tests)
+            {
+                await test.Execute(server);
+            }
         }
     }
 }
