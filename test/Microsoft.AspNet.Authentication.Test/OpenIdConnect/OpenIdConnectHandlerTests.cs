@@ -54,7 +54,7 @@ namespace Microsoft.AspNet.Authentication.Tests.OpenIdConnect
             Assert.False(logger.IsEnabled(LogLevel.Warning));
         }
 
-        [Theory, MemberData("AuthenticateCoreStateDataSet")]
+        [Theory, MemberData(nameof(AuthenticateCoreStateDataSet))]
         public async Task AuthenticateCoreState(Action<OpenIdConnectOptions> action, OpenIdConnectMessage message)
         {
             var handler = new OpenIdConnectHandlerForTestingAuthenticate();
@@ -101,7 +101,7 @@ namespace Microsoft.AspNet.Authentication.Tests.OpenIdConnect
             options.StateDataFormat = new AuthenticationPropertiesFormaterKeyValue();
             options.Events = new OpenIdConnectEvents()
             {
-                OnAuthorizationCodeRedeemed = context =>
+                OnTokenResponseReceived = context =>
                 {
                     context.HandleResponse();
                     if (context.ProtocolMessage.State == null && !context.ProtocolMessage.Parameters.ContainsKey(ExpectedStateParameter))
