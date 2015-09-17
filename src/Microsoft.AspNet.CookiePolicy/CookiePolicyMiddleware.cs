@@ -26,15 +26,16 @@ namespace Microsoft.AspNet.CookiePolicy
 
         public Task Invoke(HttpContext context)
         {
-            context.Features.Set<IResponseCookiesFeature>(new CookiesWrapperFeature(context, Options));
+            var feature = context.Features.Get<IResponseCookiesFeature>() ?? new ResponseCookiesFeature(context.Features);
+            context.Features.Set<IResponseCookiesFeature>(new CookiesWrapperFeature(context, Options, feature));
             return _next(context);
         }
 
         private class CookiesWrapperFeature : IResponseCookiesFeature
         {
-            public CookiesWrapperFeature(HttpContext context, CookiePolicyOptions options)
+            public CookiesWrapperFeature(HttpContext context, CookiePolicyOptions options, IResponseCookiesFeature feature)
             {
-                Wrapper = new CookiesWrapper(context, options);
+                Wrapper = new CookiesWrapper(context, options, feature);
             }
 
             public IResponseCookies Wrapper { get; }
@@ -50,10 +51,10 @@ namespace Microsoft.AspNet.CookiePolicy
 
         private class CookiesWrapper : IResponseCookies
         {
-            public CookiesWrapper(HttpContext context, CookiePolicyOptions options)
+            public CookiesWrapper(HttpContext context, CookiePolicyOptions options, IResponseCookiesFeature feature)
             {
                 Context = context;
-                Feature = context.Features.Get<IResponseCookiesFeature>() ?? new ResponseCookiesFeature(context.Features);
+                Feature = feature;
                 Policy = options;
             }
 
@@ -61,7 +62,8 @@ namespace Microsoft.AspNet.CookiePolicy
 
             public IResponseCookiesFeature Feature { get; }
 
-            public IResponseCookies Cookies {
+            public IResponseCookies Cookies
+            {
                 get
                 {
                     return Feature.Cookies;
@@ -84,7 +86,6 @@ namespace Microsoft.AspNet.CookiePolicy
                 else
                 {
                     Cookies.Append(key, value);
-
                 }
             }
 
