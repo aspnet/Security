@@ -163,13 +163,7 @@ namespace Microsoft.AspNet.Authentication.Facebook
             var server = CreateServer(
                 app =>
                 {
-                    app.UseFacebookAuthentication();
-                    app.UseCookieAuthentication();
-                },
-                services =>
-                {
-                    services.AddAuthentication();
-                    services.AddFacebookAuthentication(options =>
+                    app.UseFacebookAuthentication(options =>
                     {
                         options.AppId = "Test App Id";
                         options.AppSecret = "Test App Secret";
@@ -206,6 +200,11 @@ namespace Microsoft.AspNet.Authentication.Facebook
                             }
                         };
                     });
+                    app.UseCookieAuthentication();
+                },
+                services =>
+                {
+                    services.AddAuthentication();
                 }, handler: null);
 
             var properties = new AuthenticationProperties();
