@@ -20,7 +20,10 @@ namespace Microsoft.AspNet.Builder
         public static IApplicationBuilder UseMicrosoftAccountAuthentication([NotNull] this IApplicationBuilder app, Action<MicrosoftAccountOptions> configureOptions)
         {
             var options = new MicrosoftAccountOptions();
-            configureOptions(options);
+            if (configureOptions != null)
+            {
+                configureOptions(options);
+            }
             return app.UseMicrosoftAccountAuthentication(options);
         }
     }

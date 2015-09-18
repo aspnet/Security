@@ -43,7 +43,10 @@ namespace Microsoft.AspNet.Builder
         public static IApplicationBuilder UseJwtBearerAuthentication([NotNull] this IApplicationBuilder app, Action<JwtBearerOptions> configureOptions)
         {
             var options = new JwtBearerOptions();
-            configureOptions(options);
+            if (configureOptions != null)
+            {
+                configureOptions(options);
+            }
             return app.UseJwtBearerAuthentication(options);
         }
     }

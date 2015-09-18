@@ -33,7 +33,10 @@ namespace Microsoft.AspNet.Builder
         public static IApplicationBuilder UseGoogleAuthentication([NotNull] this IApplicationBuilder app, Action<GoogleOptions> configureOptions)
         {
             var options = new GoogleOptions();
-            configureOptions(options);
+            if (configureOptions != null)
+            {
+                configureOptions(options);
+            }
             return app.UseGoogleAuthentication(options);
         }
     }
