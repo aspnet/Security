@@ -12,7 +12,7 @@ namespace Microsoft.AspNet.Builder
     /// </summary>
     public static class MicrosoftAccountAuthenticationExtensions
     {
-        public static IApplicationBuilder UseMicrosoftAccountAuthentication([NotNull] this IApplicationBuilder app, MicrosoftAccountOptions options)
+        public static IApplicationBuilder UseMicrosoftAccountAuthentication([NotNull] this IApplicationBuilder app, [NotNull] MicrosoftAccountOptions options)
         {
             return app.UseMiddleware<MicrosoftAccountMiddleware>(options);
         }

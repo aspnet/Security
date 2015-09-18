@@ -17,7 +17,7 @@ namespace Microsoft.AspNet.Builder
         /// </summary>
         /// <param name="app">The <see cref="IApplicationBuilder"/> passed to the configure method.</param>
         /// <returns>The updated <see cref="IApplicationBuilder"/>.</returns>
-        public static IApplicationBuilder UseFacebookAuthentication([NotNull] this IApplicationBuilder app, FacebookOptions options)
+        public static IApplicationBuilder UseFacebookAuthentication([NotNull] this IApplicationBuilder app, [NotNull] FacebookOptions options)
         {
             return app.UseMiddleware<FacebookMiddleware>(options);
         }

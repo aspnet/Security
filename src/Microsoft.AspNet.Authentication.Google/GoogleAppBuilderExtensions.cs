@@ -18,7 +18,7 @@ namespace Microsoft.AspNet.Builder
         /// <param name="app">The <see cref="IApplicationBuilder"/> passed to the configure method.</param>
         /// <param name="options">The Middleware options.</param>
         /// <returns>The updated <see cref="IApplicationBuilder"/>.</returns>
-        public static IApplicationBuilder UseGoogleAuthentication([NotNull] this IApplicationBuilder app, GoogleOptions options)
+        public static IApplicationBuilder UseGoogleAuthentication([NotNull] this IApplicationBuilder app, [NotNull] GoogleOptions options)
         {
             return app.UseMiddleware<GoogleMiddleware>(options);
         }

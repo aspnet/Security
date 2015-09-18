@@ -22,7 +22,7 @@ namespace Microsoft.AspNet.Builder
             return app.UseTwitterAuthentication(options);
         }
 
-        public static IApplicationBuilder UseTwitterAuthentication([NotNull] this IApplicationBuilder app, TwitterOptions options)
+        public static IApplicationBuilder UseTwitterAuthentication([NotNull] this IApplicationBuilder app, [NotNull] TwitterOptions options)
         {
             return app.UseMiddleware<TwitterMiddleware>(options);
         }

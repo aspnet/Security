@@ -44,7 +44,7 @@ namespace Microsoft.AspNet.Builder
         /// <param name="app">The IApplicationBuilder passed to your configuration method</param>
         /// <param name="options">Used to configure the middleware</param>
         /// <returns>The original app parameter</returns>
-        public static IApplicationBuilder UseCookieAuthentication([NotNull] this IApplicationBuilder app, CookieAuthenticationOptions options)
+        public static IApplicationBuilder UseCookieAuthentication([NotNull] this IApplicationBuilder app, [NotNull] CookieAuthenticationOptions options)
         {
             return app.UseMiddleware<CookieAuthenticationMiddleware>(options);
         }

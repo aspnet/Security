@@ -24,7 +24,7 @@ namespace Microsoft.AspNet.Builder
         /// <param name="app">The application builder</param>
         /// <param name="options">Options which control the processing of the bearer header.</param>
         /// <returns>The application builder</returns>
-        public static IApplicationBuilder UseJwtBearerAuthentication([NotNull] this IApplicationBuilder app, JwtBearerOptions options)
+        public static IApplicationBuilder UseJwtBearerAuthentication([NotNull] this IApplicationBuilder app, [NotNull] JwtBearerOptions options)
         {
             return app.UseMiddleware<JwtBearerMiddleware>(options);
         }
