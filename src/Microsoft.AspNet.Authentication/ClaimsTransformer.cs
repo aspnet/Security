@@ -13,11 +13,7 @@ namespace Microsoft.AspNet.Authentication
 
         public virtual Task<ClaimsPrincipal> TransformAsync(ClaimsPrincipal principal)
         {
-            if (OnTransform != null)
-            {
-                return OnTransform(principal);
-            }
-            return Task.FromResult(principal);
+            return OnTransform?.Invoke(principal) ?? Task.FromResult(principal);
         }
     }
 }
