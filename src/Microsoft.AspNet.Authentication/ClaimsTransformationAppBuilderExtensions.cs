@@ -35,7 +35,7 @@ namespace Microsoft.AspNet.Builder
             var options = new ClaimsTransformationOptions();
             options.Transformer = new ClaimsTransformer
             {
-                TransformDelegate = transform
+                OnTransform = transform
             };
             return app.UseClaimsTransformation(options);
         }

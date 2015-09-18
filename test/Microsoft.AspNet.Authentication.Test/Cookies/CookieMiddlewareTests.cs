@@ -232,7 +232,7 @@ namespace Microsoft.AspNet.Authentication.Cookies
             baseAddress: null, 
             claimsTransform: o => o.Transformer = new ClaimsTransformer
             {
-                TransformDelegate = p =>
+                OnTransform = p =>
                 {
                     if (!p.Identities.Any(i => i.AuthenticationType == "xform"))
                     {

@@ -31,7 +31,10 @@ namespace Microsoft.AspNet.Builder
         public static IApplicationBuilder UseFacebookAuthentication([NotNull] this IApplicationBuilder app, Action<FacebookOptions> configureOptions)
         {
             var options = new FacebookOptions();
-            configureOptions(options);
+            if (configureOptions != null)
+            {
+                configureOptions(options);
+            }
             return app.UseFacebookAuthentication(options);
         }
     }

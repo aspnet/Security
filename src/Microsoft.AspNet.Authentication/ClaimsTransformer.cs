@@ -9,13 +9,13 @@ namespace Microsoft.AspNet.Authentication
 {
     public class ClaimsTransformer : IClaimsTransformer
     {
-        public Func<ClaimsPrincipal, Task<ClaimsPrincipal>> TransformDelegate { get; set; }
+        public Func<ClaimsPrincipal, Task<ClaimsPrincipal>> OnTransform { get; set; }
 
         public virtual Task<ClaimsPrincipal> TransformAsync(ClaimsPrincipal principal)
         {
-            if (TransformDelegate != null)
+            if (OnTransform != null)
             {
-                return TransformDelegate(principal);
+                return OnTransform(principal);
             }
             return Task.FromResult(principal);
         }
