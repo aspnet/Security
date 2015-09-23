@@ -12,6 +12,6 @@ namespace Microsoft.AspNet.Authentication.JwtBearer
         {
         }
 
-        public string SecurityToken { get; set; }
+        public string Token { get; set; }
     }
 }
