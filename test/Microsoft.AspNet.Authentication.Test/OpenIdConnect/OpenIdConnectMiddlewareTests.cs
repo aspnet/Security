@@ -19,7 +19,6 @@ using Microsoft.AspNet.TestHost;
 using Microsoft.Framework.DependencyInjection;
 using Microsoft.Framework.WebEncoders;
 using Microsoft.IdentityModel.Protocols.OpenIdConnect;
-using Moq;
 using Xunit;
 
 namespace Microsoft.AspNet.Authentication.Tests.OpenIdConnect
@@ -151,20 +150,17 @@ namespace Microsoft.AspNet.Authentication.Tests.OpenIdConnect
 
         private static void SetProtocolMessageOptions(OpenIdConnectOptions options)
         {
-            var mockOpenIdConnectMessage = new Mock<OpenIdConnectMessage>();
-            mockOpenIdConnectMessage.Setup(m => m.CreateAuthenticationRequestUrl()).Returns(ExpectedAuthorizeRequest);
-            mockOpenIdConnectMessage.Setup(m => m.CreateLogoutRequestUrl()).Returns(ExpectedLogoutRequest);
             options.AutomaticAuthentication = true;
             options.Events = new OpenIdConnectEvents()
             {
                 OnRedirectToAuthenticationEndpoint = (context) =>
                 {
-                    context.ProtocolMessage = mockOpenIdConnectMessage.Object;
+                    context.ProtocolMessage = new OpenIdConnectMessage(ExpectedAuthorizeRequest);
                     return Task.FromResult<object>(null);
                 },
                 OnRedirectToEndSessionEndpoint = (context) =>
                 {
-                    context.ProtocolMessage = mockOpenIdConnectMessage.Object;
+                    context.ProtocolMessage = new OpenIdConnectMessage(ExpectedLogoutRequest);
                     return Task.FromResult<object>(null);
                 }
             };
