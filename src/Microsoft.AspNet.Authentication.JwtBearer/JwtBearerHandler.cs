@@ -26,10 +26,10 @@ namespace Microsoft.AspNet.Authentication.JwtBearer
             try
             {
                 // Give application opportunity to find from a different location, adjust, or reject token
-                var messageReceivedContext = new MessageReceivedContext(Context, Options);
+                var messageReceivedContext = new ReceivingTokenContext(Context, Options);
 
                 // event can set the token
-                await Options.Events.MessageReceived(messageReceivedContext);
+                await Options.Events.ReceivingToken(messageReceivedContext);
                 if (messageReceivedContext.HandledResponse)
                 {
                     return messageReceivedContext.AuthenticationTicket;
@@ -66,12 +66,12 @@ namespace Microsoft.AspNet.Authentication.JwtBearer
                 }
 
                 // notify user token was received
-                var securityTokenReceivedContext = new SecurityTokenReceivedContext(Context, Options)
+                var securityTokenReceivedContext = new ReceivedTokenContext(Context, Options)
                 {
                     SecurityToken = token,
                 };
 
-                await Options.Events.SecurityTokenReceived(securityTokenReceivedContext);
+                await Options.Events.ReceivedToken(securityTokenReceivedContext);
                 if (securityTokenReceivedContext.HandledResponse)
                 {
                     return securityTokenReceivedContext.AuthenticationTicket;
@@ -110,12 +110,12 @@ namespace Microsoft.AspNet.Authentication.JwtBearer
                     {
                         var principal = validator.ValidateToken(token, validationParameters, out validatedToken);
                         var ticket = new AuthenticationTicket(principal, new AuthenticationProperties(), Options.AuthenticationScheme);
-                        var securityTokenValidatedContext = new SecurityTokenValidatedContext(Context, Options)
+                        var securityTokenValidatedContext = new ValidatedTokenContext(Context, Options)
                         {
                             AuthenticationTicket = ticket
                         };
 
-                        await Options.Events.SecurityTokenValidated(securityTokenValidatedContext);
+                        await Options.Events.ValidatedToken(securityTokenValidatedContext);
                         if (securityTokenValidatedContext.HandledResponse)
                         {
                             return securityTokenValidatedContext.AuthenticationTicket;
@@ -165,7 +165,7 @@ namespace Microsoft.AspNet.Authentication.JwtBearer
         protected override async Task<bool> HandleUnauthorizedAsync(ChallengeContext context)
         {
             Response.StatusCode = 401;
-            await Options.Events.ApplyChallenge(new AuthenticationChallengeContext(Context, Options));
+            await Options.Events.SetAuthenticationHeader(new SetAuthenticationHeaderContext(Context, Options));
             return false;
         }
 
