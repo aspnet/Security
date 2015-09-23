@@ -183,7 +183,8 @@ namespace Microsoft.AspNet.Authentication.Facebook
                                     res.Content = new FormUrlEncodedContent(tokenResponse);
                                     return res;
                                 }
-                                if (req.RequestUri.AbsolutePath == new Uri(customUserInfoEndpoint).AbsolutePath)
+                                if (req.RequestUri.GetComponents(UriComponents.SchemeAndServer | UriComponents.Path, UriFormat.Unescaped) == 
+                                    new Uri(customUserInfoEndpoint).GetComponents(UriComponents.SchemeAndServer | UriComponents.Path, UriFormat.Unescaped))
                                 {
                                     finalUserInfoEndpoint = req.RequestUri.ToString();
                                     var res = new HttpResponseMessage(HttpStatusCode.OK);

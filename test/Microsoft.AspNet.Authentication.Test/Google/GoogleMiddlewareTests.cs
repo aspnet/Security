@@ -249,7 +249,7 @@ namespace Microsoft.AspNet.Authentication.Google
                                 token_type = "Bearer"
                             });
                         }
-                        else if (req.RequestUri.AbsoluteUri == "https://www.googleapis.com/plus/v1/people/me")
+                        else if (req.RequestUri.GetComponents(UriComponents.SchemeAndServer | UriComponents.Path, UriFormat.Unescaped) == "https://www.googleapis.com/plus/v1/people/me")
                         {
                             return ReturnJsonResponse(new
                             {
@@ -388,7 +388,7 @@ namespace Microsoft.AspNet.Authentication.Google
                                 refresh_token = "Test Refresh Token"
                             });
                         }
-                        else if (req.RequestUri.AbsoluteUri == "https://www.googleapis.com/plus/v1/people/me")
+                        else if (req.RequestUri.GetComponents(UriComponents.SchemeAndServer | UriComponents.Path, UriFormat.Unescaped) == "https://www.googleapis.com/plus/v1/people/me")
                         {
                             return ReturnJsonResponse(new
                             {
@@ -485,7 +485,7 @@ namespace Microsoft.AspNet.Authentication.Google
                                 refresh_token = "Test Refresh Token"
                             });
                         }
-                        else if (req.RequestUri.AbsoluteUri == "https://www.googleapis.com/plus/v1/people/me")
+                        else if (req.RequestUri.GetComponents(UriComponents.SchemeAndServer | UriComponents.Path, UriFormat.Unescaped) == "https://www.googleapis.com/plus/v1/people/me")
                         {
                             return ReturnJsonResponse(new
                             {
