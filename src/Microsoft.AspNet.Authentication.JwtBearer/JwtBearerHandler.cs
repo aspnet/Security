@@ -45,7 +45,7 @@ namespace Microsoft.AspNet.Authentication.JwtBearer
 
                 if (string.IsNullOrEmpty(token))
                 {
-                    var authorization = Request.Headers["Authorization"];
+                    string authorization = Request.Headers["Authorization"];
 
                     // If no authorization header found, nothing to process further
                     if (string.IsNullOrEmpty(authorization))
@@ -165,7 +165,7 @@ namespace Microsoft.AspNet.Authentication.JwtBearer
         protected override async Task<bool> HandleUnauthorizedAsync(ChallengeContext context)
         {
             Response.StatusCode = 401;
-            await Options.Events.SetAuthenticationHeader(new SetAuthenticationHeaderContext(Context, Options));
+            await Options.Events.Challenge(new JwtBearerChallengeContext(Context, Options));
             return false;
         }
 

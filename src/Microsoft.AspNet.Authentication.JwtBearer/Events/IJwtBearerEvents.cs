@@ -36,6 +36,6 @@ namespace Microsoft.AspNet.Authentication.JwtBearer
         /// <summary>
         /// Invoked to apply a challenge sent back to the caller.
         /// </summary>
-        Task SetAuthenticationHeader(SetAuthenticationHeaderContext context);
+        Task Challenge(JwtBearerChallengeContext context);
     }
 }

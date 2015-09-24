@@ -38,7 +38,7 @@ namespace Microsoft.AspNet.Authentication.JwtBearer
         /// <summary>
         /// Invoked to apply a challenge sent back to the caller.
         /// </summary>
-        public Func<SetAuthenticationHeaderContext, Task> OnSetAuthenticationHeader { get; set; } = context =>
+        public Func<JwtBearerChallengeContext, Task> OnChallenge { get; set; } = context =>
         {
             context.HttpContext.Response.Headers.Append("WWW-Authenticate", context.Options.Challenge);
             return Task.FromResult(0);
@@ -52,6 +52,6 @@ namespace Microsoft.AspNet.Authentication.JwtBearer
 
         public virtual Task ValidatedToken(ValidatedTokenContext context) => OnValidatedToken(context);
 
-        public virtual Task SetAuthenticationHeader(SetAuthenticationHeaderContext context) => OnSetAuthenticationHeader(context);
+        public virtual Task Challenge(JwtBearerChallengeContext context) => OnChallenge(context);
     }
 }
