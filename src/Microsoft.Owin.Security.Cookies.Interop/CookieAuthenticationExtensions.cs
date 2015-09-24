@@ -35,7 +35,7 @@ namespace Owin
             var dataProtector = dataProtectionProvider.CreateProtector(
                 "Microsoft.AspNet.Authentication.Cookies.CookieAuthenticationMiddleware", // full name of the ASP.NET 5 type
                 authenticationScheme, "v2");
-            options.TicketDataFormat = new AspNet5TicketDataFormat(new DataProtectorShim(dataProtector), authenticationScheme);
+            options.TicketDataFormat = new AspNetTicketDataFormat(new DataProtectorShim(dataProtector), authenticationScheme);
 
             return app.UseCookieAuthentication(options, stage);
         }

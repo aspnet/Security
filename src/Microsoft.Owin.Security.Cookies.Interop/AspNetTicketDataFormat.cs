@@ -8,10 +8,10 @@ using Microsoft.Owin.Security.DataProtection;
 
 namespace Microsoft.Owin.Security.Cookies.Interop
 {
-    public class AspNet5TicketDataFormat : SecureDataFormat<AuthenticationTicket>
+    public class AspNetTicketDataFormat : SecureDataFormat<AuthenticationTicket>
     {
-        public AspNet5TicketDataFormat(IDataProtector protector, string authenticationType)
-            : base(new AspNet5TicketSerializer(authenticationType), protector, TextEncodings.Base64Url)
+        public AspNetTicketDataFormat(IDataProtector protector, string authenticationType)
+            : base(new AspNetTicketSerializer(authenticationType), protector, TextEncodings.Base64Url)
         {
         }
     }
