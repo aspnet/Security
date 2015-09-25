@@ -28,12 +28,7 @@ namespace Microsoft.AspNet.Authentication
         public ClaimsPrincipal Principal { get; set; }
         public AuthenticationProperties Properties { get; set; }
 
-        public bool IsRequestCompleted { get; private set; }
-
-        public void RequestCompleted()
-        {
-            IsRequestCompleted = true;
-        }
+        public bool RequestCompleted { get; set; }
 
         public string SignInScheme { get; set; }
 

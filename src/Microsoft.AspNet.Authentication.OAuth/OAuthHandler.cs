@@ -44,8 +44,7 @@ namespace Microsoft.AspNet.Authentication.OAuth
             var ticket = await HandleAuthenticateOnceAsync();
             if (ticket == null)
             {
-                Logger.LogWarning("Invalid return state, unable to redirect.");
-                Response.StatusCode = 500;
+                await HandleErrorAsync(new ErrorContext(Context, "Invalid return state, unable to redirect."));
                 return true;
             }
 
@@ -63,7 +62,7 @@ namespace Microsoft.AspNet.Authentication.OAuth
                 await Context.Authentication.SignInAsync(context.SignInScheme, context.Principal, context.Properties);
             }
 
-            if (!context.IsRequestCompleted && context.RedirectUri != null)
+            if (!context.RequestCompleted && context.RedirectUri != null)
             {
                 if (context.Principal == null)
                 {
@@ -71,10 +70,10 @@ namespace Microsoft.AspNet.Authentication.OAuth
                     context.RedirectUri = QueryHelpers.AddQueryString(context.RedirectUri, "error", "access_denied");
                 }
                 Response.Redirect(context.RedirectUri);
-                context.RequestCompleted();
+                context.RequestCompleted = true;
             }
 
-            return context.IsRequestCompleted;
+            return context.RequestCompleted;
         }
 
         protected override async Task<AuthenticationTicket> HandleAuthenticateAsync()
@@ -88,7 +87,8 @@ namespace Microsoft.AspNet.Authentication.OAuth
                 var value = query["error"];
                 if (!StringValues.IsNullOrEmpty(value))
                 {
-                    Logger.LogVerbose("Remote server returned an error: " + Request.QueryString);
+                    Logger.LogWarning("Remote server returned an error: " + value);
+
                     // TODO: Fail request rather than passing through?
                     return null;
                 }
@@ -99,6 +99,7 @@ namespace Microsoft.AspNet.Authentication.OAuth
                 properties = Options.StateDataFormat.Unprotect(state);
                 if (properties == null)
                 {
+                    Logger.LogWarning("Invalid state");
                     return null;
                 }
 

@@ -2,6 +2,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Net;
 using System.Net.Http;
@@ -529,6 +530,25 @@ namespace Microsoft.AspNet.Authentication.Google
             Assert.Equal("/foo", transaction.Response.Headers.GetValues("Location").First());
         }
 
+        [Fact]
+        public async Task NoStateCausesErrorHandler()
+        {
+            var stateFormat = new PropertiesDataFormat(new EphemeralDataProtectionProvider().CreateProtector("GoogleTest"));
+            var server = CreateServer(options =>
+            {
+                options.ClientId = "Test Id";
+                options.ClientSecret = "Test Secret";
+                options.ErrorHandlerPath = new PathString("/error");
+            });
+
+            //Post a message to the Google middleware
+            var transaction = await server.SendAsync(
+                "https://example.com/signin-google?code=TestCode&error=OMG");
+
+            Assert.Equal(HttpStatusCode.Redirect, transaction.Response.StatusCode);
+            Assert.Equal("/error?ErrorMessage="+UrlEncoder.Default.UrlEncode("Invalid return state, unable to redirect."), 
+                transaction.Response.Headers.GetValues("Location").First());
+        }
 
         private static HttpResponseMessage ReturnJsonResponse(object content)
         {

@@ -112,6 +112,31 @@ namespace Microsoft.AspNet.Authentication
             return Request.Scheme + "://" + Request.Host + OriginalPathBase + targetPath;
         }
 
+        /// <summary>
+        /// Handles errors by redirecting to an error handler path if configured.  Otherwise sets the status code to 500.
+        /// </summary>
+        /// <param name="error"></param>
+        /// <returns></returns>
+        protected virtual Task HandleErrorAsync(ErrorContext error)
+        {
+            Logger.LogWarning(error.ErrorMessage);
+            if (!error.Handled)
+            {
+                var errorUri = error.ErrorHandlerUri ?? Options.ErrorHandlerPath;
+                // Noop if no error handler path configured
+                if (!string.IsNullOrEmpty(errorUri))
+                {
+                    var redirectUri = errorUri + QueryString.Create("ErrorMessage", error.ErrorMessage);
+                    Context.Response.Redirect(redirectUri);
+                }
+                else
+                {
+                    Context.Response.StatusCode = 500;
+                }
+            }
+            return Task.FromResult(0);
+        }
+
         private static async Task OnStartingCallback(object state)
         {
             var handler = (AuthenticationHandler<TOptions>)state;

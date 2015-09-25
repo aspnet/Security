@@ -1,6 +1,7 @@
 // Copyright (c) .NET Foundation. All rights reserved.
 // Licensed under the Apache License, Version 2.0. See License.txt in the project root for license information.
 
+using Microsoft.AspNet.Http;
 using Microsoft.AspNet.Http.Authentication;
 
 namespace Microsoft.AspNet.Authentication
@@ -42,5 +43,11 @@ namespace Microsoft.AspNet.Authentication
         /// Additional information about the authentication type which is made available to the application.
         /// </summary>
         public AuthenticationDescription Description { get; set; } = new AuthenticationDescription();
+
+        /// <summary>
+        /// The request path within the application's base path where the user-agent will be returned
+        /// when a failure occurs.
+        /// </summary>
+        public PathString ErrorHandlerPath { get; set; }
     }
 }
