@@ -20,7 +20,7 @@ namespace Microsoft.AspNet.Authentication.JwtBearer
         /// Searches the 'Authorization' header for a 'Bearer' token. If the 'Bearer' token is found, it is validated using <see cref="TokenValidationParameters"/> set in the options.
         /// </summary>
         /// <returns></returns>
-        protected override async Task<AuthenticationTicket> HandleAuthenticateAsync()
+        protected override async Task<AuthenticateResult> HandleAuthenticateAsync()
         {
             string token = null;
             try
@@ -32,12 +32,15 @@ namespace Microsoft.AspNet.Authentication.JwtBearer
                 await Options.Events.ReceivingToken(receivingTokenContext);
                 if (receivingTokenContext.HandledResponse)
                 {
-                    return receivingTokenContext.AuthenticationTicket;
+                    return new AuthenticateResult()
+                    {
+                        Ticket = receivingTokenContext.AuthenticationTicket
+                    };
                 }
 
                 if (receivingTokenContext.Skipped)
                 {
-                    return null;
+                    return new AuthenticateResult();
                 }
 
                 // If application retrieved token from somewhere else, use that.
@@ -50,7 +53,7 @@ namespace Microsoft.AspNet.Authentication.JwtBearer
                     // If no authorization header found, nothing to process further
                     if (string.IsNullOrEmpty(authorization))
                     {
-                        return null;
+                        return new AuthenticateResult();
                     }
 
                     if (authorization.StartsWith("Bearer ", StringComparison.OrdinalIgnoreCase))
@@ -61,7 +64,7 @@ namespace Microsoft.AspNet.Authentication.JwtBearer
                     // If no token found, no further work possible
                     if (string.IsNullOrEmpty(token))
                     {
-                        return null;
+                        return new AuthenticateResult();
                     }
                 }
 
@@ -74,12 +77,15 @@ namespace Microsoft.AspNet.Authentication.JwtBearer
                 await Options.Events.ReceivedToken(receivedTokenContext);
                 if (receivedTokenContext.HandledResponse)
                 {
-                    return receivedTokenContext.AuthenticationTicket;
+                    return new AuthenticateResult()
+                    {
+                        Ticket = receivedTokenContext.AuthenticationTicket
+                    };
                 }
 
                 if (receivedTokenContext.Skipped)
                 {
-                    return null;
+                    return new AuthenticateResult();
                 }
 
                 if (_configuration == null && Options.ConfigurationManager != null)
@@ -118,15 +124,18 @@ namespace Microsoft.AspNet.Authentication.JwtBearer
                         await Options.Events.ValidatedToken(validatedTokenContext);
                         if (validatedTokenContext.HandledResponse)
                         {
-                            return validatedTokenContext.AuthenticationTicket;
+                            return new AuthenticateResult()
+                            {
+                                Ticket = validatedTokenContext.AuthenticationTicket
+                            };
                         }
 
                         if (validatedTokenContext.Skipped)
                         {
-                            return null;
+                            return new AuthenticateResult();
                         }
 
-                        return ticket;
+                        return new AuthenticateResult() { Ticket = ticket };
                     }
                 }
 
@@ -150,23 +159,25 @@ namespace Microsoft.AspNet.Authentication.JwtBearer
                 await Options.Events.AuthenticationFailed(authenticationFailedContext);
                 if (authenticationFailedContext.HandledResponse)
                 {
-                    return authenticationFailedContext.AuthenticationTicket;
+                    return new AuthenticateResult()
+                    {
+                        Ticket = authenticationFailedContext.AuthenticationTicket
+                    };
                 }
 
                 if (authenticationFailedContext.Skipped)
                 {
-                    return null;
+                    return new AuthenticateResult();
                 }
 
                 throw;
             }
         }
 
-        protected override async Task<bool> HandleUnauthorizedAsync(ChallengeContext context)
+        protected override async Task HandleUnauthorizedAsync(ChallengeContext context)
         {
             Response.StatusCode = 401;
             await Options.Events.Challenge(new JwtBearerChallengeContext(Context, Options));
-            return false;
         }
 
         protected override Task HandleSignOutAsync(SignOutContext context)

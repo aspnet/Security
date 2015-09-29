@@ -45,5 +45,10 @@ namespace Microsoft.AspNet.Authentication
         /// Additional state values for the authentication session.
         /// </summary>
         public AuthenticationProperties Properties { get; private set; }
+
+        /// <summary>
+        /// Holds error information caused by authentication.
+        /// </summary>
+        public ErrorContext Error { get; set; }
     }
 }

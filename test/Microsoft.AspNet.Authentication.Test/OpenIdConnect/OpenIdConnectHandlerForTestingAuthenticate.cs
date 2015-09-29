@@ -22,11 +22,6 @@ namespace Microsoft.AspNet.Authentication.Tests.OpenIdConnect
         {
         }
 
-        protected override async Task<bool> HandleUnauthorizedAsync(ChallengeContext context)
-        {
-            return await base.HandleUnauthorizedAsync(context);
-        }
-
         protected override Task<OpenIdConnectTokenEndpointResponse> RedeemAuthorizationCodeAsync(string authorizationCode, string redirectUri)
         {
             var jsonResponse = new JObject();

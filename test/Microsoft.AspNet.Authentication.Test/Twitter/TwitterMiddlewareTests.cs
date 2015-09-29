@@ -77,7 +77,7 @@ namespace Microsoft.AspNet.Authentication.Twitter
                 "https://example.com/signin-twitter");
 
             Assert.Equal(HttpStatusCode.Redirect, transaction.Response.StatusCode);
-            Assert.Equal("/error?ErrorMessage=" + UrlEncoder.Default.UrlEncode("Invalid return state, unable to redirect."),
+            Assert.Equal("/error?ErrorMessage=" + UrlEncoder.Default.UrlEncode("Invalid state cookie."),
                 transaction.Response.Headers.GetValues("Location").First());
         }
 

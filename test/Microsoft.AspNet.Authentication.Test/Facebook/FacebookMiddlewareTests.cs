@@ -18,6 +18,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.WebEncoders;
 using Newtonsoft.Json;
 using Xunit;
+using System.Diagnostics;
 
 namespace Microsoft.AspNet.Authentication.Facebook
 {

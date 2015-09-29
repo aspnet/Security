@@ -546,7 +546,7 @@ namespace Microsoft.AspNet.Authentication.Google
                 "https://example.com/signin-google?code=TestCode&error=OMG");
 
             Assert.Equal(HttpStatusCode.Redirect, transaction.Response.StatusCode);
-            Assert.Equal("/error?ErrorMessage="+UrlEncoder.Default.UrlEncode("Invalid return state, unable to redirect."), 
+            Assert.Equal("/error?ErrorMessage="+UrlEncoder.Default.UrlEncode("Remote server returned an error: OMG"), 
                 transaction.Response.Headers.GetValues("Location").First());
         }
 

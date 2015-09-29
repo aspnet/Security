@@ -34,7 +34,7 @@ namespace Microsoft.AspNet.Authentication.Twitter
             _httpClient = httpClient;
         }
 
-        public override async Task<bool> InvokeAsync()
+        public override async Task<bool> HandleRequestAsync()
         {
             if (Options.CallbackPath.HasValue && Options.CallbackPath == Request.Path)
             {
@@ -43,52 +43,62 @@ namespace Microsoft.AspNet.Authentication.Twitter
             return false;
         }
 
-        protected override async Task<AuthenticationTicket> HandleAuthenticateAsync()
+        protected override async Task<AuthenticateResult> HandleAuthenticateAsync()
         {
             AuthenticationProperties properties = null;
-            try
+            var query = Request.Query;
+            var protectedRequestToken = Request.Cookies[StateCookie];
+
+            var requestToken = Options.StateDataFormat.Unprotect(protectedRequestToken);
+
+            if (requestToken == null)
             {
-                var query = Request.Query;
-                var protectedRequestToken = Request.Cookies[StateCookie];
-
-                var requestToken = Options.StateDataFormat.Unprotect(protectedRequestToken);
-
-                if (requestToken == null)
+                return new AuthenticateResult()
                 {
-                    Logger.LogWarning("Invalid state");
-                    return null;
-                }
-
-                properties = requestToken.Properties;
-
-                var returnedToken = query["oauth_token"];
-                if (StringValues.IsNullOrEmpty(returnedToken))
-                {
-                    Logger.LogWarning("Missing oauth_token");
-                    return new AuthenticationTicket(properties, Options.AuthenticationScheme);
-                }
-
-                if (!string.Equals(returnedToken, requestToken.Token, StringComparison.Ordinal))
-                {
-                    Logger.LogWarning("Unmatched token");
-                    return new AuthenticationTicket(properties, Options.AuthenticationScheme);
-                }
-
-                var oauthVerifier = query["oauth_verifier"];
-                if (StringValues.IsNullOrEmpty(oauthVerifier))
-                {
-                    Logger.LogWarning("Missing or blank oauth_verifier");
-                    return new AuthenticationTicket(properties, Options.AuthenticationScheme);
-                }
-
-                var cookieOptions = new CookieOptions
-                {
-                    HttpOnly = true,
-                    Secure = Request.IsHttps
+                    Error = new ErrorContext(Context, "Invalid state cookie.")
                 };
+            }
 
-                Response.Cookies.Delete(StateCookie, cookieOptions);
+            properties = requestToken.Properties;
 
+            // REVIEW: see which of these are really errors
+
+            var returnedToken = query["oauth_token"];
+            if (StringValues.IsNullOrEmpty(returnedToken))
+            {
+                Logger.LogWarning("Missing oauth_token");
+                return new AuthenticateResult()
+                {
+                    Ticket = new AuthenticationTicket(properties, Options.AuthenticationScheme)
+                };
+            }
+
+            if (!string.Equals(returnedToken, requestToken.Token, StringComparison.Ordinal))
+            {
+                Logger.LogWarning("Unmatched token");
+                return new AuthenticateResult()
+                {
+                    Ticket = new AuthenticationTicket(properties, Options.AuthenticationScheme)
+                };
+            }
+
+            var oauthVerifier = query["oauth_verifier"];
+            if (StringValues.IsNullOrEmpty(oauthVerifier))
+            {
+                Logger.LogWarning("Missing or blank oauth_verifier");
+                return new AuthenticateResult()
+                {
+                    Ticket = new AuthenticationTicket(properties, Options.AuthenticationScheme)
+                };
+            }
+
+            var cookieOptions = new CookieOptions
+            {
+                HttpOnly = true,
+                Secure = Request.IsHttps
+            };
+
+<<<<<<< HEAD
                 var accessToken = await ObtainAccessTokenAsync(Options.ConsumerKey, Options.ConsumerSecret, requestToken, oauthVerifier);
 
                 var identity = new ClaimsIdentity(new[]
@@ -108,10 +118,30 @@ namespace Microsoft.AspNet.Authentication.Twitter
                 return await CreateTicketAsync(identity, properties, accessToken);
             }
             catch (Exception ex)
+=======
+            Response.Cookies.Delete(StateCookie, cookieOptions);
+
+            var accessToken = await ObtainAccessTokenAsync(Options.ConsumerKey, Options.ConsumerSecret, requestToken, oauthVerifier);
+                
+            var identity = new ClaimsIdentity(new[]
+>>>>>>> Control flowz
             {
-                Logger.LogError("Authentication failed", ex);
-                return new AuthenticationTicket(properties, Options.AuthenticationScheme);
+                new Claim(ClaimTypes.NameIdentifier, accessToken.UserId, ClaimValueTypes.String, Options.ClaimsIssuer),
+                new Claim(ClaimTypes.Name, accessToken.ScreenName, ClaimValueTypes.String, Options.ClaimsIssuer),
+                new Claim("urn:twitter:userid", accessToken.UserId, ClaimValueTypes.String, Options.ClaimsIssuer),
+                new Claim("urn:twitter:screenname", accessToken.ScreenName, ClaimValueTypes.String, Options.ClaimsIssuer)
+            },
+            Options.ClaimsIssuer);
+
+            if (Options.SaveTokensAsClaims)
+            {
+                identity.AddClaim(new Claim("access_token", accessToken.Token, ClaimValueTypes.String, Options.ClaimsIssuer));
             }
+
+            return new AuthenticateResult()
+            {
+                Ticket = await CreateTicketAsync(identity, properties, accessToken)
+            };
         }
 
         protected virtual async Task<AuthenticationTicket> CreateTicketAsync(ClaimsIdentity identity, AuthenticationProperties properties, AccessToken token)
@@ -132,7 +162,11 @@ namespace Microsoft.AspNet.Authentication.Twitter
             return new AuthenticationTicket(context.Principal, context.Properties, Options.AuthenticationScheme);
         }
 
+<<<<<<< HEAD
         protected override async Task<bool> HandleUnauthorizedAsync(ChallengeContext context)
+=======
+        protected override async Task HandleUnauthorizedAsync([NotNull] ChallengeContext context)
+>>>>>>> Control flowz
         {
             if (context == null)
             {
@@ -162,50 +196,60 @@ namespace Microsoft.AspNet.Authentication.Twitter
                     Context, Options,
                     properties, twitterAuthenticationEndpoint);
                 await Options.Events.RedirectToAuthorizationEndpoint(redirectContext);
-                return true;
+                context.CompleteRequest();
             }
             else
             {
                 Logger.LogError("requestToken CallbackConfirmed!=true");
             }
-            return false; // REVIEW: Make sure this should not stop other handlers
         }
 
         public async Task<bool> InvokeReturnPathAsync()
         {
-            var model = await HandleAuthenticateOnceAsync();
-            if (model == null)
+            var result = await HandleAuthenticateOnceAsync();
+            if (result.Error != null)
             {
-                await HandleErrorAsync(new ErrorContext(Context, "Invalid return state, unable to redirect."));
-                return true;
+                return await HandleErrorAsync(result.Error);
             }
 
-            var context = new SigningInContext(Context, model)
+            var ticket = result?.Ticket;
+            if (ticket == null)
+            {
+                return await HandleErrorAsync(new ErrorContext(Context, "Invalid return state, unable to redirect."));
+            }
+
+            var context = new SigningInContext(Context, ticket)
             {
                 SignInScheme = Options.SignInScheme,
-                RedirectUri = model.Properties.RedirectUri
+                RedirectUri = ticket.Properties.RedirectUri
             };
-            model.Properties.RedirectUri = null;
+            ticket.Properties.RedirectUri = null;
 
             await Options.Events.SigningIn(context);
 
             if (context.SignInScheme != null && context.Principal != null)
             {
-                await Context.Authentication.SignInAsync(context.SignInScheme, context.Principal, context.Properties);
+                var signInContext = new SignInContext(context.SignInScheme, context.Principal, context.Properties?.Items);
+                await Context.Authentication.SignInAsync(signInContext);
+                if (signInContext.IsRequestCompleted)
+                {
+                    context.CompleteRequest();
+                }
             }
 
-            if (!context.RequestCompleted && context.RedirectUri != null)
+            if (!context.IsRequestCompleted && context.RedirectUri != null)
             {
                 if (context.Principal == null)
                 {
-                    // add a redirect hint that sign-in failed in some way
-                    context.RedirectUri = QueryHelpers.AddQueryString(context.RedirectUri, "error", "access_denied");
+                    // TODO: need to override this error behavior to redirect with query string
+                    return await HandleErrorAsync(new ErrorContext(Context, "OAuth Authentication failure.")
+                    {
+                        ErrorHandlerUri = QueryHelpers.AddQueryString(context.RedirectUri, "error", "access_denied")
+                    });
                 }
-                Response.Redirect(context.RedirectUri);
-                context.RequestCompleted = true;
             }
 
-            return context.RequestCompleted;
+            return context.IsRequestCompleted;
         }
 
         protected override Task HandleSignOutAsync(SignOutContext context)
@@ -218,7 +262,7 @@ namespace Microsoft.AspNet.Authentication.Twitter
             throw new NotSupportedException();
         }
 
-        protected override Task<bool> HandleForbiddenAsync(ChallengeContext context)
+        protected override Task HandleForbiddenAsync(ChallengeContext context)
         {
             throw new NotSupportedException();
         }
