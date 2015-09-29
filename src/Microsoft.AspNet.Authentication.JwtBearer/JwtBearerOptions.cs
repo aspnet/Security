@@ -35,10 +35,10 @@ namespace Microsoft.AspNet.Authentication.JwtBearer
         public string Authority { get; set; }
 
         /// <summary>
-        /// Gets or sets the audience for any received JWT token.
+        /// Gets or sets the audience for any received OpenIdConnect token.
         /// </summary>
         /// <value>
-        /// The expected audience for any received JWT token.
+        /// The expected audience for any received OpenIdConnect token.
         /// </value>
         public string Audience { get; set; }
 

@@ -9,7 +9,7 @@ using Microsoft.Framework.OptionsModel;
 namespace Microsoft.AspNet.Builder
 {
     /// <summary>
-    /// Extension methods to add Jwt Bearer authentication capabilities to an HTTP application pipeline
+    /// Extension methods to add OpenIdConnect Bearer authentication capabilities to an HTTP application pipeline
     /// </summary>
     public static class JwtBearerAppBuilderExtensions
     {

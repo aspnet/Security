@@ -1,6 +1,6 @@
 {
     "version": "1.0.0-*",
-    "description": "ASP.NET 5 middleware that enables an application to receive a Jwt bearer token.",
+    "description": "ASP.NET 5 middleware that enables an application to receive a OpenIdConnect bearer token.",
     "repository": {
         "type": "git",
         "url": "git://github.com/aspnet/security"
@@ -8,7 +8,7 @@
     "dependencies": {
         "Microsoft.AspNet.Authentication": "1.0.0-*",
         "Microsoft.Framework.NotNullAttribute.Sources": { "type": "build", "version": "1.0.0-*" },
-        "Microsoft.IdentityModel.Protocols.OpenIdConnect": "2.0.0-beta7-*"
+        "Microsoft.IdentityModel.Protocols.OpenIdConnect": "2.0.0-beta8-*"
     },
     "frameworks": {
         "dnx451": {

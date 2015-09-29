@@ -7,6 +7,7 @@ using System.Diagnostics.CodeAnalysis;
 using System.IdentityModel.Tokens;
 using System.IdentityModel.Tokens.Jwt;
 using System.Net.Http;
+using System.Security.Claims;
 using Microsoft.AspNet.Http;
 using Microsoft.AspNet.Http.Authentication;
 using Microsoft.Framework.WebEncoders;
@@ -41,14 +42,14 @@ namespace Microsoft.AspNet.Authentication.OpenIdConnect
         /// <para>ResponseType: <see cref="OpenIdConnectResponseTypes.CodeIdToken"/></para>
         /// <para>Scope: <see cref="OpenIdConnectScopes.OpenIdProfile"/>.</para>
         /// <para>TokenValidationParameters: new <see cref="TokenValidationParameters"/> with AuthenticationScheme = authenticationScheme.</para>
-        /// <para>UseTokenLifetime: true.</para>
+        /// <para>UseTokenLifetime: false.</para>
         /// </remarks>
         /// <param name="authenticationScheme"> will be used to when creating the <see cref="System.Security.Claims.ClaimsIdentity"/> for the AuthenticationScheme property.</param>
         [SuppressMessage("Microsoft.Globalization", "CA1303:Do not pass literals as localized parameters", MessageId = "Microsoft.Owin.Security.OpenIdConnect.OpenIdConnectOptions.set_Caption(System.String)", Justification = "Not a LOC field")]
         public OpenIdConnectOptions(string authenticationScheme)
         {
             AuthenticationScheme = authenticationScheme;
-            Caption = OpenIdConnectDefaults.Caption;
+            DisplayName = OpenIdConnectDefaults.Caption;
         }
 
         /// <summary>
@@ -80,10 +81,10 @@ namespace Microsoft.AspNet.Authentication.OpenIdConnect
         /// <summary>
         /// Get or sets the text that the user can display on a sign in user interface.
         /// </summary>
-        public string Caption
+        public string DisplayName
         {
-            get { return Description.Caption; }
-            set { Description.Caption = value; }
+            get { return Description.DisplayName; }
+            set { Description.DisplayName = value; }
         }
 
         /// <summary>
@@ -144,7 +145,7 @@ namespace Microsoft.AspNet.Authentication.OpenIdConnect
         /// <exception cref="ArgumentNullException">if 'value' is null.</exception>
         public OpenIdConnectProtocolValidator ProtocolValidator { get; set; } = new OpenIdConnectProtocolValidator()
         {
-            RequireState = false,
+            RequireStateValidation = false,
             NonceLifetime = TimeSpan.FromMinutes(15)
         };
 
@@ -222,9 +223,16 @@ namespace Microsoft.AspNet.Authentication.OpenIdConnect
         /// <summary>
         /// Indicates that the authentication session lifetime (e.g. cookies) should match that of the authentication token.
         /// If the token does not provide lifetime information then normal session lifetimes will be used.
-        /// This is enabled by default.
+        /// This is disabled by default.
         /// </summary>
-        public bool UseTokenLifetime { get; set; } = true;
+        public bool UseTokenLifetime { get; set; }
+
+        /// <summary>
+        /// Defines whether access and refresh tokens should be stored in the
+        /// <see cref="ClaimsPrincipal"/> after a successful authentication.
+        /// You can set this property to <c>false</c> to reduce the size of the final authentication cookie.
+        /// </summary>
+        public bool SaveTokensAsClaims { get; set; } = true;
 
         /// <summary>
         /// Gets or sets the <see cref="IHtmlEncoder"/> used to sanitize HTML outputs.

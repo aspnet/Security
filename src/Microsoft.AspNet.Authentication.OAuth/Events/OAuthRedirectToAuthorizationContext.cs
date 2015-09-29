@@ -4,22 +4,20 @@
 using Microsoft.AspNet.Http;
 using Microsoft.AspNet.Http.Authentication;
 
-namespace Microsoft.AspNet.Authentication.Twitter
+namespace Microsoft.AspNet.Authentication.OAuth
 {
     /// <summary>
-    /// The Context passed when a Challenge causes a redirect to authorize endpoint in the Twitter middleware.
+    /// Context passed when a Challenge causes a redirect to authorize endpoint in the middleware.
     /// </summary>
-    public class TwitterApplyRedirectContext : BaseContext<TwitterOptions>
+    public class OAuthRedirectToAuthorizationContext : BaseContext<OAuthOptions>
     {
         /// <summary>
         /// Creates a new context object.
         /// </summary>
         /// <param name="context">The HTTP request context.</param>
-        /// <param name="options">The Twitter middleware options.</param>
         /// <param name="properties">The authentication properties of the challenge.</param>
         /// <param name="redirectUri">The initial redirect URI.</param>
-        public TwitterApplyRedirectContext(HttpContext context, TwitterOptions options,
-            AuthenticationProperties properties, string redirectUri)
+        public OAuthRedirectToAuthorizationContext(HttpContext context, OAuthOptions options, AuthenticationProperties properties, string redirectUri)
             : base(context, options)
         {
             RedirectUri = redirectUri;

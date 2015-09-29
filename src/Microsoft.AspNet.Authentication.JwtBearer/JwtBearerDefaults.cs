@@ -4,13 +4,12 @@
 namespace Microsoft.AspNet.Authentication.JwtBearer
 {
     /// <summary>
-    /// Default values used by authorization server and bearer authentication.
+    /// Default values used by bearer authentication.
     /// </summary>
     public static class JwtBearerDefaults
     {
         /// <summary>
-        /// Default value for AuthenticationScheme property in the JwtBearerAuthenticationOptions and
-        /// JwtAuthorizationServerOptions.
+        /// Default value for AuthenticationScheme property in the JwtBearerAuthenticationOptions
         /// </summary>
         public const string AuthenticationScheme = "Bearer";
     }

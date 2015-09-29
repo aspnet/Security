@@ -89,6 +89,13 @@ namespace Microsoft.AspNet.Authentication.OpenIdConnect
                     message.PostLogoutRedirectUri = Options.PostLogoutRedirectUri;
                 }
 
+                if (!string.IsNullOrEmpty(Options.SignInScheme))
+                {
+                    var principal = await Context.Authentication.AuthenticateAsync(Options.SignInScheme);
+
+                    message.IdTokenHint = principal?.FindFirst(OpenIdConnectParameterNames.IdToken)?.Value;
+                }
+
                 var redirectContext = new RedirectContext(Context, Options)
                 {
                     ProtocolMessage = message
@@ -160,7 +167,7 @@ namespace Microsoft.AspNet.Authentication.OpenIdConnect
             // order for local RedirectUri
             // 1. challenge.Properties.RedirectUri
             // 2. CurrentUri if Options.DefaultToCurrentUriOnRedirect is true)
-            AuthenticationProperties properties = new AuthenticationProperties(context.Properties);
+            var properties = new AuthenticationProperties(context.Properties);
 
             if (!string.IsNullOrEmpty(properties.RedirectUri))
             {
@@ -313,7 +320,7 @@ namespace Microsoft.AspNet.Authentication.OpenIdConnect
                 // response_mode=query (explicit or not) and a response_type containing id_token
                 // or token are not considered as a safe combination and MUST be rejected.
                 // See http://openid.net/specs/oauth-v2-multiple-response-types-1_0.html#Security
-                if (!string.IsNullOrEmpty(message.IdToken) || !string.IsNullOrEmpty(message.Token))
+                if (!string.IsNullOrEmpty(message.IdToken) || !string.IsNullOrEmpty(message.AccessToken))
                 {
                     Logger.LogError("An OpenID Connect response cannot contain an identity token " +
                                     "or an access token when using response_mode=query");
@@ -352,7 +359,8 @@ namespace Microsoft.AspNet.Authentication.OpenIdConnect
                 // Fail if state is missing, it's required for the correlation id.
                 if (string.IsNullOrEmpty(message.State))
                 {
-                    Logger.LogError(Resources.OIDCH_0004_MessageStateIsNullOrEmpty);
+                    // This wasn't a valid ODIC message, it may not have been intended for us.
+                    Logger.LogVerbose(Resources.OIDCH_0004_MessageStateIsNullOrEmpty);
                     return null;
                 }
 
@@ -455,6 +463,12 @@ namespace Microsoft.AspNet.Authentication.OpenIdConnect
             AuthenticationTicket ticket = null;
             JwtSecurityToken jwt = null;
 
+            Options.ProtocolValidator.ValidateAuthenticationResponse(new OpenIdConnectProtocolValidationContext()
+            {
+                ClientId = Options.ClientId,
+                ProtocolMessage = message,
+            });
+
             var authorizationCodeReceivedContext = await RunAuthorizationCodeReceivedEventAsync(message, properties, ticket, jwt);
             if (authorizationCodeReceivedContext.HandledResponse)
             {
@@ -491,7 +505,19 @@ namespace Microsoft.AspNet.Authentication.OpenIdConnect
 
             ticket = ValidateToken(tokenEndpointResponse.ProtocolMessage.IdToken, message, properties, validationParameters, out jwt);
 
-            await ValidateOpenIdConnectProtocolAsync(null, message);
+            var nonce = jwt?.Payload.Nonce;
+            if (!string.IsNullOrEmpty(nonce))
+            {
+                nonce = ReadNonceCookie(nonce);
+            }
+
+            Options.ProtocolValidator.ValidateTokenResponse(new OpenIdConnectProtocolValidationContext()
+            {
+                ClientId = Options.ClientId,
+                ProtocolMessage = tokenEndpointResponse.ProtocolMessage,
+                ValidatedIdToken = jwt,
+                Nonce = nonce
+            });
 
             var authenticationValidatedContext = await RunAuthenticationValidatedEventAsync(message, ticket, tokenEndpointResponse);
             if (authenticationValidatedContext.HandledResponse)
@@ -504,10 +530,16 @@ namespace Microsoft.AspNet.Authentication.OpenIdConnect
             }
             ticket = authenticationValidatedContext.AuthenticationTicket;
 
+            if (Options.SaveTokensAsClaims)
+            {
+                // Persist the tokens extracted from the token response.
+                SaveTokens(ticket.Principal, tokenEndpointResponse.ProtocolMessage, saveRefreshToken: true);
+            }
+
             if (Options.GetClaimsFromUserInfoEndpoint)
             {
                 Logger.LogDebug(Resources.OIDCH_0040_Sending_Request_UIEndpoint);
-                ticket = await GetUserInformationAsync(tokenEndpointResponse.ProtocolMessage, ticket);
+                ticket = await GetUserInformationAsync(tokenEndpointResponse.ProtocolMessage, jwt, ticket);
             }
 
             return ticket;
@@ -522,7 +554,19 @@ namespace Microsoft.AspNet.Authentication.OpenIdConnect
             var validationParameters = Options.TokenValidationParameters.Clone();
             var ticket = ValidateToken(message.IdToken, message, properties, validationParameters, out jwt);
 
-            await ValidateOpenIdConnectProtocolAsync(jwt, message);
+            var nonce = jwt?.Payload.Nonce;
+            if (!string.IsNullOrEmpty(nonce))
+            {
+                nonce = ReadNonceCookie(nonce);
+            }
+
+            Options.ProtocolValidator.ValidateAuthenticationResponse(new OpenIdConnectProtocolValidationContext()
+            {
+                ClientId = Options.ClientId,
+                ProtocolMessage = message,
+                ValidatedIdToken = jwt,
+                Nonce = nonce
+            });
 
             var authenticationValidatedContext = await RunAuthenticationValidatedEventAsync(message, ticket, tokenEndpointResponse: null);
             if (authenticationValidatedContext.HandledResponse)
@@ -548,7 +592,27 @@ namespace Microsoft.AspNet.Authentication.OpenIdConnect
                 {
                     return null;
                 }
+                message = authorizationCodeReceivedContext.ProtocolMessage;
                 ticket = authorizationCodeReceivedContext.AuthenticationTicket;
+
+                if (Options.SaveTokensAsClaims)
+                {
+                    // TODO: call SaveTokens with the token response and set
+                    // saveRefreshToken to true when the hybrid flow is fully implemented.
+                    SaveTokens(ticket.Principal, message, saveRefreshToken: false);
+                }
+            }
+            // Implicit Flow
+            else
+            {
+                if (Options.SaveTokensAsClaims)
+                {
+                    // Note: don't save the refresh token when it is extracted from the authorization
+                    // response, since it's not a valid parameter when using the implicit flow.
+                    // See http://openid.net/specs/openid-connect-core-1_0.html#Authentication
+                    // and https://tools.ietf.org/html/rfc6749#section-4.2.2.
+                    SaveTokens(ticket.Principal, message, saveRefreshToken: false);
+                }
             }
 
             return ticket;
@@ -586,9 +650,9 @@ namespace Microsoft.AspNet.Authentication.OpenIdConnect
         /// <param name="message">message that is being processed</param>
         /// <param name="ticket">authentication ticket with claims principal and identities</param>
         /// <returns>Authentication ticket with identity with additional claims, if any.</returns>
-        protected virtual async Task<AuthenticationTicket> GetUserInformationAsync(OpenIdConnectMessage message, AuthenticationTicket ticket)
+        protected virtual async Task<AuthenticationTicket> GetUserInformationAsync(OpenIdConnectMessage message, JwtSecurityToken jwt, AuthenticationTicket ticket)
         {
-            string userInfoEndpoint = _configuration?.UserInfoEndpoint;
+            var userInfoEndpoint = _configuration?.UserInfoEndpoint;
 
             if (string.IsNullOrEmpty(userInfoEndpoint))
             {
@@ -601,6 +665,7 @@ namespace Microsoft.AspNet.Authentication.OpenIdConnect
             var responseMessage = await Backchannel.SendAsync(requestMessage);
             responseMessage.EnsureSuccessStatusCode();
             var userInfoResponse = await responseMessage.Content.ReadAsStringAsync();
+            var userInfoEndpointJwt = new JwtSecurityToken(userInfoResponse);
             var user = JObject.Parse(userInfoResponse);
 
             var userInformationReceivedContext = await RunUserInformationReceivedEventAsync(ticket, message, user);
@@ -615,20 +680,13 @@ namespace Microsoft.AspNet.Authentication.OpenIdConnect
             ticket = userInformationReceivedContext.AuthenticationTicket;
             user = userInformationReceivedContext.User;
 
+            Options.ProtocolValidator.ValidateUserInfoResponse(new OpenIdConnectProtocolValidationContext()
+            {
+                UserInfoEndpointResponse = userInfoEndpointJwt,
+                ValidatedIdToken = jwt,
+            });
+
             var identity = (ClaimsIdentity)ticket.Principal.Identity;
-            var subjectClaimType = identity.FindFirst(ClaimTypes.NameIdentifier);
-            if (subjectClaimType == null)
-            {
-                throw new OpenIdConnectProtocolException(string.Format(CultureInfo.InvariantCulture, Resources.OIDCH_0041_Subject_Claim_Not_Found, identity.ToString()));
-            }
-
-            var userInfoSubjectClaimValue = user.Value<string>(JwtRegisteredClaimNames.Sub);
-
-            // check if the sub claim matches
-            if (userInfoSubjectClaimValue == null || !string.Equals(userInfoSubjectClaimValue, subjectClaimType.Value, StringComparison.Ordinal))
-            {
-                throw new OpenIdConnectProtocolException(Resources.OIDCH_0039_Subject_Claim_Mismatch);
-            }
 
             foreach (var claim in identity.Claims)
             {
@@ -659,6 +717,47 @@ namespace Microsoft.AspNet.Authentication.OpenIdConnect
             }
 
             return new AuthenticationTicket(new ClaimsPrincipal(identity), ticket.Properties, ticket.AuthenticationScheme);
+        }
+
+        /// <summary>
+        /// Save the tokens contained in the <see cref="OpenIdConnectMessage"/> in the <see cref="ClaimsPrincipal"/>.
+        /// </summary>
+        /// <param name="principal">The principal in which tokens are saved.</param>
+        /// <param name="message">The OpenID Connect response.</param>
+        /// <param name="saveRefreshToken">A <see cref="bool"/> indicating whether the refresh token should be stored.</param>
+        private void SaveTokens(ClaimsPrincipal principal, OpenIdConnectMessage message, bool saveRefreshToken)
+        {
+            var identity = (ClaimsIdentity) principal.Identity;
+
+            if (!string.IsNullOrEmpty(message.AccessToken))
+            {
+                identity.AddClaim(new Claim(OpenIdConnectParameterNames.AccessToken, message.AccessToken,
+                                            ClaimValueTypes.String, Options.ClaimsIssuer));
+            }
+
+            if (!string.IsNullOrEmpty(message.IdToken))
+            {
+                identity.AddClaim(new Claim(OpenIdConnectParameterNames.IdToken, message.IdToken,
+                                            ClaimValueTypes.String, Options.ClaimsIssuer));
+            }
+
+            if (saveRefreshToken && !string.IsNullOrEmpty(message.RefreshToken))
+            {
+                identity.AddClaim(new Claim(OpenIdConnectParameterNames.RefreshToken, message.RefreshToken,
+                                            ClaimValueTypes.String, Options.ClaimsIssuer));
+            }
+
+            if (!string.IsNullOrEmpty(message.TokenType))
+            {
+                identity.AddClaim(new Claim(OpenIdConnectParameterNames.TokenType, message.TokenType,
+                                            ClaimValueTypes.String, Options.ClaimsIssuer));
+            }
+
+            if (!string.IsNullOrEmpty(message.ExpiresIn))
+            {
+                identity.AddClaim(new Claim(OpenIdConnectParameterNames.ExpiresIn, message.ExpiresIn,
+                                            ClaimValueTypes.String, Options.ClaimsIssuer));
+            }
         }
 
         /// <summary>
@@ -734,7 +833,7 @@ namespace Microsoft.AspNet.Authentication.OpenIdConnect
 
             var nonceBytes = new byte[32];
             CryptoRandom.GetBytes(nonceBytes);
-            var correlationId = TextEncodings.Base64Url.Encode(nonceBytes);
+            var correlationId = Base64UrlTextEncoder.Encode(nonceBytes);
 
             var cookieOptions = new CookieOptions
             {
@@ -1021,25 +1120,6 @@ namespace Microsoft.AspNet.Authentication.OpenIdConnect
             }
 
             return ticket;
-        }
-
-        private async Task ValidateOpenIdConnectProtocolAsync(JwtSecurityToken jwt, OpenIdConnectMessage message)
-        {
-            string nonce = jwt?.Payload.Nonce;
-            if (!string.IsNullOrEmpty(nonce))
-            {
-                nonce = ReadNonceCookie(nonce);
-            }
-
-            var protocolValidationContext = new OpenIdConnectProtocolValidationContext
-            {
-                ProtocolMessage = message,
-                IdToken = jwt,
-                ClientId = Options.ClientId,
-                Nonce = nonce
-            };
-
-            Options.ProtocolValidator.Validate(protocolValidationContext);
         }
 
         /// <summary>
