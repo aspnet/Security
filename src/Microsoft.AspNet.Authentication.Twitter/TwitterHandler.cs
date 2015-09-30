@@ -19,7 +19,7 @@ using Microsoft.Extensions.Primitives;
 
 namespace Microsoft.AspNet.Authentication.Twitter
 {
-    internal class TwitterHandler : AuthenticationHandler<TwitterOptions>
+    internal class TwitterHandler : RemoteAuthenticationHandler<TwitterOptions>
     {
         private static readonly DateTime Epoch = new DateTime(1970, 1, 1, 0, 0, 0, DateTimeKind.Utc);
         private const string StateCookie = "__TwitterState";
@@ -32,15 +32,6 @@ namespace Microsoft.AspNet.Authentication.Twitter
         public TwitterHandler(HttpClient httpClient)
         {
             _httpClient = httpClient;
-        }
-
-        public override async Task<bool> HandleRequestAsync()
-        {
-            if (Options.CallbackPath.HasValue && Options.CallbackPath == Request.Path)
-            {
-                return await InvokeReturnPathAsync();
-            }
-            return false;
         }
 
         protected override async Task<AuthenticateResult> HandleAuthenticateAsync()

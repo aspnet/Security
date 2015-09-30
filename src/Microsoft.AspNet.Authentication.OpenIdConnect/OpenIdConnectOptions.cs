@@ -19,7 +19,7 @@ namespace Microsoft.AspNet.Authentication.OpenIdConnect
     /// <summary>
     /// Configuration options for <see cref="OpenIdConnectOptions"/>
     /// </summary>
-    public class OpenIdConnectOptions : AuthenticationOptions
+    public class OpenIdConnectOptions : RemoteAuthenticationOptions
     {
         /// <summary>
         /// Initializes a new <see cref="OpenIdConnectOptions"/>
@@ -66,19 +66,6 @@ namespace Microsoft.AspNet.Authentication.OpenIdConnect
         public string Authority { get; set; }
 
         /// <summary>
-        /// The HttpMessageHandler used to retrieve metadata.
-        /// This cannot be set at the same time as BackchannelCertificateValidator unless the value
-        /// is a WebRequestHandler.
-        /// </summary>
-        public HttpMessageHandler BackchannelHttpHandler { get; set; }
-
-        /// <summary>
-        /// Gets or sets the timeout when using the backchannel to make an http call.
-        /// </summary>
-        [SuppressMessage("Microsoft.Usage", "CA2208:InstantiateArgumentExceptionsCorrectly", Justification = "By design we use the property name in the exception")]
-        public TimeSpan BackchannelTimeout { get; set; } = TimeSpan.FromSeconds(60);
-
-        /// <summary>
         /// Get or sets the text that the user can display on a sign in user interface.
         /// </summary>
         public string DisplayName
@@ -86,14 +73,6 @@ namespace Microsoft.AspNet.Authentication.OpenIdConnect
             get { return Description.DisplayName; }
             set { Description.DisplayName = value; }
         }
-
-        /// <summary>
-        /// An optional constrained path on which to process the authentication callback.
-        /// If not provided and RedirectUri is available, this value will be generated from RedirectUri.
-        /// </summary>
-        /// <remarks>If you set this value, then the <see cref="OpenIdConnectHandler"/> will only listen for posts at this address. 
-        /// If the IdentityProvider does not post to this address, you may end up in a 401 -> IdentityProvider -> Client -> 401 -> ...</remarks>
-        public PathString CallbackPath { get; set; }
 
         /// <summary>
         /// Gets or sets the 'client_id'.
@@ -193,11 +172,6 @@ namespace Microsoft.AspNet.Authentication.OpenIdConnect
         /// Gets the list of permissions to request.
         /// </summary>
         public IList<string> Scope { get; } = new List<string> { "openid", "profile" };
-
-        /// <summary>
-        /// Gets or sets the SignInScheme which will be used to set the <see cref="ClaimsIdentity.AuthenticationType"/>.
-        /// </summary>
-        public string SignInScheme { get; set; }
 
         /// <summary>
         /// Gets or sets the type used to secure data handled by the middleware.
