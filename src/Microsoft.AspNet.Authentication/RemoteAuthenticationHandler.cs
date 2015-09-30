@@ -18,7 +18,7 @@ namespace Microsoft.AspNet.Authentication
         /// <value>
         /// The back channel timeout.
         /// </value>
-        public TimeSpan BackchannelTimeout { get; set; }
+        public TimeSpan BackchannelTimeout { get; set; } = TimeSpan.FromSeconds(60);
 
         /// <summary>
         /// The HttpMessageHandler used to communicate with Twitter.
@@ -50,7 +50,7 @@ namespace Microsoft.AspNet.Authentication
             set { Description.DisplayName = value; }
         }
 
-        public Func<SigningInContext, Task> TicketReceived { get; set; }
+        public Func<SigningInContext, Task> TicketReceived { get; set; } = context => Task.FromResult(0);
     }
 
     public abstract class RemoteAuthenticationHandler<TOptions> : AuthenticationHandler<TOptions> where TOptions : RemoteAuthenticationOptions

@@ -243,21 +243,6 @@ namespace Microsoft.AspNet.Authentication.Twitter
             return context.IsRequestCompleted;
         }
 
-        protected override Task HandleSignOutAsync(SignOutContext context)
-        {
-            throw new NotSupportedException();
-        }
-
-        protected override Task HandleSignInAsync(SignInContext context)
-        {
-            throw new NotSupportedException();
-        }
-
-        protected override Task HandleForbiddenAsync(ChallengeContext context)
-        {
-            throw new NotSupportedException();
-        }
-
         private async Task<RequestToken> ObtainRequestTokenAsync(string consumerKey, string consumerSecret, string callBackUri, AuthenticationProperties properties)
         {
             Logger.LogVerbose("ObtainRequestToken");
