@@ -19,7 +19,7 @@ using Microsoft.Extensions.Primitives;
 
 namespace Microsoft.AspNet.Authentication.Twitter
 {
-    internal class TwitterHandler : RemoteAuthenticationHandler<TwitterOptions>
+    internal class TwitterHandler : AuthenticationHandler<TwitterOptions>
     {
         private static readonly DateTime Epoch = new DateTime(1970, 1, 1, 0, 0, 0, DateTimeKind.Utc);
         private const string StateCookie = "__TwitterState";
@@ -32,6 +32,15 @@ namespace Microsoft.AspNet.Authentication.Twitter
         public TwitterHandler(HttpClient httpClient)
         {
             _httpClient = httpClient;
+        }
+
+        public override async Task<bool> HandleRequestAsync()
+        {
+            if (Options.CallbackPath.HasValue && Options.CallbackPath == Request.Path)
+            {
+                return await InvokeReturnPathAsync();
+            }
+            return false;
         }
 
         protected override async Task<AuthenticateResult> HandleAuthenticateAsync()
@@ -89,33 +98,11 @@ namespace Microsoft.AspNet.Authentication.Twitter
                 Secure = Request.IsHttps
             };
 
-<<<<<<< HEAD
-                var accessToken = await ObtainAccessTokenAsync(Options.ConsumerKey, Options.ConsumerSecret, requestToken, oauthVerifier);
-
-                var identity = new ClaimsIdentity(new[]
-                {
-                    new Claim(ClaimTypes.NameIdentifier, accessToken.UserId, ClaimValueTypes.String, Options.ClaimsIssuer),
-                    new Claim(ClaimTypes.Name, accessToken.ScreenName, ClaimValueTypes.String, Options.ClaimsIssuer),
-                    new Claim("urn:twitter:userid", accessToken.UserId, ClaimValueTypes.String, Options.ClaimsIssuer),
-                    new Claim("urn:twitter:screenname", accessToken.ScreenName, ClaimValueTypes.String, Options.ClaimsIssuer)
-                },
-                Options.ClaimsIssuer);
-
-                if (Options.SaveTokensAsClaims)
-                {
-                    identity.AddClaim(new Claim("access_token", accessToken.Token, ClaimValueTypes.String, Options.ClaimsIssuer));
-                }
-
-                return await CreateTicketAsync(identity, properties, accessToken);
-            }
-            catch (Exception ex)
-=======
             Response.Cookies.Delete(StateCookie, cookieOptions);
 
             var accessToken = await ObtainAccessTokenAsync(Options.ConsumerKey, Options.ConsumerSecret, requestToken, oauthVerifier);
-                
+
             var identity = new ClaimsIdentity(new[]
->>>>>>> Control flowz
             {
                 new Claim(ClaimTypes.NameIdentifier, accessToken.UserId, ClaimValueTypes.String, Options.ClaimsIssuer),
                 new Claim(ClaimTypes.Name, accessToken.ScreenName, ClaimValueTypes.String, Options.ClaimsIssuer),
@@ -153,11 +140,7 @@ namespace Microsoft.AspNet.Authentication.Twitter
             return new AuthenticationTicket(context.Principal, context.Properties, Options.AuthenticationScheme);
         }
 
-<<<<<<< HEAD
-        protected override async Task<bool> HandleUnauthorizedAsync(ChallengeContext context)
-=======
-        protected override async Task HandleUnauthorizedAsync([NotNull] ChallengeContext context)
->>>>>>> Control flowz
+        protected override async Task HandleUnauthorizedAsync(ChallengeContext context)
         {
             if (context == null)
             {
@@ -241,6 +224,21 @@ namespace Microsoft.AspNet.Authentication.Twitter
             }
 
             return context.IsRequestCompleted;
+        }
+
+        protected override Task HandleSignOutAsync(SignOutContext context)
+        {
+            throw new NotSupportedException();
+        }
+
+        protected override Task HandleSignInAsync(SignInContext context)
+        {
+            throw new NotSupportedException();
+        }
+
+        protected override Task HandleForbiddenAsync(ChallengeContext context)
+        {
+            throw new NotSupportedException();
         }
 
         private async Task<RequestToken> ObtainRequestTokenAsync(string consumerKey, string consumerSecret, string callBackUri, AuthenticationProperties properties)

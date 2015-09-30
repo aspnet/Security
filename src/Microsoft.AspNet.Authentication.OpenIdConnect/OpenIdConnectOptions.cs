@@ -6,9 +6,6 @@ using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.IdentityModel.Tokens;
 using System.IdentityModel.Tokens.Jwt;
-using System.Net.Http;
-using System.Security.Claims;
-using Microsoft.AspNet.Http;
 using Microsoft.AspNet.Http.Authentication;
 using Microsoft.Extensions.WebEncoders;
 using Microsoft.IdentityModel.Protocols;
@@ -64,15 +61,6 @@ namespace Microsoft.AspNet.Authentication.OpenIdConnect
         /// Gets or sets the Authority to use when making OpenIdConnect calls.
         /// </summary>
         public string Authority { get; set; }
-
-        /// <summary>
-        /// Get or sets the text that the user can display on a sign in user interface.
-        /// </summary>
-        public string DisplayName
-        {
-            get { return Description.DisplayName; }
-            set { Description.DisplayName = value; }
-        }
 
         /// <summary>
         /// Gets or sets the 'client_id'.

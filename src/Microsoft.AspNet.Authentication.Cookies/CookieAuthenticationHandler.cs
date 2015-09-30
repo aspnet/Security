@@ -346,19 +346,16 @@ namespace Microsoft.AspNet.Authentication.Cookies
             context.CompleteRequest();
         }
 
-<<<<<<< HEAD
-        protected override async Task<bool> HandleUnauthorizedAsync(ChallengeContext context)
+        protected override async Task HandleUnauthorizedAsync(ChallengeContext context)
         {
             if (context == null)
             {
                 throw new ArgumentNullException(nameof(context));
-=======
-        protected override async Task HandleUnauthorizedAsync([NotNull] ChallengeContext context)
-        {
+            }
+
             if (context.IsRequestCompleted)
             {
                 return;
->>>>>>> Control flowz
             }
 
             var redirectUri = new AuthenticationProperties(context.Properties).RedirectUri;

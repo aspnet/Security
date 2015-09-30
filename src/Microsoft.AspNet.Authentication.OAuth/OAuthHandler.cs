@@ -218,11 +218,7 @@ namespace Microsoft.AspNet.Authentication.OAuth
             return new AuthenticationTicket(context.Principal, context.Properties, Options.AuthenticationScheme);
         }
 
-<<<<<<< HEAD
-        protected override async Task<bool> HandleUnauthorizedAsync(ChallengeContext context)
-=======
-        protected override async Task HandleUnauthorizedAsync([NotNull] ChallengeContext context)
->>>>>>> Control flowz
+        protected override async Task HandleUnauthorizedAsync(ChallengeContext context)
         {
             if (context == null)
             {
