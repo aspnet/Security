@@ -103,7 +103,8 @@ namespace Microsoft.AspNet.Authentication
 
                 if (result?.Error != null)
                 {
-                    if (await HandleErrorAsync(result.Error))
+                    await HandleErrorAsync(result.Error);
+                    if (result.Error.IsRequestComplete)
                     {
                         return false;
                     }
@@ -118,34 +119,14 @@ namespace Microsoft.AspNet.Authentication
             return true;
         }
 
+        protected virtual Task HandleErrorAsync(ErrorContext context)
+        {
+            return Task.FromResult(0);
+        }
+
         protected string BuildRedirectUri(string targetPath)
         {
             return Request.Scheme + "://" + Request.Host + OriginalPathBase + targetPath;
-        }
-
-        /// <summary>
-        /// Handles errors by redirecting to an error handler path if configured.  Otherwise sets the status code to 500.
-        /// </summary>
-        /// <param name="error"></param>
-        /// <returns>True if the error has been handled and processing should stop</returns>
-        protected virtual Task<bool> HandleErrorAsync(ErrorContext error)
-        {
-            Logger.LogWarning(error.ErrorMessage);
-            if (!error.Handled)
-            {
-                var errorUri = error.ErrorHandlerUri ?? Options.ErrorHandlerPath;
-                // Noop if no error handler path configured
-                if (!string.IsNullOrEmpty(errorUri))
-                {
-                    var redirectUri = errorUri + QueryString.Create("ErrorMessage", error.ErrorMessage);
-                    Context.Response.Redirect(redirectUri);
-                }
-                else
-                {
-                    Context.Response.StatusCode = 500;
-                }
-            }
-            return Task.FromResult(true);
         }
 
         private static async Task OnStartingCallback(object state)
@@ -237,14 +218,6 @@ namespace Microsoft.AspNet.Authentication
             {
                 // Calling Authenticate more than once should always return the original value. 
                 var result = await HandleAuthenticateOnceAsync();
-
-                if (result?.Error != null)
-                {
-                    if (await HandleErrorAsync(result.Error))
-                    {
-                        context.CompleteRequest();
-                    }
-                }
 
                 var ticket = result?.Ticket;
                 if (ticket?.Principal != null)
@@ -373,7 +346,8 @@ namespace Microsoft.AspNet.Authentication
 
                         if (result?.Error != null)
                         {
-                            if (await HandleErrorAsync(result.Error))
+                            await HandleErrorAsync(result.Error);
+                            if (result.Error.IsRequestComplete)
                             {
                                 context.CompleteRequest();
                             }

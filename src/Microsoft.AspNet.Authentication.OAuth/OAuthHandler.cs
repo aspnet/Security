@@ -19,7 +19,7 @@ using Newtonsoft.Json.Linq;
 
 namespace Microsoft.AspNet.Authentication.OAuth
 {
-    public class OAuthHandler<TOptions> : AuthenticationHandler<TOptions> where TOptions : OAuthOptions
+    public class OAuthHandler<TOptions> : RemoteAuthenticationHandler<TOptions> where TOptions : OAuthOptions
     {
         private static readonly RandomNumberGenerator CryptoRandom = RandomNumberGenerator.Create();
 
@@ -30,6 +30,10 @@ namespace Microsoft.AspNet.Authentication.OAuth
 
         protected HttpClient Backchannel { get; private set; }
 
+        /// <summary>
+        /// Returns true if the request has been handled.
+        /// </summary>
+        /// <returns></returns>
         public override async Task<bool> HandleRequestAsync()
         {
             if (Options.CallbackPath.HasValue && Options.CallbackPath == Request.Path)
@@ -44,12 +48,15 @@ namespace Microsoft.AspNet.Authentication.OAuth
             var authResult = await HandleAuthenticateOnceAsync();
             if (authResult?.Error != null)
             {
-                return await HandleErrorAsync(authResult.Error);
+                await HandleErrorAsync(authResult.Error);
+                return authResult.Error.IsRequestComplete;
             }
             var ticket = authResult?.Ticket;
             if (ticket == null)
             {
-                return await HandleErrorAsync(new ErrorContext(Context, "Invalid return state, unable to redirect."));
+                var error = new ErrorContext(Context, "Invalid return state, unable to redirect.");
+                await HandleErrorAsync(error);
+                return error.IsRequestComplete;
             }
 
             var context = new SigningInContext(Context, ticket)
@@ -71,21 +78,24 @@ namespace Microsoft.AspNet.Authentication.OAuth
                 }
             }
 
-            if (!context.IsRequestCompleted && context.RedirectUri != null)
+            if (!context.IsRequestComplete && context.RedirectUri != null)
             {
                 if (context.Principal == null)
                 {
                     // TODO: need to override this error behavior to redirect with query string
-                    return await HandleErrorAsync(new ErrorContext(Context, "OAuth Authentication failure.")
+                    var errorContext = new ErrorContext(Context, "OAuth Authentication failure.")
                     {
                         ErrorHandlerUri = QueryHelpers.AddQueryString(context.RedirectUri, "error", "access_denied")
-                    });
+                    };
+
+                    await HandleErrorAsync(errorContext);
+                    return errorContext.IsRequestComplete;
                 }
                 Response.Redirect(context.RedirectUri);
                 context.CompleteRequest();
             }
 
-            return context.IsRequestCompleted;
+            return context.IsRequestComplete;
         }
 
         protected override async Task<AuthenticateResult> HandleAuthenticateAsync()

@@ -19,11 +19,6 @@ namespace Microsoft.AspNet.Authentication
         }
 
         /// <summary>
-        /// Exception which caused the error.
-        /// </summary>
-        public Exception Exception { get; set; }
-
-        /// <summary>
         /// User friendly error message for the error.
         /// </summary>
         public string ErrorMessage { get; set; }
@@ -34,9 +29,11 @@ namespace Microsoft.AspNet.Authentication
         [SuppressMessage("Microsoft.Design", "CA1056:UriPropertiesShouldNotBeStrings", Justification = "By design")]
         public string ErrorHandlerUri { get; set; }
 
-        /// <summary>
-        /// Used to determine if the error was handled (via redirect or another means)
-        /// </summary>
-        public bool Handled { get; set; }
+        public bool IsRequestComplete { get; private set; }
+
+        public void CompleteRequest()
+        {
+            IsRequestComplete = true;
+        }
     }
 }

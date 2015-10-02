@@ -2,59 +2,24 @@
 // Licensed under the Apache License, Version 2.0. See License.txt in the project root for license information.
 
 using System;
-using System.Net.Http;
 using System.Threading.Tasks;
-using Microsoft.AspNet.Http;
 using Microsoft.AspNet.Http.Features.Authentication;
 using Microsoft.AspNet.WebUtilities;
 
 namespace Microsoft.AspNet.Authentication
 {
-    public class RemoteAuthenticationOptions : AuthenticationOptions
-    {
-        /// <summary>
-        /// Gets or sets timeout value in milliseconds for back channel communications with Twitter.
-        /// </summary>
-        /// <value>
-        /// The back channel timeout.
-        /// </value>
-        public TimeSpan BackchannelTimeout { get; set; } = TimeSpan.FromSeconds(60);
-
-        /// <summary>
-        /// The HttpMessageHandler used to communicate with Twitter.
-        /// This cannot be set at the same time as BackchannelCertificateValidator unless the value 
-        /// can be downcast to a WebRequestHandler.
-        /// </summary>
-        public HttpMessageHandler BackchannelHttpHandler { get; set; }
-
-        /// <summary>
-        /// The request path within the application's base path where the user-agent will be returned.
-        /// The middleware will process this request when it arrives.
-        /// </summary>
-        public PathString CallbackPath { get; set; }
-
-        /// <summary>
-        /// Gets or sets the authentication scheme corresponding to the middleware
-        /// responsible of persisting user's identity after a successful authentication.
-        /// This value typically corresponds to a cookie middleware registered in the Startup class.
-        /// When omitted, <see cref="SharedAuthenticationOptions.SignInScheme"/> is used as a fallback value.
-        /// </summary>
-        public string SignInScheme { get; set; }
-
-        /// <summary>
-        /// Get or sets the text that the user can display on a sign in user interface.
-        /// </summary>
-        public string DisplayName
-        {
-            get { return Description.DisplayName; }
-            set { Description.DisplayName = value; }
-        }
-
-        public Func<SigningInContext, Task> TicketReceived { get; set; } = context => Task.FromResult(0);
-    }
-
     public abstract class RemoteAuthenticationHandler<TOptions> : AuthenticationHandler<TOptions> where TOptions : RemoteAuthenticationOptions
     {
+        /// <summary>
+        /// Called during initialize to authenticate implicitly.
+        /// </summary>
+        /// <returns>True if request processing should continue</returns>
+        protected override async Task HandleErrorAsync(ErrorContext context)
+        {
+            context.ErrorHandlerUri = context.ErrorHandlerUri ?? Options.ErrorHandlerPath;
+            await Options.RemoteEvents.Error(context);
+        }
+
         public override async Task<bool> HandleRequestAsync()
         {
             if (Options.CallbackPath.HasValue && Options.CallbackPath == Request.Path)
@@ -69,12 +34,15 @@ namespace Microsoft.AspNet.Authentication
             var authResult = await HandleAuthenticateOnceAsync();
             if (authResult?.Error != null)
             {
-                return await HandleErrorAsync(authResult.Error);
+                await HandleErrorAsync(authResult.Error);
+                return authResult.Error.IsRequestComplete;
             }
             var ticket = authResult?.Ticket;
             if (ticket == null)
             {
-                return await HandleErrorAsync(new ErrorContext(Context, "Invalid return state, unable to redirect."));
+                var error = new ErrorContext(Context, "Invalid return state, unable to redirect.");
+                await Options.RemoteEvents.Error(error);
+                return error.IsRequestComplete;
             }
 
             var context = new SigningInContext(Context, ticket)
@@ -84,9 +52,9 @@ namespace Microsoft.AspNet.Authentication
             };
             ticket.Properties.RedirectUri = null;
 
-            await Options.TicketReceived(context);
+            await Options.RemoteEvents.SigningIn(context);
 
-            if (!context.IsRequestCompleted && context.SignInScheme != null && context.Principal != null)
+            if (!context.IsRequestComplete && context.SignInScheme != null && context.Principal != null)
             {
                 var signInContext = new SignInContext(context.SignInScheme, context.Principal, context.Properties?.Items);
                 await Context.Authentication.SignInAsync(signInContext);
@@ -96,21 +64,24 @@ namespace Microsoft.AspNet.Authentication
                 }
             }
 
-            if (!context.IsRequestCompleted && context.RedirectUri != null)
+            if (!context.IsRequestComplete && context.RedirectUri != null)
             {
                 if (context.Principal == null)
                 {
                     // TODO: need to override this error behavior to redirect with query string
-                    return await HandleErrorAsync(new ErrorContext(Context, "Authentication failure.")
+
+                    var error = new ErrorContext(Context, "Authentication failure.")
                     {
                         ErrorHandlerUri = QueryHelpers.AddQueryString(context.RedirectUri, "error", "access_denied")
-                    });
+                    };
+                    await Options.RemoteEvents.Error(error);
+                    return error.IsRequestComplete;
                 }
                 Response.Redirect(context.RedirectUri);
                 context.CompleteRequest();
             }
 
-            return context.IsRequestCompleted;
+            return context.IsRequestComplete;
         }
 
         protected override Task HandleSignOutAsync(SignOutContext context)

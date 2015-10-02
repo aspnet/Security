@@ -19,7 +19,7 @@ using Microsoft.Extensions.Primitives;
 
 namespace Microsoft.AspNet.Authentication.Twitter
 {
-    internal class TwitterHandler : AuthenticationHandler<TwitterOptions>
+    internal class TwitterHandler : RemoteAuthenticationHandler<TwitterOptions>
     {
         private static readonly DateTime Epoch = new DateTime(1970, 1, 1, 0, 0, 0, DateTimeKind.Utc);
         private const string StateCookie = "__TwitterState";
@@ -32,15 +32,6 @@ namespace Microsoft.AspNet.Authentication.Twitter
         public TwitterHandler(HttpClient httpClient)
         {
             _httpClient = httpClient;
-        }
-
-        public override async Task<bool> HandleRequestAsync()
-        {
-            if (Options.CallbackPath.HasValue && Options.CallbackPath == Request.Path)
-            {
-                return await InvokeReturnPathAsync();
-            }
-            return false;
         }
 
         protected override async Task<AuthenticateResult> HandleAuthenticateAsync()
@@ -176,69 +167,6 @@ namespace Microsoft.AspNet.Authentication.Twitter
             {
                 Logger.LogError("requestToken CallbackConfirmed!=true");
             }
-        }
-
-        public async Task<bool> InvokeReturnPathAsync()
-        {
-            var result = await HandleAuthenticateOnceAsync();
-            if (result.Error != null)
-            {
-                return await HandleErrorAsync(result.Error);
-            }
-
-            var ticket = result?.Ticket;
-            if (ticket == null)
-            {
-                return await HandleErrorAsync(new ErrorContext(Context, "Invalid return state, unable to redirect."));
-            }
-
-            var context = new SigningInContext(Context, ticket)
-            {
-                SignInScheme = Options.SignInScheme,
-                RedirectUri = ticket.Properties.RedirectUri
-            };
-            ticket.Properties.RedirectUri = null;
-
-            await Options.Events.SigningIn(context);
-
-            if (context.SignInScheme != null && context.Principal != null)
-            {
-                var signInContext = new SignInContext(context.SignInScheme, context.Principal, context.Properties?.Items);
-                await Context.Authentication.SignInAsync(signInContext);
-                if (signInContext.IsRequestCompleted)
-                {
-                    context.CompleteRequest();
-                }
-            }
-
-            if (!context.IsRequestCompleted && context.RedirectUri != null)
-            {
-                if (context.Principal == null)
-                {
-                    // TODO: need to override this error behavior to redirect with query string
-                    return await HandleErrorAsync(new ErrorContext(Context, "OAuth Authentication failure.")
-                    {
-                        ErrorHandlerUri = QueryHelpers.AddQueryString(context.RedirectUri, "error", "access_denied")
-                    });
-                }
-            }
-
-            return context.IsRequestCompleted;
-        }
-
-        protected override Task HandleSignOutAsync(SignOutContext context)
-        {
-            throw new NotSupportedException();
-        }
-
-        protected override Task HandleSignInAsync(SignInContext context)
-        {
-            throw new NotSupportedException();
-        }
-
-        protected override Task HandleForbiddenAsync(ChallengeContext context)
-        {
-            throw new NotSupportedException();
         }
 
         private async Task<RequestToken> ObtainRequestTokenAsync(string consumerKey, string consumerSecret, string callBackUri, AuthenticationProperties properties)

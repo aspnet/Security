@@ -13,9 +13,7 @@ namespace Microsoft.AspNet.Authentication
     /// </summary>
     public class SigningInContext : BaseContext
     {
-        public SigningInContext(
-            HttpContext context,
-            AuthenticationTicket ticket)
+        public SigningInContext(HttpContext context, AuthenticationTicket ticket)
             : base(context)
         {
             if (ticket != null)
@@ -28,11 +26,11 @@ namespace Microsoft.AspNet.Authentication
         public ClaimsPrincipal Principal { get; set; }
         public AuthenticationProperties Properties { get; set; }
 
-        public bool IsRequestCompleted { get; private set; }
+        public bool IsRequestComplete { get; private set; }
 
         public void CompleteRequest()
         {
-            IsRequestCompleted = true;
+            IsRequestComplete = true;
         }
 
         public string SignInScheme { get; set; }

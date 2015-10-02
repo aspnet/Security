@@ -1176,12 +1176,14 @@ namespace Microsoft.AspNet.Authentication.OpenIdConnect
             return InvokeReturnPathAsync();
         }
 
+        // TODO: Unify this with RemoteAuthenticationHandler
         private async Task<bool> InvokeReturnPathAsync()
         {
             var result = await HandleAuthenticateOnceAsync();
             if (result.Error != null)
             {
-                return await HandleErrorAsync(result.Error);
+                await HandleErrorAsync(result.Error);
+                return !result.Error.IsRequestComplete;
             }
 
             var ticket = result?.Ticket;

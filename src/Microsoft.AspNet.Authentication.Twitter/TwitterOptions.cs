@@ -43,7 +43,7 @@ namespace Microsoft.AspNet.Authentication.Twitter
         /// <summary>
         /// Gets or sets the <see cref="ITwitterEvents"/> used to handle authentication events.
         /// </summary>
-        public ITwitterEvents Events { get; set; }
+        public ITwitterEvents Events { get; set; } = new TwitterEvents();
 
         /// <summary>
         /// Defines whether access tokens should be stored in the

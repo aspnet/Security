@@ -11,8 +11,6 @@ namespace Microsoft.AspNet.Authentication
     /// </summary>
     public class AuthenticateResult
     {
-
-
         /// <summary>
         /// The authentication ticket.
         /// </summary>
