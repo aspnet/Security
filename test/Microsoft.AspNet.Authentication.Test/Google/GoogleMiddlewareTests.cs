@@ -541,8 +541,6 @@ namespace Microsoft.AspNet.Authentication.Google
                 options.ErrorHandlerPath = new PathString("/error");
             });
 
-            Debugger.Launch();
-
             //Post a message to the Google middleware
             var transaction = await server.SendAsync(
                 "https://example.com/signin-google?code=TestCode&error=OMG");
