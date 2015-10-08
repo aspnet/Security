@@ -19,7 +19,7 @@ namespace Microsoft.AspNet.Authentication.OAuth
         /// <summary>
         /// Gets or sets the function that is invoked when the SigningIn method is invoked.
         /// </summary>
-        public Func<SigningInContext, Task> OnSigningIn { get; set; } = context => Task.FromResult(0);
+        public Func<TicketReceivedContext, Task> OnSigningIn { get; set; } = context => Task.FromResult(0);
 
         /// <summary>
         /// Gets or sets the delegate that is invoked when the RedirectToAuthorizationEndpoint method is invoked.
@@ -42,7 +42,7 @@ namespace Microsoft.AspNet.Authentication.OAuth
         /// </summary>
         /// <param name="context">Contains information about the login session as well as the user <see cref="ClaimsIdentity"/></param>
         /// <returns>A <see cref="Task"/> representing the completed operation.</returns>
-        public virtual Task SigningIn(SigningInContext context) => OnSigningIn(context);
+        public virtual Task SigningIn(TicketReceivedContext context) => OnSigningIn(context);
 
         /// <summary>
         /// Called when a Challenge causes a redirect to authorize endpoint in the OAuth middleware.

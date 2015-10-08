@@ -10,30 +10,17 @@ namespace Microsoft.AspNet.Authentication
     /// <summary>
     /// Provides error context information to middleware providers.
     /// </summary>
-    public class ErrorContext : BaseContext
+    public class ErrorContext : BaseControlContext
     {
-        public ErrorContext(HttpContext context, string errorMessage)
+        public ErrorContext(HttpContext context, Exception error)
             : base(context)
         {
-            ErrorMessage = errorMessage;
+            Error = error;
         }
 
         /// <summary>
         /// User friendly error message for the error.
         /// </summary>
-        public string ErrorMessage { get; set; }
-
-        /// <summary>
-        /// Uri to redirect to with errors.
-        /// </summary>
-        [SuppressMessage("Microsoft.Design", "CA1056:UriPropertiesShouldNotBeStrings", Justification = "By design")]
-        public string ErrorHandlerUri { get; set; }
-
-        public bool IsRequestComplete { get; private set; }
-
-        public void CompleteRequest()
-        {
-            IsRequestComplete = true;
-        }
+        public Exception Error { get; set; }
     }
 }

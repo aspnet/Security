@@ -23,7 +23,7 @@ namespace Microsoft.AspNet.Authentication.OAuth
         /// </summary>
         /// <param name="context"></param>
         /// <returns>A <see cref="Task"/> representing the completed operation.</returns>
-        Task SigningIn(SigningInContext context);
+        Task SigningIn(TicketReceivedContext context);
 
         /// <summary>
         /// Called when a Challenge causes a redirect to the authorize endpoint.

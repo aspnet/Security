@@ -11,9 +11,9 @@ namespace Microsoft.AspNet.Authentication
     /// <summary>
     /// Provides context information to middleware providers.
     /// </summary>
-    public class SigningInContext : BaseContext
+    public class TicketReceivedContext : BaseControlContext
     {
-        public SigningInContext(HttpContext context, AuthenticationTicket ticket)
+        public TicketReceivedContext(HttpContext context, AuthenticationTicket ticket)
             : base(context)
         {
             if (ticket != null)
@@ -26,16 +26,8 @@ namespace Microsoft.AspNet.Authentication
         public ClaimsPrincipal Principal { get; set; }
         public AuthenticationProperties Properties { get; set; }
 
-        public bool IsRequestComplete { get; private set; }
-
-        public void CompleteRequest()
-        {
-            IsRequestComplete = true;
-        }
-
         public string SignInScheme { get; set; }
 
-        [SuppressMessage("Microsoft.Design", "CA1056:UriPropertiesShouldNotBeStrings", Justification = "By design")]
-        public string RedirectUri { get; set; }
+        public string ReturnUri { get; set; }
     }
 }

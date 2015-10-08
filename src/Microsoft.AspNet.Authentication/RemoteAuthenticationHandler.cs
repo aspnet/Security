@@ -3,23 +3,15 @@
 
 using System;
 using System.Threading.Tasks;
+using Microsoft.AspNet.Http;
 using Microsoft.AspNet.Http.Features.Authentication;
 using Microsoft.AspNet.WebUtilities;
+using Microsoft.Framework.Logging;
 
 namespace Microsoft.AspNet.Authentication
 {
     public abstract class RemoteAuthenticationHandler<TOptions> : AuthenticationHandler<TOptions> where TOptions : RemoteAuthenticationOptions
     {
-        /// <summary>
-        /// Called during initialize to authenticate implicitly.
-        /// </summary>
-        /// <returns>True if request processing should continue</returns>
-        protected override async Task HandleErrorAsync(ErrorContext context)
-        {
-            context.ErrorHandlerUri = context.ErrorHandlerUri ?? Options.ErrorHandlerPath;
-            await Options.RemoteEvents.Error(context);
-        }
-
         public override async Task<bool> HandleRequestAsync()
         {
             if (Options.CallbackPath.HasValue && Options.CallbackPath == Request.Path)
@@ -32,56 +24,67 @@ namespace Microsoft.AspNet.Authentication
         public virtual async Task<bool> HandleRemoteCallbackAsync()
         {
             var authResult = await HandleAuthenticateOnceAsync();
-            if (authResult?.Error != null)
-            {
-                await HandleErrorAsync(authResult.Error);
-                return authResult.Error.IsRequestComplete;
-            }
             var ticket = authResult?.Ticket;
-            if (ticket == null)
+            if (authResult?.Error != null || ticket == null)
             {
-                var error = new ErrorContext(Context, "Invalid return state, unable to redirect.");
-                await Options.RemoteEvents.Error(error);
-                return error.IsRequestComplete;
+                ErrorContext errorContext;
+                if (ticket == null || ticket.Principal == null)
+                {
+                    errorContext = new ErrorContext(Context, new Exception("Invalid return state, unable to redirect."));
+                }
+                else
+                {
+                    errorContext = new ErrorContext(Context, authResult.Error);
+                }
+
+                await Options.RemoteEvents.Error(errorContext);
+                if (errorContext.HandledResponse)
+                {
+                    return true;
+                }
+                if (errorContext.Skipped)
+                {
+                    return false;
+                }
+
+                Context.Response.StatusCode = 500;
+                return true;
             }
 
-            var context = new SigningInContext(Context, ticket)
+            var signingInContext = new TicketReceivedContext(Context, ticket)
             {
                 SignInScheme = Options.SignInScheme,
-                RedirectUri = ticket.Properties.RedirectUri,
+                ReturnUri = ticket.Properties.RedirectUri,
             };
+            // REVIEW: is this safe or good?
             ticket.Properties.RedirectUri = null;
 
-            await Options.RemoteEvents.SigningIn(context);
+            await Options.RemoteEvents.TicketReceived(signingInContext);
 
-            if (!context.IsRequestComplete && context.SignInScheme != null && context.Principal != null)
+            if (signingInContext.HandledResponse)
             {
-                var signInContext = new SignInContext(context.SignInScheme, context.Principal, context.Properties?.Items);
+                Logger.LogVerbose("The SigningIn event returned Handled.");
+                return true;
+            }
+            else if (signingInContext.Skipped)
+            {
+                Logger.LogVerbose("The SigningIn event returned Skipped.");
+                return false;
+            }
+
+            if (signingInContext.Principal != null)
+            {
+                var signInContext = new SignInContext(signingInContext.SignInScheme, signingInContext.Principal, signingInContext.Properties?.Items);
                 await Context.Authentication.SignInAsync(signInContext);
-                if (signInContext.IsRequestCompleted)
-                {
-                    context.CompleteRequest();
-                }
             }
 
-            if (!context.IsRequestComplete && context.RedirectUri != null)
+            if (signingInContext.ReturnUri != null)
             {
-                if (context.Principal == null)
-                {
-                    // TODO: need to override this error behavior to redirect with query string
-
-                    var error = new ErrorContext(Context, "Authentication failure.")
-                    {
-                        ErrorHandlerUri = QueryHelpers.AddQueryString(context.RedirectUri, "error", "access_denied")
-                    };
-                    await Options.RemoteEvents.Error(error);
-                    return error.IsRequestComplete;
-                }
-                Response.Redirect(context.RedirectUri);
-                context.CompleteRequest();
+                Response.Redirect(signingInContext.ReturnUri);
+                return true;
             }
 
-            return context.IsRequestComplete;
+            return false;
         }
 
         protected override Task HandleSignOutAsync(SignOutContext context)

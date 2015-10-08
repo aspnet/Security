@@ -10,7 +10,7 @@ namespace Microsoft.AspNet.Authentication.Cookies
     /// <summary>
     /// Context object passed to the ICookieAuthenticationEvents method SignedIn.
     /// </summary>    
-    public class CookieSignedInContext : BaseContext<CookieAuthenticationOptions>
+    public class CookieSignedInContext : BaseCookieContext
     {
         /// <summary>
         /// Creates a new instance of the context object.
@@ -32,6 +32,8 @@ namespace Microsoft.AspNet.Authentication.Cookies
             Principal = principal;
             Properties = properties;
         }
+
+        public new CookieAuthenticationOptions Options { get { return (CookieAuthenticationOptions)base.Options; } }
 
         /// <summary>
         /// The name of the AuthenticationScheme creating a cookie

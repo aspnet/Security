@@ -100,16 +100,6 @@ namespace Microsoft.AspNet.Authentication
             if (ShouldHandleScheme(string.Empty))
             {
                 var result = await HandleAuthenticateOnceAsync();
-
-                if (result?.Error != null)
-                {
-                    await HandleErrorAsync(result.Error);
-                    if (result.Error.IsRequestComplete)
-                    {
-                        return false;
-                    }
-                }
-
                 var ticket = result?.Ticket;
                 if (ticket?.Principal != null)
                 {
@@ -117,11 +107,6 @@ namespace Microsoft.AspNet.Authentication
                 }
             }
             return true;
-        }
-
-        protected virtual Task HandleErrorAsync(ErrorContext context)
-        {
-            return Task.FromResult(0);
         }
 
         protected string BuildRedirectUri(string targetPath)
@@ -209,28 +194,31 @@ namespace Microsoft.AspNet.Authentication
 
         public async Task AuthenticateAsync(AuthenticateContext context)
         {
-            if (context.IsRequestCompleted)
-            {
-                return;
-            }
 
             if (ShouldHandleScheme(context.AuthenticationScheme))
             {
                 // Calling Authenticate more than once should always return the original value. 
                 var result = await HandleAuthenticateOnceAsync();
 
-                var ticket = result?.Ticket;
-                if (ticket?.Principal != null)
+                if (result?.Error != null)
                 {
-                    context.Authenticated(ticket.Principal, ticket.Properties.Items, Options.Description.Items);
+                    context.Failed(result.Error);
                 }
                 else
                 {
-                    context.NotAuthenticated();
+                    var ticket = result?.Ticket;
+                    if (ticket?.Principal != null)
+                    {
+                        context.Authenticated(ticket.Principal, ticket.Properties.Items, Options.Description.Items);
+                    }
+                    else
+                    {
+                        context.NotAuthenticated();
+                    }
                 }
             }
 
-            if (!context.IsRequestCompleted && PriorHandler != null)
+            if (PriorHandler != null)
             {
                 await PriorHandler.AuthenticateAsync(context);
             }
@@ -249,11 +237,6 @@ namespace Microsoft.AspNet.Authentication
 
         public async Task SignInAsync(SignInContext context)
         {
-            if (context.IsRequestCompleted)
-            {
-                return;
-            }
-
             if (ShouldHandleScheme(context.AuthenticationScheme))
             {
                 SignInAccepted = true;
@@ -261,7 +244,7 @@ namespace Microsoft.AspNet.Authentication
                 context.Accept();
             }
 
-            if (!context.IsRequestCompleted && PriorHandler != null)
+            if (PriorHandler != null)
             {
                 await PriorHandler.SignInAsync(context);
             }
@@ -278,11 +261,6 @@ namespace Microsoft.AspNet.Authentication
 
         public async Task SignOutAsync(SignOutContext context)
         {
-            if (context.IsRequestCompleted)
-            {
-                return;
-            }
-
             if (ShouldHandleScheme(context.AuthenticationScheme))
             {
                 SignOutAccepted = true;
@@ -290,7 +268,7 @@ namespace Microsoft.AspNet.Authentication
                 context.Accept();
             }
 
-            if (!context.IsRequestCompleted && PriorHandler != null)
+            if (PriorHandler != null)
             {
                 await PriorHandler.SignOutAsync(context);
             }
@@ -344,14 +322,14 @@ namespace Microsoft.AspNet.Authentication
                         // If there is a principal already, invoke the forbidden code path
                         var result = await HandleAuthenticateOnceAsync();
 
-                        if (result?.Error != null)
-                        {
-                            await HandleErrorAsync(result.Error);
-                            if (result.Error.IsRequestComplete)
-                            {
-                                context.CompleteRequest();
-                            }
-                        }
+                        //if (result?.Error != null)
+                        //{
+                        //    await HandleErrorAsync(result.Error);
+                        //    if (result.Error.IsRequestComplete)
+                        //    {
+                        //        context.CompleteRequest();
+                        //    }
+                        //}
 
                         if (result?.Ticket?.Principal != null)
                         {

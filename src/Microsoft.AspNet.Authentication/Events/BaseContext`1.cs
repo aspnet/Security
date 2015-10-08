@@ -1,33 +1,35 @@
-// Copyright (c) .NET Foundation. All rights reserved.
-// Licensed under the Apache License, Version 2.0. See License.txt in the project root for license information.
+//// Copyright (c) .NET Foundation. All rights reserved.
+//// Licensed under the Apache License, Version 2.0. See License.txt in the project root for license information.
 
-using Microsoft.AspNet.Http;
+//using Microsoft.AspNet.Http;
 
-namespace Microsoft.AspNet.Authentication
-{
-    /// <summary>
-    /// Base class used for certain event contexts
-    /// </summary>
-    public abstract class BaseContext<TOptions>
-    {
-        protected BaseContext(HttpContext context, TOptions options)
-        {
-            HttpContext = context;
-            Options = options;
-        }
+//namespace Microsoft.AspNet.Authentication
+//{
+//    /// <summary>
+//    /// Base class used for certain event contexts
+//    /// </summary>
+//    public abstract class BaseContext
+//    {
+//        protected BaseContext(HttpContext context, object options)
+//        {
+//            HttpContext = context;
+//            Options = options;
+//        }
 
-        public HttpContext HttpContext { get; private set; }
+//        public HttpContext HttpContext { get; private set; }
 
-        public TOptions Options { get; private set; }
+//        public object Options { get; private set; }
 
-        public HttpRequest Request
-        {
-            get { return HttpContext.Request; }
-        }
+//        public TOptions Options<TOptions> { get { return Options as TOptions; } }
 
-        public HttpResponse Response
-        {
-            get { return HttpContext.Response; }
-        }
-    }
-}
+//        public HttpRequest Request
+//        {
+//            get { return HttpContext.Request; }
+//        }
+
+//        public HttpResponse Response
+//        {
+//            get { return HttpContext.Response; }
+//        }
+//    }
+//}

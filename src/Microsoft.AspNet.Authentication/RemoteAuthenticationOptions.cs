@@ -47,6 +47,7 @@ namespace Microsoft.AspNet.Authentication
             set { Description.DisplayName = value; }
         }
 
+        // REVIEW: Merge this with the main events to have one single instead of two?
         public IRemoteAuthenticationEvents RemoteEvents { get; set; } = new RemoteAuthenticationEvents();
     }
 }

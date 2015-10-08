@@ -22,7 +22,7 @@ namespace Microsoft.AspNet.Authentication.Twitter
         /// </summary>
         /// <param name="context"></param>
         /// <returns>A <see cref="Task"/> representing the completed operation.</returns>
-        Task SigningIn(SigningInContext context);
+        Task SigningIn(TicketReceivedContext context);
 
         /// <summary>
         /// Called when a Challenge causes a redirect to authorize endpoint in the Twitter middleware

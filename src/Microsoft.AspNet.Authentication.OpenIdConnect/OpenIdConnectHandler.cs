@@ -26,7 +26,7 @@ namespace Microsoft.AspNet.Authentication.OpenIdConnect
     /// <summary>
     /// A per-request authentication handler for the OpenIdConnectAuthenticationMiddleware.
     /// </summary>
-    public class OpenIdConnectHandler : AuthenticationHandler<OpenIdConnectOptions>
+    public class OpenIdConnectHandler : RemoteAuthenticationHandler<OpenIdConnectOptions>
     {
         private const string NonceProperty = "N";
         private const string UriSchemeDelimiter = "://";
@@ -1165,68 +1165,6 @@ namespace Microsoft.AspNet.Authentication.OpenIdConnect
             }
 
             return ticket;
-        }
-
-        /// <summary>
-        /// Calls InvokeReplyPathAsync
-        /// </summary>
-        /// <returns>True if the request was handled, false if the next middleware should be invoked.</returns>
-        public override Task<bool> HandleRequestAsync()
-        {
-            return InvokeReturnPathAsync();
-        }
-
-        // TODO: Unify this with RemoteAuthenticationHandler
-        private async Task<bool> InvokeReturnPathAsync()
-        {
-            var result = await HandleAuthenticateOnceAsync();
-            if (result.Error != null)
-            {
-                await HandleErrorAsync(result.Error);
-                return !result.Error.IsRequestComplete;
-            }
-
-            var ticket = result?.Ticket;
-            if (ticket != null)
-            {
-                Logger.LogDebug("Authentication completed.");
-
-                var authenticationCompletedContext = new AuthenticationCompletedContext(Context, Options)
-                {
-                    AuthenticationTicket = ticket,
-                };
-                await Options.Events.AuthenticationCompleted(authenticationCompletedContext);
-                if (authenticationCompletedContext.HandledResponse)
-                {
-                    Logger.LogVerbose("The AuthenticationCompleted event returned Handled.");
-                    return true;
-                }
-                else if (authenticationCompletedContext.Skipped)
-                {
-                    Logger.LogVerbose("The AuthenticationCompleted event returned Skipped.");
-                    return false;
-                }
-                ticket = authenticationCompletedContext.AuthenticationTicket;
-
-                if (ticket.Principal != null)
-                {
-                    var signInContext = new SignInContext(Options.SignInScheme, ticket.Principal, ticket.Properties?.Items);
-                    await Request.HttpContext.Authentication.SignInAsync(signInContext);
-                    if (signInContext.IsRequestCompleted)
-                    {
-                        return true;
-                    }
-                }
-
-                // Redirect back to the original secured resource, if any.
-                if (!string.IsNullOrEmpty(ticket.Properties.RedirectUri))
-                {
-                    Response.Redirect(ticket.Properties.RedirectUri);
-                    return true;
-                }
-            }
-
-            return false;
         }
     }
 }
