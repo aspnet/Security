@@ -106,7 +106,7 @@ namespace Microsoft.AspNet.Authentication.Cookies
             var ticket = await EnsureCookieTicket();
             if (ticket == null)
             {
-                return new AuthenticateResult();
+                return AuthenticateResult.Failed("No ticket.");
             }
 
             var context = new CookieValidatePrincipalContext(Context, ticket, Options);
@@ -114,7 +114,7 @@ namespace Microsoft.AspNet.Authentication.Cookies
 
             if (context.Principal == null)
             {
-                return new AuthenticateResult();
+                return AuthenticateResult.Failed("No principal.");
             }
 
             if (context.ShouldRenew)
@@ -122,10 +122,7 @@ namespace Microsoft.AspNet.Authentication.Cookies
                 _shouldRenew = true;
             }
 
-            return new AuthenticateResult()
-            {
-                Ticket = new AuthenticationTicket(context.Principal, context.Properties, Options.AuthenticationScheme)
-            };
+            return AuthenticateResult.Success(new AuthenticationTicket(context.Principal, context.Properties, Options.AuthenticationScheme));
         }
 
         private CookieOptions BuildCookieOptions()

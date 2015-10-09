@@ -12,15 +12,32 @@ namespace Microsoft.AspNet.Authentication
     /// </summary>
     public class AuthenticateResult
     {
+        private AuthenticateResult() { }
+
         /// <summary>
         /// The authentication ticket.
         /// </summary>
-        public AuthenticationTicket Ticket { get; set; }
+        public AuthenticationTicket Ticket { get; private set; }
 
         /// <summary>
         /// Holds error information caused by authentication.
         /// </summary>
-        //public ErrorContext Error { get; set; }
-        public Exception Error { get; set; }
+        public Exception Error { get; private set; }
+
+        public static AuthenticateResult Success(AuthenticationTicket ticket)
+        {
+            return new AuthenticateResult() { Ticket = ticket };
+        }
+
+        public static AuthenticateResult Failed(Exception error)
+        {
+            return new AuthenticateResult() { Error = error };
+        }
+
+        public static AuthenticateResult Failed(string errorMessage)
+        {
+            return new AuthenticateResult() { Error = new Exception(errorMessage) };
+        }
+
     }
 }

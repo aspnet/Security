@@ -44,10 +44,7 @@ namespace Microsoft.AspNet.Authentication.Twitter
 
             if (requestToken == null)
             {
-                return new AuthenticateResult()
-                {
-                    Error = new ErrorContext(Context, "Invalid state cookie.")
-                };
+                return AuthenticateResult.Failed("Invalid state cookie.");
             }
 
             properties = requestToken.Properties;
@@ -57,30 +54,18 @@ namespace Microsoft.AspNet.Authentication.Twitter
             var returnedToken = query["oauth_token"];
             if (StringValues.IsNullOrEmpty(returnedToken))
             {
-                Logger.LogWarning("Missing oauth_token");
-                return new AuthenticateResult()
-                {
-                    Ticket = new AuthenticationTicket(properties, Options.AuthenticationScheme)
-                };
+                return AuthenticateResult.Failed("Missing oauth_token");
             }
 
             if (!string.Equals(returnedToken, requestToken.Token, StringComparison.Ordinal))
             {
-                Logger.LogWarning("Unmatched token");
-                return new AuthenticateResult()
-                {
-                    Ticket = new AuthenticationTicket(properties, Options.AuthenticationScheme)
-                };
+                return AuthenticateResult.Failed("Unmatched token");
             }
 
             var oauthVerifier = query["oauth_verifier"];
             if (StringValues.IsNullOrEmpty(oauthVerifier))
             {
-                Logger.LogWarning("Missing or blank oauth_verifier");
-                return new AuthenticateResult()
-                {
-                    Ticket = new AuthenticationTicket(properties, Options.AuthenticationScheme)
-                };
+                return AuthenticateResult.Failed("Missing or blank oauth_verifier");
             }
 
             var cookieOptions = new CookieOptions
@@ -107,10 +92,7 @@ namespace Microsoft.AspNet.Authentication.Twitter
                 identity.AddClaim(new Claim("access_token", accessToken.Token, ClaimValueTypes.String, Options.ClaimsIssuer));
             }
 
-            return new AuthenticateResult()
-            {
-                Ticket = await CreateTicketAsync(identity, properties, accessToken)
-            };
+            return AuthenticateResult.Success(await CreateTicketAsync(identity, properties, accessToken));
         }
 
         protected virtual async Task<AuthenticationTicket> CreateTicketAsync(ClaimsIdentity identity, AuthenticationProperties properties, AccessToken token)

@@ -306,8 +306,10 @@ namespace Microsoft.AspNet.Authentication.Google
             Assert.Equal("yup", transaction.FindClaimValue("xform"));
         }
 
-        [Fact]
-        public async Task ReplyPathWillRejectIfCodeIsInvalid()
+        [Theory]
+        [InlineData(true)]
+        [InlineData(false)]
+        public async Task ReplyPathWillRejectIfCodeIsInvalid(bool redirect)
         {
             var stateFormat = new PropertiesDataFormat(new EphemeralDataProtectionProvider().CreateProtector("GoogleTest"));
             var server = CreateServer(options =>
@@ -322,22 +324,42 @@ namespace Microsoft.AspNet.Authentication.Google
                         return new HttpResponseMessage(HttpStatusCode.BadRequest);
                     }
                 };
+                if (redirect)
+                {
+                    options.OnRemoteError = ctx =>
+                    {
+                        ctx.Response.Redirect("/error?ErrorMessage=" + ctx.Error.Message);
+                        ctx.HandleResponse();
+                        return Task.FromResult(0);
+                    };
+                }
             });
             var properties = new AuthenticationProperties();
             var correlationKey = ".AspNet.Correlation.Google";
             var correlationValue = "TestCorrelationId";
             properties.Items.Add(correlationKey, correlationValue);
             properties.RedirectUri = "/me";
+
             var state = stateFormat.Protect(properties);
             var transaction = await server.SendAsync(
                 "https://example.com/signin-google?code=TestCode&state=" + UrlEncoder.Default.UrlEncode(state),
                 correlationKey + "=" + correlationValue);
-            Assert.Equal(HttpStatusCode.Redirect, transaction.Response.StatusCode);
-            Assert.Contains("error=access_denied", transaction.Response.Headers.Location.ToString());
+            if (redirect)
+            {
+                Assert.Equal(HttpStatusCode.Redirect, transaction.Response.StatusCode);
+                Assert.Equal("/error?ErrorMessage=" + UrlEncoder.Default.UrlEncode("Invalid return state, unable to redirect."),
+                    transaction.Response.Headers.GetValues("Location").First());
+            }
+            else
+            {
+                Assert.Equal(HttpStatusCode.InternalServerError, transaction.Response.StatusCode);
+            }
         }
 
-        [Fact]
-        public async Task ReplyPathWillRejectIfAccessTokenIsMissing()
+        [Theory]
+        [InlineData(true)]
+        [InlineData(false)]
+        public async Task ReplyPathWillRejectIfAccessTokenIsMissing(bool redirect)
         {
             var stateFormat = new PropertiesDataFormat(new EphemeralDataProtectionProvider().CreateProtector("GoogleTest"));
             var server = CreateServer(options =>
@@ -352,6 +374,15 @@ namespace Microsoft.AspNet.Authentication.Google
                         return ReturnJsonResponse(new object());
                     }
                 };
+                if (redirect)
+                {
+                    options.OnRemoteError = ctx =>
+                    {
+                        ctx.Response.Redirect("/error?ErrorMessage=" + ctx.Error.Message);
+                        ctx.HandleResponse();
+                        return Task.FromResult(0);
+                    };
+                }
             });
             var properties = new AuthenticationProperties();
             var correlationKey = ".AspNet.Correlation.Google";
@@ -362,8 +393,16 @@ namespace Microsoft.AspNet.Authentication.Google
             var transaction = await server.SendAsync(
                 "https://example.com/signin-google?code=TestCode&state=" + UrlEncoder.Default.UrlEncode(state),
                 correlationKey + "=" + correlationValue);
-            Assert.Equal(HttpStatusCode.Redirect, transaction.Response.StatusCode);
-            Assert.Contains("error=access_denied", transaction.Response.Headers.Location.ToString());
+            if (redirect)
+            {
+                Assert.Equal(HttpStatusCode.Redirect, transaction.Response.StatusCode);
+                Assert.Equal("/error?ErrorMessage=" + UrlEncoder.Default.UrlEncode("Invalid return state, unable to redirect."),
+                    transaction.Response.Headers.GetValues("Location").First());
+            }
+            else
+            {
+                Assert.Equal(HttpStatusCode.InternalServerError, transaction.Response.StatusCode);
+            }
         }
 
         [Fact]
@@ -421,7 +460,7 @@ namespace Microsoft.AspNet.Authentication.Google
                     {
                         var refreshToken = context.RefreshToken;
                         context.Principal.AddIdentity(new ClaimsIdentity(new Claim[] { new Claim("RefreshToken", refreshToken, ClaimValueTypes.String, "Google") }, "Google"));
-                        return Task.FromResult<object>(null);
+                        return Task.FromResult(0);
                     }
                 };
             });
@@ -531,7 +570,7 @@ namespace Microsoft.AspNet.Authentication.Google
         }
 
         [Fact]
-        public async Task NoStateCausesErrorHandler()
+        public async Task NoStateCauses500()
         {
             var stateFormat = new PropertiesDataFormat(new EphemeralDataProtectionProvider().CreateProtector("GoogleTest"));
             var server = CreateServer(options =>
@@ -543,10 +582,33 @@ namespace Microsoft.AspNet.Authentication.Google
 
             //Post a message to the Google middleware
             var transaction = await server.SendAsync(
-                "https://example.com/signin-google?code=TestCode&error=OMG");
+                "https://example.com/signin-google?code=TestCode");
+
+            Assert.Equal(HttpStatusCode.InternalServerError, transaction.Response.StatusCode);
+        }
+
+        [Fact]
+        public async Task CanRedirectOnError()
+        {
+            var stateFormat = new PropertiesDataFormat(new EphemeralDataProtectionProvider().CreateProtector("GoogleTest"));
+            var server = CreateServer(options =>
+            {
+                options.ClientId = "Test Id";
+                options.ClientSecret = "Test Secret";
+                options.OnRemoteError = ctx =>
+                {
+                    ctx.Response.Redirect("/error?ErrorMessage=" + ctx.Error.Message);
+                    ctx.HandleResponse();
+                    return Task.FromResult(0);
+                };
+            });
+
+            //Post a message to the Google middleware
+            var transaction = await server.SendAsync(
+                "https://example.com/signin-google?code=TestCode");
 
             Assert.Equal(HttpStatusCode.Redirect, transaction.Response.StatusCode);
-            Assert.Equal("/error?ErrorMessage="+UrlEncoder.Default.UrlEncode("Remote server returned an error: OMG"), 
+            Assert.Equal("/error?ErrorMessage=" + UrlEncoder.Default.UrlEncode("Invalid return state, unable to redirect."),
                 transaction.Response.Headers.GetValues("Location").First());
         }
 

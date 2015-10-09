@@ -12,7 +12,6 @@ using Microsoft.AspNet.Http;
 using Microsoft.AspNet.Http.Authentication;
 using Microsoft.AspNet.Http.Extensions;
 using Microsoft.AspNet.Http.Features.Authentication;
-using Microsoft.AspNet.WebUtilities;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Primitives;
 using Newtonsoft.Json.Linq;
@@ -35,54 +34,31 @@ namespace Microsoft.AspNet.Authentication.OAuth
             AuthenticationProperties properties = null;
             var query = Request.Query;
 
-            // TODO: Is this a standard error returned by servers?
-            var value = query["error"];
-            if (!StringValues.IsNullOrEmpty(value))
-            {
-                return new AuthenticateResult()
-                {
-                    Error = new ErrorContext(Context, "Remote server returned an error: " + value)
-                };
-            }
-
             var code = query["code"];
             var state = query["state"];
 
             properties = Options.StateDataFormat.Unprotect(state);
             if (properties == null)
             {
-                return new AuthenticateResult();
+                return AuthenticateResult.Failed("State not found.");
             }
-
-            // TODO: review these for how many are actually errors
 
             // OAuth2 10.12 CSRF
             if (!ValidateCorrelationId(properties))
             {
-                return new AuthenticateResult()
-                {
-                    Ticket = new AuthenticationTicket(properties, Options.AuthenticationScheme)
-                };
+                return AuthenticateResult.Failed("Correlation failed.");
             }
 
             if (StringValues.IsNullOrEmpty(code))
             {
-                // Null if the remote server returns an error.
-                return new AuthenticateResult()
-                {
-                    Ticket = new AuthenticationTicket(properties, Options.AuthenticationScheme)
-                };
+                return AuthenticateResult.Failed("Code was not found.");
             }
 
             var tokens = await ExchangeCodeAsync(code, BuildRedirectUri(Options.CallbackPath));
 
             if (tokens == null || string.IsNullOrEmpty(tokens.AccessToken))
             {
-                Logger.LogWarning("Access token was not found");
-                return new AuthenticateResult()
-                {
-                    Ticket = new AuthenticationTicket(properties, Options.AuthenticationScheme)
-                };
+                return AuthenticateResult.Failed("Access token was not found");
             }
 
             var identity = new ClaimsIdentity(Options.ClaimsIssuer);
@@ -111,10 +87,7 @@ namespace Microsoft.AspNet.Authentication.OAuth
                 }
             }
 
-            return new AuthenticateResult()
-            {
-                Ticket = await CreateTicketAsync(identity, properties, tokens)
-            };
+            return AuthenticateResult.Success(await CreateTicketAsync(identity, properties, tokens));
         }
 
         protected virtual async Task<OAuthTokenResponse> ExchangeCodeAsync(string code, string redirectUri)

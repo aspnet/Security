@@ -3,6 +3,7 @@
 
 using System;
 using System.Net.Http;
+using System.Threading.Tasks;
 using Microsoft.AspNet.Http;
 
 namespace Microsoft.AspNet.Authentication
@@ -47,7 +48,8 @@ namespace Microsoft.AspNet.Authentication
             set { Description.DisplayName = value; }
         }
 
-        // REVIEW: Merge this with the main events to have one single instead of two?
-        public IRemoteAuthenticationEvents RemoteEvents { get; set; } = new RemoteAuthenticationEvents();
+        public Func<ErrorContext, Task> OnRemoteError { get; set; } = context => Task.FromResult(0);
+
+        public Func<TicketReceivedContext, Task> OnTicketReceived { get; set; } = context => Task.FromResult(0);
     }
 }

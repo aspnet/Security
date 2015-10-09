@@ -3,10 +3,8 @@
 
 using System;
 using System.Threading.Tasks;
-using Microsoft.AspNet.Http;
 using Microsoft.AspNet.Http.Features.Authentication;
-using Microsoft.AspNet.WebUtilities;
-using Microsoft.Framework.Logging;
+using Microsoft.Extensions.Logging;
 
 namespace Microsoft.AspNet.Authentication
 {
@@ -37,7 +35,8 @@ namespace Microsoft.AspNet.Authentication
                     errorContext = new ErrorContext(Context, authResult.Error);
                 }
 
-                await Options.RemoteEvents.Error(errorContext);
+                Logger.LogInformation("Error from RemoteAuthentication: "+errorContext.Error.Message);
+                await Options.OnRemoteError(errorContext);
                 if (errorContext.HandledResponse)
                 {
                     return true;
@@ -51,7 +50,7 @@ namespace Microsoft.AspNet.Authentication
                 return true;
             }
 
-            var signingInContext = new TicketReceivedContext(Context, ticket)
+            var context = new TicketReceivedContext(Context, ticket)
             {
                 SignInScheme = Options.SignInScheme,
                 ReturnUri = ticket.Properties.RedirectUri,
@@ -59,28 +58,29 @@ namespace Microsoft.AspNet.Authentication
             // REVIEW: is this safe or good?
             ticket.Properties.RedirectUri = null;
 
-            await Options.RemoteEvents.TicketReceived(signingInContext);
+            await Options.OnTicketReceived(context);
 
-            if (signingInContext.HandledResponse)
+            if (context.HandledResponse)
             {
                 Logger.LogVerbose("The SigningIn event returned Handled.");
                 return true;
             }
-            else if (signingInContext.Skipped)
+            else if (context.Skipped)
             {
                 Logger.LogVerbose("The SigningIn event returned Skipped.");
                 return false;
             }
 
-            if (signingInContext.Principal != null)
+            // REVIEW: SignInScheme can be null if Shared SignInScheme and its not set on options, we could throw in Ctor?
+            if (context.SignInScheme != null && context.Principal != null)
             {
-                var signInContext = new SignInContext(signingInContext.SignInScheme, signingInContext.Principal, signingInContext.Properties?.Items);
+                var signInContext = new SignInContext(context.SignInScheme, context.Principal, context.Properties?.Items);
                 await Context.Authentication.SignInAsync(signInContext);
             }
 
-            if (signingInContext.ReturnUri != null)
+            if (context.ReturnUri != null)
             {
-                Response.Redirect(signingInContext.ReturnUri);
+                Response.Redirect(context.ReturnUri);
                 return true;
             }
 

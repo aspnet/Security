@@ -11,6 +11,7 @@ using Microsoft.AspNet.Builder;
 using Microsoft.AspNet.Http;
 using Microsoft.AspNet.TestHost;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.WebEncoders;
 using Xunit;
 
 namespace Microsoft.AspNet.Authentication.Twitter
@@ -63,7 +64,7 @@ namespace Microsoft.AspNet.Authentication.Twitter
         }
 
         [Fact]
-        public async Task BadSignInWillRedirectErrorPath()
+        public async Task BadSignInWill500()
         {
             var server = CreateServer(options =>
             {
@@ -76,9 +77,7 @@ namespace Microsoft.AspNet.Authentication.Twitter
             var transaction = await server.SendAsync(
                 "https://example.com/signin-twitter");
 
-            Assert.Equal(HttpStatusCode.Redirect, transaction.Response.StatusCode);
-            Assert.Equal("/error?ErrorMessage=" + UrlEncoder.Default.UrlEncode("Invalid state cookie."),
-                transaction.Response.Headers.GetValues("Location").First());
+            Assert.Equal(HttpStatusCode.InternalServerError, transaction.Response.StatusCode);
         }
 
         [Fact]

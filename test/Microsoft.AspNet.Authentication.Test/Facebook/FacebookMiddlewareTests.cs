@@ -159,7 +159,7 @@ namespace Microsoft.AspNet.Authentication.Facebook
         public async Task CustomUserInfoEndpointHasValidGraphQuery()
         {
             var customUserInfoEndpoint = "https://graph.facebook.com/me?fields=email,timezone,picture";
-            string finalUserInfoEndpoint = string.Empty;
+            var finalUserInfoEndpoint = string.Empty;
             var stateFormat = new PropertiesDataFormat(new EphemeralDataProtectionProvider().CreateProtector("FacebookTest"));
             var server = CreateServer(
                 app =>
