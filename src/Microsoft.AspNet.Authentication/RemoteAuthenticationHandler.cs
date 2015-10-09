@@ -22,11 +22,10 @@ namespace Microsoft.AspNet.Authentication
         public virtual async Task<bool> HandleRemoteCallbackAsync()
         {
             var authResult = await HandleAuthenticateOnceAsync();
-            var ticket = authResult?.Ticket;
-            if (authResult?.Error != null || ticket == null)
+            if (authResult == null || !authResult.Succeeded)
             {
                 var errorContext = new ErrorContext(Context, 
-                    authResult.Error ?? new Exception("Invalid return state, unable to redirect."));
+                    authResult?.Error ?? new Exception("Invalid return state, unable to redirect."));
 
                 Logger.LogInformation("Error from RemoteAuthentication: "+errorContext.Error.Message);
                 await Options.OnRemoteError(errorContext);
@@ -43,6 +42,8 @@ namespace Microsoft.AspNet.Authentication
                 return true;
             }
 
+            // We have a ticket if we get here
+            var ticket = authResult.Ticket;
             var context = new TicketReceivedContext(Context, ticket)
             {
                 SignInScheme = Options.SignInScheme,

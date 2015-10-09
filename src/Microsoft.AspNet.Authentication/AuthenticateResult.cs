@@ -15,6 +15,17 @@ namespace Microsoft.AspNet.Authentication
         private AuthenticateResult() { }
 
         /// <summary>
+        /// If a ticket was produced, authenticate was successful.
+        /// </summary>
+        public bool Succeeded
+        {
+            get
+            {
+                return Ticket != null;
+            }
+        }
+
+        /// <summary>
         /// The authentication ticket.
         /// </summary>
         public AuthenticationTicket Ticket { get; private set; }
