@@ -2,7 +2,6 @@
 
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Linq;
 using System.Net;
 using System.Net.Http;
@@ -226,6 +225,37 @@ namespace Microsoft.AspNet.Authentication.Google
         }
 
         [Theory]
+        [InlineData(true)]
+        [InlineData(false)]
+        public async Task ReplyPathWithErrorFails(bool redirect)
+        {
+            var server = CreateServer(options =>
+            {
+                options.ClientId = "Test Id";
+                options.ClientSecret = "Test Secret";
+                if (redirect)
+                {
+                    options.OnRemoteError = ctx =>
+                    {
+                        ctx.Response.Redirect("/error?ErrorMessage=" + ctx.Error.Message);
+                        ctx.HandleResponse();
+                        return Task.FromResult(0);
+                    };
+                }
+            });
+            var transaction = await server.SendAsync("https://example.com/signin-google?error=OMG");
+            if (redirect)
+            {
+                Assert.Equal(HttpStatusCode.Redirect, transaction.Response.StatusCode);
+                Assert.Equal("/error?ErrorMessage=OMG", transaction.Response.Headers.GetValues("Location").First());
+            }
+            else
+            {
+                Assert.Equal(HttpStatusCode.InternalServerError, transaction.Response.StatusCode);
+            }
+        }
+
+        [Theory]
         [InlineData(null)]
         [InlineData("CustomIssuer")]
         public async Task ReplyPathWillAuthenticateValidAuthorizeCodeAndState(string claimsIssuer)
@@ -347,7 +377,7 @@ namespace Microsoft.AspNet.Authentication.Google
             if (redirect)
             {
                 Assert.Equal(HttpStatusCode.Redirect, transaction.Response.StatusCode);
-                Assert.Equal("/error?ErrorMessage=" + UrlEncoder.Default.UrlEncode("Invalid return state, unable to redirect."),
+                Assert.Equal("/error?ErrorMessage=" + UrlEncoder.Default.UrlEncode("Access token was not found."),
                     transaction.Response.Headers.GetValues("Location").First());
             }
             else
@@ -396,7 +426,7 @@ namespace Microsoft.AspNet.Authentication.Google
             if (redirect)
             {
                 Assert.Equal(HttpStatusCode.Redirect, transaction.Response.StatusCode);
-                Assert.Equal("/error?ErrorMessage=" + UrlEncoder.Default.UrlEncode("Invalid return state, unable to redirect."),
+                Assert.Equal("/error?ErrorMessage=" + UrlEncoder.Default.UrlEncode("Access token was not found."),
                     transaction.Response.Headers.GetValues("Location").First());
             }
             else
@@ -608,7 +638,7 @@ namespace Microsoft.AspNet.Authentication.Google
                 "https://example.com/signin-google?code=TestCode");
 
             Assert.Equal(HttpStatusCode.Redirect, transaction.Response.StatusCode);
-            Assert.Equal("/error?ErrorMessage=" + UrlEncoder.Default.UrlEncode("Invalid return state, unable to redirect."),
+            Assert.Equal("/error?ErrorMessage=" + UrlEncoder.Default.UrlEncode("State not found."),
                 transaction.Response.Headers.GetValues("Location").First());
         }
 

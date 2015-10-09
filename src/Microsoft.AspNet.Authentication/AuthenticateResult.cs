@@ -26,6 +26,10 @@ namespace Microsoft.AspNet.Authentication
 
         public static AuthenticateResult Success(AuthenticationTicket ticket)
         {
+            if (ticket == null)
+            {
+                throw new ArgumentNullException(nameof(ticket));
+            }
             return new AuthenticateResult() { Ticket = ticket };
         }
 

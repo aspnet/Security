@@ -34,6 +34,12 @@ namespace Microsoft.AspNet.Authentication.OAuth
             AuthenticationProperties properties = null;
             var query = Request.Query;
 
+            var error = query["error"];
+            if (!StringValues.IsNullOrEmpty(error))
+            {
+                return AuthenticateResult.Failed(error);
+            }
+
             var code = query["code"];
             var state = query["state"];
 
@@ -58,7 +64,7 @@ namespace Microsoft.AspNet.Authentication.OAuth
 
             if (tokens == null || string.IsNullOrEmpty(tokens.AccessToken))
             {
-                return AuthenticateResult.Failed("Access token was not found");
+                return AuthenticateResult.Failed("Access token was not found.");
             }
 
             var identity = new ClaimsIdentity(Options.ClaimsIssuer);

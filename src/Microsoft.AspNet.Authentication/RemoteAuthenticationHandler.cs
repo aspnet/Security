@@ -25,15 +25,8 @@ namespace Microsoft.AspNet.Authentication
             var ticket = authResult?.Ticket;
             if (authResult?.Error != null || ticket == null)
             {
-                ErrorContext errorContext;
-                if (ticket == null || ticket.Principal == null)
-                {
-                    errorContext = new ErrorContext(Context, new Exception("Invalid return state, unable to redirect."));
-                }
-                else
-                {
-                    errorContext = new ErrorContext(Context, authResult.Error);
-                }
+                var errorContext = new ErrorContext(Context, 
+                    authResult.Error ?? new Exception("Invalid return state, unable to redirect."));
 
                 Logger.LogInformation("Error from RemoteAuthentication: "+errorContext.Error.Message);
                 await Options.OnRemoteError(errorContext);
