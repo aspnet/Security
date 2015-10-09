@@ -34,7 +34,7 @@ namespace Microsoft.AspNet.Authentication.Twitter
             _httpClient = httpClient;
         }
 
-        protected override async Task<AuthenticateResult> HandleAuthenticateAsync()
+        protected override async Task<AuthenticateResult> HandleRemoteAuthenticateAsync()
         {
             AuthenticationProperties properties = null;
             var query = Request.Query;
@@ -143,7 +143,6 @@ namespace Microsoft.AspNet.Authentication.Twitter
                     Context, Options,
                     properties, twitterAuthenticationEndpoint);
                 await Options.Events.RedirectToAuthorizationEndpoint(redirectContext);
-                context.CompleteRequest();
             }
             else
             {

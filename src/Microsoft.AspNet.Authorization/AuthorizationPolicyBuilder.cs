@@ -47,7 +47,7 @@ namespace Microsoft.AspNet.Authorization
                 throw new ArgumentNullException(nameof(policy));
             }
 
-            AddAuthenticationSchemes(policy.ActiveAuthenticationSchemes.ToArray());
+            AddAuthenticationSchemes(policy.AuthenticationSchemes.ToArray());
             AddRequirements(policy.Requirements.ToArray());
             return this;
         }

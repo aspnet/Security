@@ -19,9 +19,9 @@ namespace Microsoft.AspNet.Authentication
             return false;
         }
 
-        public virtual async Task<bool> HandleRemoteCallbackAsync()
+        protected virtual async Task<bool> HandleRemoteCallbackAsync()
         {
-            var authResult = await HandleAuthenticateOnceAsync();
+            var authResult = await HandleRemoteAuthenticateAsync();
             if (authResult == null || !authResult.Succeeded)
             {
                 var errorContext = new ErrorContext(Context, 
@@ -68,8 +68,7 @@ namespace Microsoft.AspNet.Authentication
             // REVIEW: SignInScheme can be null if Shared SignInScheme and its not set on options, we could throw in Ctor?
             if (context.SignInScheme != null && context.Principal != null)
             {
-                var signInContext = new SignInContext(context.SignInScheme, context.Principal, context.Properties?.Items);
-                await Context.Authentication.SignInAsync(signInContext);
+                await Context.Authentication.SignInAsync(context.SignInScheme, context.Principal, context.Properties);
             }
 
             if (context.ReturnUri != null)
@@ -79,6 +78,13 @@ namespace Microsoft.AspNet.Authentication
             }
 
             return false;
+        }
+
+        protected abstract Task<AuthenticateResult> HandleRemoteAuthenticateAsync();
+
+        protected override Task<AuthenticateResult> HandleAuthenticateAsync()
+        {
+            return Task.FromResult(AuthenticateResult.Failed("Remote authentication does not support authenticate"));
         }
 
         protected override Task HandleSignOutAsync(SignOutContext context)

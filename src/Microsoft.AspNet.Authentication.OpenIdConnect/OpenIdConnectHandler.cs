@@ -224,7 +224,6 @@ namespace Microsoft.AspNet.Authentication.OpenIdConnect
             if (redirectContext.HandledResponse)
             {
                 Logger.LogVerbose("RedirectToAuthenticationEndpoint.HandledResponse");
-                context.CompleteRequest();
                 return;
             }
             else if (redirectContext.Skipped)
@@ -264,7 +263,6 @@ namespace Microsoft.AspNet.Authentication.OpenIdConnect
                 }
 
                 Response.Redirect(redirectUri);
-                context.CompleteRequest();
                 return;
             }
             else if (Options.AuthenticationMethod == OpenIdConnectRedirectBehavior.FormPost)
@@ -293,7 +291,6 @@ namespace Microsoft.AspNet.Authentication.OpenIdConnect
                 Response.Headers[HeaderNames.Expires] = "-1";
 
                 await Response.Body.WriteAsync(buffer, 0, buffer.Length);
-                context.CompleteRequest();
                 return;
             }
 
@@ -305,7 +302,7 @@ namespace Microsoft.AspNet.Authentication.OpenIdConnect
         /// </summary>
         /// <returns>An <see cref="AuthenticationTicket"/> if successful.</returns>
         /// <remarks>Uses log id's OIDCH-0000 - OIDCH-0025</remarks>
-        protected override async Task<AuthenticateResult> HandleAuthenticateAsync()
+        protected override async Task<AuthenticateResult> HandleRemoteAuthenticateAsync()
         {
             Logger.LogDebug(Resources.OIDCH_0000_AuthenticateCoreAsync, this.GetType());
 

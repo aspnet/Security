@@ -29,7 +29,7 @@ namespace Microsoft.AspNet.Authentication.OAuth
 
         protected HttpClient Backchannel { get; private set; }
 
-        protected override async Task<AuthenticateResult> HandleAuthenticateAsync()
+        protected override async Task<AuthenticateResult> HandleRemoteAuthenticateAsync()
         {
             AuthenticationProperties properties = null;
             var query = Request.Query;
@@ -161,7 +161,6 @@ namespace Microsoft.AspNet.Authentication.OAuth
                 Context, Options,
                 properties, authorizationEndpoint);
             await Options.Events.RedirectToAuthorizationEndpoint(redirectContext);
-            context.CompleteRequest();
         }
 
         protected override Task HandleSignOutAsync(SignOutContext context)

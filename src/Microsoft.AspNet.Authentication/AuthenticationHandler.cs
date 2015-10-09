@@ -289,7 +289,6 @@ namespace Microsoft.AspNet.Authentication
         protected virtual Task HandleForbiddenAsync(ChallengeContext context)
         {
             Response.StatusCode = 403;
-            context.CompleteRequest();
             return Task.FromResult(0);
         }
 
@@ -308,11 +307,6 @@ namespace Microsoft.AspNet.Authentication
 
         public async Task ChallengeAsync(ChallengeContext context)
         {
-            if (context.IsRequestCompleted)
-            {
-                return;
-            }
-
             ChallengeCalled = true;
             if (ShouldHandleScheme(context.AuthenticationScheme))
             {
@@ -350,7 +344,7 @@ namespace Microsoft.AspNet.Authentication
                 context.Accept();
             }
 
-            if (!context.IsRequestCompleted && PriorHandler != null)
+            if (PriorHandler != null)
             {
                 await PriorHandler.ChallengeAsync(context);
             }

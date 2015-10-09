@@ -324,13 +324,8 @@ namespace Microsoft.AspNet.Authentication.Cookies
             return path[0] == '/' && path[1] != '/' && path[1] != '\\';
         }
 
-        protected async override Task HandleForbiddenAsync(ChallengeContext context)
+        protected override Task HandleForbiddenAsync(ChallengeContext context)
         {
-            if (context.IsRequestCompleted)
-            {
-                return;
-            }
-
             var accessDeniedUri =
                 Request.Scheme +
                 "://" +
@@ -339,20 +334,14 @@ namespace Microsoft.AspNet.Authentication.Cookies
                 Options.AccessDeniedPath;
 
             var redirectContext = new CookieRedirectContext(Context, Options, accessDeniedUri);
-            await Options.Events.RedirectToAccessDenied(redirectContext);
-            context.CompleteRequest();
+            return Options.Events.RedirectToAccessDenied(redirectContext);
         }
 
-        protected override async Task HandleUnauthorizedAsync(ChallengeContext context)
+        protected override Task HandleUnauthorizedAsync(ChallengeContext context)
         {
             if (context == null)
             {
                 throw new ArgumentNullException(nameof(context));
-            }
-
-            if (context.IsRequestCompleted)
-            {
-                return;
             }
 
             var redirectUri = new AuthenticationProperties(context.Properties).RedirectUri;
@@ -363,8 +352,7 @@ namespace Microsoft.AspNet.Authentication.Cookies
 
             var loginUri = Options.LoginPath + QueryString.Create(Options.ReturnUrlParameter, redirectUri);
             var redirectContext = new CookieRedirectContext(Context, Options, BuildRedirectUri(loginUri));
-            await Options.Events.RedirectToLogin(redirectContext);
-            context.CompleteRequest();
+            return Options.Events.RedirectToLogin(redirectContext);
         }
     }
 }
