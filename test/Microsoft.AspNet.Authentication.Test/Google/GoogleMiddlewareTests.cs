@@ -13,6 +13,7 @@ using Microsoft.AspNet.Builder;
 using Microsoft.AspNet.DataProtection;
 using Microsoft.AspNet.Http;
 using Microsoft.AspNet.Http.Authentication;
+using Microsoft.AspNet.Http.Features.Authentication;
 using Microsoft.AspNet.TestHost;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.WebEncoders;
@@ -210,6 +211,29 @@ namespace Microsoft.AspNet.Authentication.Google
             Assert.Equal(HttpStatusCode.Redirect, transaction.Response.StatusCode);
             var query = transaction.Response.Headers.Location.Query;
             Assert.Contains("custom=test", query);
+        }
+
+        [Fact]
+        public async Task AuthenticateWillFail()
+        {
+            var server = CreateServer(options =>
+            {
+                options.ClientId = "Test Id";
+                options.ClientSecret = "Test Secret";
+            },
+            async context => 
+            {
+                var req = context.Request;
+                var res = context.Response;
+                if (req.Path == new PathString("/auth"))
+                {
+                    var auth = new AuthenticateContext("Google");
+                    await context.Authentication.AuthenticateAsync(auth);
+                    Assert.NotNull(auth.Error);
+                }
+            });
+            var transaction = await server.SendAsync("https://example.com/auth");
+            Assert.Equal(HttpStatusCode.OK, transaction.Response.StatusCode);
         }
 
         [Fact]
