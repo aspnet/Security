@@ -126,28 +126,22 @@ namespace Microsoft.AspNet.Authentication.Twitter
                 properties.RedirectUri = CurrentUri;
             }
 
+            // If CallbackConfirmed is false, this will throw
             var requestToken = await ObtainRequestTokenAsync(Options.ConsumerKey, Options.ConsumerSecret, BuildRedirectUri(Options.CallbackPath), properties);
-            if (requestToken.CallbackConfirmed)
+            var twitterAuthenticationEndpoint = AuthenticationEndpoint + requestToken.Token;
+
+            var cookieOptions = new CookieOptions
             {
-                var twitterAuthenticationEndpoint = AuthenticationEndpoint + requestToken.Token;
+                HttpOnly = true,
+                Secure = Request.IsHttps
+            };
 
-                var cookieOptions = new CookieOptions
-                {
-                    HttpOnly = true,
-                    Secure = Request.IsHttps
-                };
+            Response.Cookies.Append(StateCookie, Options.StateDataFormat.Protect(requestToken), cookieOptions);
 
-                Response.Cookies.Append(StateCookie, Options.StateDataFormat.Protect(requestToken), cookieOptions);
-
-                var redirectContext = new TwitterRedirectToAuthorizationEndpointContext(
-                    Context, Options,
-                    properties, twitterAuthenticationEndpoint);
-                await Options.Events.RedirectToAuthorizationEndpoint(redirectContext);
-            }
-            else
-            {
-                Logger.LogError("requestToken CallbackConfirmed!=true");
-            }
+            var redirectContext = new TwitterRedirectToAuthorizationEndpointContext(
+                Context, Options,
+                properties, twitterAuthenticationEndpoint);
+            await Options.Events.RedirectToAuthorizationEndpoint(redirectContext);
         }
 
         private async Task<RequestToken> ObtainRequestTokenAsync(string consumerKey, string consumerSecret, string callBackUri, AuthenticationProperties properties)
@@ -201,12 +195,12 @@ namespace Microsoft.AspNet.Authentication.Twitter
             string responseText = await response.Content.ReadAsStringAsync();
 
             var responseParameters = new FormCollection(FormReader.ReadForm(responseText));
-            if (string.Equals(responseParameters["oauth_callback_confirmed"], "true", StringComparison.Ordinal))
+            if (!string.Equals(responseParameters["oauth_callback_confirmed"], "true", StringComparison.Ordinal))
             {
-                return new RequestToken { Token = Uri.UnescapeDataString(responseParameters["oauth_token"]), TokenSecret = Uri.UnescapeDataString(responseParameters["oauth_token_secret"]), CallbackConfirmed = true, Properties = properties };
+                throw new Exception("Twitter oauth_callback_confirmed is not true.");
             }
 
-            return new RequestToken();
+            return new RequestToken { Token = Uri.UnescapeDataString(responseParameters["oauth_token"]), TokenSecret = Uri.UnescapeDataString(responseParameters["oauth_token_secret"]), CallbackConfirmed = true, Properties = properties };
         }
 
         private async Task<AccessToken> ObtainAccessTokenAsync(string consumerKey, string consumerSecret, RequestToken token, string verifier)

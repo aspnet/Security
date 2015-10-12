@@ -294,7 +294,7 @@ namespace Microsoft.AspNet.Authentication.OpenIdConnect
                 return;
             }
 
-            Logger.LogError("An unsupported authentication method has been configured: {0}", Options.AuthenticationMethod);
+            throw new NotImplementedException($"An unsupported authentication method has been configured: {Options.AuthenticationMethod}");
         }
 
         /// <summary>

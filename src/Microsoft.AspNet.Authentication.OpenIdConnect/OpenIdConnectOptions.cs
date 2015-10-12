@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.IdentityModel.Tokens;
 using System.IdentityModel.Tokens.Jwt;
+using Microsoft.AspNet.Http;
 using Microsoft.AspNet.Http.Authentication;
 using Microsoft.Extensions.WebEncoders;
 using Microsoft.IdentityModel.Protocols;
@@ -47,6 +48,7 @@ namespace Microsoft.AspNet.Authentication.OpenIdConnect
         {
             AuthenticationScheme = authenticationScheme;
             DisplayName = OpenIdConnectDefaults.Caption;
+            CallbackPath = new PathString("/signin-oidc");
         }
 
         /// <summary>
