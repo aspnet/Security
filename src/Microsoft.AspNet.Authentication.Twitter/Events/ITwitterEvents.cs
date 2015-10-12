@@ -8,7 +8,7 @@ namespace Microsoft.AspNet.Authentication.Twitter
     /// <summary>
     /// Specifies callback methods which the <see cref="TwitterMiddleware"></see> invokes to enable developer control over the authentication process. />
     /// </summary>
-    public interface ITwitterEvents
+    public interface ITwitterEvents : IRemoteAuthenticationEvents
     {
         /// <summary>
         /// Invoked whenever Twitter succesfully authenticates a user

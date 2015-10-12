@@ -8,7 +8,7 @@ namespace Microsoft.AspNet.Authentication.OAuth
     /// <summary>
     /// Specifies callback methods which the <see cref="OAuthMiddleware"/> invokes to enable developer control over the authentication process.
     /// </summary>
-    public interface IOAuthEvents
+    public interface IOAuthEvents : IRemoteAuthenticationEvents
     {
         /// <summary>
         /// Invoked after the provider successfully authenticates a user. This can be used to retrieve user information.

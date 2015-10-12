@@ -48,8 +48,6 @@ namespace Microsoft.AspNet.Authentication
             set { Description.DisplayName = value; }
         }
 
-        public Func<ErrorContext, Task> OnRemoteError { get; set; } = context => Task.FromResult(0);
-
-        public Func<TicketReceivedContext, Task> OnTicketReceived { get; set; } = context => Task.FromResult(0);
+        public IRemoteAuthenticationEvents Events = new RemoteAuthenticationEvents();
     }
 }

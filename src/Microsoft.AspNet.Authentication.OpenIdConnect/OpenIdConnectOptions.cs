@@ -49,6 +49,7 @@ namespace Microsoft.AspNet.Authentication.OpenIdConnect
             AuthenticationScheme = authenticationScheme;
             DisplayName = OpenIdConnectDefaults.Caption;
             CallbackPath = new PathString("/signin-oidc");
+            Events = new OpenIdConnectEvents();
         }
 
         /// <summary>
@@ -105,7 +106,17 @@ namespace Microsoft.AspNet.Authentication.OpenIdConnect
         /// <summary>
         /// Gets or sets the <see cref="IOpenIdConnectEvents"/> to notify when processing OpenIdConnect messages.
         /// </summary>
-        public IOpenIdConnectEvents Events { get; set; } = new OpenIdConnectEvents();
+        public new IOpenIdConnectEvents Events
+        {
+            get
+            {
+                return (IOpenIdConnectEvents)base.Events;
+            }
+            set
+            {
+                base.Events = value;
+            }
+        }
 
         /// <summary>
         /// Gets or sets the <see cref="OpenIdConnectProtocolValidator"/> that is used to ensure that the 'id_token' received

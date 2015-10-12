@@ -9,7 +9,7 @@ namespace Microsoft.AspNet.Authentication.OAuth
     /// <summary>
     /// Default <see cref="IOAuthEvents"/> implementation.
     /// </summary>
-    public class OAuthEvents : IOAuthEvents
+    public class OAuthEvents : RemoteAuthenticationEvents, IOAuthEvents
     {
         /// <summary>
         /// Gets or sets the function that is invoked when the CreatingTicket method is invoked.

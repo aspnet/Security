@@ -259,11 +259,14 @@ namespace Microsoft.AspNet.Authentication.Google
                 options.ClientSecret = "Test Secret";
                 if (redirect)
                 {
-                    options.OnRemoteError = ctx =>
+                    options.Events = new OAuthEvents()
                     {
-                        ctx.Response.Redirect("/error?ErrorMessage=" + ctx.Error.Message);
-                        ctx.HandleResponse();
-                        return Task.FromResult(0);
+                        OnRemoteError = ctx =>
+                        {
+                            ctx.Response.Redirect("/error?ErrorMessage=" + ctx.Error.Message);
+                            ctx.HandleResponse();
+                            return Task.FromResult(0);
+                        }
                     };
                 }
             });
@@ -380,11 +383,14 @@ namespace Microsoft.AspNet.Authentication.Google
                 };
                 if (redirect)
                 {
-                    options.OnRemoteError = ctx =>
+                    options.Events = new OAuthEvents()
                     {
-                        ctx.Response.Redirect("/error?ErrorMessage=" + ctx.Error.Message);
-                        ctx.HandleResponse();
-                        return Task.FromResult(0);
+                        OnRemoteError = ctx =>
+                        {
+                            ctx.Response.Redirect("/error?ErrorMessage=" + ctx.Error.Message);
+                            ctx.HandleResponse();
+                            return Task.FromResult(0);
+                        }
                     };
                 }
             });
@@ -430,11 +436,14 @@ namespace Microsoft.AspNet.Authentication.Google
                 };
                 if (redirect)
                 {
-                    options.OnRemoteError = ctx =>
+                    options.Events = new OAuthEvents()
                     {
-                        ctx.Response.Redirect("/error?ErrorMessage=" + ctx.Error.Message);
-                        ctx.HandleResponse();
-                        return Task.FromResult(0);
+                        OnRemoteError = ctx =>
+                        {
+                            ctx.Response.Redirect("/error?ErrorMessage=" + ctx.Error.Message);
+                            ctx.HandleResponse();
+                            return Task.FromResult(0);
+                        }
                     };
                 }
             });
@@ -649,11 +658,14 @@ namespace Microsoft.AspNet.Authentication.Google
             {
                 options.ClientId = "Test Id";
                 options.ClientSecret = "Test Secret";
-                options.OnRemoteError = ctx =>
+                options.Events = new OAuthEvents()
                 {
-                    ctx.Response.Redirect("/error?ErrorMessage=" + ctx.Error.Message);
-                    ctx.HandleResponse();
-                    return Task.FromResult(0);
+                    OnRemoteError = ctx =>
+                    {
+                        ctx.Response.Redirect("/error?ErrorMessage=" + ctx.Error.Message);
+                        ctx.HandleResponse();
+                        return Task.FromResult(0);
+                    }
                 };
             });
 

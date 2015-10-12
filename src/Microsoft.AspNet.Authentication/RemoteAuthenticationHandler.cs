@@ -28,7 +28,7 @@ namespace Microsoft.AspNet.Authentication
                     authResult?.Error ?? new Exception("Invalid return state, unable to redirect."));
 
                 Logger.LogInformation("Error from RemoteAuthentication: "+errorContext.Error.Message);
-                await Options.OnRemoteError(errorContext);
+                await Options.Events.RemoteError(errorContext);
                 if (errorContext.HandledResponse)
                 {
                     return true;
@@ -52,7 +52,7 @@ namespace Microsoft.AspNet.Authentication
             // REVIEW: is this safe or good?
             ticket.Properties.RedirectUri = null;
 
-            await Options.OnTicketReceived(context);
+            await Options.Events.TicketReceived(context);
 
             if (context.HandledResponse)
             {

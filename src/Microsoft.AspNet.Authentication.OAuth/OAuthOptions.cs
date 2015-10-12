@@ -14,6 +14,11 @@ namespace Microsoft.AspNet.Authentication.OAuth
     /// </summary>
     public class OAuthOptions : RemoteAuthenticationOptions
     {
+        public OAuthOptions()
+        {
+            Events = new OAuthEvents();
+        }
+
         /// <summary>
         /// Gets or sets the provider-assigned client id.
         /// </summary>
@@ -44,7 +49,17 @@ namespace Microsoft.AspNet.Authentication.OAuth
         /// <summary>
         /// Gets or sets the <see cref="IOAuthEvents"/> used to handle authentication events.
         /// </summary>
-        public IOAuthEvents Events { get; set; } = new OAuthEvents();
+        public new IOAuthEvents Events
+        {
+            get
+            {
+                return (IOAuthEvents)base.Events;
+            }
+            set
+            {
+                base.Events = value;
+            }
+        }
 
         /// <summary>
         /// A list of permissions to request.

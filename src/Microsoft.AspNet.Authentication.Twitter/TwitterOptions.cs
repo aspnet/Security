@@ -21,6 +21,7 @@ namespace Microsoft.AspNet.Authentication.Twitter
             DisplayName = AuthenticationScheme;
             CallbackPath = new PathString("/signin-twitter");
             BackchannelTimeout = TimeSpan.FromSeconds(60);
+            Events = new TwitterEvents();
         }
 
         /// <summary>
@@ -43,7 +44,17 @@ namespace Microsoft.AspNet.Authentication.Twitter
         /// <summary>
         /// Gets or sets the <see cref="ITwitterEvents"/> used to handle authentication events.
         /// </summary>
-        public ITwitterEvents Events { get; set; } = new TwitterEvents();
+        public new ITwitterEvents Events
+        {
+            get
+            {
+                return (ITwitterEvents)base.Events;
+            }
+            set
+            {
+                base.Events = value;
+            }
+        }
 
         /// <summary>
         /// Defines whether access tokens should be stored in the

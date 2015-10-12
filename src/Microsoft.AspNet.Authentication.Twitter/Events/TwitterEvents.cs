@@ -9,7 +9,7 @@ namespace Microsoft.AspNet.Authentication.Twitter
     /// <summary>
     /// Default <see cref="ITwitterEvents"/> implementation.
     /// </summary>
-    public class TwitterEvents : ITwitterEvents
+    public class TwitterEvents : RemoteAuthenticationEvents, ITwitterEvents
     {
         /// <summary>
         /// Gets or sets the function that is invoked when the Authenticated method is invoked.
