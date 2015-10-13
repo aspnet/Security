@@ -150,20 +150,43 @@ namespace Microsoft.AspNet.Authentication.Tests.OpenIdConnect
 
         private static void SetProtocolMessageOptions(OpenIdConnectOptions options)
         {
+            var fakeOpenIdRequestMessage = new FakeOpenIdConnectMessage(ExpectedAuthorizeRequest, ExpectedLogoutRequest);
             options.AutomaticAuthentication = true;
             options.Events = new OpenIdConnectEvents()
             {
                 OnRedirectToAuthenticationEndpoint = (context) =>
                 {
-                    context.ProtocolMessage = new OpenIdConnectMessage(ExpectedAuthorizeRequest);
+                    context.ProtocolMessage = fakeOpenIdRequestMessage;
                     return Task.FromResult<object>(null);
                 },
                 OnRedirectToEndSessionEndpoint = (context) =>
                 {
-                    context.ProtocolMessage = new OpenIdConnectMessage(ExpectedLogoutRequest);
+                    context.ProtocolMessage = fakeOpenIdRequestMessage;
                     return Task.FromResult<object>(null);
                 }
             };
+        }
+
+        private class FakeOpenIdConnectMessage : OpenIdConnectMessage
+        {
+            private readonly string _authorizeRequest;
+            private readonly string _logoutRequest;
+
+            public FakeOpenIdConnectMessage(string authorizeRequest, string logoutRequest)
+            {
+                _authorizeRequest = authorizeRequest;
+                _logoutRequest = logoutRequest;
+            }
+
+            public override string CreateAuthenticationRequestUrl()
+            {
+                return _authorizeRequest;
+            }
+
+            public override string CreateLogoutRequestUrl()
+            {
+                return _logoutRequest;
+            }
         }
 
         /// <summary>
