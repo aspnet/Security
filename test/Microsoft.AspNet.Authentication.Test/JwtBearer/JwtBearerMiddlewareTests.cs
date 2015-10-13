@@ -12,14 +12,17 @@ using Microsoft.AspNet.Builder;
 using Microsoft.AspNet.Http;
 using Microsoft.AspNet.Http.Authentication;
 using Microsoft.AspNet.TestHost;
-using Microsoft.Framework.DependencyInjection;
+using Microsoft.AspNet.Testing.xunit;
+using Microsoft.Extensions.DependencyInjection;
 using Xunit;
 
 namespace Microsoft.AspNet.Authentication.JwtBearer
 {
     public class JwtBearerMiddlewareTests
     {
-        [Fact]
+        [ConditionalFact]
+        [FrameworkSkipCondition(RuntimeFrameworks.Mono)]
+        // https://github.com/AzureAD/azure-activedirectory-identitymodel-extensions-for-dotnet/issues/179
         public async Task BearerTokenValidation()
         {
             var server = CreateServer(options =>

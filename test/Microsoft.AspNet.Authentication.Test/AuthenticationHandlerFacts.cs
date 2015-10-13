@@ -2,14 +2,13 @@
 // Licensed under the Apache License, Version 2.0. See License.txt in the project root for license information.
 
 using System;
-using System.Collections.Generic;
 using System.IO;
 using System.Threading.Tasks;
+using Microsoft.AspNet.Http;
 using Microsoft.AspNet.Http.Features;
 using Microsoft.AspNet.Http.Features.Authentication;
 using Microsoft.AspNet.Http.Internal;
-using Microsoft.Framework.Logging;
-using Microsoft.Framework.Primitives;
+using Microsoft.Extensions.Logging;
 using Xunit;
 
 namespace Microsoft.AspNet.Authentication
@@ -96,7 +95,10 @@ namespace Microsoft.AspNet.Authentication
                 var handler = new CountHandler();
                 var context = new DefaultHttpContext();
                 context.Features.Set<IHttpResponseFeature>(new TestResponse());
-                await handler.InitializeAsync(new CountOptions(), context, new LoggerFactory().CreateLogger("CountHandler"), Framework.WebEncoders.UrlEncoder.Default);
+                await handler.InitializeAsync(
+                    new CountOptions(), context,
+                    new LoggerFactory().CreateLogger("CountHandler"),
+                    Extensions.WebEncoders.UrlEncoder.Default);
                 handler.Options.AuthenticationScheme = scheme;
                 handler.Options.AutomaticAuthentication = true;
                 return handler;
@@ -119,7 +121,10 @@ namespace Microsoft.AspNet.Authentication
                 var handler = new TestHandler();
                 var context = new DefaultHttpContext();
                 context.Features.Set<IHttpResponseFeature>(new TestResponse());
-                await handler.InitializeAsync(new TestOptions(), context, new LoggerFactory().CreateLogger("TestHandler"), Framework.WebEncoders.UrlEncoder.Default);
+                await handler.InitializeAsync(
+                    new TestOptions(), context,
+                    new LoggerFactory().CreateLogger("TestHandler"),
+                    Extensions.WebEncoders.UrlEncoder.Default);
                 handler.Options.AuthenticationScheme = scheme;
                 return handler;
             }
@@ -149,7 +154,10 @@ namespace Microsoft.AspNet.Authentication
                 var handler = new TestAutoHandler();
                 var context = new DefaultHttpContext();
                 context.Features.Set<IHttpResponseFeature>(new TestResponse());
-                await handler.InitializeAsync(new TestAutoOptions(), context, new LoggerFactory().CreateLogger("TestAutoHandler"), Framework.WebEncoders.UrlEncoder.Default);
+                await handler.InitializeAsync(
+                    new TestAutoOptions(), context,
+                    new LoggerFactory().CreateLogger("TestAutoHandler"),
+                    Extensions.WebEncoders.UrlEncoder.Default);
                 handler.Options.AuthenticationScheme = scheme;
                 handler.Options.AutomaticAuthentication = auto;
                 return handler;
@@ -184,7 +192,7 @@ namespace Microsoft.AspNet.Authentication
                 }
             }
 
-            public IDictionary<string, StringValues> Headers
+            public IHeaderDictionary Headers
             {
                 get
                 {
