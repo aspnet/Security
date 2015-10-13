@@ -306,12 +306,6 @@ namespace Microsoft.AspNet.Authentication.OpenIdConnect
         {
             Logger.LogDebug(Resources.OIDCH_0000_AuthenticateCoreAsync, this.GetType());
 
-            // Allow login to be constrained to a specific path. Need to make this runtime configurable.
-            if (Options.CallbackPath.HasValue && Options.CallbackPath != (Request.PathBase + Request.Path))
-            {
-                return AuthenticateResult.Failed("Wrong callback path.");
-            }
-
             OpenIdConnectMessage message = null;
 
             if (string.Equals(Request.Method, "GET", StringComparison.OrdinalIgnoreCase))
@@ -375,9 +369,9 @@ namespace Microsoft.AspNet.Authentication.OpenIdConnect
                 // if any of the error fields are set, throw error null
                 if (!string.IsNullOrEmpty(message.Error))
                 {
+                    // REVIEW: this error formatting is pretty nuts
                     Logger.LogError(Resources.OIDCH_0006_MessageContainsError, message.Error, message.ErrorDescription ?? "ErrorDecription null", message.ErrorUri ?? "ErrorUri null");
-                    // REVIEW: throw really?
-                    throw new OpenIdConnectProtocolException(string.Format(CultureInfo.InvariantCulture, Resources.OIDCH_0006_MessageContainsError, message.Error, message.ErrorDescription ?? "ErrorDecription null", message.ErrorUri ?? "ErrorUri null"));
+                    return AuthenticateResult.Failed(new OpenIdConnectProtocolException(string.Format(CultureInfo.InvariantCulture, Resources.OIDCH_0006_MessageContainsError, message.Error, message.ErrorDescription ?? "ErrorDecription null", message.ErrorUri ?? "ErrorUri null")));
                 }
 
                 string userstate = null;
