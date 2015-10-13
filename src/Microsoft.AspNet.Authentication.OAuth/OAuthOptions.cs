@@ -51,14 +51,8 @@ namespace Microsoft.AspNet.Authentication.OAuth
         /// </summary>
         public new IOAuthEvents Events
         {
-            get
-            {
-                return (IOAuthEvents)base.Events;
-            }
-            set
-            {
-                base.Events = value;
-            }
+            get { return (IOAuthEvents)base.Events; }
+            set { base.Events = value; }
         }
 
         /// <summary>
