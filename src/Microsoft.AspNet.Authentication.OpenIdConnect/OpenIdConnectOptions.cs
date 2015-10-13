@@ -108,14 +108,8 @@ namespace Microsoft.AspNet.Authentication.OpenIdConnect
         /// </summary>
         public new IOpenIdConnectEvents Events
         {
-            get
-            {
-                return (IOpenIdConnectEvents)base.Events;
-            }
-            set
-            {
-                base.Events = value;
-            }
+            get { return (IOpenIdConnectEvents)base.Events; }
+            set { base.Events = value; }
         }
 
         /// <summary>
