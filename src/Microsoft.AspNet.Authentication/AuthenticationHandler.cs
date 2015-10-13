@@ -250,10 +250,6 @@ namespace Microsoft.AspNet.Authentication
             }
         }
 
-        /// <summary>
-        /// </summary>
-        /// <param name="context"></param>
-        /// <returns>True if no other handlers should be called</returns>
         protected virtual Task HandleSignInAsync(SignInContext context)
         {
             return Task.FromResult(0);
@@ -273,19 +269,12 @@ namespace Microsoft.AspNet.Authentication
                 await PriorHandler.SignOutAsync(context);
             }
         }
-        /// <summary>
-        /// </summary>
-        /// <param name="context"></param>
-        /// <returns>True if no other handlers should be called</returns>
+
         protected virtual Task HandleSignOutAsync(SignOutContext context)
         {
             return Task.FromResult(0);
         }
 
-        /// <summary>
-        /// </summary>
-        /// <param name="context"></param>
-        /// <returns>True if no other handlers should be called</returns>
         protected virtual Task HandleForbiddenAsync(ChallengeContext context)
         {
             Response.StatusCode = 403;
@@ -315,25 +304,10 @@ namespace Microsoft.AspNet.Authentication
                     case ChallengeBehavior.Automatic:
                         // If there is a principal already, invoke the forbidden code path
                         var result = await HandleAuthenticateOnceAsync();
-
-                        //if (result?.Error != null)
-                        //{
-                        //    await HandleErrorAsync(result.Error);
-                        //    if (result.Error.IsRequestComplete)
-                        //    {
-                        //        context.CompleteRequest();
-                        //    }
-                        //}
-
                         if (result?.Ticket?.Principal != null)
                         {
-                            await HandleForbiddenAsync(context);
+                            goto case ChallengeBehavior.Forbidden;
                         }
-                        else
-                        {
-                            await HandleUnauthorizedAsync(context);
-                        }
-                        break;
                     case ChallengeBehavior.Unauthorized:
                         await HandleUnauthorizedAsync(context);
                         break;
