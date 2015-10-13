@@ -163,21 +163,6 @@ namespace Microsoft.AspNet.Authentication.OAuth
             await Options.Events.RedirectToAuthorizationEndpoint(redirectContext);
         }
 
-        protected override Task HandleSignOutAsync(SignOutContext context)
-        {
-            throw new NotSupportedException();
-        }
-
-        protected override Task HandleSignInAsync(SignInContext context)
-        {
-            throw new NotSupportedException();
-        }
-
-        protected override Task HandleForbiddenAsync(ChallengeContext context)
-        {
-            throw new NotSupportedException();
-        }
-
         protected virtual string BuildChallengeUrl(AuthenticationProperties properties, string redirectUri)
         {
             var scope = FormatScope();
