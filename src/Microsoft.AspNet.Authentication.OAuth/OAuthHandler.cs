@@ -42,9 +42,10 @@ namespace Microsoft.AspNet.Authentication.OAuth
         public async Task<bool> InvokeReturnPathAsync()
         {
             var ticket = await HandleAuthenticateOnceAsync();
-            if (ticket == null)
+            if (ticket?.Properties?.RedirectUri == null)
             {
                 Logger.LogWarning("Invalid return state, unable to redirect.");
+                //Response.Redirect(Options.CallBackErrorPath); + some error 
                 Response.StatusCode = 500;
                 return true;
             }
@@ -63,7 +64,7 @@ namespace Microsoft.AspNet.Authentication.OAuth
                 await Context.Authentication.SignInAsync(context.SignInScheme, context.Principal, context.Properties);
             }
 
-            if (!context.IsRequestCompleted && context.RedirectUri != null)
+            if (!context.IsRequestCompleted )
             {
                 if (context.Principal == null)
                 {
@@ -74,7 +75,7 @@ namespace Microsoft.AspNet.Authentication.OAuth
                 context.RequestCompleted();
             }
 
-            return context.IsRequestCompleted;
+            return true;
         }
 
         protected override async Task<AuthenticationTicket> HandleAuthenticateAsync()
@@ -89,8 +90,6 @@ namespace Microsoft.AspNet.Authentication.OAuth
                 if (!StringValues.IsNullOrEmpty(value))
                 {
                     Logger.LogVerbose("Remote server returned an error: " + Request.QueryString);
-                    // TODO: Fail request rather than passing through?
-                    return null;
                 }
 
                 var code = query["code"];
