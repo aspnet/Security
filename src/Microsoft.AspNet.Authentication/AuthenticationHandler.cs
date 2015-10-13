@@ -287,7 +287,6 @@ namespace Microsoft.AspNet.Authentication
         /// changing the 401 result to 302 of a login page or external sign-in location.)
         /// </summary>
         /// <param name="context"></param>
-        /// <returns>True if no other handlers should be called</returns>
         protected virtual Task HandleUnauthorizedAsync(ChallengeContext context)
         {
             Response.StatusCode = 401;
@@ -308,6 +307,7 @@ namespace Microsoft.AspNet.Authentication
                         {
                             goto case ChallengeBehavior.Forbidden;
                         }
+                        goto case ChallengeBehavior.Unauthorized;
                     case ChallengeBehavior.Unauthorized:
                         await HandleUnauthorizedAsync(context);
                         break;

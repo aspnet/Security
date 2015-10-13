@@ -46,7 +46,7 @@ namespace Microsoft.AspNet.Authentication.OAuth
             properties = Options.StateDataFormat.Unprotect(state);
             if (properties == null)
             {
-                return AuthenticateResult.Failed("State not found.");
+                return AuthenticateResult.Failed("The oauth state was missing or invalid.");
             }
 
             // OAuth2 10.12 CSRF
