@@ -46,14 +46,8 @@ namespace Microsoft.AspNet.Authentication.Twitter
         /// </summary>
         public new ITwitterEvents Events
         {
-            get
-            {
-                return (ITwitterEvents)base.Events;
-            }
-            set
-            {
-                base.Events = value;
-            }
+            get { return (ITwitterEvents)base.Events; }
+            set { base.Events = value; }
         }
 
         /// <summary>
