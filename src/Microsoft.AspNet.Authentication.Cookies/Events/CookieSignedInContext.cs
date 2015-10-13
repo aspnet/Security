@@ -33,8 +33,6 @@ namespace Microsoft.AspNet.Authentication.Cookies
             Properties = properties;
         }
 
-        public new CookieAuthenticationOptions Options { get { return (CookieAuthenticationOptions)base.Options; } }
-
         /// <summary>
         /// The name of the AuthenticationScheme creating a cookie
         /// </summary>

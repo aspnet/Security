@@ -70,7 +70,6 @@ namespace Microsoft.AspNet.Authentication.Twitter
             {
                 options.ConsumerKey = "Test Consumer Key";
                 options.ConsumerSecret = "Test Consumer Secret";
-                options.ErrorHandlerPath = new PathString("/error");
             });
 
             // Send a bogus sign in

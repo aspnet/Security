@@ -640,7 +640,6 @@ namespace Microsoft.AspNet.Authentication.Google
             {
                 options.ClientId = "Test Id";
                 options.ClientSecret = "Test Secret";
-                options.ErrorHandlerPath = new PathString("/error");
             });
 
             //Post a message to the Google middleware
