@@ -4,6 +4,7 @@
 using System;
 using System.Threading.Tasks;
 using Microsoft.AspNet.Http;
+using Microsoft.AspNet.Http.Authentication;
 using Microsoft.AspNet.Http.Features.Authentication;
 using Microsoft.Extensions.Internal;
 using Microsoft.Extensions.Logging;
@@ -96,7 +97,7 @@ namespace Microsoft.AspNet.Authentication
 
             Response.OnStarting(OnStartingCallback, this);
 
-            if (ShouldHandleScheme(AuthenticationOptions.AutomaticScheme, Options.AutomaticAuthenticate))
+            if (ShouldHandleScheme(AuthenticationManager.AutomaticScheme, Options.AutomaticAuthenticate))
             {
                 var result = await HandleAuthenticateOnceAsync();
                 var ticket = result?.Ticket;
@@ -188,7 +189,7 @@ namespace Microsoft.AspNet.Authentication
         public bool ShouldHandleScheme(string authenticationScheme, bool handleAutomatic)
         {
             return string.Equals(Options.AuthenticationScheme, authenticationScheme, StringComparison.Ordinal) ||
-                (handleAutomatic && string.Equals(authenticationScheme, AuthenticationOptions.AutomaticScheme));
+                (handleAutomatic && string.Equals(authenticationScheme, AuthenticationManager.AutomaticScheme));
         }
 
         public async Task AuthenticateAsync(AuthenticateContext context)

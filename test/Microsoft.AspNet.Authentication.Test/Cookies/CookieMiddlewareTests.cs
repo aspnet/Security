@@ -60,7 +60,7 @@ namespace Microsoft.AspNet.Authentication.Cookies
         [Fact]
         public async Task ProtectedCustomRequestShouldRedirectToCustomRedirectUri()
         {
-            var server = CreateServer(options => options.AutomaticAuthenticate = true);
+            var server = CreateServer(options => options.AutomaticChallenge = true);
 
             var transaction = await SendAsync(server, "http://example.com/protected/CustomRedirect");
 
@@ -1002,10 +1002,7 @@ namespace Microsoft.AspNet.Authentication.Cookies
                     }
                 });
             },
-            services =>
-            {
-                services.AddAuthentication();
-            });
+            services => services.AddAuthentication());
             server.BaseAddress = baseAddress;
             return server;
         }

@@ -10,11 +10,6 @@ namespace Microsoft.AspNet.Authentication
     /// </summary>
     public abstract class AuthenticationOptions
     {
-        /// <summary>
-        /// Constant used to represent the automatic scheme
-        /// </summary>
-        public const string AutomaticScheme = "(_automatic_)";
-
         private string _authenticationScheme;
 
         /// <summary>

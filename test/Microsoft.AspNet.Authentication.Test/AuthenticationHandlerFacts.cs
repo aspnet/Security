@@ -5,6 +5,7 @@ using System;
 using System.IO;
 using System.Threading.Tasks;
 using Microsoft.AspNet.Http;
+using Microsoft.AspNet.Http.Authentication;
 using Microsoft.AspNet.Http.Features;
 using Microsoft.AspNet.Http.Features.Authentication;
 using Microsoft.AspNet.Http.Internal;
@@ -32,7 +33,7 @@ namespace Microsoft.AspNet.Authentication
         public async Task AutomaticHandlerInAutomaticModeHandlesEmptyChallenges()
         {
             var handler = await TestAutoHandler.Create("ignored", true);
-            Assert.True(handler.ShouldHandleScheme(AuthenticationOptions.AutomaticScheme, handleAutomatic: true));
+            Assert.True(handler.ShouldHandleScheme(AuthenticationManager.AutomaticScheme, handleAutomatic: true));
         }
 
         [Theory]
