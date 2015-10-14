@@ -324,7 +324,7 @@ namespace Microsoft.AspNet.Authentication.Cookies
             return path[0] == '/' && path[1] != '/' && path[1] != '\\';
         }
 
-        protected override Task HandleForbiddenAsync(ChallengeContext context)
+        protected override async Task<bool> HandleForbiddenAsync(ChallengeContext context)
         {
             var accessDeniedUri =
                 Request.Scheme +
@@ -334,10 +334,11 @@ namespace Microsoft.AspNet.Authentication.Cookies
                 Options.AccessDeniedPath;
 
             var redirectContext = new CookieRedirectContext(Context, Options, accessDeniedUri);
-            return Options.Events.RedirectToAccessDenied(redirectContext);
+            await Options.Events.RedirectToAccessDenied(redirectContext);
+            return true;
         }
 
-        protected override Task HandleUnauthorizedAsync(ChallengeContext context)
+        protected override async Task<bool> HandleUnauthorizedAsync(ChallengeContext context)
         {
             if (context == null)
             {
@@ -352,7 +353,9 @@ namespace Microsoft.AspNet.Authentication.Cookies
 
             var loginUri = Options.LoginPath + QueryString.Create(Options.ReturnUrlParameter, redirectUri);
             var redirectContext = new CookieRedirectContext(Context, Options, BuildRedirectUri(loginUri));
-            return Options.Events.RedirectToLogin(redirectContext);
+            await Options.Events.RedirectToLogin(redirectContext);
+            return true;
+
         }
     }
 }

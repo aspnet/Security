@@ -136,7 +136,7 @@ namespace Microsoft.AspNet.Authentication.OAuth
             return new AuthenticationTicket(context.Principal, context.Properties, Options.AuthenticationScheme);
         }
 
-        protected override async Task HandleUnauthorizedAsync(ChallengeContext context)
+        protected override async Task<bool> HandleUnauthorizedAsync(ChallengeContext context)
         {
             if (context == null)
             {
@@ -153,11 +153,11 @@ namespace Microsoft.AspNet.Authentication.OAuth
             GenerateCorrelationId(properties);
 
             var authorizationEndpoint = BuildChallengeUrl(properties, BuildRedirectUri(Options.CallbackPath));
-
             var redirectContext = new OAuthRedirectToAuthorizationContext(
                 Context, Options,
                 properties, authorizationEndpoint);
             await Options.Events.RedirectToAuthorizationEndpoint(redirectContext);
+            return true;
         }
 
         protected virtual string BuildChallengeUrl(AuthenticationProperties properties, string redirectUri)

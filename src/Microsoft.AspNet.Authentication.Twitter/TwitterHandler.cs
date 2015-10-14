@@ -113,7 +113,7 @@ namespace Microsoft.AspNet.Authentication.Twitter
             return new AuthenticationTicket(context.Principal, context.Properties, Options.AuthenticationScheme);
         }
 
-        protected override async Task HandleUnauthorizedAsync(ChallengeContext context)
+        protected override async Task<bool> HandleUnauthorizedAsync(ChallengeContext context)
         {
             if (context == null)
             {
@@ -142,6 +142,7 @@ namespace Microsoft.AspNet.Authentication.Twitter
                 Context, Options,
                 properties, twitterAuthenticationEndpoint);
             await Options.Events.RedirectToAuthorizationEndpoint(redirectContext);
+            return true;
         }
 
         private async Task<RequestToken> ObtainRequestTokenAsync(string consumerKey, string consumerSecret, string callBackUri, AuthenticationProperties properties)

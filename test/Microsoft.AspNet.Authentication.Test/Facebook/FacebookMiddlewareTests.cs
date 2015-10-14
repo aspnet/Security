@@ -46,7 +46,7 @@ namespace Microsoft.AspNet.Authentication.Facebook
                     app.UseCookieAuthentication(options =>
                     {
                         options.AuthenticationScheme = "External";
-                        options.AutomaticAuthentication = true;
+                        options.AutomaticAuthenticate = true;
                     });
                 },
                 services =>

@@ -10,6 +10,11 @@ namespace Microsoft.AspNet.Authentication
     /// </summary>
     public abstract class AuthenticationOptions
     {
+        /// <summary>
+        /// Constant used to represent the automatic scheme
+        /// </summary>
+        public const string AutomaticScheme = "(_automatic_)";
+
         private string _authenticationScheme;
 
         /// <summary>
@@ -27,11 +32,16 @@ namespace Microsoft.AspNet.Authentication
         }
 
         /// <summary>
-        /// If true the authentication middleware alter the request user coming in and
-        /// alter 401 Unauthorized responses going out. If false the authentication middleware will only provide
+        /// If true the authentication middleware alter the request user coming in. If false the authentication middleware will only provide
         /// identity and alter responses when explicitly indicated by the AuthenticationScheme.
         /// </summary>
-        public bool AutomaticAuthentication { get; set; }
+        public bool AutomaticAuthenticate { get; set; }
+
+        /// <summary>
+        /// If true the authentication middleware should handle automatic challenge.
+        /// If false the authentication middleware will only provide identity and alter responses when explicitly indicated by the AuthenticationScheme.
+        /// </summary>
+        public bool AutomaticChallenge { get; set; }
 
         /// <summary>
         /// Gets or sets the issuer that should be used for any claims that are created

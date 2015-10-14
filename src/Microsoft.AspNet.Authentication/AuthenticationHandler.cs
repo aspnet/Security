@@ -96,8 +96,7 @@ namespace Microsoft.AspNet.Authentication
 
             Response.OnStarting(OnStartingCallback, this);
 
-            // Automatic authentication is the empty scheme
-            if (ShouldHandleScheme(string.Empty))
+            if (ShouldHandleScheme(AuthenticationOptions.AutomaticScheme, Options.AutomaticAuthenticate))
             {
                 var result = await HandleAuthenticateOnceAsync();
                 var ticket = result?.Ticket;
@@ -141,7 +140,7 @@ namespace Microsoft.AspNet.Authentication
 
         private async Task HandleAutomaticChallengeIfNeeded()
         {
-            if (!ChallengeCalled && Options.AutomaticAuthentication && Response.StatusCode == 401)
+            if (!ChallengeCalled && Options.AutomaticAuthenticate && Response.StatusCode == 401)
             {
                 await HandleUnauthorizedAsync(new ChallengeContext(Options.AuthenticationScheme));
             }
@@ -186,16 +185,16 @@ namespace Microsoft.AspNet.Authentication
             }
         }
 
-        public bool ShouldHandleScheme(string authenticationScheme)
+        public bool ShouldHandleScheme(string authenticationScheme, bool handleAutomatic)
         {
             return string.Equals(Options.AuthenticationScheme, authenticationScheme, StringComparison.Ordinal) ||
-                (Options.AutomaticAuthentication && string.IsNullOrEmpty(authenticationScheme));
+                (handleAutomatic && string.Equals(authenticationScheme, AuthenticationOptions.AutomaticScheme));
         }
 
         public async Task AuthenticateAsync(AuthenticateContext context)
         {
-
-            if (ShouldHandleScheme(context.AuthenticationScheme))
+            var handled = false;
+            if (ShouldHandleScheme(context.AuthenticationScheme, Options.AutomaticAuthenticate))
             {
                 // Calling Authenticate more than once should always return the original value. 
                 var result = await HandleAuthenticateOnceAsync();
@@ -210,6 +209,7 @@ namespace Microsoft.AspNet.Authentication
                     if (ticket?.Principal != null)
                     {
                         context.Authenticated(ticket.Principal, ticket.Properties.Items, Options.Description.Items);
+                        handled = true;
                     }
                     else
                     {
@@ -218,7 +218,7 @@ namespace Microsoft.AspNet.Authentication
                 }
             }
 
-            if (PriorHandler != null)
+            if (PriorHandler != null && !handled)
             {
                 await PriorHandler.AuthenticateAsync(context);
             }
@@ -237,14 +237,13 @@ namespace Microsoft.AspNet.Authentication
 
         public async Task SignInAsync(SignInContext context)
         {
-            if (ShouldHandleScheme(context.AuthenticationScheme))
+            if (ShouldHandleScheme(context.AuthenticationScheme, handleAutomatic: false))
             {
                 SignInAccepted = true;
                 await HandleSignInAsync(context);
                 context.Accept();
             }
-
-            if (PriorHandler != null)
+            else if (PriorHandler != null)
             {
                 await PriorHandler.SignInAsync(context);
             }
@@ -257,14 +256,13 @@ namespace Microsoft.AspNet.Authentication
 
         public async Task SignOutAsync(SignOutContext context)
         {
-            if (ShouldHandleScheme(context.AuthenticationScheme))
+            if (ShouldHandleScheme(context.AuthenticationScheme, handleAutomatic: false))
             {
                 SignOutAccepted = true;
                 await HandleSignOutAsync(context);
                 context.Accept();
             }
-
-            if (PriorHandler != null)
+            else if (PriorHandler != null)
             {
                 await PriorHandler.SignOutAsync(context);
             }
@@ -275,10 +273,10 @@ namespace Microsoft.AspNet.Authentication
             return Task.FromResult(0);
         }
 
-        protected virtual Task HandleForbiddenAsync(ChallengeContext context)
+        protected virtual Task<bool> HandleForbiddenAsync(ChallengeContext context)
         {
             Response.StatusCode = 403;
-            return Task.FromResult(0);
+            return Task.FromResult(true);
         }
 
         /// <summary>
@@ -287,16 +285,17 @@ namespace Microsoft.AspNet.Authentication
         /// changing the 401 result to 302 of a login page or external sign-in location.)
         /// </summary>
         /// <param name="context"></param>
-        protected virtual Task HandleUnauthorizedAsync(ChallengeContext context)
+        protected virtual Task<bool> HandleUnauthorizedAsync(ChallengeContext context)
         {
             Response.StatusCode = 401;
-            return Task.FromResult(0);
+            return Task.FromResult(false);
         }
 
         public async Task ChallengeAsync(ChallengeContext context)
         {
             ChallengeCalled = true;
-            if (ShouldHandleScheme(context.AuthenticationScheme))
+            var handled = false;
+            if (ShouldHandleScheme(context.AuthenticationScheme, Options.AutomaticChallenge))
             {
                 switch (context.Behavior)
                 {
@@ -309,16 +308,16 @@ namespace Microsoft.AspNet.Authentication
                         }
                         goto case ChallengeBehavior.Unauthorized;
                     case ChallengeBehavior.Unauthorized:
-                        await HandleUnauthorizedAsync(context);
+                        handled = await HandleUnauthorizedAsync(context);
                         break;
                     case ChallengeBehavior.Forbidden:
-                        await HandleForbiddenAsync(context);
+                        handled = await HandleForbiddenAsync(context);
                         break;
                 }
                 context.Accept();
             }
 
-            if (PriorHandler != null)
+            if (!handled && PriorHandler != null)
             {
                 await PriorHandler.ChallengeAsync(context);
             }

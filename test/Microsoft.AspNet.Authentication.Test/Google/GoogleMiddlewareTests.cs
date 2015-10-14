@@ -89,7 +89,7 @@ namespace Microsoft.AspNet.Authentication.Google
             {
                 options.ClientId = "Test Id";
                 options.ClientSecret = "Test Secret";
-                options.AutomaticAuthentication = true;
+                options.AutomaticAuthenticate = true;
             });
             var transaction = await server.SendAsync("https://example.com/401");
             Assert.Equal(HttpStatusCode.Redirect, transaction.Response.StatusCode);
@@ -120,7 +120,7 @@ namespace Microsoft.AspNet.Authentication.Google
             {
                 options.ClientId = "Test Id";
                 options.ClientSecret = "Test Secret";
-                options.AutomaticAuthentication = true;
+                options.AutomaticAuthenticate = true;
             });
             var transaction = await server.SendAsync("https://example.com/401");
             Assert.Contains(".AspNet.Correlation.Google=", transaction.SetCookie.Single());
@@ -147,7 +147,7 @@ namespace Microsoft.AspNet.Authentication.Google
             {
                 options.ClientId = "Test Id";
                 options.ClientSecret = "Test Secret";
-                options.AutomaticAuthentication = true;
+                options.AutomaticAuthenticate = true;
             });
             var transaction = await server.SendAsync("https://example.com/401");
             Assert.Equal(HttpStatusCode.Redirect, transaction.Response.StatusCode);
@@ -162,7 +162,7 @@ namespace Microsoft.AspNet.Authentication.Google
             {
                 options.ClientId = "Test Id";
                 options.ClientSecret = "Test Secret";
-                options.AutomaticAuthentication = true;
+                options.AutomaticAuthenticate = true;
             },
             context =>
                 {
@@ -692,7 +692,7 @@ namespace Microsoft.AspNet.Authentication.Google
                 app.UseCookieAuthentication(options =>
                 {
                     options.AuthenticationScheme = TestExtensions.CookieAuthenticationScheme;
-                    options.AutomaticAuthentication = true;
+                    options.AutomaticAuthenticate = true;
                 });
                 app.UseGoogleAuthentication(configureOptions);
                 app.UseClaimsTransformation(p =>

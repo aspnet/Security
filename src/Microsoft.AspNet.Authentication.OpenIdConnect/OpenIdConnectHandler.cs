@@ -159,7 +159,7 @@ namespace Microsoft.AspNet.Authentication.OpenIdConnect
         /// </summary>
         /// <returns></returns>
         /// <remarks>Uses log id's OIDCH-0026 - OIDCH-0050, next num: 37</remarks>
-        protected override async Task HandleUnauthorizedAsync(ChallengeContext context)
+        protected override async Task<bool> HandleUnauthorizedAsync(ChallengeContext context)
         {
             if (context == null)
             {
@@ -224,12 +224,12 @@ namespace Microsoft.AspNet.Authentication.OpenIdConnect
             if (redirectContext.HandledResponse)
             {
                 Logger.LogVerbose("RedirectToAuthenticationEndpoint.HandledResponse");
-                return;
+                return true;
             }
             else if (redirectContext.Skipped)
             {
                 Logger.LogVerbose("RedirectToAuthenticationEndpoint.Skipped");
-                return;
+                return false;
             }
 
             message = redirectContext.ProtocolMessage;
@@ -263,7 +263,7 @@ namespace Microsoft.AspNet.Authentication.OpenIdConnect
                 }
 
                 Response.Redirect(redirectUri);
-                return;
+                return true;
             }
             else if (Options.AuthenticationMethod == OpenIdConnectRedirectBehavior.FormPost)
             {
@@ -291,7 +291,7 @@ namespace Microsoft.AspNet.Authentication.OpenIdConnect
                 Response.Headers[HeaderNames.Expires] = "-1";
 
                 await Response.Body.WriteAsync(buffer, 0, buffer.Length);
-                return;
+                return true;
             }
 
             throw new NotImplementedException($"An unsupported authentication method has been configured: {Options.AuthenticationMethod}");

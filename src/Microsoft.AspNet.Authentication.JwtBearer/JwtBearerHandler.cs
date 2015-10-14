@@ -162,10 +162,11 @@ namespace Microsoft.AspNet.Authentication.JwtBearer
             }
         }
 
-        protected override async Task HandleUnauthorizedAsync(ChallengeContext context)
+        protected override async Task<bool> HandleUnauthorizedAsync(ChallengeContext context)
         {
             Response.StatusCode = 401;
             await Options.Events.Challenge(new JwtBearerChallengeContext(Context, Options));
+            return false;
         }
 
         protected override Task HandleSignOutAsync(SignOutContext context)

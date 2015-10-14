@@ -95,7 +95,7 @@ namespace Microsoft.AspNet.Authentication
             throw new NotSupportedException();
         }
 
-        protected override Task HandleForbiddenAsync(ChallengeContext context)
+        protected override Task<bool> HandleForbiddenAsync(ChallengeContext context)
         {
             throw new NotSupportedException();
         }

@@ -19,10 +19,10 @@ namespace Microsoft.AspNet.Authentication
         public async Task ShouldHandleSchemeAreDeterminedOnlyByMatchingAuthenticationScheme()
         {
             var handler = await TestHandler.Create("Alpha");
-            var passiveNoMatch = handler.ShouldHandleScheme("Beta");
+            var passiveNoMatch = handler.ShouldHandleScheme("Beta", handleAutomatic: false);
 
             handler = await TestHandler.Create("Alpha");
-            var passiveWithMatch = handler.ShouldHandleScheme("Alpha");
+            var passiveWithMatch = handler.ShouldHandleScheme("Alpha", handleAutomatic: false);
 
             Assert.False(passiveNoMatch);
             Assert.True(passiveWithMatch);
@@ -32,42 +32,32 @@ namespace Microsoft.AspNet.Authentication
         public async Task AutomaticHandlerInAutomaticModeHandlesEmptyChallenges()
         {
             var handler = await TestAutoHandler.Create("ignored", true);
-            Assert.True(handler.ShouldHandleScheme(""));
+            Assert.True(handler.ShouldHandleScheme(AuthenticationOptions.AutomaticScheme, handleAutomatic: true));
         }
 
-        [Fact]
-        public async Task AutomaticHandlerHandlesNullScheme()
+        [Theory]
+        [InlineData(null)]
+        [InlineData("")]
+        [InlineData("        ")]
+        [InlineData("notmatched")]
+        public async Task AutomaticHandlerDoesNotHandleSchemes(string scheme)
         {
             var handler = await TestAutoHandler.Create("ignored", true);
-            Assert.True(handler.ShouldHandleScheme(null));
-        }
-
-        [Fact]
-        public async Task AutomaticHandlerIgnoresWhitespaceScheme()
-        {
-            var handler = await TestAutoHandler.Create("ignored", true);
-            Assert.False(handler.ShouldHandleScheme("    "));
+            Assert.False(handler.ShouldHandleScheme(scheme, handleAutomatic: true));
         }
 
         [Fact]
         public async Task AutomaticHandlerShouldHandleSchemeWhenSchemeMatches()
         {
             var handler = await TestAutoHandler.Create("Alpha", true);
-            Assert.True(handler.ShouldHandleScheme("Alpha"));
-        }
-
-        [Fact]
-        public async Task AutomaticHandlerShouldNotHandleChallengeWhenSchemeDoesNotMatches()
-        {
-            var handler = await TestAutoHandler.Create("Dog", true);
-            Assert.False(handler.ShouldHandleScheme("Alpha"));
+            Assert.True(handler.ShouldHandleScheme("Alpha", handleAutomatic: true));
         }
 
         [Fact]
         public async Task AutomaticHandlerShouldNotHandleChallengeWhenSchemesNotEmpty()
         {
             var handler = await TestAutoHandler.Create(null, true);
-            Assert.False(handler.ShouldHandleScheme("Alpha"));
+            Assert.False(handler.ShouldHandleScheme("Alpha", handleAutomatic: true));
         }
 
         [Theory]
@@ -100,7 +90,7 @@ namespace Microsoft.AspNet.Authentication
                     new LoggerFactory().CreateLogger("CountHandler"),
                     Extensions.WebEncoders.UrlEncoder.Default);
                 handler.Options.AuthenticationScheme = scheme;
-                handler.Options.AutomaticAuthentication = true;
+                handler.Options.AutomaticAuthenticate = true;
                 return handler;
             }
 
@@ -141,7 +131,7 @@ namespace Microsoft.AspNet.Authentication
         {
             public TestAutoOptions()
             {
-                AutomaticAuthentication = true;
+                AutomaticAuthenticate = true;
             }
         }
 
@@ -159,7 +149,7 @@ namespace Microsoft.AspNet.Authentication
                     new LoggerFactory().CreateLogger("TestAutoHandler"),
                     Extensions.WebEncoders.UrlEncoder.Default);
                 handler.Options.AuthenticationScheme = scheme;
-                handler.Options.AutomaticAuthentication = auto;
+                handler.Options.AutomaticAuthenticate = auto;
                 return handler;
             }
 
