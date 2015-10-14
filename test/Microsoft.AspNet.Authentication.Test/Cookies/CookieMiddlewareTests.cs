@@ -43,7 +43,7 @@ namespace Microsoft.AspNet.Authentication.Cookies
             var server = CreateServer(options =>
             {
                 options.LoginPath = new PathString("/login");
-                options.AutomaticAuthenticate = auto;
+                options.AutomaticChallenge = auto;
             });
 
             var transaction = await SendAsync(server, "http://example.com/protected");

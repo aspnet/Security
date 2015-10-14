@@ -64,29 +64,26 @@ namespace Microsoft.AspNet.Authentication
         public async Task Invoke(HttpContext context)
         {
             var handler = CreateHandler();
-            if (await handler.InitializeAsync(Options, context, Logger, UrlEncoder))
+            await handler.InitializeAsync(Options, context, Logger, UrlEncoder);
+            try
+            {
+                if (!await handler.HandleRequestAsync())
+                {
+                    await _next(context);
+                }
+            }
+            catch (Exception)
             {
                 try
                 {
-                    if (!await handler.HandleRequestAsync())
-                    {
-                        await _next(context);
-                    }
+                    await handler.TeardownAsync();
                 }
                 catch (Exception)
                 {
-                    try
-                    {
-                        await handler.TeardownAsync();
-                    }
-                    catch (Exception)
-                    {
-                        // Don't mask the original exception
-                    }
-                    throw;
+                    // Don't mask the original exception
                 }
+                throw;
             }
-            await handler.TeardownAsync();
         }
 
         protected abstract AuthenticationHandler<TOptions> CreateHandler();

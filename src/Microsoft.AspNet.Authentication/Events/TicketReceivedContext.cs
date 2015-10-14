@@ -12,9 +12,10 @@ namespace Microsoft.AspNet.Authentication
     /// </summary>
     public class TicketReceivedContext : BaseControlContext
     {
-        public TicketReceivedContext(HttpContext context, AuthenticationTicket ticket)
+        public TicketReceivedContext(HttpContext context, RemoteAuthenticationOptions options, AuthenticationTicket ticket)
             : base(context)
         {
+            Options = options;
             if (ticket != null)
             {
                 Principal = ticket.Principal;
@@ -24,8 +25,7 @@ namespace Microsoft.AspNet.Authentication
 
         public ClaimsPrincipal Principal { get; set; }
         public AuthenticationProperties Properties { get; set; }
-
-        public string SignInScheme { get; set; }
+        public RemoteAuthenticationOptions Options { get; set; }
 
         public string ReturnUri { get; set; }
     }

@@ -63,7 +63,7 @@ namespace Microsoft.AspNet.Authentication
 
         [Theory]
         [InlineData("Alpha")]
-        [InlineData("")]
+        [InlineData("Automatic")]
         public async Task AuthHandlerAuthenticateCachesTicket(string scheme)
         {
             var handler = await CountHandler.Create(scheme);

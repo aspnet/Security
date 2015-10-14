@@ -89,7 +89,7 @@ namespace Microsoft.AspNet.Authentication.Google
             {
                 options.ClientId = "Test Id";
                 options.ClientSecret = "Test Secret";
-                options.AutomaticAuthenticate = true;
+                options.AutomaticChallenge = true;
             });
             var transaction = await server.SendAsync("https://example.com/401");
             Assert.Equal(HttpStatusCode.Redirect, transaction.Response.StatusCode);
@@ -120,7 +120,7 @@ namespace Microsoft.AspNet.Authentication.Google
             {
                 options.ClientId = "Test Id";
                 options.ClientSecret = "Test Secret";
-                options.AutomaticAuthenticate = true;
+                options.AutomaticChallenge = true;
             });
             var transaction = await server.SendAsync("https://example.com/401");
             Assert.Contains(".AspNet.Correlation.Google=", transaction.SetCookie.Single());
@@ -147,7 +147,7 @@ namespace Microsoft.AspNet.Authentication.Google
             {
                 options.ClientId = "Test Id";
                 options.ClientSecret = "Test Secret";
-                options.AutomaticAuthenticate = true;
+                options.AutomaticChallenge = true;
             });
             var transaction = await server.SendAsync("https://example.com/401");
             Assert.Equal(HttpStatusCode.Redirect, transaction.Response.StatusCode);
@@ -162,7 +162,7 @@ namespace Microsoft.AspNet.Authentication.Google
             {
                 options.ClientId = "Test Id";
                 options.ClientSecret = "Test Secret";
-                options.AutomaticAuthenticate = true;
+                options.AutomaticChallenge = true;
             },
             context =>
                 {

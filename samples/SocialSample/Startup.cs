@@ -30,6 +30,7 @@ namespace CookieSample
             app.UseCookieAuthentication(options =>
             {
                 options.AutomaticAuthenticate = true;
+                options.AutomaticChallenge = true;
                 options.LoginPath = new PathString("/login");
             });
 

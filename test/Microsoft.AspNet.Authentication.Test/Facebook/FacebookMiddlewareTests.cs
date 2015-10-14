@@ -19,6 +19,7 @@ using Microsoft.Extensions.WebEncoders;
 using Newtonsoft.Json;
 using Xunit;
 using System.Diagnostics;
+using Microsoft.AspNet.Authentication.Cookies;
 
 namespace Microsoft.AspNet.Authentication.Facebook
 {
@@ -164,6 +165,7 @@ namespace Microsoft.AspNet.Authentication.Facebook
             var server = CreateServer(
                 app =>
                 {
+                    app.UseCookieAuthentication();
                     app.UseFacebookAuthentication(options =>
                     {
                         options.AppId = "Test App Id";
@@ -201,11 +203,10 @@ namespace Microsoft.AspNet.Authentication.Facebook
                             }
                         };
                     });
-                    app.UseCookieAuthentication();
                 },
                 services =>
                 {
-                    services.AddAuthentication();
+                    services.AddAuthentication(options => options.SignInScheme = CookieAuthenticationDefaults.AuthenticationScheme);
                 }, handler: null);
 
             var properties = new AuthenticationProperties();

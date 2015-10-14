@@ -12,7 +12,7 @@ namespace Microsoft.AspNet.Authentication
     {
         public override async Task<bool> HandleRequestAsync()
         {
-            if (Options.CallbackPath.HasValue && Options.CallbackPath == Request.Path)
+            if (Options.CallbackPath == Request.Path)
             {
                 return await HandleRemoteCallbackAsync();
             }
@@ -42,9 +42,8 @@ namespace Microsoft.AspNet.Authentication
 
             // We have a ticket if we get here
             var ticket = authResult.Ticket;
-            var context = new TicketReceivedContext(Context, ticket)
+            var context = new TicketReceivedContext(Context, Options, ticket)
             {
-                SignInScheme = Options.SignInScheme,
                 ReturnUri = ticket.Properties.RedirectUri,
             };
             // REVIEW: is this safe or good?
@@ -63,10 +62,9 @@ namespace Microsoft.AspNet.Authentication
                 return false;
             }
 
-            // REVIEW: SignInScheme can be null if Shared SignInScheme and its not set on options, we could throw in Ctor?
-            if (context.SignInScheme != null && context.Principal != null)
+            if (context.Principal != null)
             {
-                await Context.Authentication.SignInAsync(context.SignInScheme, context.Principal, context.Properties);
+                await Context.Authentication.SignInAsync(Options.SignInScheme, context.Principal, context.Properties);
             }
 
             if (context.ReturnUri != null)

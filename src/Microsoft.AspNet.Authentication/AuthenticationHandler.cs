@@ -63,8 +63,8 @@ namespace Microsoft.AspNet.Authentication
         /// <param name="options">The original options passed by the application control behavior</param>
         /// <param name="context">The utility object to observe the current request and response</param>
         /// <param name="logger">The logging factory used to create loggers</param>
-        /// <returns>True if initialization was successful</returns>
-        public async Task<bool> InitializeAsync(TOptions options, HttpContext context, ILogger logger, IUrlEncoder encoder)
+        /// <returns>async completion</returns>
+        public async Task InitializeAsync(TOptions options, HttpContext context, ILogger logger, IUrlEncoder encoder)
         {
             if (options == null)
             {
@@ -106,7 +106,6 @@ namespace Microsoft.AspNet.Authentication
                     Context.User = SecurityHelper.MergeUserPrincipal(Context.User, ticket.Principal);
                 }
             }
-            return true;
         }
 
         protected string BuildRedirectUri(string targetPath)
@@ -141,7 +140,7 @@ namespace Microsoft.AspNet.Authentication
 
         private async Task HandleAutomaticChallengeIfNeeded()
         {
-            if (!ChallengeCalled && Options.AutomaticAuthenticate && Response.StatusCode == 401)
+            if (!ChallengeCalled && Options.AutomaticChallenge && Response.StatusCode == 401)
             {
                 await HandleUnauthorizedAsync(new ChallengeContext(Options.AuthenticationScheme));
             }
@@ -189,7 +188,7 @@ namespace Microsoft.AspNet.Authentication
         public bool ShouldHandleScheme(string authenticationScheme, bool handleAutomatic)
         {
             return string.Equals(Options.AuthenticationScheme, authenticationScheme, StringComparison.Ordinal) ||
-                (handleAutomatic && string.Equals(authenticationScheme, AuthenticationManager.AutomaticScheme));
+                (handleAutomatic && string.Equals(authenticationScheme, AuthenticationManager.AutomaticScheme, StringComparison.Ordinal));
         }
 
         public async Task AuthenticateAsync(AuthenticateContext context)
@@ -286,6 +285,7 @@ namespace Microsoft.AspNet.Authentication
         /// changing the 401 result to 302 of a login page or external sign-in location.)
         /// </summary>
         /// <param name="context"></param>
+        /// <returns>True if no other handlers should be called</returns>
         protected virtual Task<bool> HandleUnauthorizedAsync(ChallengeContext context)
         {
             Response.StatusCode = 401;

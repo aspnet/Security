@@ -5,8 +5,6 @@ using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Threading.Tasks;
 using Microsoft.AspNet.Authentication.OpenIdConnect;
-using Microsoft.AspNet.Http.Authentication;
-using Microsoft.AspNet.Http.Features.Authentication;
 using Microsoft.IdentityModel.Protocols.OpenIdConnect;
 using Newtonsoft.Json.Linq;
 
@@ -17,8 +15,7 @@ namespace Microsoft.AspNet.Authentication.Tests.OpenIdConnect
     /// </summary>
     public class OpenIdConnectHandlerForTestingAuthenticate : OpenIdConnectHandler
     {
-        public OpenIdConnectHandlerForTestingAuthenticate()
-                    : base(null)
+        public OpenIdConnectHandlerForTestingAuthenticate() : base(null)
         {
         }
 

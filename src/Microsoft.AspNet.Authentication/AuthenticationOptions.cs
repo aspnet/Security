@@ -28,13 +28,13 @@ namespace Microsoft.AspNet.Authentication
 
         /// <summary>
         /// If true the authentication middleware alter the request user coming in. If false the authentication middleware will only provide
-        /// identity and alter responses when explicitly indicated by the AuthenticationScheme.
+        /// identity when explicitly indicated by the AuthenticationScheme.
         /// </summary>
         public bool AutomaticAuthenticate { get; set; }
 
         /// <summary>
         /// If true the authentication middleware should handle automatic challenge.
-        /// If false the authentication middleware will only provide identity and alter responses when explicitly indicated by the AuthenticationScheme.
+        /// If false the authentication middleware will only alter responses when explicitly indicated by the AuthenticationScheme.
         /// </summary>
         public bool AutomaticChallenge { get; set; }
 
