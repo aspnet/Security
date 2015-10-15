@@ -91,10 +91,7 @@ namespace Microsoft.AspNet.Authentication.OpenIdConnect
                 throw new ArgumentException("Options.SignInScheme is required.");
             }
 
-            if (Options.HtmlEncoder == null)
-            {
-                Options.HtmlEncoder = services.GetHtmlEncoder();
-            }
+            HtmlEncoder = services.GetHtmlEncoder();
 
             if (Options.StateDataFormat == null)
             {
@@ -170,13 +167,15 @@ namespace Microsoft.AspNet.Authentication.OpenIdConnect
 
         protected HttpClient Backchannel { get; private set; }
 
+        protected IHtmlEncoder HtmlEncoder { get; private set; }
+
         /// <summary>
         /// Provides the <see cref="AuthenticationHandler"/> object for processing authentication-related requests.
         /// </summary>
         /// <returns>An <see cref="AuthenticationHandler"/> configured with the <see cref="OpenIdConnectOptions"/> supplied to the constructor.</returns>
         protected override AuthenticationHandler<OpenIdConnectOptions> CreateHandler()
         {
-            return new OpenIdConnectHandler(Backchannel);
+            return new OpenIdConnectHandler(Backchannel, HtmlEncoder);
         }
 
         private class StringSerializer : IDataSerializer<string>

@@ -555,6 +555,79 @@ namespace Microsoft.AspNet.Authentication.Google
         }
 
         [Fact]
+        public async Task NullRedirectUriWillRedirectToSlash()
+        {
+            var stateFormat = new PropertiesDataFormat(new EphemeralDataProtectionProvider().CreateProtector("GoogleTest"));
+            var server = CreateServer(options =>
+            {
+                options.ClientId = "Test Id";
+                options.ClientSecret = "Test Secret";
+                options.StateDataFormat = stateFormat;
+                options.BackchannelHttpHandler = new TestHttpMessageHandler
+                {
+                    Sender = req =>
+                    {
+                        if (req.RequestUri.AbsoluteUri == "https://accounts.google.com/o/oauth2/token")
+                        {
+                            return ReturnJsonResponse(new
+                            {
+                                access_token = "Test Access Token",
+                                expires_in = 3600,
+                                token_type = "Bearer",
+                                refresh_token = "Test Refresh Token"
+                            });
+                        }
+                        else if (req.RequestUri.GetLeftPart(UriPartial.Path) == "https://www.googleapis.com/plus/v1/people/me")
+                        {
+                            return ReturnJsonResponse(new
+                            {
+                                id = "Test User ID",
+                                displayName = "Test Name",
+                                name = new
+                                {
+                                    familyName = "Test Family Name",
+                                    givenName = "Test Given Name"
+                                },
+                                url = "Profile link",
+                                emails = new[]
+                                    {
+                                        new
+                                        {
+                                            value = "Test email",
+                                            type = "account"
+                                        }
+                                    }
+                            });
+                        }
+
+                        return null;
+                    }
+                };
+                options.Events = new OAuthEvents
+                {
+                    OnTicketReceived = context =>
+                    {
+                        context.AuthenticationTicket.Properties.RedirectUri = null;
+                        return Task.FromResult(0);
+                    }
+                };
+            });
+            var properties = new AuthenticationProperties();
+            var correlationKey = ".AspNet.Correlation.Google";
+            var correlationValue = "TestCorrelationId";
+            properties.Items.Add(correlationKey, correlationValue);
+            var state = stateFormat.Protect(properties);
+            var transaction = await server.SendAsync(
+                "https://example.com/signin-google?code=TestCode&state=" + UrlEncoder.Default.UrlEncode(state),
+                correlationKey + "=" + correlationValue);
+            Assert.Equal(HttpStatusCode.Redirect, transaction.Response.StatusCode);
+            Assert.Equal("/", transaction.Response.Headers.GetValues("Location").First());
+            Assert.Equal(2, transaction.SetCookie.Count);
+            Assert.Contains(correlationKey, transaction.SetCookie[0]);
+            Assert.Contains(".AspNet." + TestExtensions.CookieAuthenticationScheme, transaction.SetCookie[1]);
+        }
+
+        [Fact]
         public async Task ValidateAuthenticatedContext()
         {
             var stateFormat = new PropertiesDataFormat(new EphemeralDataProtectionProvider().CreateProtector("GoogleTest"));
