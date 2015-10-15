@@ -263,7 +263,7 @@ namespace Microsoft.AspNet.Authentication.Google
                     {
                         OnRemoteError = ctx =>
                         {
-                            ctx.Response.Redirect("/error?ErrorMessage=" + ctx.Error.Message);
+                            ctx.Response.Redirect("/error?ErrorMessage=" + UrlEncoder.Default.UrlEncode(ctx.Error.Message));
                             ctx.HandleResponse();
                             return Task.FromResult(0);
                         }
@@ -388,7 +388,7 @@ namespace Microsoft.AspNet.Authentication.Google
                     {
                         OnRemoteError = ctx =>
                         {
-                            ctx.Response.Redirect("/error?ErrorMessage=" + ctx.Error.Message);
+                            ctx.Response.Redirect("/error?ErrorMessage=" + UrlEncoder.Default.UrlEncode(ctx.Error.Message));
                             ctx.HandleResponse();
                             return Task.FromResult(0);
                         }
@@ -446,7 +446,7 @@ namespace Microsoft.AspNet.Authentication.Google
                     {
                         OnRemoteError = ctx =>
                         {
-                            ctx.Response.Redirect("/error?ErrorMessage=" + ctx.Error.Message);
+                            ctx.Response.Redirect("/error?ErrorMessage=" + UrlEncoder.Default.UrlEncode(ctx.Error.Message));
                             ctx.HandleResponse();
                             return Task.FromResult(0);
                         }
@@ -740,7 +740,7 @@ namespace Microsoft.AspNet.Authentication.Google
                 {
                     OnRemoteError = ctx =>
                     {
-                        ctx.Response.Redirect("/error?ErrorMessage=" + ctx.Error.Message);
+                        ctx.Response.Redirect("/error?ErrorMessage=" + UrlEncoder.Default.UrlEncode(ctx.Error.Message));
                         ctx.HandleResponse();
                         return Task.FromResult(0);
                     }
