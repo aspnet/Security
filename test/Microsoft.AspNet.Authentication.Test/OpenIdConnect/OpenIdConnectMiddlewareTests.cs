@@ -151,7 +151,7 @@ namespace Microsoft.AspNet.Authentication.Tests.OpenIdConnect
         private static void SetProtocolMessageOptions(OpenIdConnectOptions options)
         {
             var fakeOpenIdRequestMessage = new FakeOpenIdConnectMessage(ExpectedAuthorizeRequest, ExpectedLogoutRequest);
-            options.AutomaticAuthentication = true;
+            options.AutomaticChallenge = true;
             options.Events = new OpenIdConnectEvents()
             {
                 OnRedirectToAuthenticationEndpoint = (context) =>
@@ -210,7 +210,7 @@ namespace Microsoft.AspNet.Authentication.Tests.OpenIdConnect
             var server = CreateServer(options =>
             {
                 SetOptions(options, DefaultParameters(new string[] { OpenIdConnectParameterNames.State }), queryValues, stateDataFormat);
-                options.AutomaticAuthentication = challenge.Equals(ChallengeWithOutContext);
+                options.AutomaticChallenge = challenge.Equals(ChallengeWithOutContext);
                 options.Events = new OpenIdConnectEvents()
                 {
                     OnRedirectToAuthenticationEndpoint = context =>
@@ -325,7 +325,7 @@ namespace Microsoft.AspNet.Authentication.Tests.OpenIdConnect
         private static void DefaultChallengeOptions(OpenIdConnectOptions options)
         {
             options.AuthenticationScheme = "OpenIdConnectHandlerTest";
-            options.AutomaticAuthentication = true;
+            options.AutomaticChallenge = true;
             options.ClientId = Guid.NewGuid().ToString();
             options.ConfigurationManager = TestUtilities.DefaultOpenIdConnectConfigurationManager;
             options.StateDataFormat = new AuthenticationPropertiesFormaterKeyValue();
