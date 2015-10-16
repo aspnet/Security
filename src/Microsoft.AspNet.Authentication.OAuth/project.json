@@ -1,13 +1,16 @@
 {
-    "version": "1.0.0-*",
+    "version": "1.0.0-beta8",
     "description": "ASP.NET 5 middleware that enables an application to support any standard OAuth 2.0 authentication workflow.",
     "repository": {
         "type": "git",
         "url": "git://github.com/aspnet/security"
     },
     "dependencies": {
-        "Microsoft.AspNet.Authentication": "1.0.0-*",
-        "Microsoft.Framework.NotNullAttribute.Sources": { "type": "build", "version": "1.0.0-*" },
+        "Microsoft.AspNet.Authentication": "1.0.0-beta8",
+        "Microsoft.Framework.NotNullAttribute.Sources": {
+            "type": "build",
+            "version": "1.0.0-beta8"
+        },
         "Newtonsoft.Json": "6.0.6"
     },
     "frameworks": {
@@ -18,7 +21,7 @@
         },
         "dnxcore50": {
             "dependencies": {
-                "System.Net.Http": "4.0.1-beta-*"
+                "System.Net.Http": "4.0.1-beta-23409"
             }
         }
     }

@@ -1,15 +1,15 @@
 {
-    "version": "1.0.0-*",
+    "version": "1.0.0-beta8",
     "description": "ASP.NET 5 cookie policy classes.",
     "repository": {
         "type": "git",
         "url": "git://github.com/aspnet/security"
     },
     "dependencies": {
-        "Microsoft.AspNet.Http": "1.0.0-*"
+        "Microsoft.AspNet.Http": "1.0.0-beta8"
     },
     "frameworks": {
-        "dnx451": { },
-        "dnxcore50": { }
+        "dnx451": {},
+        "dnxcore50": {}
     }
 }

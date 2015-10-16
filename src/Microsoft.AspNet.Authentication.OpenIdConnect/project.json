@@ -1,13 +1,16 @@
 {
-    "version": "1.0.0-*",
+    "version": "1.0.0-beta8",
     "description": "ASP.NET 5 middleware that enables an application to support OpenIdConnect authentication workflow.",
     "repository": {
         "type": "git",
         "url": "git://github.com/aspnet/security"
     },
     "dependencies": {
-        "Microsoft.AspNet.Authentication": "1.0.0-*",
-        "Microsoft.Framework.NotNullAttribute.Sources": { "type": "build", "version": "1.0.0-*" },
+        "Microsoft.AspNet.Authentication": "1.0.0-beta8",
+        "Microsoft.Framework.NotNullAttribute.Sources": {
+            "type": "build",
+            "version": "1.0.0-beta8"
+        },
         "Microsoft.IdentityModel.Protocols.OpenIdConnect": "2.0.0-beta8-*"
     },
     "frameworks": {
@@ -18,8 +21,8 @@
         },
         "dnxcore50": {
             "dependencies": {
-                "System.Collections.Specialized": "4.0.1-beta-*",
-                "System.Net.Http": "4.0.1-beta-*"
+                "System.Collections.Specialized": "4.0.1-beta-23409",
+                "System.Net.Http": "4.0.1-beta-23409"
             }
         }
     }
