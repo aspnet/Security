@@ -297,7 +297,7 @@ namespace Microsoft.AspNet.Authorization.Test
                 );
 
             // Act
-            var allowed = await authorizationService.AuthorizeAsync(user, policy.Build());
+            var allowed = await authorizationService.AuthorizeAsync(user, policy.Build(new ServiceCollection().BuildServiceProvider()));
 
             // Assert
             Assert.True(allowed);
@@ -318,7 +318,7 @@ namespace Microsoft.AspNet.Authorization.Test
                 );
 
             // Act
-            var allowed = await authorizationService.AuthorizeAsync(user, policy.Build());
+            var allowed = await authorizationService.AuthorizeAsync(user, policy.Build(new ServiceCollection().BuildServiceProvider()));
 
             // Assert
             Assert.True(allowed);
@@ -335,7 +335,7 @@ namespace Microsoft.AspNet.Authorization.Test
                 );
 
             // Act
-            var allowed = await authorizationService.AuthorizeAsync(user, policy.Build());
+            var allowed = await authorizationService.AuthorizeAsync(user, policy.Build(new ServiceCollection().BuildServiceProvider()));
 
             // Assert
             Assert.True(allowed);
@@ -352,7 +352,7 @@ namespace Microsoft.AspNet.Authorization.Test
             );
 
             // Act
-            var allowed = await authorizationService.AuthorizeAsync(user, null, policy.Build());
+            var allowed = await authorizationService.AuthorizeAsync(user, null, policy.Build(new ServiceCollection().BuildServiceProvider()));
 
             // Assert
             Assert.True(allowed);
@@ -368,7 +368,7 @@ namespace Microsoft.AspNet.Authorization.Test
                 new ClaimsIdentity(new Claim[] { new Claim(ClaimTypes.Role, "Users") }, "AuthType"));
 
             // Act
-            var allowed = await authorizationService.AuthorizeAsync(user, policy.Build());
+            var allowed = await authorizationService.AuthorizeAsync(user, policy.Build(new ServiceCollection().BuildServiceProvider()));
 
             // Assert
             Assert.True(allowed);
@@ -389,7 +389,7 @@ namespace Microsoft.AspNet.Authorization.Test
                 );
 
             // Act
-            var allowed = await authorizationService.AuthorizeAsync(user, policy.Build());
+            var allowed = await authorizationService.AuthorizeAsync(user, policy.Build(new ServiceCollection().BuildServiceProvider()));
 
             // Assert
             Assert.False(allowed);
@@ -423,13 +423,7 @@ namespace Microsoft.AspNet.Authorization.Test
         [Fact]
         public void PolicyThrowsWithNoRequirements()
         {
-            Assert.Throws<InvalidOperationException>(() => BuildAuthorizationService(services =>
-            {
-                services.AddAuthorization(options =>
-                {
-                    options.AddPolicy("Basic", policy => { });
-                });
-            }));
+            Assert.Throws<InvalidOperationException>(() => new AuthorizationPolicyBuilder().Build(new ServiceCollection().BuildServiceProvider()));
         }
 
         [Fact]
@@ -590,7 +584,7 @@ namespace Microsoft.AspNet.Authorization.Test
             {
                 services.AddAuthorization(options =>
                 {
-                    options.AddPolicy("Custom", policy => policy.Requirements.Add(new CustomRequirement()));
+                    options.AddPolicy("Custom", policy => policy.AddRequirement<CustomRequirement>());
                 });
             });
             var user = new ClaimsPrincipal();
@@ -611,7 +605,7 @@ namespace Microsoft.AspNet.Authorization.Test
                 services.AddTransient<IAuthorizationHandler, CustomHandler>();
                 services.AddAuthorization(options =>
                 {
-                    options.AddPolicy("Custom", policy => policy.Requirements.Add(new CustomRequirement()));
+                    options.AddPolicy("Custom", policy => policy.AddRequirement<CustomRequirement>());
                 });
             });
             var user = new ClaimsPrincipal();
@@ -649,9 +643,8 @@ namespace Microsoft.AspNet.Authorization.Test
             var authorizationService = BuildAuthorizationService(services =>
             {
                 services.AddAuthorization(options =>
-                {
-                    options.AddPolicy("Passthrough", policy => policy.Requirements.Add(new PassThroughRequirement(shouldSucceed)));
-                });
+                    options.AddPolicy("Passthrough", policy => policy.AddRequirement<PassThroughRequirement>(shouldSucceed))
+                );
             });
             var user = new ClaimsPrincipal();
 
@@ -670,7 +663,7 @@ namespace Microsoft.AspNet.Authorization.Test
             {
                 services.AddAuthorization(options =>
                 {
-                    var basePolicy = new AuthorizationPolicyBuilder().RequireClaim("Base", "Value").Build();
+                    var basePolicy = new AuthorizationPolicyBuilder().RequireClaim("Base", "Value");
                     options.AddPolicy("Combined", policy => policy.Combine(basePolicy).RequireClaim("Claim", "Exists"));
                 });
             });
@@ -698,7 +691,7 @@ namespace Microsoft.AspNet.Authorization.Test
             {
                 services.AddAuthorization(options =>
                 {
-                    var basePolicy = new AuthorizationPolicyBuilder().RequireClaim("Base", "Value").Build();
+                    var basePolicy = new AuthorizationPolicyBuilder().RequireClaim("Base", "Value");
                     options.AddPolicy("Combined", policy => policy.Combine(basePolicy).RequireClaim("Claim", "Exists"));
                 });
             });
@@ -725,7 +718,7 @@ namespace Microsoft.AspNet.Authorization.Test
             {
                 services.AddAuthorization(options =>
                 {
-                    var basePolicy = new AuthorizationPolicyBuilder().RequireClaim("Base", "Value").Build();
+                    var basePolicy = new AuthorizationPolicyBuilder().RequireClaim("Base", "Value");
                     options.AddPolicy("Combined", policy => policy.Combine(basePolicy).RequireClaim("Claim", "Exists"));
                 });
             });

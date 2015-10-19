@@ -5,6 +5,7 @@ using System;
 using System.Linq;
 using Microsoft.AspNet.Authorization;
 using Microsoft.AspNet.Authorization.Infrastructure;
+using Microsoft.Extensions.DependencyInjection;
 using Xunit;
 
 namespace Microsoft.AspNet.Authroization.Test
@@ -14,7 +15,7 @@ namespace Microsoft.AspNet.Authroization.Test
         [Fact]
         public void RequireRoleThrowsIfEmpty()
         {
-            Assert.Throws<InvalidOperationException>(() => new AuthorizationPolicyBuilder().RequireRole());
+            Assert.Throws<InvalidOperationException>(() => new AuthorizationPolicyBuilder().RequireRole().Build(new ServiceCollection().BuildServiceProvider()));
         }
 
         [Fact]
@@ -32,7 +33,7 @@ namespace Microsoft.AspNet.Authroization.Test
             options.AddPolicy("2", policy => policy.RequireClaim("2"));
 
             // Act
-            var combined = AuthorizationPolicy.Combine(options, attributes);
+            var combined = AuthorizationPolicy.Combine(options, attributes).Build(new ServiceCollection().BuildServiceProvider());
 
             // Assert
             Assert.Equal(2, combined.AuthenticationSchemes.Count());
@@ -53,11 +54,11 @@ namespace Microsoft.AspNet.Authroization.Test
                 new AuthorizeAttribute("2") { ActiveAuthenticationSchemes = "dupe" }
             };
             var options = new AuthorizationOptions();
-            options.DefaultPolicy = new AuthorizationPolicyBuilder("default").RequireClaim("default").Build();
+            options.DefaultPolicy = new AuthorizationPolicyBuilder("default").RequireClaim("default");
             options.AddPolicy("2", policy => policy.RequireClaim("2"));
 
             // Act
-            var combined = AuthorizationPolicy.Combine(options, attributes);
+            var combined = AuthorizationPolicy.Combine(options, attributes).Build(new ServiceCollection().BuildServiceProvider());
 
             // Assert
             Assert.Equal(2, combined.AuthenticationSchemes.Count());

@@ -8,27 +8,12 @@ namespace Microsoft.AspNet.Authorization
 {
     public class AuthorizationOptions
     {
-        private IDictionary<string, AuthorizationPolicy> PolicyMap { get; } = new Dictionary<string, AuthorizationPolicy>(StringComparer.OrdinalIgnoreCase);
+        private IDictionary<string, AuthorizationPolicyBuilder> PolicyMap { get; } = new Dictionary<string, AuthorizationPolicyBuilder>(StringComparer.OrdinalIgnoreCase);
 
         /// <summary>
         /// The initial default policy is to require any authenticated user
         /// </summary>
-        public AuthorizationPolicy DefaultPolicy { get; set; } = new AuthorizationPolicyBuilder().RequireAuthenticatedUser().Build();
-
-        public void AddPolicy(string name, AuthorizationPolicy policy)
-        {
-            if (name == null)
-            {
-                throw new ArgumentNullException(nameof(name));
-            }
-
-            if (policy == null)
-            {
-                throw new ArgumentNullException(nameof(policy));
-            }
-
-            PolicyMap[name] = policy;
-        }
+        public AuthorizationPolicyBuilder DefaultPolicy { get; set; } = new AuthorizationPolicyBuilder().RequireAuthenticatedUser();
 
         public void AddPolicy(string name, Action<AuthorizationPolicyBuilder> configurePolicy)
         {
@@ -44,10 +29,10 @@ namespace Microsoft.AspNet.Authorization
 
             var policyBuilder = new AuthorizationPolicyBuilder();
             configurePolicy(policyBuilder);
-            PolicyMap[name] = policyBuilder.Build();
+            PolicyMap[name] = policyBuilder;
         }
 
-        public AuthorizationPolicy GetPolicy(string name)
+        public AuthorizationPolicyBuilder GetPolicy(string name)
         {
             if (name == null)
             {

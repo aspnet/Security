@@ -32,7 +32,7 @@ namespace Microsoft.AspNet.Authorization
         public IReadOnlyList<IAuthorizationRequirement> Requirements { get; }
         public IReadOnlyList<string> AuthenticationSchemes { get; }
 
-        public static AuthorizationPolicy Combine(params AuthorizationPolicy[] policies)
+        public static AuthorizationPolicyBuilder Combine(params AuthorizationPolicy[] policies)
         {
             if (policies == null)
             {
@@ -42,7 +42,7 @@ namespace Microsoft.AspNet.Authorization
             return Combine((IEnumerable<AuthorizationPolicy>)policies);
         }
 
-        public static AuthorizationPolicy Combine(IEnumerable<AuthorizationPolicy> policies)
+        public static AuthorizationPolicyBuilder Combine(IEnumerable<AuthorizationPolicy> policies)
         {
             if (policies == null)
             {
@@ -54,10 +54,10 @@ namespace Microsoft.AspNet.Authorization
             {
                 builder.Combine(policy);
             }
-            return builder.Build();
+            return builder;
         }
 
-        public static AuthorizationPolicy Combine(AuthorizationOptions options, IEnumerable<IAuthorizeData> attributes)
+        public static AuthorizationPolicyBuilder Combine(AuthorizationOptions options, IEnumerable<IAuthorizeData> attributes)
         {
             if (options == null)
             {
@@ -104,7 +104,7 @@ namespace Microsoft.AspNet.Authorization
                     policyBuilder.Combine(options.DefaultPolicy);
                 }
             }
-            return any ? policyBuilder.Build() : null;
+            return any ? policyBuilder : null;
         }
     }
 }
