@@ -103,8 +103,8 @@ namespace Microsoft.AspNet.Authentication
                 var ticket = result?.Ticket;
                 if (ticket?.Principal != null)
                 {
-                    Logger.LogInformation(0, $"HttContext.User merged via AutomaticAuthentication from authenticationScheme: {Options.AuthenticationScheme}.");
                     Context.User = SecurityHelper.MergeUserPrincipal(Context.User, ticket.Principal);
+                    Logger.LogInformation(0, $"HttContext.User merged via AutomaticAuthentication from authenticationScheme: {Options.AuthenticationScheme}.");
                 }
             }
         }
@@ -209,14 +209,14 @@ namespace Microsoft.AspNet.Authentication
                     var ticket = result?.Ticket;
                     if (ticket?.Principal != null)
                     {
-                        Logger.LogInformation(1, $"AuthenticationScheme: {Options.AuthenticationScheme} was successfully authenticated.");
                         context.Authenticated(ticket.Principal, ticket.Properties.Items, Options.Description.Items);
+                        Logger.LogInformation(1, $"AuthenticationScheme: {Options.AuthenticationScheme} was successfully authenticated.");
                         handled = true;
                     }
                     else
                     {
-                        Logger.LogVerbose(2, $"AuthenticationScheme: {Options.AuthenticationScheme} was not authenticated.");
                         context.NotAuthenticated();
+                        Logger.LogVerbose(2, $"AuthenticationScheme: {Options.AuthenticationScheme} was not authenticated.");
                     }
                 }
             }
@@ -243,8 +243,8 @@ namespace Microsoft.AspNet.Authentication
             if (ShouldHandleScheme(context.AuthenticationScheme, handleAutomatic: false))
             {
                 SignInAccepted = true;
-                Logger.LogInformation(3, $"AuthenticationScheme: {Options.AuthenticationScheme} signed in.");
                 await HandleSignInAsync(context);
+                Logger.LogInformation(3, $"AuthenticationScheme: {Options.AuthenticationScheme} signed in.");
                 context.Accept();
             }
             else if (PriorHandler != null)
@@ -263,8 +263,8 @@ namespace Microsoft.AspNet.Authentication
             if (ShouldHandleScheme(context.AuthenticationScheme, handleAutomatic: false))
             {
                 SignOutAccepted = true;
-                Logger.LogInformation(4, $"AuthenticationScheme: {Options.AuthenticationScheme} signed out.");
                 await HandleSignOutAsync(context);
+                Logger.LogInformation(4, $"AuthenticationScheme: {Options.AuthenticationScheme} signed out.");
                 context.Accept();
             }
             else if (PriorHandler != null)
@@ -314,12 +314,12 @@ namespace Microsoft.AspNet.Authentication
                         }
                         goto case ChallengeBehavior.Unauthorized;
                     case ChallengeBehavior.Unauthorized:
-                        Logger.LogInformation(5, $"AuthenticationScheme: {Options.AuthenticationScheme} was challenged.");
                         handled = await HandleUnauthorizedAsync(context);
+                        Logger.LogInformation(5, $"AuthenticationScheme: {Options.AuthenticationScheme} was challenged.");
                         break;
                     case ChallengeBehavior.Forbidden:
-                        Logger.LogInformation(6, $"AuthenticationScheme: {Options.AuthenticationScheme} was forbidden.");
                         handled = await HandleForbiddenAsync(context);
+                        Logger.LogInformation(6, $"AuthenticationScheme: {Options.AuthenticationScheme} was forbidden.");
                         break;
                 }
                 context.Accept();
