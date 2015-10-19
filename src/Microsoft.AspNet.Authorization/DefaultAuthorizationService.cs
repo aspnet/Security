@@ -58,7 +58,7 @@ namespace Microsoft.AspNet.Authorization
             }
             else
             {
-                _logger.LogInformation(0, $"Authorization failed for user: {user?.Identity?.Name}.");
+                _logger.LogInformation(1, $"Authorization failed for user: {user?.Identity?.Name}.");
                 return false;
             }
         }
