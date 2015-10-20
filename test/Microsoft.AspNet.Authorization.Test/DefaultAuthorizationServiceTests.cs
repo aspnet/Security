@@ -737,6 +737,51 @@ namespace Microsoft.AspNet.Authorization.Test
             Assert.False(allowed);
         }
 
+        public class NeedyService { }
+
+        public class NeedyRequirement : AuthorizationHandler<NeedyRequirement>, IAuthorizationRequirement
+        {
+            public NeedyRequirement(NeedyService serv, bool success)
+            {
+                Service = serv;
+                _success = success;
+            }
+
+            public NeedyService Service { get; set; }
+            private bool _success;
+
+
+            protected override void Handle(AuthorizationContext context, NeedyRequirement requirement)
+            {
+                if (_success)
+                {
+                    context.Succeed(requirement);
+                }
+            }
+        }
+
+        [Theory]
+        [InlineData(true)]
+        [InlineData(false)]
+        public async Task CanAuthorizeRequirementThatNeedsServices(bool success)
+        {
+            // Arrange
+            var authorizationService = BuildAuthorizationService(services =>
+            {
+                services.AddTransient<NeedyService>();
+                services.AddAuthorization(options =>
+                {
+                    options.AddPolicy("Needy", policy => policy.AddRequirement<NeedyRequirement>(success));
+                });
+            });
+            var user = new ClaimsPrincipal();
+
+            // Act
+            // Assert
+            Assert.Equal(success, await authorizationService.AuthorizeAsync(user, "Needy"));
+        }
+
+
         public class ExpenseReport { }
 
         public static class Operations
