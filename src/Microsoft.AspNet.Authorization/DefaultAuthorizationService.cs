@@ -53,12 +53,12 @@ namespace Microsoft.AspNet.Authorization
 
             if (authContext.HasSucceeded)
             {
-                _logger.LogInformation(0, $"Authorization was successful for user: {user?.Identity?.Name}.");
+                _logger.LogInformation(0, "Authorization was successful for user: {userName}.", user?.Identity?.Name);
                 return true;
             }
             else
             {
-                _logger.LogInformation(1, $"Authorization failed for user: {user?.Identity?.Name}.");
+                _logger.LogInformation(1, "Authorization failed for user: {userName}.", user?.Identity?.Name);
                 return false;
             }
         }
