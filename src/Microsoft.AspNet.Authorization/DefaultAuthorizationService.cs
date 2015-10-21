@@ -32,7 +32,6 @@ namespace Microsoft.AspNet.Authorization
                 throw new ArgumentNullException(nameof(logger));
             }
 
-            _services = services;
             _handlers = handlers.ToArray();
             _options = options.Value;
             _logger = logger;
@@ -70,12 +69,12 @@ namespace Microsoft.AspNet.Authorization
                 throw new ArgumentNullException(nameof(policyName));
             }
 
-            var policyBuilder = _options.GetPolicy(policyName);
-            if (policyBuilder == null)
+            var policy = _options.GetPolicy(policyName);
+            if (policy == null)
             {
                 throw new InvalidOperationException($"No policy found: {policyName}.");
             }
-            return this.AuthorizeAsync(user, resource, policyBuilder.Build(_services));
+            return this.AuthorizeAsync(user, resource, policy);
         }
     }
 }
