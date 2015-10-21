@@ -32,11 +32,11 @@ namespace Microsoft.AspNet.Authorization
                 throw new ArgumentNullException(nameof(logger));
             }
 
+            _services = services;
             _handlers = handlers.ToArray();
             _options = options.Value;
             _logger = logger;
         }
-
 
         public async Task<bool> AuthorizeAsync(ClaimsPrincipal user, object resource, IEnumerable<IAuthorizationRequirement> requirements)
         {
@@ -70,10 +70,12 @@ namespace Microsoft.AspNet.Authorization
                 throw new ArgumentNullException(nameof(policyName));
             }
 
-            var policy = _options.GetPolicy(policyName);
-            return (policy == null)
-                ? Task.FromResult(false)
-                : this.AuthorizeAsync(user, resource, policy);
+            var policyBuilder = _options.GetPolicy(policyName);
+            if (policyBuilder == null)
+            {
+                throw new InvalidOperationException($"No policy found: {policyName}.");
+            }
+            return this.AuthorizeAsync(user, resource, policyBuilder.Build(_services));
         }
     }
 }

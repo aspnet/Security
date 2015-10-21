@@ -268,23 +268,15 @@ namespace Microsoft.AspNet.Authorization.Test
         }
 
         [Fact]
-        public async Task Authorize_ShouldNotAllowIfUnknownPolicy()
+        public async Task Authorize_ThrowsWithUnknownPolicy()
         {
             // Arrange
             var authorizationService = BuildAuthorizationService();
-            var user = new ClaimsPrincipal(
-                new ClaimsIdentity(
-                    new Claim[] {
-                        new Claim("Permission", "CanViewComment"),
-                    },
-                    null)
-                );
 
             // Act
-            var allowed = await authorizationService.AuthorizeAsync(user, "Basic");
-
             // Assert
-            Assert.False(allowed);
+            var exception = await Assert.ThrowsAsync<InvalidOperationException>(() => authorizationService.AuthorizeAsync(new ClaimsPrincipal(), "whatever", "BogusPolicy"));
+            Assert.Equal("No policy found: BogusPolicy.", exception.Message);
         }
 
         [Fact]
