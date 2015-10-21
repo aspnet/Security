@@ -3,8 +3,6 @@
 
 using System;
 using Microsoft.AspNet.Authentication.Cookies;
-using Microsoft.Framework.Internal;
-using Microsoft.Framework.OptionsModel;
 
 namespace Microsoft.AspNet.Builder
 {
