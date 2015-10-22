@@ -44,25 +44,9 @@ namespace Microsoft.AspNet.Authentication.Cookies
         };
 
         private static bool IsAjaxRequest(HttpRequest request)
-        {		
-            var query = request.Query;		
-            if (query != null)		
-            {		
-                if (query["X-Requested-With"] == "XMLHttpRequest")		
-                {		
-                    return true;		
-                }		
-            }		
-		
-            var headers = request.Headers;		
-            if (headers != null)		
-            {		
-                if (headers["X-Requested-With"] == "XMLHttpRequest")		
-                {		
-                    return true;		
-                }		
-            }		
-            return false;		
+        {
+            return request?.Query["X-Requested-With"] == "XMLHttpRequest" ||
+                request?.Headers["X-Requested-With"] == "XMLHttpRequest";
         }		
 
         /// <summary>
