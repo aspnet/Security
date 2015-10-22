@@ -3,6 +3,7 @@
 
 using System;
 using System.Threading.Tasks;
+using Microsoft.AspNet.Http;
 
 namespace Microsoft.AspNet.Authentication.Cookies
 {
@@ -42,6 +43,28 @@ namespace Microsoft.AspNet.Authentication.Cookies
             return Task.FromResult(0);
         };
 
+        private static bool IsAjaxRequest(HttpRequest request)
+        {		
+            var query = request.Query;		
+            if (query != null)		
+            {		
+                if (query["X-Requested-With"] == "XMLHttpRequest")		
+                {		
+                    return true;		
+                }		
+            }		
+		
+            var headers = request.Headers;		
+            if (headers != null)		
+            {		
+                if (headers["X-Requested-With"] == "XMLHttpRequest")		
+                {		
+                    return true;		
+                }		
+            }		
+            return false;		
+        }		
+
         /// <summary>
         /// Implements the interface method by invoking the related delegate method.
         /// </summary>
@@ -71,24 +94,73 @@ namespace Microsoft.AspNet.Authentication.Cookies
         /// Implements the interface method by invoking the related delegate method.
         /// </summary>
         /// <param name="context">Contains information about the event</param>
-        public virtual Task RedirectToLogout(CookieRedirectContext context) => OnRedirect(context);
+        public virtual Task RedirectToLogout(CookieRedirectContext context)
+        {
+            if (IsAjaxRequest(context.Request))
+            {
+                context.Response.Headers["Location"] = context.RedirectUri;
+                context.Response.StatusCode = 200;
+                return Task.FromResult(0);
+            }
+            else
+            {
+                return OnRedirect(context);
+            }
+        }
 
         /// <summary>
         /// Implements the interface method by invoking the related delegate method.
         /// </summary>
         /// <param name="context">Contains information about the event</param>
-        public virtual Task RedirectToLogin(CookieRedirectContext context) => OnRedirect(context);
+        public virtual Task RedirectToLogin(CookieRedirectContext context)
+        {
+            if (IsAjaxRequest(context.Request))
+            {
+                context.Response.Headers["Location"] = context.RedirectUri;
+                context.Response.StatusCode = 401;
+                return Task.FromResult(0);
+            }
+            else
+            {
+                return OnRedirect(context);
+            }
+        }
+
 
         /// <summary>
         /// Implements the interface method by invoking the related delegate method.
         /// </summary>
         /// <param name="context">Contains information about the event</param>
-        public virtual Task RedirectToReturnUrl(CookieRedirectContext context) => OnRedirect(context);
+        public virtual Task RedirectToReturnUrl(CookieRedirectContext context)
+        {
+            if (IsAjaxRequest(context.Request))
+            {
+                context.Response.Headers["Location"] = context.RedirectUri;
+                context.Response.StatusCode = 200;
+                return Task.FromResult(0);
+            }
+            else
+            {
+                return OnRedirect(context);
+            }
+        }
 
         /// <summary>
         /// Implements the interface method by invoking the related delegate method.
         /// </summary>
         /// <param name="context">Contains information about the event</param>
-        public virtual Task RedirectToAccessDenied(CookieRedirectContext context) => OnRedirect(context);
+        public virtual Task RedirectToAccessDenied(CookieRedirectContext context)
+        {
+            if (IsAjaxRequest(context.Request))
+            {
+                context.Response.Headers["Location"] = context.RedirectUri;
+                context.Response.StatusCode = 403;
+                return Task.FromResult(0);
+            }
+            else
+            {
+                return OnRedirect(context);
+            }
+        }
     }
 }
