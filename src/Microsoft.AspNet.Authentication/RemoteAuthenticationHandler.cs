@@ -36,7 +36,7 @@ namespace Microsoft.AspNet.Authentication
                     return false;
                 }
 
-                throw errorContext.Error;
+                throw new Exception("Unhandled error.", errorContext.Error);
             }
 
             // We have a ticket if we get here

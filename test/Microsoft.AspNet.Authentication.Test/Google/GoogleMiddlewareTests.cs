@@ -754,7 +754,6 @@ namespace Microsoft.AspNet.Authentication.Google
         {
             return TestServer.Create(app =>
             {
-                app.UseExceptionHandler("/Error");
                 app.UseCookieAuthentication(options =>
                 {
                     options.AuthenticationScheme = TestExtensions.CookieAuthenticationScheme;
@@ -775,10 +774,6 @@ namespace Microsoft.AspNet.Authentication.Google
                     if (req.Path == new PathString("/challenge"))
                     {
                         await context.Authentication.ChallengeAsync("Google");
-                    }
-                    else if (req.Path == new PathString("/Error"))
-                    {
-                        await res.WriteAsync("Error!");
                     }
                     else if (req.Path == new PathString("/me"))
                     {
