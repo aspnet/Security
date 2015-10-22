@@ -402,24 +402,10 @@ namespace Microsoft.AspNet.Authentication.Google
             properties.RedirectUri = "/me";
 
             var state = stateFormat.Protect(properties);
-
-            await Assert.ThrowsAsync<HttpRequestException>(() => server.SendAsync(
+            var transaction = await server.SendAsync(
                 "https://example.com/signin-google?code=TestCode&state=" + UrlEncoder.Default.Encode(state),
-                correlationKey + "=" + correlationValue));
-
-            //var transaction = await server.SendAsync(
-            //    "https://example.com/signin-google?code=TestCode&state=" + UrlEncoder.Default.Encode(state),
-            //    correlationKey + "=" + correlationValue);
-            //if (redirect)
-            //{
-            //    Assert.Equal(HttpStatusCode.Redirect, transaction.Response.StatusCode);
-            //    Assert.Equal("/error?ErrorMessage=" + UrlEncoder.Default.Encode("Access token was not found."),
-            //        transaction.Response.Headers.GetValues("Location").First());
-            //}
-            //else
-            //{
-            //    Assert.Equal(HttpStatusCode.InternalServerError, transaction.Response.StatusCode);
-            //}
+                correlationKey + "=" + correlationValue);
+            Assert.Equal(HttpStatusCode.InternalServerError, transaction.Response.StatusCode);
         }
 
         [Theory]
@@ -768,6 +754,7 @@ namespace Microsoft.AspNet.Authentication.Google
         {
             return TestServer.Create(app =>
             {
+                app.UseExceptionHandler("/Error");
                 app.UseCookieAuthentication(options =>
                 {
                     options.AuthenticationScheme = TestExtensions.CookieAuthenticationScheme;
@@ -788,6 +775,10 @@ namespace Microsoft.AspNet.Authentication.Google
                     if (req.Path == new PathString("/challenge"))
                     {
                         await context.Authentication.ChallengeAsync("Google");
+                    }
+                    else if (req.Path == new PathString("/Error"))
+                    {
+                        await res.WriteAsync("Error!");
                     }
                     else if (req.Path == new PathString("/me"))
                     {

@@ -36,8 +36,7 @@ namespace Microsoft.AspNet.Authentication
                     return false;
                 }
 
-                Context.Response.StatusCode = 500;
-                return true;
+                throw errorContext.Error;
             }
 
             // We have a ticket if we get here

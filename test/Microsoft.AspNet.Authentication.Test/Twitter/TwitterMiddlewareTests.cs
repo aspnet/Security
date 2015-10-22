@@ -157,6 +157,7 @@ namespace Microsoft.AspNet.Authentication.Twitter
         {
             return TestServer.Create(app =>
             {
+                app.UseExceptionHandler("/Error");
                 app.UseCookieAuthentication(options =>
                 {
                     options.AuthenticationScheme = "External";
@@ -169,6 +170,10 @@ namespace Microsoft.AspNet.Authentication.Twitter
                     if (req.Path == new PathString("/signIn"))
                     {
                         await Assert.ThrowsAsync<NotSupportedException>(() => context.Authentication.SignInAsync("Twitter", new ClaimsPrincipal()));
+                    }
+                    else if (req.Path == new PathString("/Error"))
+                    {
+                        await res.WriteAsync("Error!");
                     }
                     else if (req.Path == new PathString("/signOut"))
                     {
