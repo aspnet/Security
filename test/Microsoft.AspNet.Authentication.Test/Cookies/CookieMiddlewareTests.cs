@@ -50,7 +50,7 @@ namespace Microsoft.AspNet.Authentication.Cookies
         }
 
         [Fact]
-        public async Task AjaxLogoutRedirectToReturnUrlTurnsInto403WithLocationHeader()
+        public async Task AjaxForbidTurnsInto403WithLocationHeader()
         {
             var server = CreateServer(options =>
             {
