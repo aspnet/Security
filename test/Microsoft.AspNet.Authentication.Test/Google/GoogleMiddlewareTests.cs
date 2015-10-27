@@ -411,13 +411,13 @@ namespace Microsoft.AspNet.Authentication.Google
             {
                 var transaction = await sendTask;
                 Assert.Equal(HttpStatusCode.Redirect, transaction.Response.StatusCode);
-                Assert.Equal("/error?ErrorMessage=" + UrlEncoder.Default.UrlEncode("OAuth token endpoint failure: Headers: ;Body: {\"Error\":\"Error\"};"),
+                Assert.Equal("/error?ErrorMessage=" + UrlEncoder.Default.UrlEncode("OAuth token endpoint failure: Status: BadRequest;Headers: ;Body: {\"Error\":\"Error\"};"),
                     transaction.Response.Headers.GetValues("Location").First());
             }
             else
             {
                 var error = await Assert.ThrowsAsync<Exception>(() => sendTask);
-                Assert.Equal("OAuth token endpoint failure: Headers: ;Body: {\"Error\":\"Error\"};", error.Message);
+                Assert.Equal("OAuth token endpoint failure: Status: BadRequest;Headers: ;Body: {\"Error\":\"Error\"};", error.Message);
             }
         }
 

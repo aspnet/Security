@@ -134,6 +134,7 @@ namespace Microsoft.AspNet.Authentication.OAuth
         private static async Task<string> Display(HttpResponseMessage response)
         {
             var output = new StringBuilder();
+            output.Append("Status: " + response.StatusCode + ";");
             output.Append("Headers: " + response.Headers.ToString() + ";");
             output.Append("Body: " + await response.Content.ReadAsStringAsync() + ";");
             return output.ToString();
