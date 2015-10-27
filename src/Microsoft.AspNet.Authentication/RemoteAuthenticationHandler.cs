@@ -36,7 +36,7 @@ namespace Microsoft.AspNet.Authentication
                     return false;
                 }
 
-                throw new Exception("Unhandled error.", errorContext.Error);
+                throw new AggregateException("Unhandled remote error.", errorContext.Error);
             }
 
             // We have a ticket if we get here

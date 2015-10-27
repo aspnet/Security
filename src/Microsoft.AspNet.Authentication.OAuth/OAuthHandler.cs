@@ -61,10 +61,9 @@ namespace Microsoft.AspNet.Authentication.OAuth
             }
 
             var tokens = await ExchangeCodeAsync(code, BuildRedirectUri(Options.CallbackPath));
-
-            if (string.IsNullOrEmpty(tokens.AccessToken))
+            if (tokens == null || string.IsNullOrEmpty(tokens.AccessToken))
             {
-                return AuthenticateResult.Failed("Access token was not found.");
+                return AuthenticateResult.Failed("Failed to retrieve access token.");
             }
 
             var identity = new ClaimsIdentity(Options.ClaimsIssuer);
@@ -113,9 +112,15 @@ namespace Microsoft.AspNet.Authentication.OAuth
             requestMessage.Headers.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
             requestMessage.Content = requestContent;
             var response = await Backchannel.SendAsync(requestMessage, Context.RequestAborted);
-            response.EnsureSuccessStatusCode();
-            var payload = JObject.Parse(await response.Content.ReadAsStringAsync());
-            return new OAuthTokenResponse(payload);
+            if (response.IsSuccessStatusCode)
+            {
+                var payload = JObject.Parse(await response.Content.ReadAsStringAsync());
+                return new OAuthTokenResponse(payload);
+            }
+            else
+            {
+                return null;
+            }
         }
 
         protected virtual async Task<AuthenticationTicket> CreateTicketAsync(ClaimsIdentity identity, AuthenticationProperties properties, OAuthTokenResponse tokens)

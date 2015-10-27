@@ -244,8 +244,8 @@ namespace Microsoft.AspNet.Authentication.Google
                 options.ClientId = "Test Id";
                 options.ClientSecret = "Test Secret";
             });
-            var transaction = await server.SendAsync("https://example.com/signin-google?code=TestCode");
-            Assert.Equal(HttpStatusCode.InternalServerError, transaction.Response.StatusCode);
+            var error = await Assert.ThrowsAsync<Exception>(() => server.SendAsync("https://example.com/signin-google?code=TestCode"));
+            Assert.Equal("The oauth state was missing or invalid.", error.Message);
         }
 
         [Theory]
@@ -270,15 +270,16 @@ namespace Microsoft.AspNet.Authentication.Google
                     };
                 }
             });
-            var transaction = await server.SendAsync("https://example.com/signin-google?error=OMG");
             if (redirect)
             {
+                var transaction = await server.SendAsync("https://example.com/signin-google?error=OMG");
                 Assert.Equal(HttpStatusCode.Redirect, transaction.Response.StatusCode);
                 Assert.Equal("/error?ErrorMessage=OMG", transaction.Response.Headers.GetValues("Location").First());
             }
             else
             {
-                Assert.Equal(HttpStatusCode.InternalServerError, transaction.Response.StatusCode);
+                var error = await Assert.ThrowsAsync<Exception>(() => server.SendAsync("https://example.com/signin-google?error=OMG"));
+                Assert.Equal("OMG", error.Message);
             }
         }
 
@@ -402,10 +403,21 @@ namespace Microsoft.AspNet.Authentication.Google
             properties.RedirectUri = "/me";
 
             var state = stateFormat.Protect(properties);
-            var transaction = await server.SendAsync(
+            var sendTask = server.SendAsync(
                 "https://example.com/signin-google?code=TestCode&state=" + UrlEncoder.Default.Encode(state),
                 correlationKey + "=" + correlationValue);
-            Assert.Equal(HttpStatusCode.InternalServerError, transaction.Response.StatusCode);
+            if (redirect)
+            {
+                var transaction = await sendTask;
+                Assert.Equal(HttpStatusCode.Redirect, transaction.Response.StatusCode);
+                Assert.Equal("/error?ErrorMessage=" + UrlEncoder.Default.UrlEncode("Failed to retrieve access token."),
+                    transaction.Response.Headers.GetValues("Location").First());
+            }
+            else
+            {
+                var error = await Assert.ThrowsAsync<Exception>(() => sendTask);
+                Assert.Equal("Failed to retrieve access token.", error.Message);
+            }
         }
 
         [Theory]
@@ -445,18 +457,20 @@ namespace Microsoft.AspNet.Authentication.Google
             properties.Items.Add(correlationKey, correlationValue);
             properties.RedirectUri = "/me";
             var state = stateFormat.Protect(properties);
-            var transaction = await server.SendAsync(
+            var sendTask = server.SendAsync(
                 "https://example.com/signin-google?code=TestCode&state=" + UrlEncoder.Default.Encode(state),
                 correlationKey + "=" + correlationValue);
             if (redirect)
             {
+                var transaction = await sendTask;
                 Assert.Equal(HttpStatusCode.Redirect, transaction.Response.StatusCode);
-                Assert.Equal("/error?ErrorMessage=" + UrlEncoder.Default.Encode("Access token was not found."),
+                Assert.Equal("/error?ErrorMessage=" + UrlEncoder.Default.Encode("Failed to retrieve access token."),
                     transaction.Response.Headers.GetValues("Location").First());
             }
             else
             {
-                Assert.Equal(HttpStatusCode.InternalServerError, transaction.Response.StatusCode);
+                var error = await Assert.ThrowsAsync<Exception>(() => sendTask);
+                Assert.Equal("Failed to retrieve access token.", error.Message);
             }
         }
 
@@ -698,9 +712,8 @@ namespace Microsoft.AspNet.Authentication.Google
         }
 
         [Fact]
-        public async Task NoStateCauses500()
+        public async Task NoStateCausesException()
         {
-            var stateFormat = new PropertiesDataFormat(new EphemeralDataProtectionProvider().CreateProtector("GoogleTest"));
             var server = CreateServer(options =>
             {
                 options.ClientId = "Test Id";
@@ -708,10 +721,8 @@ namespace Microsoft.AspNet.Authentication.Google
             });
 
             //Post a message to the Google middleware
-            var transaction = await server.SendAsync(
-                "https://example.com/signin-google?code=TestCode");
-
-            Assert.Equal(HttpStatusCode.InternalServerError, transaction.Response.StatusCode);
+            var error = await Assert.ThrowsAsync<Exception>(() => server.SendAsync("https://example.com/signin-google?code=TestCode"));
+            Assert.Equal("The oauth state was missing or invalid.", error.Message);
         }
 
         [Fact]
