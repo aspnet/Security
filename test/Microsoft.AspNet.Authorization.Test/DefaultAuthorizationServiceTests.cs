@@ -297,7 +297,7 @@ namespace Microsoft.AspNet.Authorization.Test
                 );
 
             // Act
-            var allowed = await authorizationService.AuthorizeAsync(user, policy.Build(new ServiceCollection().BuildServiceProvider()));
+            var allowed = await authorizationService.AuthorizeAsync(user, policy.Build().BuildRequirements(new ServiceCollection().BuildServiceProvider()));
 
             // Assert
             Assert.True(allowed);
@@ -318,7 +318,7 @@ namespace Microsoft.AspNet.Authorization.Test
                 );
 
             // Act
-            var allowed = await authorizationService.AuthorizeAsync(user, policy.Build(new ServiceCollection().BuildServiceProvider()));
+            var allowed = await authorizationService.AuthorizeAsync(user, policy.Build().BuildRequirements(new ServiceCollection().BuildServiceProvider()));
 
             // Assert
             Assert.True(allowed);
@@ -328,14 +328,16 @@ namespace Microsoft.AspNet.Authorization.Test
         public async Task Authorize_PolicyCanAuthenticationSchemeWithNameClaim()
         {
             // Arrange
-            var policy = new AuthorizationPolicyBuilder("AuthType").RequireClaim(ClaimTypes.Name);
-            var authorizationService = BuildAuthorizationService();
+            var authorizationService = BuildAuthorizationService(
+                services => services.AddAuthorization(
+                    options => options.AddPolicy("AuthType", 
+                        policy => policy.RequireClaim(ClaimTypes.Name))));
             var user = new ClaimsPrincipal(
                 new ClaimsIdentity(new Claim[] { new Claim(ClaimTypes.Name, "Name") }, "AuthType")
                 );
 
             // Act
-            var allowed = await authorizationService.AuthorizeAsync(user, policy.Build(new ServiceCollection().BuildServiceProvider()));
+            var allowed = await authorizationService.AuthorizeAsync(user, "AuthType");
 
             // Assert
             Assert.True(allowed);
@@ -345,14 +347,16 @@ namespace Microsoft.AspNet.Authorization.Test
         public async Task RolePolicyCanRequireSingleRole()
         {
             // Arrange
-            var policy = new AuthorizationPolicyBuilder("AuthType").RequireRole("Admin");
-            var authorizationService = BuildAuthorizationService();
+            var authorizationService = BuildAuthorizationService(
+                services => services.AddAuthorization(
+                    options => options.AddPolicy("AuthType",
+                        policy => policy.RequireRole("Admin"))));
             var user = new ClaimsPrincipal(
                 new ClaimsIdentity(new Claim[] { new Claim(ClaimTypes.Role, "Admin") }, "AuthType")
             );
 
             // Act
-            var allowed = await authorizationService.AuthorizeAsync(user, null, policy.Build(new ServiceCollection().BuildServiceProvider()));
+            var allowed = await authorizationService.AuthorizeAsync(user, "AuthType");
 
             // Assert
             Assert.True(allowed);
@@ -362,13 +366,15 @@ namespace Microsoft.AspNet.Authorization.Test
         public async Task RolePolicyCanRequireOneOfManyRoles()
         {
             // Arrange
-            var policy = new AuthorizationPolicyBuilder("AuthType").RequireRole("Admin", "Users");
-            var authorizationService = BuildAuthorizationService();
+            var authorizationService = BuildAuthorizationService(
+                services => services.AddAuthorization(
+                    options => options.AddPolicy("AuthType",
+                        policy => policy.RequireRole("Admin", "Users"))));
             var user = new ClaimsPrincipal(
                 new ClaimsIdentity(new Claim[] { new Claim(ClaimTypes.Role, "Users") }, "AuthType"));
 
             // Act
-            var allowed = await authorizationService.AuthorizeAsync(user, policy.Build(new ServiceCollection().BuildServiceProvider()));
+            var allowed = await authorizationService.AuthorizeAsync(user, "AuthType");
 
             // Assert
             Assert.True(allowed);
@@ -378,8 +384,10 @@ namespace Microsoft.AspNet.Authorization.Test
         public async Task RolePolicyCanBlockWrongRole()
         {
             // Arrange
-            var policy = new AuthorizationPolicyBuilder().RequireClaim("Permission", "CanViewPage");
-            var authorizationService = BuildAuthorizationService();
+            var authorizationService = BuildAuthorizationService(
+                services => services.AddAuthorization(
+                    options => options.AddPolicy("AuthType",
+                        policy => policy.RequireClaim("Permission", "CanViewPage"))));
             var user = new ClaimsPrincipal(
                 new ClaimsIdentity(
                     new Claim[] {
@@ -389,7 +397,7 @@ namespace Microsoft.AspNet.Authorization.Test
                 );
 
             // Act
-            var allowed = await authorizationService.AuthorizeAsync(user, policy.Build(new ServiceCollection().BuildServiceProvider()));
+            var allowed = await authorizationService.AuthorizeAsync(user, "AuthType");
 
             // Assert
             Assert.False(allowed);
@@ -423,7 +431,7 @@ namespace Microsoft.AspNet.Authorization.Test
         [Fact]
         public void PolicyThrowsWithNoRequirements()
         {
-            Assert.Throws<InvalidOperationException>(() => new AuthorizationPolicyBuilder().Build(new ServiceCollection().BuildServiceProvider()));
+            Assert.Throws<InvalidOperationException>(() => new AuthorizationPolicyBuilder().Build());
         }
 
         [Fact]

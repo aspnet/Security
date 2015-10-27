@@ -2,7 +2,7 @@
 // Licensed under the Apache License, Version 2.0. See License.txt in the project root for license information.
 
 using System;
-using System.Linq;
+using System.Collections.Generic;
 using System.Security.Claims;
 using System.Threading.Tasks;
 
@@ -33,48 +33,18 @@ namespace Microsoft.AspNet.Authorization
         }
 
         /// <summary>
-        /// Checks if a user meets a specific authorization policy
+        /// Checks if a user meets a specific set of requirements
         /// </summary>
-        /// <param name="service">The authorization service.</param>
-        /// <param name="user">The user to check the policy against.</param>
-        /// <param name="resource">The resource the policy should be checked with.</param>
-        /// <param name="policy">The policy to check against a specific context.</param>
-        /// <returns><value>true</value> when the user fulfills the policy, <value>false</value> otherwise.</returns>
-        public static Task<bool> AuthorizeAsync(this IAuthorizationService service, ClaimsPrincipal user, object resource, AuthorizationPolicy policy)
+        /// <param name="user"></param>
+        /// <param name="requirements"></param>
+        /// <returns></returns>
+        public static Task<bool> AuthorizeAsync(this IAuthorizationService service, ClaimsPrincipal user, IEnumerable<IAuthorizationRequirement> requirements)
         {
             if (service == null)
             {
                 throw new ArgumentNullException(nameof(service));
             }
-
-            if (policy == null)
-            {
-                throw new ArgumentNullException(nameof(policy));
-            }
-
-            return service.AuthorizeAsync(user, resource, policy.Requirements.ToArray());
-        }
-
-        /// <summary>
-        /// Checks if a user meets a specific authorization policy
-        /// </summary>
-        /// <param name="service">The authorization service.</param>
-        /// <param name="user">The user to check the policy against.</param>
-        /// <param name="policy">The policy to check against a specific context.</param>
-        /// <returns><value>true</value> when the user fulfills the policy, <value>false</value> otherwise.</returns>
-        public static Task<bool> AuthorizeAsync(this IAuthorizationService service, ClaimsPrincipal user, AuthorizationPolicy policy)
-        {
-            if (service == null)
-            {
-                throw new ArgumentNullException(nameof(service));
-            }
-
-            if (policy == null)
-            {
-                throw new ArgumentNullException(nameof(policy));
-            }
-
-            return service.AuthorizeAsync(user, resource: null, policy: policy);
+            return service.AuthorizeAsync(user, resource: null, requirements: requirements);
         }
 
         /// <summary>

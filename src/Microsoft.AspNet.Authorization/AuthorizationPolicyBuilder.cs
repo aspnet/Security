@@ -35,17 +35,30 @@ namespace Microsoft.AspNet.Authorization
             return this;
         }
 
+        public AuthorizationPolicyBuilder AddRequirement(Func<IServiceProvider, IAuthorizationRequirement> requirementFunc)
+        {
+            if (requirementFunc == null)
+            {
+                throw new ArgumentNullException(nameof(requirementFunc));
+            }
+            RequirementBuilders.Add(requirementFunc);
+            return this;
+        }
+
         public AuthorizationPolicyBuilder AddRequirement(IAuthorizationRequirement requirement)
         {
-            RequirementBuilders.Add(services => requirement);
-            return this;
+            if (requirement == null)
+            {
+                throw new ArgumentNullException(nameof(requirement));
+            }
+
+            return AddRequirement(services => requirement);
         }
 
         public AuthorizationPolicyBuilder AddRequirement<TRequirement>(params object[] arguments) where TRequirement : IAuthorizationRequirement
         {
-            RequirementBuilders.Add(services => 
+            return AddRequirement(services => 
                 (IAuthorizationRequirement)ActivatorUtilities.CreateInstance(services, typeof(TRequirement), arguments));
-            return this;
         }
 
         public AuthorizationPolicyBuilder Combine(AuthorizationPolicy policy)
@@ -162,20 +175,9 @@ namespace Microsoft.AspNet.Authorization
             return this;
         }
 
-        private IEnumerable<IAuthorizationRequirement> BuildRequirements(IServiceProvider services)
+        public AuthorizationPolicy Build()
         {
-            var requirements = new List<IAuthorizationRequirement>();
-            foreach (var reqBuild in RequirementBuilders)
-            {
-
-                requirements.Add(reqBuild(services));
-            }
-            return requirements;
-        }
-
-        public AuthorizationPolicy Build(IServiceProvider services)
-        {
-            return new AuthorizationPolicy(BuildRequirements(services), AuthenticationSchemes.Distinct());
+            return new AuthorizationPolicy(RequirementBuilders, AuthenticationSchemes.Distinct());
         }
     }
 }

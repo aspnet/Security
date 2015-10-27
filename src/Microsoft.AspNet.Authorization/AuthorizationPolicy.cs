@@ -9,7 +9,7 @@ namespace Microsoft.AspNet.Authorization
 {
     public class AuthorizationPolicy
     {
-        public AuthorizationPolicy(IEnumerable<IAuthorizationRequirement> requirements, IEnumerable<string> authenticationSchemes)
+        public AuthorizationPolicy(IEnumerable<Func<IServiceProvider, IAuthorizationRequirement>> requirements, IEnumerable<string> authenticationSchemes)
         {
             if (requirements == null)
             {
@@ -25,12 +25,22 @@ namespace Microsoft.AspNet.Authorization
             {
                 throw new InvalidOperationException(Resources.Exception_AuthorizationPolicyEmpty);
             }
-            Requirements = new List<IAuthorizationRequirement>(requirements).AsReadOnly();
             AuthenticationSchemes = new List<string>(authenticationSchemes).AsReadOnly();
+            Requirements = new List<Func<IServiceProvider, IAuthorizationRequirement>>(requirements);
         }
 
-        public IReadOnlyList<IAuthorizationRequirement> Requirements { get; }
+        public IList<Func<IServiceProvider, IAuthorizationRequirement>> Requirements { get; }
         public IReadOnlyList<string> AuthenticationSchemes { get; }
+
+        public IEnumerable<IAuthorizationRequirement> BuildRequirements(IServiceProvider services)
+        {
+            var requirements = new List<IAuthorizationRequirement>();
+            foreach (var reqBuild in Requirements)
+            {
+                requirements.Add(reqBuild(services));
+            }
+            return requirements;
+        }
 
         public static AuthorizationPolicyBuilder Combine(params AuthorizationPolicy[] policies)
         {
@@ -57,7 +67,7 @@ namespace Microsoft.AspNet.Authorization
             return builder;
         }
 
-        public static AuthorizationPolicyBuilder Combine(AuthorizationOptions options, IEnumerable<IAuthorizeData> attributes)
+        public static AuthorizationPolicy Combine(AuthorizationOptions options, IEnumerable<IAuthorizeData> attributes)
         {
             if (options == null)
             {
@@ -104,7 +114,7 @@ namespace Microsoft.AspNet.Authorization
                     policyBuilder.Combine(options.DefaultPolicy);
                 }
             }
-            return any ? policyBuilder : null;
+            return any ? policyBuilder.Build() : null;
         }
     }
 }

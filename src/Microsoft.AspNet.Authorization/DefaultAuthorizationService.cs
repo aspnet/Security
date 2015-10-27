@@ -16,12 +16,13 @@ namespace Microsoft.AspNet.Authorization
         private readonly IList<IAuthorizationHandler> _handlers;
         private readonly AuthorizationOptions _options;
         private readonly ILogger _logger;
-
-        public DefaultAuthorizationService(IOptions<AuthorizationOptions> options, IEnumerable<IAuthorizationHandler> handlers, ILogger<DefaultAuthorizationService> logger)
-        {
         private readonly IServiceProvider _services;
 
-        public DefaultAuthorizationService(IServiceProvider services, IOptions<AuthorizationOptions> options, IEnumerable<IAuthorizationHandler> handlers)
+        public DefaultAuthorizationService(
+            IServiceProvider services, 
+            IOptions<AuthorizationOptions> options,
+            ILogger<DefaultAuthorizationService> logger,
+            IEnumerable<IAuthorizationHandler> handlers)
         {
             if (services == null)
             {
@@ -83,7 +84,7 @@ namespace Microsoft.AspNet.Authorization
             {
                 throw new InvalidOperationException($"No policy found: {policyName}.");
             }
-            return this.AuthorizeAsync(user, resource, policy.Build(_services));
+            return this.AuthorizeAsync(user, resource, policy.BuildRequirements(_services));
         }
     }
 }
