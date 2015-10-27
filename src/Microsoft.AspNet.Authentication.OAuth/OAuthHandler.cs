@@ -61,7 +61,13 @@ namespace Microsoft.AspNet.Authentication.OAuth
             }
 
             var tokens = await ExchangeCodeAsync(code, BuildRedirectUri(Options.CallbackPath));
-            if (tokens == null || string.IsNullOrEmpty(tokens.AccessToken))
+
+            if (tokens.Error != null)
+            {
+                return AuthenticateResult.Failed(tokens.Error);
+            }
+
+            if (string.IsNullOrEmpty(tokens.AccessToken))
             {
                 return AuthenticateResult.Failed("Failed to retrieve access token.");
             }
@@ -115,11 +121,11 @@ namespace Microsoft.AspNet.Authentication.OAuth
             if (response.IsSuccessStatusCode)
             {
                 var payload = JObject.Parse(await response.Content.ReadAsStringAsync());
-                return new OAuthTokenResponse(payload);
+                return OAuthTokenResponse.Success(payload);
             }
             else
             {
-                return null;
+                return OAuthTokenResponse.Failed("OAuth token endpoint failure: "+response.StatusCode);
             }
         }
 
