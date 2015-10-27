@@ -7,6 +7,7 @@ using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Security.Claims;
 using System.Security.Cryptography;
+using System.Text;
 using System.Threading.Tasks;
 using Microsoft.AspNet.Http;
 using Microsoft.AspNet.Http.Authentication;
@@ -125,8 +126,17 @@ namespace Microsoft.AspNet.Authentication.OAuth
             }
             else
             {
-                return OAuthTokenResponse.Failed("OAuth token endpoint failure: "+response.StatusCode);
+                var error = "OAuth token endpoint failure: " + await Display(response);
+                return OAuthTokenResponse.Failed(new Exception(error));
             }
+        }
+
+        private static async Task<string> Display(HttpResponseMessage response)
+        {
+            var output = new StringBuilder();
+            output.Append("Headers: " + response.Headers.ToString() + ";");
+            output.Append("Body: " + await response.Content.ReadAsStringAsync() + ";");
+            return output.ToString();
         }
 
         protected virtual async Task<AuthenticationTicket> CreateTicketAsync(ClaimsIdentity identity, AuthenticationProperties properties, OAuthTokenResponse tokens)

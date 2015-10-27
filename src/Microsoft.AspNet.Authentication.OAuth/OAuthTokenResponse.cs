@@ -1,6 +1,7 @@
 // Copyright (c) .NET Foundation. All rights reserved.
 // Licensed under the Apache License, Version 2.0. See License.txt in the project root for license information.
 
+using System;
 using Newtonsoft.Json.Linq;
 
 namespace Microsoft.AspNet.Authentication.OAuth
@@ -16,7 +17,7 @@ namespace Microsoft.AspNet.Authentication.OAuth
             ExpiresIn = response.Value<string>("expires_in");
         }
 
-        private OAuthTokenResponse(string error)
+        private OAuthTokenResponse(Exception error)
         {
             Error = error;
         }
@@ -26,7 +27,7 @@ namespace Microsoft.AspNet.Authentication.OAuth
             return new OAuthTokenResponse(response);
         }
 
-        public static OAuthTokenResponse Failed(string error)
+        public static OAuthTokenResponse Failed(Exception error)
         {
             return new OAuthTokenResponse(error);
         }
@@ -36,6 +37,6 @@ namespace Microsoft.AspNet.Authentication.OAuth
         public string TokenType { get; set; }
         public string RefreshToken { get; set; }
         public string ExpiresIn { get; set; }
-        public string Error { get; set; }
+        public Exception Error { get; set; }
     }
 }

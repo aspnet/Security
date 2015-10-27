@@ -380,7 +380,8 @@ namespace Microsoft.AspNet.Authentication.Google
                 {
                     Sender = req =>
                     {
-                        return new HttpResponseMessage(HttpStatusCode.BadRequest);
+                        return ReturnJsonResponse(new { Error = "Error" }, 
+                            HttpStatusCode.BadRequest);
                     }
                 };
                 if (redirect)
@@ -410,13 +411,13 @@ namespace Microsoft.AspNet.Authentication.Google
             {
                 var transaction = await sendTask;
                 Assert.Equal(HttpStatusCode.Redirect, transaction.Response.StatusCode);
-                Assert.Equal("/error?ErrorMessage=" + UrlEncoder.Default.UrlEncode("OAuth token endpoint failure: BadRequest"),
+                Assert.Equal("/error?ErrorMessage=" + UrlEncoder.Default.UrlEncode("OAuth token endpoint failure: Headers: ;Body: {\"Error\":\"Error\"};"),
                     transaction.Response.Headers.GetValues("Location").First());
             }
             else
             {
                 var error = await Assert.ThrowsAsync<Exception>(() => sendTask);
-                Assert.Equal("OAuth token endpoint failure: BadRequest", error.Message);
+                Assert.Equal("OAuth token endpoint failure: Headers: ;Body: {\"Error\":\"Error\"};", error.Message);
             }
         }
 
@@ -753,9 +754,9 @@ namespace Microsoft.AspNet.Authentication.Google
                 transaction.Response.Headers.GetValues("Location").First());
         }
 
-        private static HttpResponseMessage ReturnJsonResponse(object content)
+        private static HttpResponseMessage ReturnJsonResponse(object content, HttpStatusCode code = HttpStatusCode.OK)
         {
-            var res = new HttpResponseMessage(HttpStatusCode.OK);
+            var res = new HttpResponseMessage(code);
             var text = JsonConvert.SerializeObject(content);
             res.Content = new StringContent(text, Encoding.UTF8, "application/json");
             return res;
