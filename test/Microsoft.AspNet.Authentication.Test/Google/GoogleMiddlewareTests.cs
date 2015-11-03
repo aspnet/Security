@@ -244,7 +244,7 @@ namespace Microsoft.AspNet.Authentication.Google
                 options.ClientId = "Test Id";
                 options.ClientSecret = "Test Secret";
             });
-            var error = await Assert.ThrowsAsync<Exception>(() => server.SendAsync("https://example.com/signin-google?code=TestCode"));
+            var error = await Assert.ThrowsAnyAsync<Exception>(() => server.SendAsync("https://example.com/signin-google?code=TestCode"));
             Assert.Equal("The oauth state was missing or invalid.", error.Message);
         }
 
@@ -278,7 +278,7 @@ namespace Microsoft.AspNet.Authentication.Google
             }
             else
             {
-                var error = await Assert.ThrowsAsync<Exception>(() => server.SendAsync("https://example.com/signin-google?error=OMG"));
+                var error = await Assert.ThrowsAnyAsync<Exception>(() => server.SendAsync("https://example.com/signin-google?error=OMG"));
                 Assert.Equal("OMG", error.Message);
             }
         }
@@ -411,12 +411,12 @@ namespace Microsoft.AspNet.Authentication.Google
             {
                 var transaction = await sendTask;
                 Assert.Equal(HttpStatusCode.Redirect, transaction.Response.StatusCode);
-                Assert.Equal("/error?ErrorMessage=" + UrlEncoder.Default.UrlEncode("OAuth token endpoint failure: Status: BadRequest;Headers: ;Body: {\"Error\":\"Error\"};"),
+                Assert.Equal("/error?ErrorMessage=" + UrlEncoder.Default.Encode("OAuth token endpoint failure: Status: BadRequest;Headers: ;Body: {\"Error\":\"Error\"};"),
                     transaction.Response.Headers.GetValues("Location").First());
             }
             else
             {
-                var error = await Assert.ThrowsAsync<Exception>(() => sendTask);
+                var error = await Assert.ThrowsAnyAsync<Exception>(() => sendTask);
                 Assert.Equal("OAuth token endpoint failure: Status: BadRequest;Headers: ;Body: {\"Error\":\"Error\"};", error.Message);
             }
         }
@@ -470,7 +470,7 @@ namespace Microsoft.AspNet.Authentication.Google
             }
             else
             {
-                var error = await Assert.ThrowsAsync<Exception>(() => sendTask);
+                var error = await Assert.ThrowsAnyAsync<Exception>(() => sendTask);
                 Assert.Equal("Failed to retrieve access token.", error.Message);
             }
         }
@@ -722,7 +722,7 @@ namespace Microsoft.AspNet.Authentication.Google
             });
 
             //Post a message to the Google middleware
-            var error = await Assert.ThrowsAsync<Exception>(() => server.SendAsync("https://example.com/signin-google?code=TestCode"));
+            var error = await Assert.ThrowsAnyAsync<Exception>(() => server.SendAsync("https://example.com/signin-google?code=TestCode"));
             Assert.Equal("The oauth state was missing or invalid.", error.Message);
         }
 
