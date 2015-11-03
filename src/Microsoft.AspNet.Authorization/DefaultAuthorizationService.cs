@@ -84,7 +84,7 @@ namespace Microsoft.AspNet.Authorization
             {
                 throw new InvalidOperationException($"No policy found: {policyName}.");
             }
-            return this.AuthorizeAsync(user, resource, policy.BuildRequirements(_services));
+            return this.AuthorizeAsync(user, resource, policy.CreateRequirements(_services));
         }
     }
 }

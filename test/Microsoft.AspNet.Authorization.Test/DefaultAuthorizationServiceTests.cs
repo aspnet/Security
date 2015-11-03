@@ -297,7 +297,7 @@ namespace Microsoft.AspNet.Authorization.Test
                 );
 
             // Act
-            var allowed = await authorizationService.AuthorizeAsync(user, policy.Build().BuildRequirements(new ServiceCollection().BuildServiceProvider()));
+            var allowed = await authorizationService.AuthorizeAsync(user, policy.Build().CreateRequirements(new ServiceCollection().BuildServiceProvider()));
 
             // Assert
             Assert.True(allowed);
@@ -318,7 +318,7 @@ namespace Microsoft.AspNet.Authorization.Test
                 );
 
             // Act
-            var allowed = await authorizationService.AuthorizeAsync(user, policy.Build().BuildRequirements(new ServiceCollection().BuildServiceProvider()));
+            var allowed = await authorizationService.AuthorizeAsync(user, policy.Build().CreateRequirements(new ServiceCollection().BuildServiceProvider()));
 
             // Assert
             Assert.True(allowed);

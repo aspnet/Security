@@ -32,7 +32,7 @@ namespace Microsoft.AspNet.Authorization
         internal IList<Func<IServiceProvider, IAuthorizationRequirement>> Requirements { get; }
         public IReadOnlyList<string> AuthenticationSchemes { get; }
 
-        public IEnumerable<IAuthorizationRequirement> BuildRequirements(IServiceProvider services)
+        public IEnumerable<IAuthorizationRequirement> CreateRequirements(IServiceProvider services)
         {
             var requirements = new List<IAuthorizationRequirement>();
             foreach (var reqBuild in Requirements)
