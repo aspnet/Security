@@ -29,7 +29,7 @@ namespace Microsoft.AspNet.Authorization
             Requirements = new List<Func<IServiceProvider, IAuthorizationRequirement>>(requirements);
         }
 
-        public IList<Func<IServiceProvider, IAuthorizationRequirement>> Requirements { get; }
+        internal IList<Func<IServiceProvider, IAuthorizationRequirement>> Requirements { get; }
         public IReadOnlyList<string> AuthenticationSchemes { get; }
 
         public IEnumerable<IAuthorizationRequirement> BuildRequirements(IServiceProvider services)

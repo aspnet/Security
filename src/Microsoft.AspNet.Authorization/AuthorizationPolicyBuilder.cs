@@ -22,8 +22,7 @@ namespace Microsoft.AspNet.Authorization
             Combine(policy);
         }
 
-        //private IList<IAuthorizationRequirement> Requirements { get; set; } = new List<IAuthorizationRequirement>();
-        private List<Func<IServiceProvider, IAuthorizationRequirement>> RequirementBuilders = new List<Func<IServiceProvider, IAuthorizationRequirement>>();
+        private List<Func<IServiceProvider, IAuthorizationRequirement>> _requirements = new List<Func<IServiceProvider, IAuthorizationRequirement>>();
         public IList<string> AuthenticationSchemes { get; set; } = new List<string>();
 
         public AuthorizationPolicyBuilder AddAuthenticationSchemes(params string[] schemes)
@@ -41,7 +40,7 @@ namespace Microsoft.AspNet.Authorization
             {
                 throw new ArgumentNullException(nameof(requirementFunc));
             }
-            RequirementBuilders.Add(requirementFunc);
+            _requirements.Add(requirementFunc);
             return this;
         }
 
@@ -84,7 +83,7 @@ namespace Microsoft.AspNet.Authorization
             }
 
             AddAuthenticationSchemes(policyBuilder.AuthenticationSchemes.ToArray());
-            RequirementBuilders.AddRange(policyBuilder.RequirementBuilders);
+            _requirements.AddRange(policyBuilder._requirements);
             return this;
         }
 
@@ -106,7 +105,6 @@ namespace Microsoft.AspNet.Authorization
             }
 
             AddRequirement<ClaimsAuthorizationRequirement>(claimType, requiredValues);
-            //Requirements.Add(new ClaimsAuthorizationRequirement(claimType, requiredValues));
             return this;
         }
 
@@ -118,7 +116,6 @@ namespace Microsoft.AspNet.Authorization
             }
 
             AddRequirement<ClaimsAuthorizationRequirement>(claimType, Enumerable.Empty<string>());
-            //Requirements.Add(new ClaimsAuthorizationRequirement(claimType, allowedValues: null));
             return this;
         }
 
@@ -140,7 +137,6 @@ namespace Microsoft.AspNet.Authorization
             }
 
             AddRequirement<RolesAuthorizationRequirement>(roles);
-            //Requirements.Add(new RolesAuthorizationRequirement(roles));
             return this;
         }
 
@@ -152,14 +148,12 @@ namespace Microsoft.AspNet.Authorization
             }
 
             AddRequirement<NameAuthorizationRequirement>(userName);
-            //Requirements.Add(new NameAuthorizationRequirement(userName));
             return this;
         }
 
         public AuthorizationPolicyBuilder RequireAuthenticatedUser()
         {
             AddRequirement<DenyAnonymousAuthorizationRequirement>();
-            //Requirements.Add(new DenyAnonymousAuthorizationRequirement());
             return this;
         }
 
@@ -171,13 +165,12 @@ namespace Microsoft.AspNet.Authorization
             }
 
             AddRequirement<DelegateRequirement>(handler);
-            //Requirements.Add(new DelegateRequirement(handler));
             return this;
         }
 
         public AuthorizationPolicy Build()
         {
-            return new AuthorizationPolicy(RequirementBuilders, AuthenticationSchemes.Distinct());
+            return new AuthorizationPolicy(_requirements, AuthenticationSchemes.Distinct());
         }
     }
 }
