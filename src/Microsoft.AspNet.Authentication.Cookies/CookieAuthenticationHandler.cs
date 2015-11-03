@@ -327,7 +327,11 @@ namespace Microsoft.AspNet.Authentication.Cookies
 
         protected override async Task<bool> HandleForbiddenAsync(ChallengeContext context)
         {
-            var returnUrl = OriginalPathBase + Request.Path + Request.QueryString;
+            var returnUrl = new AuthenticationProperties(context.Properties).RedirectUri;
+            if (string.IsNullOrEmpty(returnUrl))
+            {
+                returnUrl = OriginalPathBase + Request.Path + Request.QueryString;
+            }
             var accessDeniedUri = Options.AccessDeniedPath + QueryString.Create(Options.ReturnUrlParameter, returnUrl);
             var redirectContext = new CookieRedirectContext(Context, Options, BuildRedirectUri(accessDeniedUri));
             await Options.Events.RedirectToAccessDenied(redirectContext);
