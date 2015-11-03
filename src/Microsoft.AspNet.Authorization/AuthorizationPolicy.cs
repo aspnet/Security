@@ -42,17 +42,12 @@ namespace Microsoft.AspNet.Authorization
             return requirements;
         }
 
-        public static AuthorizationPolicyBuilder Combine(params AuthorizationPolicy[] policies)
+        public static AuthorizationPolicy Combine(params AuthorizationPolicy[] policies)
         {
-            if (policies == null)
-            {
-                throw new ArgumentNullException(nameof(policies));
-            }
-
             return Combine((IEnumerable<AuthorizationPolicy>)policies);
         }
 
-        public static AuthorizationPolicyBuilder Combine(IEnumerable<AuthorizationPolicy> policies)
+        public static AuthorizationPolicy Combine(IEnumerable<AuthorizationPolicy> policies)
         {
             if (policies == null)
             {
@@ -64,7 +59,7 @@ namespace Microsoft.AspNet.Authorization
             {
                 builder.Combine(policy);
             }
-            return builder;
+            return builder.Build();
         }
 
         public static AuthorizationPolicy Combine(AuthorizationOptions options, IEnumerable<IAuthorizeData> attributes)
