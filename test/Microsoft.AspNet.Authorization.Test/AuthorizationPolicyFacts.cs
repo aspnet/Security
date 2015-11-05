@@ -5,6 +5,7 @@ using System;
 using System.Linq;
 using Microsoft.AspNet.Authorization;
 using Microsoft.AspNet.Authorization.Infrastructure;
+using Microsoft.Extensions.DependencyInjection;
 using Xunit;
 
 namespace Microsoft.AspNet.Authroization.Test
@@ -14,7 +15,7 @@ namespace Microsoft.AspNet.Authroization.Test
         [Fact]
         public void RequireRoleThrowsIfEmpty()
         {
-            Assert.Throws<InvalidOperationException>(() => new AuthorizationPolicyBuilder().RequireRole());
+            Assert.Throws<InvalidOperationException>(() => new AuthorizationPolicyBuilder().RequireRole().Build().CreateRequirements(new ServiceCollection().BuildServiceProvider()));
         }
 
         [Fact]
@@ -38,10 +39,11 @@ namespace Microsoft.AspNet.Authroization.Test
             Assert.Equal(2, combined.AuthenticationSchemes.Count());
             Assert.True(combined.AuthenticationSchemes.Contains("dupe"));
             Assert.True(combined.AuthenticationSchemes.Contains("roles"));
-            Assert.Equal(4, combined.Requirements.Count());
-            Assert.True(combined.Requirements.Any(r => r is DenyAnonymousAuthorizationRequirement));
-            Assert.Equal(2, combined.Requirements.OfType<ClaimsAuthorizationRequirement>().Count());
-            Assert.Equal(1, combined.Requirements.OfType<RolesAuthorizationRequirement>().Count());
+            var reqs = combined.CreateRequirements(new ServiceCollection().BuildServiceProvider());
+            Assert.Equal(4, reqs.Count());
+            Assert.True(reqs.Any(r => r is DenyAnonymousAuthorizationRequirement));
+            Assert.Equal(2, reqs.OfType<ClaimsAuthorizationRequirement>().Count());
+            Assert.Equal(1, reqs.OfType<RolesAuthorizationRequirement>().Count());
         }
 
         [Fact]
@@ -63,9 +65,10 @@ namespace Microsoft.AspNet.Authroization.Test
             Assert.Equal(2, combined.AuthenticationSchemes.Count());
             Assert.True(combined.AuthenticationSchemes.Contains("dupe"));
             Assert.True(combined.AuthenticationSchemes.Contains("default"));
-            Assert.Equal(2, combined.Requirements.Count());
-            Assert.False(combined.Requirements.Any(r => r is DenyAnonymousAuthorizationRequirement));
-            Assert.Equal(2, combined.Requirements.OfType<ClaimsAuthorizationRequirement>().Count());
+            var reqs = combined.CreateRequirements(new ServiceCollection().BuildServiceProvider());
+            Assert.Equal(2, reqs.Count());
+            Assert.False(reqs.Any(r => r is DenyAnonymousAuthorizationRequirement));
+            Assert.Equal(2, reqs.OfType<ClaimsAuthorizationRequirement>().Count());
         }
     }
 }

@@ -15,21 +15,6 @@ namespace Microsoft.AspNet.Authorization
         /// </summary>
         public AuthorizationPolicy DefaultPolicy { get; set; } = new AuthorizationPolicyBuilder().RequireAuthenticatedUser().Build();
 
-        public void AddPolicy(string name, AuthorizationPolicy policy)
-        {
-            if (name == null)
-            {
-                throw new ArgumentNullException(nameof(name));
-            }
-
-            if (policy == null)
-            {
-                throw new ArgumentNullException(nameof(policy));
-            }
-
-            PolicyMap[name] = policy;
-        }
-
         public void AddPolicy(string name, Action<AuthorizationPolicyBuilder> configurePolicy)
         {
             if (name == null)

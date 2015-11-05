@@ -9,7 +9,7 @@ namespace Microsoft.AspNet.Authorization
 {
     public class AuthorizationPolicy
     {
-        public AuthorizationPolicy(IEnumerable<IAuthorizationRequirement> requirements, IEnumerable<string> authenticationSchemes)
+        public AuthorizationPolicy(IEnumerable<Func<IServiceProvider, IAuthorizationRequirement>> requirements, IEnumerable<string> authenticationSchemes)
         {
             if (requirements == null)
             {
@@ -25,20 +25,25 @@ namespace Microsoft.AspNet.Authorization
             {
                 throw new InvalidOperationException(Resources.Exception_AuthorizationPolicyEmpty);
             }
-            Requirements = new List<IAuthorizationRequirement>(requirements).AsReadOnly();
             AuthenticationSchemes = new List<string>(authenticationSchemes).AsReadOnly();
+            Requirements = new List<Func<IServiceProvider, IAuthorizationRequirement>>(requirements);
         }
 
-        public IReadOnlyList<IAuthorizationRequirement> Requirements { get; }
+        internal IList<Func<IServiceProvider, IAuthorizationRequirement>> Requirements { get; }
         public IReadOnlyList<string> AuthenticationSchemes { get; }
+
+        public IEnumerable<IAuthorizationRequirement> CreateRequirements(IServiceProvider services)
+        {
+            var requirements = new List<IAuthorizationRequirement>();
+            foreach (var reqBuild in Requirements)
+            {
+                requirements.Add(reqBuild(services));
+            }
+            return requirements;
+        }
 
         public static AuthorizationPolicy Combine(params AuthorizationPolicy[] policies)
         {
-            if (policies == null)
-            {
-                throw new ArgumentNullException(nameof(policies));
-            }
-
             return Combine((IEnumerable<AuthorizationPolicy>)policies);
         }
 
