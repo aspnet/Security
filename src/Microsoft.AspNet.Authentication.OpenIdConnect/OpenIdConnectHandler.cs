@@ -336,7 +336,7 @@ namespace Microsoft.AspNet.Authentication.OpenIdConnect
                 }
                 else if (messageReceivedContext.Skipped)
                 {
-                    return AuthenticateResult.Success(ticket: null);
+                    return AuthenticateResult.Skipped();
                 }
                 message = messageReceivedContext.ProtocolMessage;
 
@@ -394,7 +394,7 @@ namespace Microsoft.AspNet.Authentication.OpenIdConnect
                 else if (authorizationResponseReceivedContext.Skipped)
                 {
                     Logger.LogVerbose(17, "AuthorizationResponseReceived.Skipped");
-                    return AuthenticateResult.Success(ticket: null);
+                    return AuthenticateResult.Skipped();
                 }
                 message = authorizationResponseReceivedContext.ProtocolMessage;
                 properties = authorizationResponseReceivedContext.Properties;
@@ -434,7 +434,7 @@ namespace Microsoft.AspNet.Authentication.OpenIdConnect
                 }
                 else if (authenticationFailedContext.Skipped)
                 {
-                    return AuthenticateResult.Success(ticket: null);
+                    return AuthenticateResult.Skipped();
                 }
 
                 throw;
@@ -460,7 +460,7 @@ namespace Microsoft.AspNet.Authentication.OpenIdConnect
             }
             else if (authorizationCodeReceivedContext.Skipped)
             {
-                return AuthenticateResult.Success(ticket: null);
+                return AuthenticateResult.Skipped();
             }
             message = authorizationCodeReceivedContext.ProtocolMessage;
             var code = authorizationCodeReceivedContext.Code;
@@ -477,7 +477,7 @@ namespace Microsoft.AspNet.Authentication.OpenIdConnect
             }
             else if (authorizationCodeRedeemedContext.Skipped)
             {
-                return AuthenticateResult.Success(ticket: null);
+                return AuthenticateResult.Skipped();
             }
 
             message = authorizationCodeRedeemedContext.ProtocolMessage;
@@ -510,7 +510,7 @@ namespace Microsoft.AspNet.Authentication.OpenIdConnect
             }
             else if (authenticationValidatedContext.Skipped)
             {
-                return AuthenticateResult.Success(ticket: null);
+                return AuthenticateResult.Skipped();
             }
             ticket = authenticationValidatedContext.AuthenticationTicket;
 
@@ -559,7 +559,7 @@ namespace Microsoft.AspNet.Authentication.OpenIdConnect
             }
             else if (authenticationValidatedContext.Skipped)
             {
-                return AuthenticateResult.Success(ticket: null);
+                return AuthenticateResult.Skipped();
             }
             message = authenticationValidatedContext.ProtocolMessage;
             ticket = authenticationValidatedContext.AuthenticationTicket;
@@ -574,7 +574,7 @@ namespace Microsoft.AspNet.Authentication.OpenIdConnect
                 }
                 else if (authorizationCodeReceivedContext.Skipped)
                 {
-                    return AuthenticateResult.Success(ticket: null);
+                    return AuthenticateResult.Skipped();
                 }
                 message = authorizationCodeReceivedContext.ProtocolMessage;
                 ticket = authorizationCodeReceivedContext.AuthenticationTicket;

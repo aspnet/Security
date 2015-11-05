@@ -37,7 +37,7 @@ namespace Microsoft.AspNet.Authentication.JwtBearer
 
                 if (receivingTokenContext.Skipped)
                 {
-                    return AuthenticateResult.Success(ticket: null);
+                    return AuthenticateResult.Skipped();
                 }
 
                 // If application retrieved token from somewhere else, use that.
@@ -79,7 +79,7 @@ namespace Microsoft.AspNet.Authentication.JwtBearer
 
                 if (receivedTokenContext.Skipped)
                 {
-                    return AuthenticateResult.Success(ticket: null);
+                    return AuthenticateResult.Skipped();
                 }
 
                 if (_configuration == null && Options.ConfigurationManager != null)
@@ -123,7 +123,7 @@ namespace Microsoft.AspNet.Authentication.JwtBearer
 
                         if (validatedTokenContext.Skipped)
                         {
-                            return AuthenticateResult.Success(ticket: null);
+                            return AuthenticateResult.Skipped();
                         }
 
                         return AuthenticateResult.Success(ticket);
@@ -155,7 +155,7 @@ namespace Microsoft.AspNet.Authentication.JwtBearer
                 }
                 if (authenticationFailedContext.Skipped)
                 {
-                    return AuthenticateResult.Success(ticket: null);
+                    return AuthenticateResult.Skipped();
                 }
 
                 throw;
