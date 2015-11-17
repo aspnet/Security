@@ -99,8 +99,9 @@ namespace Microsoft.AspNet.Authentication.OpenIdConnect
                     message.IdTokenHint = principal?.FindFirst(OpenIdConnectParameterNames.IdToken)?.Value;
                 }
 
-                var redirectContext = new RedirectContext(Context, Options, properties)
+                var redirectContext = new RedirectContext(Context, Options)
                 {
+                    Properties = properties,
                     ProtocolMessage = message
                 };
 
@@ -215,8 +216,9 @@ namespace Microsoft.AspNet.Authentication.OpenIdConnect
 
             GenerateCorrelationId(properties);
 
-            var redirectContext = new RedirectContext(Context, Options, properties)
+            var redirectContext = new RedirectContext(Context, Options)
             {
+                Properties = properties,
                 ProtocolMessage = message
             };
 
@@ -956,6 +958,7 @@ namespace Microsoft.AspNet.Authentication.OpenIdConnect
                 ProtocolMessage = message,
                 RedirectUri = redirectUri,
                 AuthenticationTicket = ticket,
+                Properties = properties,
                 JwtSecurityToken = jwt
             };
 

@@ -13,10 +13,9 @@ namespace Microsoft.AspNet.Authentication.OpenIdConnect
     /// </summary>
     public class RedirectContext : BaseOpenIdConnectContext
     {
-        public RedirectContext(HttpContext context, OpenIdConnectOptions options, AuthenticationProperties properties)
+        public RedirectContext(HttpContext context, OpenIdConnectOptions options)
             : base(context, options)
         {
-            Properties = properties;
         }
 
         public AuthenticationProperties Properties { get; set; }
