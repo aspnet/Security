@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNet.Http;
+using Microsoft.AspNet.Http.Authentication;
 using Microsoft.IdentityModel.Protocols.OpenIdConnect;
 
 namespace Microsoft.AspNet.Authentication.OpenIdConnect
@@ -15,6 +16,8 @@ namespace Microsoft.AspNet.Authentication.OpenIdConnect
             : base(context, options)
         {
         }
+
+        public AuthenticationProperties Properties { get; set; }
 
         /// <summary>
         /// Gets or sets the <see cref="OpenIdConnectMessage"/> that contains the tokens received after redeeming the code at the token endpoint.

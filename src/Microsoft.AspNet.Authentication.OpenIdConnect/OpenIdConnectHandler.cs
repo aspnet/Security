@@ -471,7 +471,7 @@ namespace Microsoft.AspNet.Authentication.OpenIdConnect
 
             var tokenEndpointResponse = await RedeemAuthorizationCodeAsync(code, authorizationCodeReceivedContext.RedirectUri);
 
-            var authorizationCodeRedeemedContext = await RunTokenResponseReceivedEventAsync(message, tokenEndpointResponse);
+            var authorizationCodeRedeemedContext = await RunTokenResponseReceivedEventAsync(message, tokenEndpointResponse, properties);
             if (authorizationCodeRedeemedContext.HandledResponse)
             {
                 return AuthenticateResult.Success(authorizationCodeRedeemedContext.AuthenticationTicket);
@@ -504,7 +504,7 @@ namespace Microsoft.AspNet.Authentication.OpenIdConnect
                 Nonce = nonce
             });
 
-            var authenticationValidatedContext = await RunAuthenticationValidatedEventAsync(message, ticket, tokenEndpointResponse);
+            var authenticationValidatedContext = await RunAuthenticationValidatedEventAsync(message, ticket, properties, tokenEndpointResponse);
             if (authenticationValidatedContext.HandledResponse)
             {
                 return AuthenticateResult.Success(authenticationValidatedContext.AuthenticationTicket);
@@ -553,7 +553,7 @@ namespace Microsoft.AspNet.Authentication.OpenIdConnect
                 Nonce = nonce
             });
 
-            var authenticationValidatedContext = await RunAuthenticationValidatedEventAsync(message, ticket, tokenEndpointResponse: null);
+            var authenticationValidatedContext = await RunAuthenticationValidatedEventAsync(message, ticket, properties, tokenEndpointResponse: null);
             if (authenticationValidatedContext.HandledResponse)
             {
                 return AuthenticateResult.Success(authenticationValidatedContext.AuthenticationTicket);
@@ -975,11 +975,12 @@ namespace Microsoft.AspNet.Authentication.OpenIdConnect
             return authorizationCodeReceivedContext;
         }
 
-        private async Task<TokenResponseReceivedContext> RunTokenResponseReceivedEventAsync(OpenIdConnectMessage message, OpenIdConnectMessage tokenEndpointResponse)
+        private async Task<TokenResponseReceivedContext> RunTokenResponseReceivedEventAsync(OpenIdConnectMessage message, OpenIdConnectMessage tokenEndpointResponse, AuthenticationProperties properties)
         {
             Logger.LogTrace(35, "Token response received.");
             var tokenResponseReceivedContext = new TokenResponseReceivedContext(Context, Options)
             {
+                Properties = properties,
                 ProtocolMessage = message,
                 TokenEndpointResponse = tokenEndpointResponse
             };
@@ -996,11 +997,12 @@ namespace Microsoft.AspNet.Authentication.OpenIdConnect
             return tokenResponseReceivedContext;
         }
 
-        private async Task<AuthenticationValidatedContext> RunAuthenticationValidatedEventAsync(OpenIdConnectMessage message, AuthenticationTicket ticket, OpenIdConnectMessage tokenEndpointResponse)
+        private async Task<AuthenticationValidatedContext> RunAuthenticationValidatedEventAsync(OpenIdConnectMessage message, AuthenticationTicket ticket, AuthenticationProperties properties, OpenIdConnectMessage tokenEndpointResponse)
         {
             var authenticationValidatedContext = new AuthenticationValidatedContext(Context, Options)
             {
                 AuthenticationTicket = ticket,
+                Properties = properties,
                 ProtocolMessage = message,
                 TokenEndpointResponse = tokenEndpointResponse,
             };
