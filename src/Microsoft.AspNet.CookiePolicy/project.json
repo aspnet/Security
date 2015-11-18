@@ -1,5 +1,5 @@
 {
-  "version": "1.0.0-*",
+  "version": "1.0.0-rc1-final",
   "description": "ASP.NET 5 cookie policy classes.",
   "repository": {
     "type": "git",
@@ -10,7 +10,7 @@
     "keyFile": "../../tools/Key.snk"
   },
   "dependencies": {
-    "Microsoft.AspNet.Http": "1.0.0-*"
+    "Microsoft.AspNet.Http": "1.0.0-rc1-final"
   },
   "frameworks": {
     "net451": {},

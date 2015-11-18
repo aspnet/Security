@@ -1,5 +1,5 @@
 {
-  "version": "1.0.0-*",
+  "version": "1.0.0-rc1-final",
   "description": "ASP.NET 5 middleware that enables an application to support the Microsoft Account authentication workflow.",
   "repository": {
     "type": "git",
@@ -10,7 +10,7 @@
     "keyFile": "../../tools/Key.snk"
   },
   "dependencies": {
-    "Microsoft.AspNet.Authentication.OAuth": "1.0.0-*"
+    "Microsoft.AspNet.Authentication.OAuth": "1.0.0-rc1-final"
   },
   "frameworks": {
     "net451": {},

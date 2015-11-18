@@ -1,5 +1,5 @@
 {
-  "version": "1.0.0-*",
+  "version": "1.0.0-rc1-final",
   "description": "ASP.NET 5 common types used by the various authentication middleware.",
   "repository": {
     "type": "git",
@@ -10,16 +10,16 @@
     "keyFile": "../../tools/Key.snk"
   },
   "dependencies": {
-    "Microsoft.AspNet.DataProtection": "1.0.0-*",
-    "Microsoft.AspNet.Http": "1.0.0-*",
-    "Microsoft.AspNet.Http.Extensions": "1.0.0-*",
-    "Microsoft.Extensions.Logging.Abstractions": "1.0.0-*",
+    "Microsoft.AspNet.DataProtection": "1.0.0-rc1-final",
+    "Microsoft.AspNet.Http": "1.0.0-rc1-final",
+    "Microsoft.AspNet.Http.Extensions": "1.0.0-rc1-final",
+    "Microsoft.Extensions.Logging.Abstractions": "1.0.0-rc1-final",
     "Microsoft.Extensions.SecurityHelper.Sources": {
       "type": "build",
-      "version": "1.0.0-*"
+      "version": "1.0.0-rc1-final"
     },
-    "Microsoft.Extensions.OptionsModel": "1.0.0-*",
-    "Microsoft.Extensions.WebEncoders": "1.0.0-*"
+    "Microsoft.Extensions.OptionsModel": "1.0.0-rc1-final",
+    "Microsoft.Extensions.WebEncoders": "1.0.0-rc1-final"
   },
   "frameworks": {
     "net451": {
@@ -29,7 +29,7 @@
     },
     "dotnet5.4": {
       "dependencies": {
-        "System.Net.Http": "4.0.1-beta-*"
+        "System.Net.Http": "4.0.1-beta-23516"
       }
     }
   }

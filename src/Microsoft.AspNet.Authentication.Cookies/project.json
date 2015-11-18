@@ -1,5 +1,5 @@
 {
-  "version": "1.0.0-*",
+  "version": "1.0.0-rc1-final",
   "description": "ASP.NET middleware that enables an application to use cookie based authentication, similar to ASP.NET's forms authentication.",
   "repository": {
     "type": "git",
@@ -10,8 +10,8 @@
     "keyFile": "../../tools/Key.snk"
   },
   "dependencies": {
-    "Microsoft.AspNet.Authentication": "1.0.0-*",
-    "Microsoft.Extensions.WebEncoders": "1.0.0-*",
+    "Microsoft.AspNet.Authentication": "1.0.0-rc1-final",
+    "Microsoft.Extensions.WebEncoders": "1.0.0-rc1-final",
     "Newtonsoft.Json": "6.0.6"
   },
   "frameworks": {
