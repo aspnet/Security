@@ -186,7 +186,7 @@ namespace Microsoft.AspNet.Authentication.Cookies
                     cookieValue,
                     cookieOptions);
 
-                await ApplyHeaders(shouldRedirectToReturnUrl: false);
+                await ApplyHeaders(shouldRedirectToReturnUrl: false, properties: ticket.Properties);
             }
         }
 
@@ -261,7 +261,7 @@ namespace Microsoft.AspNet.Authentication.Cookies
 
             // Only redirect on the login path
             var shouldRedirect = Options.LoginPath.HasValue && OriginalPath == Options.LoginPath;
-            await ApplyHeaders(shouldRedirect);
+            await ApplyHeaders(shouldRedirect, signedInContext.Properties);
         }
 
         protected override async Task HandleSignOutAsync(SignOutContext signOutContext)
@@ -277,6 +277,7 @@ namespace Microsoft.AspNet.Authentication.Cookies
             var context = new CookieSigningOutContext(
                 Context,
                 Options,
+                new AuthenticationProperties(signOutContext.Properties),
                 cookieOptions);
 
             await Options.Events.SigningOut(context);
@@ -288,10 +289,10 @@ namespace Microsoft.AspNet.Authentication.Cookies
 
             // Only redirect on the logout path
             var shouldRedirect = Options.LogoutPath.HasValue && OriginalPath == Options.LogoutPath;
-            await ApplyHeaders(shouldRedirect);
+            await ApplyHeaders(shouldRedirect, context.Properties);
         }
 
-        private async Task ApplyHeaders(bool shouldRedirectToReturnUrl)
+        private async Task ApplyHeaders(bool shouldRedirectToReturnUrl, AuthenticationProperties properties)
         {
             Response.Headers[HeaderNames.CacheControl] = HeaderValueNoCache;
             Response.Headers[HeaderNames.Pragma] = HeaderValueNoCache;
@@ -303,7 +304,10 @@ namespace Microsoft.AspNet.Authentication.Cookies
                 if (!StringValues.IsNullOrEmpty(redirectUri)
                     && IsHostRelative(redirectUri))
                 {
-                    var redirectContext = new CookieRedirectContext(Context, Options, redirectUri);
+                    var redirectContext = new CookieRedirectContext(Context, Options, redirectUri)
+                    {
+                        Properties = properties
+                    };
                     await Options.Events.RedirectToReturnUrl(redirectContext);
                 }
             }

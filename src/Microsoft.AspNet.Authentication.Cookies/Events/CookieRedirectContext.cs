@@ -3,6 +3,7 @@
 
 using System.Diagnostics.CodeAnalysis;
 using Microsoft.AspNet.Http;
+using Microsoft.AspNet.Http.Authentication;
 
 namespace Microsoft.AspNet.Authentication.Cookies
 {
@@ -29,5 +30,7 @@ namespace Microsoft.AspNet.Authentication.Cookies
         /// </summary>
         [SuppressMessage("Microsoft.Design", "CA1056:UriPropertiesShouldNotBeStrings", Justification = "Represents header value")]
         public string RedirectUri { get; set; }
+
+        public AuthenticationProperties Properties { get; set; }
     }
 }
