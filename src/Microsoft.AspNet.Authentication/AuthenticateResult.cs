@@ -54,5 +54,9 @@ namespace Microsoft.AspNet.Authentication
             return new AuthenticateResult() { Error = new Exception(errorMessage) };
         }
 
+        public static AuthenticateResult Skipped()
+        {
+            return new AuthenticateResult();
+        }
     }
 }
