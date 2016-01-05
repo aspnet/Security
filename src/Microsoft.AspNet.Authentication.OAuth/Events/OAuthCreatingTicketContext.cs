@@ -85,6 +85,8 @@ namespace Microsoft.AspNet.Authentication.OAuth
             Backchannel = backchannel;
             User = user;
             Options = options;
+            Principal = principal;
+            Properties = properties;
         }
 
         public OAuthOptions Options { get; }
