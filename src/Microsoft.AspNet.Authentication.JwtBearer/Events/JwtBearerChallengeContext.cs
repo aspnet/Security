@@ -8,11 +8,12 @@ namespace Microsoft.AspNet.Authentication.JwtBearer
 {
     public class JwtBearerChallengeContext : BaseJwtBearerContext
     {
-        public JwtBearerChallengeContext(HttpContext context, JwtBearerOptions options)
+        public JwtBearerChallengeContext(HttpContext context, JwtBearerOptions options, AuthenticationProperties properties)
             : base(context, options)
         {
+            Properties = properties;
         }
 
-        public AuthenticationProperties Properties { get; set; }
+        public AuthenticationProperties Properties { get; }
     }
 }

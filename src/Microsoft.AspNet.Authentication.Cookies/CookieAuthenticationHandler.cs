@@ -304,10 +304,7 @@ namespace Microsoft.AspNet.Authentication.Cookies
                 if (!StringValues.IsNullOrEmpty(redirectUri)
                     && IsHostRelative(redirectUri))
                 {
-                    var redirectContext = new CookieRedirectContext(Context, Options, redirectUri)
-                    {
-                        Properties = properties
-                    };
+                    var redirectContext = new CookieRedirectContext(Context, Options, redirectUri, properties);
                     await Options.Events.RedirectToReturnUrl(redirectContext);
                 }
             }
@@ -329,13 +326,14 @@ namespace Microsoft.AspNet.Authentication.Cookies
 
         protected override async Task<bool> HandleForbiddenAsync(ChallengeContext context)
         {
-            var returnUrl = new AuthenticationProperties(context.Properties).RedirectUri;
+            var properties = new AuthenticationProperties(context.Properties);
+            var returnUrl = properties.RedirectUri;
             if (string.IsNullOrEmpty(returnUrl))
             {
                 returnUrl = OriginalPathBase + Request.Path + Request.QueryString;
             }
             var accessDeniedUri = Options.AccessDeniedPath + QueryString.Create(Options.ReturnUrlParameter, returnUrl);
-            var redirectContext = new CookieRedirectContext(Context, Options, BuildRedirectUri(accessDeniedUri));
+            var redirectContext = new CookieRedirectContext(Context, Options, BuildRedirectUri(accessDeniedUri), properties);
             await Options.Events.RedirectToAccessDenied(redirectContext);
             return true;
         }
@@ -347,14 +345,15 @@ namespace Microsoft.AspNet.Authentication.Cookies
                 throw new ArgumentNullException(nameof(context));
             }
 
-            var redirectUri = new AuthenticationProperties(context.Properties).RedirectUri;
+            var properties = new AuthenticationProperties(context.Properties);
+            var redirectUri = properties.RedirectUri;
             if (string.IsNullOrEmpty(redirectUri))
             {
                 redirectUri = OriginalPathBase + Request.Path + Request.QueryString;
             }
 
             var loginUri = Options.LoginPath + QueryString.Create(Options.ReturnUrlParameter, redirectUri);
-            var redirectContext = new CookieRedirectContext(Context, Options, BuildRedirectUri(loginUri));
+            var redirectContext = new CookieRedirectContext(Context, Options, BuildRedirectUri(loginUri), properties);
             await Options.Events.RedirectToLogin(redirectContext);
             return true;
 
