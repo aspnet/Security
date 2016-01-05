@@ -610,7 +610,7 @@ namespace Microsoft.AspNet.Authentication.Google
                 {
                     OnTicketReceived = context =>
                     {
-                        context.AuthenticationTicket.Properties.RedirectUri = null;
+                        context.Ticket.Properties.RedirectUri = null;
                         return Task.FromResult(0);
                     }
                 };

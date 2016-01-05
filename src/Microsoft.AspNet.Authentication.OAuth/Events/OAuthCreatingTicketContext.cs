@@ -144,10 +144,5 @@ namespace Microsoft.AspNet.Authentication.OAuth
         /// This property returns <c>null</c> when <see cref="Ticket"/> is <c>null</c>.
         /// </summary>
         public ClaimsIdentity Identity => Ticket?.Principal.Identity as ClaimsIdentity;
-
-        /// <summary>
-        /// Gets or sets a property bag for common authentication properties.
-        /// </summary>
-        public AuthenticationProperties Properties { get; set; }
     }
 }

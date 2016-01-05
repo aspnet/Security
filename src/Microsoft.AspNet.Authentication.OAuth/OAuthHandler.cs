@@ -157,14 +157,7 @@ namespace Microsoft.AspNet.Authentication.OAuth
         {
             var ticket = new AuthenticationTicket(new ClaimsPrincipal(identity), properties, Options.AuthenticationScheme);
             var context = new OAuthCreatingTicketContext(ticket, Context, Options, Backchannel, tokens);
-
             await Options.Events.CreatingTicket(context);
-
-            if (context?.Ticket?.Principal?.Identity == null)
-            {
-                return null;
-            }
-
             return context.Ticket;
         }
 
