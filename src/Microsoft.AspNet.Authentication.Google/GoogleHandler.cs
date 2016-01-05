@@ -32,7 +32,7 @@ namespace Microsoft.AspNet.Authentication.Google
 
             var payload = JObject.Parse(await response.Content.ReadAsStringAsync());
 
-            var context = new OAuthCreatingTicketContext(new ClaimsPrincipal(identity), properties, Context, Options, Backchannel, tokens, payload);
+            var context = new OAuthCreatingTicketContext(new AuthenticationTicket(new ClaimsPrincipal(identity), properties, Options.AuthenticationScheme), Context, Options, Backchannel, tokens, payload);
 
             var identifier = GoogleHelper.GetId(payload);
             if (!string.IsNullOrEmpty(identifier))

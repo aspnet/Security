@@ -38,7 +38,7 @@ namespace Microsoft.AspNet.Authentication.Facebook
 
             var payload = JObject.Parse(await response.Content.ReadAsStringAsync());
 
-            var context = new OAuthCreatingTicketContext(new ClaimsPrincipal(identity), properties, Context, Options, Backchannel, tokens, payload);
+            var context = new OAuthCreatingTicketContext(new AuthenticationTicket(new ClaimsPrincipal(identity), properties, Options.AuthenticationScheme), Context, Options, Backchannel, tokens, payload);
 
             var identifier = FacebookHelper.GetId(payload);
             if (!string.IsNullOrEmpty(identifier))
@@ -78,7 +78,7 @@ namespace Microsoft.AspNet.Authentication.Facebook
 
             await Options.Events.CreatingTicket(context);
 
-            return new AuthenticationTicket(context.Principal, context.Properties, context.Options.AuthenticationScheme);
+            return context.Ticket;
         }
 
         private string GenerateAppSecretProof(string accessToken)

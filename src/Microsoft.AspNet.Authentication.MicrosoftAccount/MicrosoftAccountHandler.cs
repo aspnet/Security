@@ -28,7 +28,7 @@ namespace Microsoft.AspNet.Authentication.MicrosoftAccount
 
             var payload = JObject.Parse(await response.Content.ReadAsStringAsync());
 
-            var context = new OAuthCreatingTicketContext(new ClaimsPrincipal(identity), properties, Context, Options, Backchannel, tokens, payload);
+            var context = new OAuthCreatingTicketContext(new AuthenticationTicket(new ClaimsPrincipal(identity), properties, Options.AuthenticationScheme), Context, Options, Backchannel, tokens, payload);
             var identifier = MicrosoftAccountHelper.GetId(payload);
             if (!string.IsNullOrEmpty(identifier))
             {
