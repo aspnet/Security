@@ -117,6 +117,7 @@ namespace Microsoft.AspNet.Authentication.Cookies
             if (context.ShouldRenew)
             {
                 _shouldRenew = true;
+                _renewIssuedUtc = Options.SystemClock.UtcNow;
             }
 
             return AuthenticateResult.Success(new AuthenticationTicket(context.Principal, context.Properties, Options.AuthenticationScheme));

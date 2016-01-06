@@ -580,6 +580,53 @@ namespace Microsoft.AspNet.Authentication.Cookies
             Assert.Null(FindClaimValue(transaction5, ClaimTypes.Name));
         }
 
+        [Fact]
+        public async Task ShouldRenewUpdatesIssuedUtc()
+        {
+            var clock = new TestClock();
+            DateTimeOffset? lastValidateIssuedDate = null;
+            var server = CreateServer(options =>
+            {
+                options.SystemClock = clock;
+                options.ExpireTimeSpan = TimeSpan.FromMinutes(10);
+                options.SlidingExpiration = false;
+                options.Events = new CookieAuthenticationEvents
+                {
+                    OnValidatePrincipal = ctx =>
+                    {
+                        lastValidateIssuedDate = ctx.Properties.IssuedUtc;
+                        ctx.ShouldRenew = true;
+                        return Task.FromResult(0);
+                    }
+                };
+            },
+            context =>
+                context.Authentication.SignInAsync("Cookies",
+                    new ClaimsPrincipal(new ClaimsIdentity(new GenericIdentity("Alice", "Cookies")))));
+
+            var transaction1 = await SendAsync(server, "http://example.com/testpath");
+
+            var transaction2 = await SendAsync(server, "http://example.com/me/Cookies", transaction1.CookieNameValue);
+            Assert.NotNull(transaction2.SetCookie);
+            Assert.Equal("Alice", FindClaimValue(transaction2, ClaimTypes.Name));
+
+            Assert.NotNull(lastValidateIssuedDate);
+            var firstIssueDate = lastValidateIssuedDate;
+
+            clock.Add(TimeSpan.FromMinutes(1));
+
+            var transaction3 = await SendAsync(server, "http://example.com/me/Cookies", transaction2.CookieNameValue);
+            Assert.NotNull(transaction3.SetCookie);
+            Assert.Equal("Alice", FindClaimValue(transaction3, ClaimTypes.Name));
+
+            clock.Add(TimeSpan.FromMinutes(2));
+
+            var transaction4 = await SendAsync(server, "http://example.com/me/Cookies", transaction3.CookieNameValue);
+            Assert.NotNull(transaction4.SetCookie);
+            Assert.Equal("Alice", FindClaimValue(transaction4, ClaimTypes.Name));
+
+            Assert.NotEqual(firstIssueDate, lastValidateIssuedDate);
+        }
 
         [Fact]
         public async Task CookieExpirationCanBeOverridenInEvent()
