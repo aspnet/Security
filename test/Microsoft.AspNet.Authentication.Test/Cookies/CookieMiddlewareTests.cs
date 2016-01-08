@@ -2,6 +2,7 @@
 // Licensed under the Apache License, Version 2.0. See License.txt in the project root for license information.
 
 using System;
+using System.Diagnostics;
 using System.Linq;
 using System.Net;
 using System.Net.Http;
@@ -580,21 +581,25 @@ namespace Microsoft.AspNet.Authentication.Cookies
             Assert.Null(FindClaimValue(transaction5, ClaimTypes.Name));
         }
 
-        [Fact]
-        public async Task ShouldRenewUpdatesIssuedUtc()
+        [Theory]
+        [InlineData(true)]
+        [InlineData(false)]
+        public async Task ShouldRenewUpdatesIssuedExpiredUtc(bool sliding)
         {
             var clock = new TestClock();
             DateTimeOffset? lastValidateIssuedDate = null;
+            DateTimeOffset? lastExpiresDate = null;
             var server = CreateServer(options =>
             {
                 options.SystemClock = clock;
                 options.ExpireTimeSpan = TimeSpan.FromMinutes(10);
-                options.SlidingExpiration = false;
+                options.SlidingExpiration = sliding;
                 options.Events = new CookieAuthenticationEvents
                 {
                     OnValidatePrincipal = ctx =>
                     {
                         lastValidateIssuedDate = ctx.Properties.IssuedUtc;
+                        lastExpiresDate = ctx.Properties.ExpiresUtc;
                         ctx.ShouldRenew = true;
                         return Task.FromResult(0);
                     }
@@ -611,7 +616,10 @@ namespace Microsoft.AspNet.Authentication.Cookies
             Assert.Equal("Alice", FindClaimValue(transaction2, ClaimTypes.Name));
 
             Assert.NotNull(lastValidateIssuedDate);
+            Assert.NotNull(lastExpiresDate);
+
             var firstIssueDate = lastValidateIssuedDate;
+            var firstExpiresDate = lastExpiresDate;
 
             clock.Add(TimeSpan.FromMinutes(1));
 
@@ -625,7 +633,8 @@ namespace Microsoft.AspNet.Authentication.Cookies
             Assert.NotNull(transaction4.SetCookie);
             Assert.Equal("Alice", FindClaimValue(transaction4, ClaimTypes.Name));
 
-            Assert.NotEqual(firstIssueDate, lastValidateIssuedDate);
+            Assert.NotEqual(lastValidateIssuedDate, firstIssueDate);
+            Assert.NotEqual(firstExpiresDate, lastExpiresDate);
         }
 
         [Fact]
