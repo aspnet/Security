@@ -12,9 +12,14 @@ namespace Microsoft.AspNet.Authorization.Infrastructure
         /// </summary>
         public Func<AuthorizationContext, bool> Handler { get; }
 
-        public AssertionRequirement(Func<AuthorizationContext, bool> handleMe)
+        public AssertionRequirement(Func<AuthorizationContext, bool> assert)
         {
-            Handler = handleMe;
+            if (assert == null)
+            {
+                throw new ArgumentNullException(nameof(assert));
+            }
+
+            Handler = assert;
         }
 
         protected override void Handle(AuthorizationContext context, AssertionRequirement requirement)
