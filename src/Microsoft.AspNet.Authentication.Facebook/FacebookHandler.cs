@@ -71,7 +71,19 @@ namespace Microsoft.AspNet.Authentication.Facebook
                     identity.AddClaim(new Claim(identity.NameClaimType, name, ClaimValueTypes.String, Options.ClaimsIssuer));
                 }
             }
+            
+            var givenName = FacebookHelper.GetGivenName(payload);
+            if (!string.IsNullOrEmpty(givenName))
+            {
+                identity.AddClaim(new Claim(ClaimTypes.GivenName, givenName, ClaimValueTypes.String, Options.ClaimsIssuer));
+            }
 
+            var familyName = FacebookHelper.GetFamilyName(payload);
+            if (!string.IsNullOrEmpty(familyName))
+            {
+                identity.AddClaim(new Claim(ClaimTypes.Surname, familyName, ClaimValueTypes.String, Options.ClaimsIssuer));
+            }
+            
             var link = FacebookHelper.GetLink(payload);
             if (!string.IsNullOrEmpty(link))
             {
