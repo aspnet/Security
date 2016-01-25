@@ -48,28 +48,10 @@ namespace Microsoft.AspNetCore.Authentication.Facebook
                 identity.AddClaim(new Claim(ClaimTypes.NameIdentifier, identifier, ClaimValueTypes.String, Options.ClaimsIssuer));
             }
 
-            var userName = FacebookHelper.GetUserName(payload);
-            if (!string.IsNullOrEmpty(userName))
-            {
-                identity.AddClaim(new Claim(ClaimsIdentity.DefaultNameClaimType, userName, ClaimValueTypes.String, Options.ClaimsIssuer));
-            }
-
-            var email = FacebookHelper.GetEmail(payload);
-            if (!string.IsNullOrEmpty(email))
-            {
-                identity.AddClaim(new Claim(ClaimTypes.Email, email, ClaimValueTypes.String, Options.ClaimsIssuer));
-            }
-
             var name = FacebookHelper.GetName(payload);
             if (!string.IsNullOrEmpty(name))
-            {
-                identity.AddClaim(new Claim("urn:facebook:name", name, ClaimValueTypes.String, Options.ClaimsIssuer));
-
-                // Many Facebook accounts do not set the UserName field.  Fall back to the Name field instead.
-                if (string.IsNullOrEmpty(userName))
-                {
-                    identity.AddClaim(new Claim(identity.NameClaimType, name, ClaimValueTypes.String, Options.ClaimsIssuer));
-                }
+            {           
+                identity.AddClaim(new Claim(ClaimTypes.Name, name, ClaimValueTypes.String, Options.ClaimsIssuer));
             }
 
             var link = FacebookHelper.GetLink(payload);
