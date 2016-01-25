@@ -5,9 +5,9 @@ AppVeyor: [![AppVeyor](https://ci.appveyor.com/api/projects/status/fujhh8n956v5o
 
 Travis:   [![Travis](https://travis-ci.org/aspnet/Security.svg?branch=dev)](https://travis-ci.org/aspnet/Security)
 
-ASP.NET Security contains the security and authorization middlewares for ASP.NET 5.
+ASP.NET Security contains the security and authorization middlewares for ASP.NET Core 1.0.
 
-This project is part of ASP.NET 5. You can find samples, documentation and getting started instructions for ASP.NET 5 at the [Home](https://github.com/aspnet/home) repo.
+This project is part of ASP.NET Core 1.0. You can find samples, documentation and getting started instructions for ASP.NET Core 1.0 at the [Home](https://github.com/aspnet/home) repo.
 
 ### Notes
 
