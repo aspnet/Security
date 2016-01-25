@@ -39,6 +39,32 @@ namespace Microsoft.AspNetCore.Authentication.Facebook
         }
 
         /// <summary>
+        /// Gets the user's given name.
+        /// </summary>
+        public static string GetGivenName(JObject user)
+        {
+            if (user == null)
+            {
+                throw new ArgumentNullException(nameof(user));
+            }
+
+            return user.Value<string>("first_name");
+        }
+
+        /// <summary>
+        /// Gets the user's family name.
+        /// </summary>
+        public static string GetFamilyName(JObject user)
+        {
+            if (user == null)
+            {
+                throw new ArgumentNullException(nameof(user));
+            }
+
+            return user.Value<string>("last_name");
+        }
+
+        /// <summary>
         /// Gets the user's link.
         /// </summary>
         public static string GetLink(JObject user)
@@ -49,20 +75,6 @@ namespace Microsoft.AspNetCore.Authentication.Facebook
             }
             return user.Value<string>("link");
         }
-
-        /// <summary>
-        /// Gets the Facebook username.
-        /// </summary>
-        public static string GetUserName(JObject user)
-        {
-            if (user == null)
-            {
-                throw new ArgumentNullException(nameof(user));
-            }
-
-            return user.Value<string>("username");
-        }
-
 
         /// <summary>
         /// Gets the Facebook email.
