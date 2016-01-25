@@ -30,7 +30,7 @@ namespace Microsoft.AspNetCore.Authorization.Test
         [Fact]
         public void AuthorizeCombineThrowsOnUnknownPolicy()
         {
-            Assert.Throws<InvalidOperationException>(() => AuthorizationPolicy.Combine(new AuthorizationOptions(), new AuthorizeAttribute[] {
+            Assert.Throws<InvalidOperationException>(() => AuthorizationPolicy.Combine(new AuthorizationPolicyOptions(), new AuthorizeAttribute[] {
                 new AuthorizeAttribute { Policy = "Wut" }
             }));
         }
