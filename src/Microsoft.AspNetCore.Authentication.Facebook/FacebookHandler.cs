@@ -60,6 +60,18 @@ namespace Microsoft.AspNetCore.Authentication.Facebook
                 identity.AddClaim(new Claim(ClaimTypes.Name, name, ClaimValueTypes.String, Options.ClaimsIssuer));
             }
 
+            var givenName = FacebookHelper.GetGivenName(payload);
+            if (!string.IsNullOrEmpty(givenName))
+            {
+                identity.AddClaim(new Claim(ClaimTypes.GivenName, givenName, ClaimValueTypes.String, Options.ClaimsIssuer));
+            }
+
+            var surname = FacebookHelper.GetFamilyName(payload);
+            if (!string.IsNullOrEmpty(surname))
+            {
+                identity.AddClaim(new Claim(ClaimTypes.Surname, surname, ClaimValueTypes.String, Options.ClaimsIssuer));
+            }
+
             var link = FacebookHelper.GetLink(payload);
             if (!string.IsNullOrEmpty(link))
             {
