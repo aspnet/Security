@@ -51,20 +51,6 @@ namespace Microsoft.AspNetCore.Authentication.Facebook
         }
 
         /// <summary>
-        /// Gets the Facebook username.
-        /// </summary>
-        public static string GetUserName(JObject user)
-        {
-            if (user == null)
-            {
-                throw new ArgumentNullException(nameof(user));
-            }
-
-            return user.Value<string>("username");
-        }
-
-
-        /// <summary>
         /// Gets the Facebook email.
         /// </summary>
         public static string GetEmail(JObject user)
