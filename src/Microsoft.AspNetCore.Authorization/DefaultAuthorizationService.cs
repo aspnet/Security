@@ -61,19 +61,19 @@ namespace Microsoft.AspNetCore.Authorization
             }
         }
 
-        public Task<bool> AuthorizeAsync(ClaimsPrincipal user, object resource, string policyName)
+        public async Task<bool> AuthorizeAsync(ClaimsPrincipal user, object resource, string policyName)
         {
             if (policyName == null)
             {
                 throw new ArgumentNullException(nameof(policyName));
             }
 
-            var policy = _policyProvider.GetPolicy(policyName);
+            var policy = await _policyProvider.GetPolicyAsync(policyName);
             if (policy == null)
             {
                 throw new InvalidOperationException($"No policy found: {policyName}.");
             }
-            return this.AuthorizeAsync(user, resource, policy);
+            return await this.AuthorizeAsync(user, resource, policy);
         }
     }
 }

@@ -1,6 +1,8 @@
 // Copyright (c) .NET Foundation. All rights reserved.
 // Licensed under the Apache License, Version 2.0. See License.txt in the project root for license information.
 
+using System.Threading.Tasks;
+
 namespace Microsoft.AspNetCore.Authorization
 {
     /// <summary>
@@ -13,6 +15,6 @@ namespace Microsoft.AspNetCore.Authorization
         /// </summary>
         /// <param name="policyName"></param>
         /// <returns></returns>
-        AuthorizationPolicy GetPolicy(string policyName);
+        Task<AuthorizationPolicy> GetPolicyAsync(string policyName);
     }
 }

@@ -2,6 +2,7 @@
 // Licensed under the Apache License, Version 2.0. See License.txt in the project root for license information.
 
 using System;
+using System.Threading.Tasks;
 using Microsoft.Extensions.Options;
 
 namespace Microsoft.AspNetCore.Authorization
@@ -28,9 +29,9 @@ namespace Microsoft.AspNetCore.Authorization
         /// </summary>
         /// <param name="policyName"></param>
         /// <returns></returns>
-        public virtual AuthorizationPolicy GetPolicy(string policyName)
+        public virtual Task<AuthorizationPolicy> GetPolicyAsync(string policyName)
         {
-            return _options.GetPolicy(policyName);
+            return Task.FromResult(_options.GetPolicy(policyName));
         }
     }
 }
