@@ -12,9 +12,9 @@ namespace Microsoft.AspNetCore.Authorization
     /// </summary>
     public class DefaultAuthorizationPolicyProvider : IAuthorizationPolicyProvider
     {
-        private readonly AuthorizationPolicyOptions _options;
+        private readonly AuthorizationOptions _options;
 
-        public DefaultAuthorizationPolicyProvider(IOptions<AuthorizationPolicyOptions> options)
+        public DefaultAuthorizationPolicyProvider(IOptions<AuthorizationOptions> options)
         {
             if (options == null)
             {

@@ -30,7 +30,7 @@ namespace Microsoft.AspNetCore.Authorization.Test
         [Fact]
         public void AuthorizeCombineThrowsOnUnknownPolicy()
         {
-            Assert.Throws<InvalidOperationException>(() => AuthorizationPolicy.Combine(new AuthorizationPolicyOptions(), new AuthorizeAttribute[] {
+            Assert.Throws<InvalidOperationException>(() => AuthorizationPolicy.Combine(new AuthorizationOptions(), new AuthorizeAttribute[] {
                 new AuthorizeAttribute { Policy = "Wut" }
             }));
         }
@@ -925,9 +925,9 @@ namespace Microsoft.AspNetCore.Authorization.Test
 
         public class StaticPolicyProvider : IAuthorizationPolicyProvider
         {
-            public AuthorizationPolicy GetPolicy(string policyName)
+            public Task<AuthorizationPolicy> GetPolicyAsync(string policyName)
             {
-                return new AuthorizationPolicyBuilder().RequireAuthenticatedUser().Build();
+                return Task.FromResult(new AuthorizationPolicyBuilder().RequireAuthenticatedUser().Build());
             }
         }
 
@@ -954,9 +954,9 @@ namespace Microsoft.AspNetCore.Authorization.Test
 
         public class DynamicPolicyProvider : IAuthorizationPolicyProvider
         {
-            public AuthorizationPolicy GetPolicy(string policyName)
+            public Task<AuthorizationPolicy> GetPolicyAsync(string policyName)
             {
-                return new AuthorizationPolicyBuilder().RequireClaim(policyName).Build();
+                return Task.FromResult(new AuthorizationPolicyBuilder().RequireClaim(policyName).Build());
             }
         }
 
