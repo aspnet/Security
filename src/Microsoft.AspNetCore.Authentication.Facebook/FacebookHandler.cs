@@ -12,6 +12,7 @@ using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http.Authentication;
 using Microsoft.AspNetCore.WebUtilities;
 using Newtonsoft.Json.Linq;
+using System.Linq;
 
 namespace Microsoft.AspNetCore.Authentication.Facebook
 {
@@ -31,7 +32,7 @@ namespace Microsoft.AspNetCore.Authentication.Facebook
             }
             if (Options.Fields.Count > 0)
             {
-                endpoint = QueryHelpers.AddQueryString(endpoint, "fields", string.Join(",", Options.Fields));
+                endpoint = QueryHelpers.AddQueryString(endpoint, "fields", string.Join(",", Options.Fields.Distinct()));
             }
 
             var response = await Backchannel.GetAsync(endpoint, Context.RequestAborted);

@@ -76,25 +76,6 @@ namespace Microsoft.AspNetCore.Authentication.Facebook
             {
                 throw new ArgumentException(string.Format(CultureInfo.CurrentCulture, Resources.Exception_OptionMustBeProvided, nameof(Options.AppSecret)));
             }
-
-            if (Options.Scope.Count == 0)
-            {
-                // Add default scopes.  These scopes are always permitted.
-                // TODO: Should we just add these by default when we create the Options?
-                Options.Scope.Add("public_profile");
-                Options.Scope.Add("email");
-            }
-
-            if (Options.Fields.Count == 0)
-            {
-                // Add default fields
-                // TODO: Should we just add these by default when we create the Options?
-                Options.Fields.Add("name");
-                Options.Fields.Add("first_name");
-                Options.Fields.Add("last_name");
-                Options.Fields.Add("link");
-                Options.Fields.Add("email");
-            }
         }
 
         /// <summary>
