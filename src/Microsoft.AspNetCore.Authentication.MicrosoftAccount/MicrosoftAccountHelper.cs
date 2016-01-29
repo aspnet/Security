@@ -8,7 +8,8 @@ namespace Microsoft.AspNetCore.Authentication.MicrosoftAccount
 {
     /// <summary>
     /// Contains static methods that allow to extract user's information from a <see cref="JObject"/>
-    /// instance retrieved from Google after a successful authentication process.
+    /// instance retrieved from Microsoft after a successful authentication process.
+    /// http://graph.microsoft.io/en-us/docs/api-reference/v1.0/resources/user
     /// </summary>
     public static class MicrosoftAccountHelper
     {
@@ -34,8 +35,17 @@ namespace Microsoft.AspNetCore.Authentication.MicrosoftAccount
             {
                 throw new ArgumentNullException(nameof(user));
             }
+            
+            //displayName is required for Azure AD accounts, but not for Microsoft accounts.
+            //givenName & surename is required for Microsoft accounts, but not for Azure AD accounts
+            //In case of microsoft accounts displayName is null => fallback to givenName + surename
+            var name = user.Value<string>("displayName");
+            if (string.IsNullOrEmpty(name))
+            {
+                name = string.Format("{0} {1}", GetFirstName(user), GetLastName(user));
+            }
 
-            return user.Value<string>("name");
+            return name;
         }
 
         /// <summary>
@@ -48,7 +58,7 @@ namespace Microsoft.AspNetCore.Authentication.MicrosoftAccount
                 throw new ArgumentNullException(nameof(user));
             }
 
-            return user.Value<string>("first_name");
+            return user.Value<string>("givenName");
         }
 
         /// <summary>
@@ -61,7 +71,7 @@ namespace Microsoft.AspNetCore.Authentication.MicrosoftAccount
                 throw new ArgumentNullException(nameof(user));
             }
 
-            return user.Value<string>("last_name");
+            return user.Value<string>("surname");
         }
 
         /// <summary>
@@ -74,7 +84,7 @@ namespace Microsoft.AspNetCore.Authentication.MicrosoftAccount
                 throw new ArgumentNullException(nameof(user));
             }
 
-            return user.Value<JObject>("emails")?.Value<string>("preferred");
+            return user.Value<string>("mail") ?? user.Value<string>("userPrincipalName");
         }
     }
 }
