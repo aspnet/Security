@@ -27,9 +27,6 @@ namespace Microsoft.AspNetCore.Builder
             Scope.Add("public_profile");
             Scope.Add("email");
             Fields.Add("name");
-            Fields.Add("first_name");
-            Fields.Add("last_name");
-            Fields.Add("link");
             Fields.Add("email");
         }
 
