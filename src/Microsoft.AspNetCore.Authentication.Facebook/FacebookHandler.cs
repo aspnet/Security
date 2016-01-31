@@ -49,10 +49,70 @@ namespace Microsoft.AspNetCore.Authentication.Facebook
                 identity.AddClaim(new Claim(ClaimTypes.NameIdentifier, identifier, ClaimValueTypes.String, Options.ClaimsIssuer));
             }
 
+            var ageRangeMin = FacebookHelper.GetAgeRangeMin(payload);
+            if (!string.IsNullOrEmpty(ageRangeMin))
+            {
+                identity.AddClaim(new Claim("urn:facebook:age_range_min", ageRangeMin, ClaimValueTypes.String, Options.ClaimsIssuer));
+            }
+
+            var ageRangeMax = FacebookHelper.GetAgeRangeMax(payload);
+            if (!string.IsNullOrEmpty(ageRangeMax))
+            {
+                identity.AddClaim(new Claim("urn:facebook:age_range_max", ageRangeMax, ClaimValueTypes.String, Options.ClaimsIssuer));
+            }
+
+            var birthday = FacebookHelper.GetBirthday(payload);
+            if (!string.IsNullOrEmpty(birthday))
+            {
+                identity.AddClaim(new Claim(ClaimTypes.DateOfBirth, birthday, ClaimValueTypes.String, Options.ClaimsIssuer));
+            }
+
             var email = FacebookHelper.GetEmail(payload);
             if (!string.IsNullOrEmpty(email))
             {
                 identity.AddClaim(new Claim(ClaimTypes.Email, email, ClaimValueTypes.String, Options.ClaimsIssuer));
+            }
+
+            var firstName = FacebookHelper.GetFirstName(payload);
+            if (!string.IsNullOrEmpty(firstName))
+            {
+                identity.AddClaim(new Claim(ClaimTypes.GivenName, firstName, ClaimValueTypes.String, Options.ClaimsIssuer));
+            }
+
+            var gender = FacebookHelper.GetGender(payload);
+            if (!string.IsNullOrEmpty(gender))
+            {
+                identity.AddClaim(new Claim(ClaimTypes.Gender, gender, ClaimValueTypes.String, Options.ClaimsIssuer));
+            }
+
+            var lastName = FacebookHelper.GetLastName(payload);
+            if (!string.IsNullOrEmpty(lastName))
+            {
+                identity.AddClaim(new Claim(ClaimTypes.Surname, lastName, ClaimValueTypes.String, Options.ClaimsIssuer));
+            }
+
+            var link = FacebookHelper.GetLink(payload);
+            if (!string.IsNullOrEmpty(link))
+            {
+                identity.AddClaim(new Claim("urn:facebook:link", link, ClaimValueTypes.String, Options.ClaimsIssuer));
+            }
+
+            var location = FacebookHelper.GetLocation(payload);
+            if (!string.IsNullOrEmpty(location))
+            {
+                identity.AddClaim(new Claim(ClaimTypes.StateOrProvince, location, ClaimValueTypes.String, Options.ClaimsIssuer));
+            }
+
+            var locale = FacebookHelper.GetLocale(payload);
+            if (!string.IsNullOrEmpty(locale))
+            {
+                identity.AddClaim(new Claim(ClaimTypes.Locality, locale, ClaimValueTypes.String, Options.ClaimsIssuer));
+            }
+
+            var middleName = FacebookHelper.GetMiddleName(payload);
+            if (!string.IsNullOrEmpty(middleName))
+            {
+                identity.AddClaim(new Claim("urn:facebook:middle_name", middleName, ClaimValueTypes.String, Options.ClaimsIssuer));
             }
 
             var name = FacebookHelper.GetName(payload);
@@ -60,23 +120,11 @@ namespace Microsoft.AspNetCore.Authentication.Facebook
             {
                 identity.AddClaim(new Claim(ClaimTypes.Name, name, ClaimValueTypes.String, Options.ClaimsIssuer));
             }
-
-            var givenName = FacebookHelper.GetGivenName(payload);
-            if (!string.IsNullOrEmpty(givenName))
+ 
+            var timeZone = FacebookHelper.GetTimeZone(payload);
+            if (!string.IsNullOrEmpty(timeZone))
             {
-                identity.AddClaim(new Claim(ClaimTypes.GivenName, givenName, ClaimValueTypes.String, Options.ClaimsIssuer));
-            }
-
-            var surname = FacebookHelper.GetFamilyName(payload);
-            if (!string.IsNullOrEmpty(surname))
-            {
-                identity.AddClaim(new Claim(ClaimTypes.Surname, surname, ClaimValueTypes.String, Options.ClaimsIssuer));
-            }
-
-            var link = FacebookHelper.GetLink(payload);
-            if (!string.IsNullOrEmpty(link))
-            {
-                identity.AddClaim(new Claim("urn:facebook:link", link, ClaimValueTypes.String, Options.ClaimsIssuer));
+                identity.AddClaim(new Claim("urn:facebook:timezone", timeZone, ClaimValueTypes.String, Options.ClaimsIssuer));
             }
 
             await Options.Events.CreatingTicket(context);
