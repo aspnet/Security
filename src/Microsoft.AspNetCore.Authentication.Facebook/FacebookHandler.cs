@@ -12,7 +12,6 @@ using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http.Authentication;
 using Microsoft.AspNetCore.WebUtilities;
 using Newtonsoft.Json.Linq;
-using System.Linq;
 
 namespace Microsoft.AspNetCore.Authentication.Facebook
 {
@@ -32,7 +31,7 @@ namespace Microsoft.AspNetCore.Authentication.Facebook
             }
             if (Options.Fields.Count > 0)
             {
-                endpoint = QueryHelpers.AddQueryString(endpoint, "fields", string.Join(",", Options.Fields.Distinct()));
+                endpoint = QueryHelpers.AddQueryString(endpoint, "fields", string.Join(",", Options.Fields));
             }
 
             var response = await Backchannel.GetAsync(endpoint, Context.RequestAborted);
@@ -100,7 +99,7 @@ namespace Microsoft.AspNetCore.Authentication.Facebook
             var location = FacebookHelper.GetLocation(payload);
             if (!string.IsNullOrEmpty(location))
             {
-                identity.AddClaim(new Claim(ClaimTypes.StateOrProvince, location, ClaimValueTypes.String, Options.ClaimsIssuer));
+                identity.AddClaim(new Claim("urn:facebook:location", location, ClaimValueTypes.String, Options.ClaimsIssuer));
             }
 
             var locale = FacebookHelper.GetLocale(payload);

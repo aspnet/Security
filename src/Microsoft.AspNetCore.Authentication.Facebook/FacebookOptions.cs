@@ -60,6 +60,6 @@ namespace Microsoft.AspNetCore.Builder
         /// The list of fields to retrieve from the UserInformationEndpoint.
         /// https://developers.facebook.com/docs/graph-api/reference/user
         /// </summary>
-        public IList<string> Fields { get; } = new List<string>();
+        public ICollection<string> Fields { get; } = new HashSet<string>();
     }
 }
