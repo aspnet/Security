@@ -6,6 +6,7 @@ using System;
 using System.Linq;
 using System.Security.Claims;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Antiforgery;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Http.Authentication;
@@ -22,11 +23,18 @@ namespace Microsoft.AspNetCore.Authentication.Cookies
         private const string HeaderValueMinusOne = "-1";
         private const string SessionIdClaim = "Microsoft.AspNetCore.Authentication.Cookies-SessionId";
 
+        private readonly IAntiforgery _antiforgery;
+
         private bool _shouldRefresh;
         private DateTimeOffset? _refreshIssuedUtc;
         private DateTimeOffset? _refreshExpiresUtc;
         private string _sessionKey;
         private Task<AuthenticateResult> _readCookieTask;
+
+        public CookieAuthenticationHandler(IAntiforgery antiforgery)
+        {
+            _antiforgery = antiforgery;
+        }
 
         private Task<AuthenticateResult> EnsureCookieTicket()
         {
@@ -113,12 +121,32 @@ namespace Microsoft.AspNetCore.Authentication.Cookies
             return AuthenticateResult.Success(ticket);
         }
 
+        private bool RequiresAntiforgery()
+        {
+            if (Options.SuppressAntiforgeryValidation)
+            {
+                return false;
+            }
+
+            var method = Context.Request.Method;
+            return
+                !string.Equals(method, "GET", StringComparison.OrdinalIgnoreCase) &&
+                !string.Equals(method, "HEAD", StringComparison.OrdinalIgnoreCase) &&
+                !string.Equals(method, "OPTIONS", StringComparison.OrdinalIgnoreCase) &&
+                !string.Equals(method, "TRACE", StringComparison.OrdinalIgnoreCase);
+        }
+
         protected override async Task<AuthenticateResult> HandleAuthenticateAsync()
         {
             var result = await EnsureCookieTicket();
             if (!result.Succeeded)
             {
                 return result;
+            }
+
+            if (RequiresAntiforgery() && !await _antiforgery.IsRequestValidAsync(Context))
+            {
+                return AuthenticateResult.Fail("No antiforgery token");
             }
 
             var context = new CookieValidatePrincipalContext(Context, result.Ticket, Options);

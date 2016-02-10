@@ -2,6 +2,7 @@
 // Licensed under the Apache License, Version 2.0. See License.txt in the project root for license information.
 
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Net;
 using System.Net.Http;
@@ -10,6 +11,7 @@ using System.Security.Principal;
 using System.Text;
 using System.Threading.Tasks;
 using System.Xml.Linq;
+using Microsoft.AspNetCore.Antiforgery;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.DataProtection;
 using Microsoft.AspNetCore.Hosting;
@@ -25,7 +27,7 @@ namespace Microsoft.AspNetCore.Authentication.Cookies
     public class CookieMiddlewareTests
     {
         [Fact]
-        public async Task NormalRequestPassesThrough()
+        public async Task NormalGetRequestPassesThrough()
         {
             var server = CreateServer(new CookieAuthenticationOptions());
             var response = await server.CreateClient().GetAsync("http://example.com/normal");
@@ -713,6 +715,210 @@ namespace Microsoft.AspNetCore.Authentication.Cookies
             Assert.Equal("Alice", FindClaimValue(transaction5, ClaimTypes.Name));
         }
 
+        // These http methods are allow-listed
+        [Theory]
+        [InlineData("GET")]
+        [InlineData("HEaD")]
+        [InlineData("TRace")]
+        [InlineData("options")]
+        public async Task Cookie_Authenticated_WithoutCSRF(string httpMethod)
+        {
+            var builder = new WebHostBuilder()
+                .ConfigureServices(services =>
+                {
+                    services.AddAntiforgery(options => options.FormFieldName = "CSRF_REQUEST_TOKEN");
+                    services.AddCookieAuthentication();
+                })
+                .Configure(app =>
+                {
+                    app.UseCookieAuthentication();
+
+                    app.Run(async context =>
+                    {
+                        if (context.Request.Path == new PathString("/login"))
+                        {
+                            await SignInAsAlice(context);
+
+                            var antiforgery = context.RequestServices.GetRequiredService<IAntiforgery>();
+
+                            var tokens = antiforgery.GetAndStoreTokens(context);
+                            context.Response.Headers["CSRF"] = tokens.RequestToken;
+                        }
+                        else if (context.Request.Path == new PathString("/requires-authentication"))
+                        {
+                            var authorizationContext = new AuthenticateContext(CookieAuthenticationDefaults.AuthenticationScheme);
+                            await context.Authentication.AuthenticateAsync(authorizationContext);
+                            Describe(context.Response, authorizationContext);
+                        }
+                    });
+                });
+
+            var server = new TestServer(builder);
+
+            var transaction1 = await SendAsync(server, "http://example.com/login");
+
+            // Explicitly NOT propagating the CSRF here
+            var message = new HttpRequestMessage(new HttpMethod(httpMethod), "http://example.com/requires-authentication");
+            var transaction2 = await SendAsync(server, message, transaction1.CookieNameValue);
+            Assert.Equal("Alice", FindClaimValue(transaction2, ClaimTypes.Name));
+        }
+
+        [Theory]
+        [InlineData("GET")]
+        [InlineData("HEaD")]
+        [InlineData("TRace")]
+        [InlineData("options")]
+        [InlineData("PUT")]
+        [InlineData("PoST")]
+        [InlineData("delete")]
+        [InlineData("DEBUG")]
+        [InlineData("bleh")]
+        public async Task Cookie_Authenticated_WithCSRF(string httpMethod)
+        {
+            var builder = new WebHostBuilder()
+                .ConfigureServices(services =>
+                {
+                    services.AddAntiforgery(options => options.FormFieldName = "CSRF_REQUEST_TOKEN");
+                    services.AddCookieAuthentication();
+                })
+                .Configure(app =>
+                {
+                    app.UseCookieAuthentication();
+
+                    app.Run(async context =>
+                    {
+                        if (context.Request.Path == new PathString("/login"))
+                        {
+                            await SignInAsAlice(context);
+
+                            var antiforgery = context.RequestServices.GetRequiredService<IAntiforgery>();
+
+                            var tokens = antiforgery.GetAndStoreTokens(context);
+                            context.Response.Headers["CSRF"] = tokens.RequestToken;
+                        }
+                        else if (context.Request.Path == new PathString("/requires-authentication"))
+                        {
+                            var authorizationContext = new AuthenticateContext(CookieAuthenticationDefaults.AuthenticationScheme);
+                            await context.Authentication.AuthenticateAsync(authorizationContext);
+                            Describe(context.Response, authorizationContext);
+                        }
+                    });
+                });
+
+            var server = new TestServer(builder);
+
+            var transaction1 = await SendAsync(server, "http://example.com/login");
+
+            var message = new HttpRequestMessage(HttpMethod.Post, "http://example.com/requires-authentication");
+            message.Content = new FormUrlEncodedContent(new Dictionary<string, string>()
+            {
+                { "CSRF_REQUEST_TOKEN", transaction1.Response.Headers.GetValues("CSRF").First() },
+            });
+
+            var transaction2 = await SendAsync(server, message, transaction1.CookieNameValue);
+            Assert.Equal("Alice", FindClaimValue(transaction2, ClaimTypes.Name));
+        }
+
+        [Theory]
+        [InlineData("PUT")]
+        [InlineData("PoST")]
+        [InlineData("delete")]
+        [InlineData("DEBUG")]
+        [InlineData("bleh")]
+        public async Task Cookie_TreatedAsAnonymous_WithoutCSRF(string httpMethod)
+        {
+            var builder = new WebHostBuilder()
+                .ConfigureServices(services =>
+                {
+                    services.AddAntiforgery(options => options.FormFieldName = "CSRF_REQUEST_TOKEN");
+                    services.AddCookieAuthentication();
+                })
+                .Configure(app =>
+                {
+                    app.UseCookieAuthentication();
+
+                    app.Run(async context =>
+                    {
+                        if (context.Request.Path == new PathString("/login"))
+                        {
+                            await SignInAsAlice(context);
+
+                            var antiforgery = context.RequestServices.GetRequiredService<IAntiforgery>();
+
+                            var tokens = antiforgery.GetAndStoreTokens(context);
+                            context.Response.Headers["CSRF"] = tokens.RequestToken;
+                        }
+                        else if (context.Request.Path == new PathString("/requires-authentication"))
+                        {
+                            var authorizationContext = new AuthenticateContext(CookieAuthenticationDefaults.AuthenticationScheme);
+                            await context.Authentication.AuthenticateAsync(authorizationContext);
+                            Describe(context.Response, authorizationContext);
+                        }
+                    });
+                });
+
+            var server = new TestServer(builder);
+
+            var transaction1 = await SendAsync(server, "http://example.com/login");
+
+            // Explicitly NOT propagating the CSRF here
+            var message = new HttpRequestMessage(new HttpMethod(httpMethod), "http://example.com/requires-authentication");
+            var transaction2 = await SendAsync(server, message, transaction1.CookieNameValue);
+
+            Assert.Null(FindClaimValue(transaction2, ClaimTypes.Name));
+        }
+
+        [Theory]
+        [InlineData("PUT")]
+        [InlineData("PoST")]
+        [InlineData("delete")]
+        [InlineData("DEBUG")]
+        [InlineData("bleh")]
+        public async Task Cookie_Authenticated_WithoutCSRF_CSRFSuppressed(string httpMethod)
+        {
+            var builder = new WebHostBuilder()
+                .ConfigureServices(services =>
+                {
+                    services.AddAntiforgery(options => options.FormFieldName = "CSRF_REQUEST_TOKEN");
+                    services.AddCookieAuthentication();
+                })
+                .Configure(app =>
+                {
+                    app.UseCookieAuthentication(new CookieAuthenticationOptions()
+                    {
+                        SuppressAntiforgeryValidation = true,
+                    });
+
+                    app.Run(async context =>
+                    {
+                        if (context.Request.Path == new PathString("/login"))
+                        {
+                            await SignInAsAlice(context);
+
+                            var antiforgery = context.RequestServices.GetRequiredService<IAntiforgery>();
+
+                            var tokens = antiforgery.GetAndStoreTokens(context);
+                            context.Response.Headers["CSRF"] = tokens.RequestToken;
+                        }
+                        else if (context.Request.Path == new PathString("/requires-authentication"))
+                        {
+                            var authorizationContext = new AuthenticateContext(CookieAuthenticationDefaults.AuthenticationScheme);
+                            await context.Authentication.AuthenticateAsync(authorizationContext);
+                            Describe(context.Response, authorizationContext);
+                        }
+                    });
+                });
+
+            var server = new TestServer(builder);
+
+            var transaction1 = await SendAsync(server, "http://example.com/login");
+
+            // Explicitly NOT propagating the CSRF here
+            var message = new HttpRequestMessage(new HttpMethod(httpMethod), "http://example.com/requires-authentication");
+            var transaction2 = await SendAsync(server, message, transaction1.CookieNameValue);
+            Assert.Equal("Alice", FindClaimValue(transaction2, ClaimTypes.Name));
+        }
+
         [Fact]
         public async Task CookieUsesPathBaseByDefault()
         {
@@ -863,7 +1069,7 @@ namespace Microsoft.AspNetCore.Authentication.Cookies
                     });
                     app.Map("/login", signoutApp => signoutApp.Run(context => context.Authentication.ChallengeAsync("Cookies", new AuthenticationProperties() { RedirectUri = "/" })));
                 })
-                .ConfigureServices(services => services.AddAuthentication());
+                .ConfigureServices(services => services.AddCookieAuthentication());
             var server = new TestServer(builder);
 
             var transaction = await server.SendAsync("http://example.com/login");
@@ -887,7 +1093,7 @@ namespace Microsoft.AspNetCore.Authentication.Cookies
                         await Assert.ThrowsAsync<InvalidOperationException>(() => context.Authentication.ChallengeAsync());
                     });
                 })
-                .ConfigureServices(services => services.AddAuthentication());
+                .ConfigureServices(services => services.AddCookieAuthentication());
             var server = new TestServer(builder);
 
             var transaction = await server.SendAsync("http://example.com");
@@ -907,7 +1113,7 @@ namespace Microsoft.AspNetCore.Authentication.Cookies
                     app.UseCookieAuthentication();
                     app.Run(context => context.Authentication.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme, new ClaimsPrincipal(new ClaimsIdentity())));
                 })
-                .ConfigureServices(services => services.AddAuthentication());
+                .ConfigureServices(services => services.AddCookieAuthentication());
             var server = new TestServer(builder);
 
             var transaction = await server.SendAsync("http://example.com");
@@ -929,7 +1135,7 @@ namespace Microsoft.AspNetCore.Authentication.Cookies
                     app.Map("/notlogin", signoutApp => signoutApp.Run(context => context.Authentication.SignInAsync("Cookies",
                         new ClaimsPrincipal())));
                 })
-                .ConfigureServices(services => services.AddAuthentication());
+                .ConfigureServices(services => services.AddCookieAuthentication());
             var server = new TestServer(builder);
 
             var transaction = await server.SendAsync("http://example.com/notlogin?ReturnUrl=%2Fpage");
@@ -950,7 +1156,7 @@ namespace Microsoft.AspNetCore.Authentication.Cookies
                     app.Map("/login", signoutApp => signoutApp.Run(context => context.Authentication.SignInAsync("Cookies",
                         new ClaimsPrincipal())));
                 })
-                .ConfigureServices(services => services.AddAuthentication());
+                .ConfigureServices(services => services.AddCookieAuthentication());
             var server = new TestServer(builder);
 
             var transaction = await server.SendAsync("http://example.com/login?ReturnUrl=%2Fpage");
@@ -974,7 +1180,7 @@ namespace Microsoft.AspNetCore.Authentication.Cookies
                     });
                     app.Map("/notlogout", signoutApp => signoutApp.Run(context => context.Authentication.SignOutAsync("Cookies")));
                 })
-                .ConfigureServices(services => services.AddAuthentication());
+                .ConfigureServices(services => services.AddCookieAuthentication());
             var server = new TestServer(builder);
 
             var transaction = await server.SendAsync("http://example.com/notlogout?ReturnUrl=%2Fpage");
@@ -994,7 +1200,7 @@ namespace Microsoft.AspNetCore.Authentication.Cookies
                     });
                     app.Map("/logout", signoutApp => signoutApp.Run(context => context.Authentication.SignOutAsync("Cookies")));
                 })
-                .ConfigureServices(services => services.AddAuthentication());
+                .ConfigureServices(services => services.AddCookieAuthentication());
             var server = new TestServer(builder);
 
             var transaction = await server.SendAsync("http://example.com/logout?ReturnUrl=%2Fpage");
@@ -1018,7 +1224,7 @@ namespace Microsoft.AspNetCore.Authentication.Cookies
                     });
                     app.Map("/forbid", signoutApp => signoutApp.Run(context => context.Authentication.ForbidAsync("Cookies")));
                 })
-                .ConfigureServices(services => services.AddAuthentication());
+                .ConfigureServices(services => services.AddCookieAuthentication());
             var server = new TestServer(builder);
             var transaction = await server.SendAsync("http://example.com/forbid");
 
@@ -1041,7 +1247,7 @@ namespace Microsoft.AspNetCore.Authentication.Cookies
                         });
                         map.Map("/login", signoutApp => signoutApp.Run(context => context.Authentication.ChallengeAsync("Cookies", new AuthenticationProperties() { RedirectUri = "/" })));
                     }))
-                .ConfigureServices(services => services.AddAuthentication());
+                .ConfigureServices(services => services.AddCookieAuthentication());
             var server = new TestServer(builder);
             var transaction = await server.SendAsync("http://example.com/base/login");
 
@@ -1065,7 +1271,7 @@ namespace Microsoft.AspNetCore.Authentication.Cookies
                         });
                         map.Map("/forbid", signoutApp => signoutApp.Run(context => context.Authentication.ForbidAsync("Cookies")));
                     }))
-                    .ConfigureServices(services => services.AddAuthentication());
+                    .ConfigureServices(services => services.AddCookieAuthentication());
             var server = new TestServer(builder);
             var transaction = await server.SendAsync("http://example.com/base/forbid");
 
@@ -1093,7 +1299,7 @@ namespace Microsoft.AspNetCore.Authentication.Cookies
                                         new ClaimsPrincipal(new ClaimsIdentity(new GenericIdentity("Alice", "Cookies"))),
                                         new AuthenticationProperties()));
                 })
-                .ConfigureServices(services => services.AddAuthentication());
+                .ConfigureServices(services => services.AddCookieAuthentication());
             var server1 = new TestServer(builder1);
 
             var transaction = await SendAsync(server1, "http://example.com/stuff");
@@ -1115,7 +1321,7 @@ namespace Microsoft.AspNetCore.Authentication.Cookies
                         Describe(context.Response, authContext);
                     });
                 })
-                .ConfigureServices(services => services.AddAuthentication());
+                .ConfigureServices(services => services.AddCookieAuthentication());
             var server2 = new TestServer(builder2);
             var transaction2 = await SendAsync(server2, "http://example.com/stuff", transaction.CookieNameValue);
             Assert.Equal("Alice", FindClaimValue(transaction2, ClaimTypes.Name));
@@ -1227,7 +1433,7 @@ namespace Microsoft.AspNetCore.Authentication.Cookies
                         }
                     });
                 })
-                .ConfigureServices(services => services.AddAuthentication());
+                .ConfigureServices(services => services.AddCookieAuthentication());
             var server = new TestServer(builder);
             server.BaseAddress = baseAddress;
             return server;
@@ -1250,9 +1456,14 @@ namespace Microsoft.AspNetCore.Authentication.Cookies
             res.Body.Write(xmlBytes, 0, xmlBytes.Length);
         }
 
-        private static async Task<Transaction> SendAsync(TestServer server, string uri, string cookieHeader = null)
+        private static Task<Transaction> SendAsync(TestServer server, string uri, string cookieHeader = null)
         {
             var request = new HttpRequestMessage(HttpMethod.Get, uri);
+            return SendAsync(server, request, cookieHeader);
+        }
+
+        private static async Task<Transaction> SendAsync(TestServer server, HttpRequestMessage request, string cookieHeader = null)
+        {
             if (!string.IsNullOrEmpty(cookieHeader))
             {
                 request.Headers.Add("Cookie", cookieHeader);
@@ -1264,11 +1475,13 @@ namespace Microsoft.AspNetCore.Authentication.Cookies
             };
             if (transaction.Response.Headers.Contains("Set-Cookie"))
             {
-                transaction.SetCookie = transaction.Response.Headers.GetValues("Set-Cookie").SingleOrDefault();
+                transaction.SetCookie = string.Join(", ", transaction.Response.Headers.GetValues("Set-Cookie"));
             }
             if (!string.IsNullOrEmpty(transaction.SetCookie))
             {
-                transaction.CookieNameValue = transaction.SetCookie.Split(new[] { ';' }, 2).First();
+                transaction.CookieNameValue = string.Join(
+                    ", ", 
+                    transaction.Response.Headers.GetValues("Set-Cookie").Select(c => c.Split(new[] { ';' }, 2).First()));
             }
             transaction.ResponseText = await transaction.Response.Content.ReadAsStringAsync();
 

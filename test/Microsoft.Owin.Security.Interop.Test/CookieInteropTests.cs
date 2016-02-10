@@ -67,7 +67,7 @@ namespace Microsoft.Owin.Security.Interop
                         await context.Response.WriteAsync(result.Identity.Name);
                     });
                 })
-                .ConfigureServices(services => services.AddAuthentication());
+                .ConfigureServices(services => services.AddCookieAuthentication());
             var newServer = new AspNetCore.TestHost.TestServer(builder);
 
             var request = new HttpRequestMessage(HttpMethod.Get, "http://example.com/login");
@@ -99,7 +99,7 @@ namespace Microsoft.Owin.Security.Interop
                     });
                     app.Run(context => context.Authentication.SignInAsync("Cookies", user));
                 })
-                .ConfigureServices(services => services.AddAuthentication());
+                .ConfigureServices(services => services.AddCookieAuthentication());
             var newServer = new AspNetCore.TestHost.TestServer(builder);
 
             var cookie = await SendAndGetCookie(newServer, "http://example.com/login");

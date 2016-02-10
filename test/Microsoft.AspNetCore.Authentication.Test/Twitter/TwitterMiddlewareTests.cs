@@ -184,7 +184,8 @@ namespace Microsoft.AspNetCore.Authentication.Twitter
                 })
                 .ConfigureServices(services =>
                 {
-                    services.AddAuthentication();
+                    services.AddAntiforgery();
+                    services.AddCookieAuthentication();
                     services.Configure<SharedAuthenticationOptions>(authOptions =>
                     {
                         authOptions.SignInScheme = "External";

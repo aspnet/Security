@@ -824,7 +824,7 @@ namespace Microsoft.AspNetCore.Authentication.Google
                 })
                 .ConfigureServices(services =>
                 {
-                    services.AddAuthentication(authOptions => authOptions.SignInScheme = TestExtensions.CookieAuthenticationScheme);
+                    services.AddCookieAuthentication(authOptions => authOptions.SignInScheme = TestExtensions.CookieAuthenticationScheme);
                 });
             return new TestServer(builder);
         }

@@ -37,7 +37,7 @@ namespace CookieSample
 
         public void ConfigureServices(IServiceCollection services)
         {
-            services.AddAuthentication(options => options.SignInScheme = CookieAuthenticationDefaults.AuthenticationScheme);
+            services.AddCookieAuthentication(options => options.SignInScheme = CookieAuthenticationDefaults.AuthenticationScheme);
         }
 
         public void Configure(IApplicationBuilder app, ILoggerFactory loggerfactory)
