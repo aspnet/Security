@@ -29,29 +29,20 @@ namespace Microsoft.AspNetCore.Authentication.MicrosoftAccount
         /// <summary>
         /// Gets the user's name.
         /// </summary>
-        public static string GetName(JObject user)
+        public static string GetDisplayName(JObject user)
         {
             if (user == null)
             {
                 throw new ArgumentNullException(nameof(user));
             }
-            
-            //displayName is required for Azure AD accounts, but not for Microsoft accounts.
-            //givenName & surename is required for Microsoft accounts, but not for Azure AD accounts
-            //In case of microsoft accounts displayName is null => fallback to givenName + surename
-            var name = user.Value<string>("displayName");
-            if (string.IsNullOrEmpty(name))
-            {
-                name = string.Format("{0} {1}", GetFirstName(user), GetLastName(user));
-            }
 
-            return name;
+            return user.Value<string>("displayName");
         }
 
         /// <summary>
-        /// Gets the user's first name.
+        /// Gets the user's given name.
         /// </summary>
-        public static string GetFirstName(JObject user)
+        public static string GetGivenName(JObject user)
         {
             if (user == null)
             {
@@ -62,9 +53,9 @@ namespace Microsoft.AspNetCore.Authentication.MicrosoftAccount
         }
 
         /// <summary>
-        /// Gets the user's last name.
+        /// Gets the user's surname.
         /// </summary>
-        public static string GetLastName(JObject user)
+        public static string GetSurname(JObject user)
         {
             if (user == null)
             {

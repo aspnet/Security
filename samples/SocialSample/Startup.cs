@@ -1,10 +1,14 @@
 using System;
+using System.IO;
 using System.Linq;
 using System.Net.Http;
 using System.Net.Http.Headers;
+using System.Reflection;
 using System.Security.Claims;
+using System.Security.Cryptography.X509Certificates;
 using System.Text.Encodings.Web;
 using System.Threading.Tasks;
+using Microsoft.AspNet.FileProviders;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authentication.Google;
 using Microsoft.AspNetCore.Authentication.MicrosoftAccount;
@@ -14,15 +18,11 @@ using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Http.Authentication;
+using Microsoft.AspNetCore.Server.Kestrel.Filter;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
-using Microsoft.AspNetCore.Server.Kestrel.Filter;
 using Newtonsoft.Json.Linq;
-using System.Security.Cryptography.X509Certificates;
-using System.Reflection;
-using System.IO;
-using Microsoft.AspNet.FileProviders;
 
 namespace SocialSample
 {
@@ -153,7 +153,7 @@ namespace SocialSample
                 CallbackPath = new PathString("/signin-microsoft-token"),
                 AuthorizationEndpoint = MicrosoftAccountDefaults.AuthorizationEndpoint,
                 TokenEndpoint = MicrosoftAccountDefaults.TokenEndpoint,
-                Scope = { "openid", "https://graph.microsoft.com/user.read" },
+                Scope = { "https://graph.microsoft.com/user.read" },
                 SaveTokensAsClaims = true
             });
 
