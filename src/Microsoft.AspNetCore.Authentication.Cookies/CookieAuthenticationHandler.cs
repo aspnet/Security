@@ -121,21 +121,6 @@ namespace Microsoft.AspNetCore.Authentication.Cookies
             return AuthenticateResult.Success(ticket);
         }
 
-        private bool RequiresAntiforgery()
-        {
-            if (Options.SuppressAntiforgeryValidation)
-            {
-                return false;
-            }
-
-            var method = Context.Request.Method;
-            return
-                !string.Equals(method, "GET", StringComparison.OrdinalIgnoreCase) &&
-                !string.Equals(method, "HEAD", StringComparison.OrdinalIgnoreCase) &&
-                !string.Equals(method, "OPTIONS", StringComparison.OrdinalIgnoreCase) &&
-                !string.Equals(method, "TRACE", StringComparison.OrdinalIgnoreCase);
-        }
-
         protected override async Task<AuthenticateResult> HandleAuthenticateAsync()
         {
             var result = await EnsureCookieTicket();
@@ -144,7 +129,8 @@ namespace Microsoft.AspNetCore.Authentication.Cookies
                 return result;
             }
 
-            if (RequiresAntiforgery() && !await _antiforgery.IsRequestValidAsync(Context))
+            if (!Options.SuppressAntiforgeryValidation && 
+                !await _antiforgery.IsRequestValidAsync(Context))
             {
                 return AuthenticateResult.Fail("No antiforgery token");
             }
