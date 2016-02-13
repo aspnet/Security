@@ -85,21 +85,21 @@ namespace Microsoft.AspNetCore.Authentication.OAuth
 
             var identity = new ClaimsIdentity(Options.ClaimsIssuer);
 
-            if (Options.SaveTokensAsClaims)
+            var ticket = await CreateTicketAsync(identity, properties, tokens);
+
+            var id = ticket.Principal.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            if (Options.TokenStore != null && !string.IsNullOrEmpty(id))
             {
-                identity.AddClaim(new Claim("access_token", tokens.AccessToken,
-                                            ClaimValueTypes.String, Options.ClaimsIssuer));
+                Options.TokenStore.Set(Options.AuthenticationScheme, id, "access_token", tokens.AccessToken);
 
                 if (!string.IsNullOrEmpty(tokens.RefreshToken))
                 {
-                    identity.AddClaim(new Claim("refresh_token", tokens.RefreshToken,
-                                                ClaimValueTypes.String, Options.ClaimsIssuer));
+                    Options.TokenStore.Set(Options.AuthenticationScheme, id, "refresh_token", tokens.RefreshToken);
                 }
 
                 if (!string.IsNullOrEmpty(tokens.TokenType))
                 {
-                    identity.AddClaim(new Claim("token_type", tokens.TokenType,
-                                                ClaimValueTypes.String, Options.ClaimsIssuer));
+                    Options.TokenStore.Set(Options.AuthenticationScheme, id, "token_type", tokens.TokenType);
                 }
 
                 if (!string.IsNullOrEmpty(tokens.ExpiresIn))
@@ -108,15 +108,13 @@ namespace Microsoft.AspNetCore.Authentication.OAuth
                     if (int.TryParse(tokens.ExpiresIn, NumberStyles.Integer, CultureInfo.InvariantCulture, out value))
                     {
                         var expiresAt = Options.SystemClock.UtcNow + TimeSpan.FromSeconds(value);
-                        // https://www.w3.org/TR/xmlschema-2/#dateTime
                         // https://msdn.microsoft.com/en-us/library/az4se3k1(v=vs.110).aspx
-                        identity.AddClaim(new Claim("expires_at", expiresAt.ToString("o", CultureInfo.InvariantCulture),
-                                                    ClaimValueTypes.DateTime, Options.ClaimsIssuer));
+                        Options.TokenStore.Set(Options.AuthenticationScheme, id, "expires_at", expiresAt.ToString("o", CultureInfo.InvariantCulture));
                     }
                 }
             }
 
-            return AuthenticateResult.Success(await CreateTicketAsync(identity, properties, tokens));
+            return AuthenticateResult.Success(ticket);
         }
 
         protected virtual async Task<OAuthTokenResponse> ExchangeCodeAsync(string code, string redirectUri)
@@ -162,6 +160,14 @@ namespace Microsoft.AspNetCore.Authentication.OAuth
             var ticket = new AuthenticationTicket(new ClaimsPrincipal(identity), properties, Options.AuthenticationScheme);
             var context = new OAuthCreatingTicketContext(ticket, Context, Options, Backchannel, tokens);
             await Options.Events.CreatingTicket(context);
+
+            if (ticket.Principal.FindFirst(ClaimTypes.NameIdentifier) == null)
+            {
+                // If there aren't any claims at all, at least add a unique id for this login session. This will help associate the
+                // tokens from the token store.
+                identity.AddClaim(new Claim(ClaimTypes.NameIdentifier, Guid.NewGuid().ToString(), ClaimValueTypes.String, Options.ClaimsIssuer));
+            }
+
             return context.Ticket;
         }
 

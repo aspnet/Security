@@ -23,20 +23,21 @@ namespace Microsoft.AspNetCore.Authentication.Google
         /// Initializes a new <see cref="GoogleMiddleware"/>.
         /// </summary>
         /// <param name="next">The next middleware in the HTTP pipeline to invoke.</param>
+        /// <param name="serviceProvider"></param>
         /// <param name="dataProtectionProvider"></param>
         /// <param name="loggerFactory"></param>
         /// <param name="encoder"></param>
         /// <param name="sharedOptions"></param>
         /// <param name="options">Configuration options for the middleware.</param>
-        /// <param name="configureOptions"></param>
         public GoogleMiddleware(
             RequestDelegate next,
+            IServiceProvider serviceProvider,
             IDataProtectionProvider dataProtectionProvider,
             ILoggerFactory loggerFactory,
             UrlEncoder encoder,
             IOptions<SharedAuthenticationOptions> sharedOptions,
             IOptions<GoogleOptions> options)
-            : base(next, dataProtectionProvider, loggerFactory, encoder, sharedOptions, options)
+            : base(next, serviceProvider, dataProtectionProvider, loggerFactory, encoder, sharedOptions, options)
         {
             if (next == null)
             {
