@@ -9,6 +9,7 @@ using System.Text.Encodings.Web;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.DataProtection;
 using Microsoft.AspNetCore.Http;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 
@@ -26,14 +27,15 @@ namespace Microsoft.AspNetCore.Authentication.Twitter
         /// Initializes a <see cref="TwitterMiddleware"/>
         /// </summary>
         /// <param name="next">The next middleware in the HTTP pipeline to invoke</param>
+        /// <param name="serviceProvider"></param>
         /// <param name="dataProtectionProvider"></param>
         /// <param name="loggerFactory"></param>
         /// <param name="encoder"></param>
         /// <param name="sharedOptions"></param>
         /// <param name="options">Configuration options for the middleware</param>
-        /// <param name="configureOptions"></param>
         public TwitterMiddleware(
             RequestDelegate next,
+            IServiceProvider serviceProvider,
             IDataProtectionProvider dataProtectionProvider,
             ILoggerFactory loggerFactory,
             UrlEncoder encoder,
@@ -44,6 +46,11 @@ namespace Microsoft.AspNetCore.Authentication.Twitter
             if (next == null)
             {
                 throw new ArgumentNullException(nameof(next));
+            }
+
+            if (serviceProvider == null)
+            {
+                throw new ArgumentNullException(nameof(serviceProvider));
             }
 
             if (dataProtectionProvider == null)
@@ -104,6 +111,12 @@ namespace Microsoft.AspNetCore.Authentication.Twitter
             if (string.IsNullOrEmpty(Options.SignInScheme))
             {
                 throw new ArgumentException(string.Format(CultureInfo.CurrentCulture, Resources.Exception_OptionMustBeProvided, "SignInScheme"));
+            }
+
+            if (Options.TokenStore == null)
+            {
+                // Optional
+                Options.TokenStore = serviceProvider.GetService<ITokenStore>();
             }
 
             _httpClient = new HttpClient(Options.BackchannelHttpHandler ?? new HttpClientHandler());

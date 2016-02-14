@@ -9,6 +9,7 @@ using System.Text.Encodings.Web;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.DataProtection;
 using Microsoft.AspNetCore.Http;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Protocols;
@@ -25,19 +26,19 @@ namespace Microsoft.AspNetCore.Authentication.OpenIdConnect
         /// Initializes a <see cref="OpenIdConnectMiddleware"/>
         /// </summary>
         /// <param name="next">The next middleware in the ASP.NET pipeline to invoke.</param>
+        /// <param name="serviceProvider"></param>
         /// <param name="dataProtectionProvider"> provider for creating a data protector.</param>
         /// <param name="loggerFactory">factory for creating a <see cref="ILogger"/>.</param>
         /// <param name="encoder"></param>
-        /// <param name="services"></param>
         /// <param name="sharedOptions"></param>
         /// <param name="options"></param>
         [SuppressMessage("Microsoft.Reliability", "CA2000:Dispose objects before losing scope", Justification = "Managed by caller")]
         public OpenIdConnectMiddleware(
             RequestDelegate next,
+            IServiceProvider serviceProvider,
             IDataProtectionProvider dataProtectionProvider,
             ILoggerFactory loggerFactory,
             UrlEncoder encoder,
-            IServiceProvider services,
             IOptions<SharedAuthenticationOptions> sharedOptions,
             IOptions<OpenIdConnectOptions> options,
             HtmlEncoder htmlEncoder)
@@ -46,6 +47,11 @@ namespace Microsoft.AspNetCore.Authentication.OpenIdConnect
             if (next == null)
             {
                 throw new ArgumentNullException(nameof(next));
+            }
+
+            if (serviceProvider == null)
+            {
+                throw new ArgumentNullException(nameof(serviceProvider));
             }
 
             if (dataProtectionProvider == null)
@@ -61,11 +67,6 @@ namespace Microsoft.AspNetCore.Authentication.OpenIdConnect
             if (encoder == null)
             {
                 throw new ArgumentNullException(nameof(encoder));
-            }
-
-            if (services == null)
-            {
-                throw new ArgumentNullException(nameof(services));
             }
 
             if (sharedOptions == null)
@@ -121,10 +122,15 @@ namespace Microsoft.AspNetCore.Authentication.OpenIdConnect
                 Options.StringDataFormat = new SecureDataFormat<string>(new StringSerializer(), dataProtector);
             }
 
-
             if (Options.Events == null)
             {
                 Options.Events = new OpenIdConnectEvents();
+            }
+
+            if (Options.TokenStore == null)
+            {
+                // Optional
+                Options.TokenStore = serviceProvider.GetService<ITokenStore>();
             }
 
             if (string.IsNullOrEmpty(Options.TokenValidationParameters.ValidAudience) && !string.IsNullOrEmpty(Options.ClientId))

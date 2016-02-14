@@ -5,6 +5,7 @@ using System.Net.Http.Headers;
 using System.Security.Claims;
 using System.Text.Encodings.Web;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authentication.Google;
 using Microsoft.AspNetCore.Authentication.MicrosoftAccount;
@@ -19,7 +20,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Newtonsoft.Json.Linq;
 
-namespace CookieSample
+namespace SocialSample
 {
     /* Note all servers must use the same address and port because these are pre-registered with the various providers. */
     public class Startup
@@ -38,11 +39,14 @@ namespace CookieSample
         public void ConfigureServices(IServiceCollection services)
         {
             services.AddAuthentication(options => options.SignInScheme = CookieAuthenticationDefaults.AuthenticationScheme);
+            services.AddSingleton<ITokenStore, MemoryTokenStore>();
         }
 
         public void Configure(IApplicationBuilder app, ILoggerFactory loggerfactory)
         {
             loggerfactory.AddConsole(LogLevel.Information);
+
+            var tokenStore = app.ApplicationServices.GetService<ITokenStore>();
 
             // Simple error page to avoid a repo dependency.
             app.Use(async (context, next) =>
@@ -90,7 +94,6 @@ namespace CookieSample
                 AuthorizationEndpoint = GoogleDefaults.AuthorizationEndpoint,
                 TokenEndpoint = GoogleDefaults.TokenEndpoint,
                 Scope = { "openid", "profile", "email" },
-                SaveTokensAsClaims = true
             });
 
             // See config.json
@@ -99,6 +102,7 @@ namespace CookieSample
             {
                 ClientId = Configuration["google:clientid"],
                 ClientSecret = Configuration["google:clientsecret"],
+                AccessType = "offline",
                 Events = new OAuthEvents()
                 {
                     OnRemoteFailure = ctx =>
@@ -156,7 +160,6 @@ namespace CookieSample
                 AuthorizationEndpoint = MicrosoftAccountDefaults.AuthorizationEndpoint,
                 TokenEndpoint = MicrosoftAccountDefaults.TokenEndpoint,
                 Scope = { "wl.basic" },
-                SaveTokensAsClaims = true
             });
 
             //// You must first create an app with live.com and add it's ID and Secret to your config.json or user-secrets.
@@ -179,7 +182,6 @@ namespace CookieSample
                 CallbackPath = new PathString("/signin-github-token"),
                 AuthorizationEndpoint = "https://github.com/login/oauth/authorize",
                 TokenEndpoint = "https://github.com/login/oauth/access_token",
-                SaveTokensAsClaims = true
             });
 
             // See config.json
@@ -193,7 +195,6 @@ namespace CookieSample
                 AuthorizationEndpoint = "https://github.com/login/oauth/authorize",
                 TokenEndpoint = "https://github.com/login/oauth/access_token",
                 UserInformationEndpoint = "https://api.github.com/user",
-                ClaimsIssuer = "OAuth2-Github",
                 // Retrieving user information is unique to each provider.
                 Events = new OAuthEvents
                 {
@@ -318,6 +319,23 @@ namespace CookieSample
                 {
                     await context.Response.WriteAsync(claim.Type + ": " + claim.Value + "<br>");
                 }
+
+                await context.Response.WriteAsync("Tokens:<br>");
+
+                // TODO: Options.ClaimsIssuer is used for AuthenticationType, but AuthenticationScheme is used to store tokens.
+                // By default they match, but they can be different. AuthenticationScheme isn't stored in the identity anywhere.
+                // This may not be a problem because you'd usually be requesting a specific provider (e.g. Facebook) to interact with
+                // their APIs, not dynamically showing the current tokens.
+                var authScheme = context.User.Identity.AuthenticationType;
+                context.Authentication.GetAccessToken(authScheme);
+                context.Authentication.GetToken(authScheme, "access_token");
+                tokenStore.Get(authScheme, context.User, "access_token");
+                var id = context.User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+                await context.Response.WriteAsync("Access Token: " + tokenStore.Get(authScheme, id, "access_token") + "<br>");
+                await context.Response.WriteAsync("Refresh Token: " + tokenStore.Get(authScheme, id, "refresh_token") + "<br>");
+                await context.Response.WriteAsync("Token Type: " + tokenStore.Get(authScheme, id, "token_type") + "<br>");
+                await context.Response.WriteAsync("expires_at: " + tokenStore.Get(authScheme, id, "expires_at") + "<br>");
+
                 await context.Response.WriteAsync("<a href=\"/logout\">Logout</a>");
                 await context.Response.WriteAsync("</body></html>");
             });
