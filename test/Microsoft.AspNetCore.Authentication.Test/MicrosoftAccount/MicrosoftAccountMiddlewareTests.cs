@@ -216,7 +216,7 @@ namespace Microsoft.AspNetCore.Authentication.Tests.MicrosoftAccount
                 })
                 .ConfigureServices(services =>
                 {
-                    services.AddAuthentication();
+                    services.AddCookieAuthentication();
                     services.Configure<SharedAuthenticationOptions>(authOptions =>
                     {
                         authOptions.SignInScheme = TestExtensions.CookieAuthenticationScheme;

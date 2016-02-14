@@ -3,6 +3,7 @@
 
 using System;
 using System.Text.Encodings.Web;
+using Microsoft.AspNetCore.Antiforgery;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.DataProtection;
 using Microsoft.AspNetCore.Http;
@@ -13,9 +14,12 @@ namespace Microsoft.AspNetCore.Authentication.Cookies
 {
     public class CookieAuthenticationMiddleware : AuthenticationMiddleware<CookieAuthenticationOptions>
     {
+        private readonly IAntiforgery _antiforgery;
+
         public CookieAuthenticationMiddleware(
             RequestDelegate next,
             IDataProtectionProvider dataProtectionProvider,
+            IAntiforgery antiforgery,
             ILoggerFactory loggerFactory,
             UrlEncoder urlEncoder,
             IOptions<CookieAuthenticationOptions> options)
@@ -25,6 +29,13 @@ namespace Microsoft.AspNetCore.Authentication.Cookies
             {
                 throw new ArgumentNullException(nameof(dataProtectionProvider));
             }
+
+            if (antiforgery == null)
+            {
+                throw new ArgumentNullException(nameof(antiforgery));
+            }
+
+            _antiforgery = antiforgery;
 
             if (Options.Events == null)
             {
@@ -60,7 +71,7 @@ namespace Microsoft.AspNetCore.Authentication.Cookies
 
         protected override AuthenticationHandler<CookieAuthenticationOptions> CreateHandler()
         {
-            return new CookieAuthenticationHandler();
+            return new CookieAuthenticationHandler(_antiforgery);
         }
     }
 }

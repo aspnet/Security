@@ -143,6 +143,13 @@ namespace Microsoft.AspNetCore.Builder
         public ISecureDataFormat<AuthenticationTicket> TicketDataFormat { get; set; }
 
         /// <summary>
+        /// The SuppressAntiforgeryValidation option disables validation of antiforgery (CSRF) tokens for authenticated
+        /// users. By default an antiforgery token must be provided in the request for HTTP methods that can change
+        /// server side state. If an antiforgery token is not provided the user will be considered unauthenticated.
+        /// </summary>
+        public bool SuppressAntiforgeryValidation { get; set; }
+
+        /// <summary>
         /// For testing purposes only.
         /// </summary>
         [EditorBrowsable(EditorBrowsableState.Never)]

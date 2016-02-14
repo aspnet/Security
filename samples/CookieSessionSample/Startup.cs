@@ -14,7 +14,7 @@ namespace CookieSessionSample
     {
         public void ConfigureServices(IServiceCollection services)
         {
-            services.AddAuthentication();
+            services.AddCookieAuthentication();
         }
 
         public void Configure(IApplicationBuilder app, ILoggerFactory loggerfactory)

@@ -51,7 +51,7 @@ namespace Microsoft.AspNetCore.Authentication.Facebook
                 },
                 services =>
                 {
-                    services.AddAuthentication(options =>
+                    services.AddCookieAuthentication(options =>
                     {
                         options.SignInScheme = "External";
                     });
@@ -139,7 +139,7 @@ namespace Microsoft.AspNetCore.Authentication.Facebook
                 },
                 services =>
                 {
-                    services.AddAuthentication(options => options.SignInScheme = "External");
+                    services.AddCookieAuthentication(options => options.SignInScheme = "External");
                 },
                 context =>
                 {
@@ -208,7 +208,7 @@ namespace Microsoft.AspNetCore.Authentication.Facebook
                 },
                 services =>
                 {
-                    services.AddAuthentication(options => options.SignInScheme = CookieAuthenticationDefaults.AuthenticationScheme);
+                    services.AddCookieAuthentication(options => options.SignInScheme = CookieAuthenticationDefaults.AuthenticationScheme);
                 }, handler: null);
 
             var properties = new AuthenticationProperties();
