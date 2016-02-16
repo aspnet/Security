@@ -116,7 +116,7 @@ namespace Microsoft.AspNetCore.Authentication.OAuth
                     }
                 }
 
-                AuthenticationToken.StoreTokens(properties, toks);
+                properties.StoreTokens(toks);
             }
 
             return AuthenticateResult.Success(await CreateTicketAsync(identity, properties, tokens));
