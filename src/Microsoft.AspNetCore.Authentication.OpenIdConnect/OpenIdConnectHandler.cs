@@ -513,7 +513,7 @@ namespace Microsoft.AspNetCore.Authentication.OpenIdConnect
                 tokenEndpointResponse = authenticationValidatedContext.TokenEndpointResponse;
                 ticket = authenticationValidatedContext.Ticket;
 
-                if (Options.SaveTokensInAuthenticationProperties)
+                if (Options.SaveTokens)
                 {
                     SaveTokens(ticket.Principal, tokenEndpointResponse ?? authorizationResponse, jwt.Issuer);
                 }

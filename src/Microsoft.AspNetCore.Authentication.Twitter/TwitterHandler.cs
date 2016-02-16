@@ -88,7 +88,7 @@ namespace Microsoft.AspNetCore.Authentication.Twitter
             },
             Options.ClaimsIssuer);
 
-            if (Options.SaveTokensInAuthenticationProperties)
+            if (Options.SaveTokens)
             {
                 identity.AddClaim(new Claim("access_token", accessToken.Token, ClaimValueTypes.String, Options.ClaimsIssuer));
                 identity.AddClaim(new Claim("access_token_secret", accessToken.TokenSecret, ClaimValueTypes.String, Options.ClaimsIssuer));

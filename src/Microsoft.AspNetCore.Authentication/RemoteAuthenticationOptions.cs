@@ -54,7 +54,7 @@ namespace Microsoft.AspNetCore.Builder
         /// This property is set to <c>false</c> by default to reduce
         /// the size of the final authentication cookie.
         /// </summary>
-        public bool SaveTokensInAuthenticationProperties { get; set; }
+        public bool SaveTokens { get; set; }
 
         /// <summary>
         /// Gets or sets the time limit for completing the authentication flow (15 minutes by default).

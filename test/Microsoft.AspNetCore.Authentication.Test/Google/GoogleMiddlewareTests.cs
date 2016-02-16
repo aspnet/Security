@@ -2,7 +2,6 @@
 
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Linq;
 using System.Net;
 using System.Net.Http;
@@ -293,7 +292,7 @@ namespace Microsoft.AspNetCore.Authentication.Google
             {
                 ClientId = "Test Id",
                 ClientSecret = "Test Secret",
-                SaveTokensInAuthenticationProperties = true,
+                SaveTokens = true,
                 StateDataFormat = stateFormat,
                 ClaimsIssuer = claimsIssuer,
                 BackchannelHttpHandler = new TestHttpMessageHandler
@@ -336,8 +335,6 @@ namespace Microsoft.AspNetCore.Authentication.Google
                     }
                 }
             });
-
-            Debugger.Launch();
 
             var properties = new AuthenticationProperties();
             var correlationKey = ".xsrf";

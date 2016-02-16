@@ -3,7 +3,10 @@
 
 using System;
 using System.Collections.Generic;
+using System.Threading.Tasks;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Http.Authentication;
+using Microsoft.AspNetCore.Http.Features.Authentication;
 
 namespace Microsoft.AspNetCore.Authentication
 {
@@ -36,6 +39,28 @@ namespace Microsoft.AspNetCore.Authentication
             {
                 properties.Items[TokenNamesKey] = string.Join(";", tokenNames.ToArray());
             }
+        }
+
+        public static async Task<string> GetTokenAsync(HttpContext context, string signedInScheme, string tokenName)
+        {
+            if (context == null)
+            {
+                throw new ArgumentNullException(nameof(context));
+            }
+            if (signedInScheme == null)
+            {
+                throw new ArgumentNullException(nameof(signedInScheme));
+            }
+            if (tokenName == null)
+            {
+                throw new ArgumentNullException(nameof(tokenName));
+            }
+
+            var authContext = new AuthenticateContext(signedInScheme);
+            await context.Authentication.AuthenticateAsync(authContext);
+            return authContext.Properties.ContainsKey(tokenName) 
+                ? authContext.Properties[tokenName]
+                : null;
         }
 
         public static IEnumerable<AuthenticationToken> GetTokens(AuthenticationProperties properties)

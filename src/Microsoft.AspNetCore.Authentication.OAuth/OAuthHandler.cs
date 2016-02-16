@@ -85,7 +85,7 @@ namespace Microsoft.AspNetCore.Authentication.OAuth
 
             var identity = new ClaimsIdentity(Options.ClaimsIssuer);
 
-            if (Options.SaveTokensInAuthenticationProperties)
+            if (Options.SaveTokens)
             {
                 var toks = new List<AuthenticationToken>();
 
