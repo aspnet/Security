@@ -90,7 +90,7 @@ namespace CookieSample
                 AuthorizationEndpoint = GoogleDefaults.AuthorizationEndpoint,
                 TokenEndpoint = GoogleDefaults.TokenEndpoint,
                 Scope = { "openid", "profile", "email" },
-                SaveTokensAsClaims = true
+                SaveTokensInAuthenticationProperties = true
             });
 
             // See config.json
@@ -156,7 +156,7 @@ namespace CookieSample
                 AuthorizationEndpoint = MicrosoftAccountDefaults.AuthorizationEndpoint,
                 TokenEndpoint = MicrosoftAccountDefaults.TokenEndpoint,
                 Scope = { "wl.basic" },
-                SaveTokensAsClaims = true
+                SaveTokensInAuthenticationProperties = true
             });
 
             //// You must first create an app with live.com and add it's ID and Secret to your config.json or user-secrets.
@@ -179,7 +179,7 @@ namespace CookieSample
                 CallbackPath = new PathString("/signin-github-token"),
                 AuthorizationEndpoint = "https://github.com/login/oauth/authorize",
                 TokenEndpoint = "https://github.com/login/oauth/access_token",
-                SaveTokensAsClaims = true
+                SaveTokensInAuthenticationProperties = true
             });
 
             // See config.json
