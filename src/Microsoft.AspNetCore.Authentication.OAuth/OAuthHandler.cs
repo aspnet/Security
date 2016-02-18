@@ -87,17 +87,17 @@ namespace Microsoft.AspNetCore.Authentication.OAuth
 
             if (Options.SaveTokens)
             {
-                var toks = new List<AuthenticationToken>();
+                var authTokens = new List<AuthenticationToken>();
 
-                toks.Add(new AuthenticationToken { Name = "access_token", Value = tokens.AccessToken });
+                authTokens.Add(new AuthenticationToken { Name = "access_token", Value = tokens.AccessToken });
                 if (!string.IsNullOrEmpty(tokens.RefreshToken))
                 {
-                    toks.Add(new AuthenticationToken { Name = "refresh_token", Value = tokens.RefreshToken });
+                    authTokens.Add(new AuthenticationToken { Name = "refresh_token", Value = tokens.RefreshToken });
                 }
 
                 if (!string.IsNullOrEmpty(tokens.TokenType))
                 {
-                    toks.Add(new AuthenticationToken { Name = "token_type", Value = tokens.TokenType });
+                    authTokens.Add(new AuthenticationToken { Name = "token_type", Value = tokens.TokenType });
                 }
 
                 if (!string.IsNullOrEmpty(tokens.ExpiresIn))
@@ -108,7 +108,7 @@ namespace Microsoft.AspNetCore.Authentication.OAuth
                         // https://www.w3.org/TR/xmlschema-2/#dateTime
                         // https://msdn.microsoft.com/en-us/library/az4se3k1(v=vs.110).aspx
                         var expiresAt = Options.SystemClock.UtcNow + TimeSpan.FromSeconds(value);
-                        toks.Add(new AuthenticationToken
+                        authTokens.Add(new AuthenticationToken
                         {
                             Name = "expires_at",
                             Value = expiresAt.ToString("o", CultureInfo.InvariantCulture)
@@ -116,7 +116,7 @@ namespace Microsoft.AspNetCore.Authentication.OAuth
                     }
                 }
 
-                properties.StoreTokens(toks);
+                properties.StoreTokens(authTokens);
             }
 
             return AuthenticateResult.Success(await CreateTicketAsync(identity, properties, tokens));
