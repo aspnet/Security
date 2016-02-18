@@ -153,6 +153,14 @@ namespace Microsoft.AspNetCore.Authentication.JwtBearer
                             return AuthenticateResult.Skip();
                         }
 
+                        if (Options.SaveTokens)
+                        {
+                            ticket.Properties.StoreTokens(new[]
+                            {
+                                new AuthenticationToken { Name = "Bearer", Value = token }
+                            });
+                        }
+
                         return AuthenticateResult.Success(ticket);
                     }
                 }

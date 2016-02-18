@@ -515,7 +515,7 @@ namespace Microsoft.AspNetCore.Authentication.OpenIdConnect
 
                 if (Options.SaveTokens)
                 {
-                    SaveTokens(ticket.Principal, tokenEndpointResponse ?? authorizationResponse, jwt.Issuer);
+                    SaveTokens(ticket.Properties, tokenEndpointResponse ?? authorizationResponse);
                 }
 
                 if (Options.GetClaimsFromUserInfoEndpoint)
@@ -693,32 +693,28 @@ namespace Microsoft.AspNetCore.Authentication.OpenIdConnect
         /// </summary>
         /// <param name="principal">The principal in which tokens are saved.</param>
         /// <param name="message">The OpenID Connect response.</param>
-        private void SaveTokens(ClaimsPrincipal principal, OpenIdConnectMessage message, string issuer)
+        private void SaveTokens(AuthenticationProperties properties, OpenIdConnectMessage message)
         {
-            var identity = (ClaimsIdentity)principal.Identity;
+            var tokens = new List<AuthenticationToken>();
 
             if (!string.IsNullOrEmpty(message.AccessToken))
             {
-                identity.AddClaim(new Claim(OpenIdConnectParameterNames.AccessToken, message.AccessToken,
-                                            ClaimValueTypes.String, issuer));
+                tokens.Add(new AuthenticationToken { Name = OpenIdConnectParameterNames.AccessToken, Value = message.AccessToken });
             }
 
             if (!string.IsNullOrEmpty(message.IdToken))
             {
-                identity.AddClaim(new Claim(OpenIdConnectParameterNames.IdToken, message.IdToken,
-                                            ClaimValueTypes.String, issuer));
+                tokens.Add(new AuthenticationToken { Name = OpenIdConnectParameterNames.IdToken, Value = message.IdToken });
             }
 
             if (!string.IsNullOrEmpty(message.RefreshToken))
             {
-                identity.AddClaim(new Claim(OpenIdConnectParameterNames.RefreshToken, message.RefreshToken,
-                                            ClaimValueTypes.String, issuer));
+                tokens.Add(new AuthenticationToken { Name = OpenIdConnectParameterNames.RefreshToken, Value = message.RefreshToken });
             }
 
             if (!string.IsNullOrEmpty(message.TokenType))
             {
-                identity.AddClaim(new Claim(OpenIdConnectParameterNames.TokenType, message.TokenType,
-                                            ClaimValueTypes.String, issuer));
+                tokens.Add(new AuthenticationToken { Name = OpenIdConnectParameterNames.TokenType, Value = message.TokenType });
             }
 
             if (!string.IsNullOrEmpty(message.ExpiresIn))
@@ -729,8 +725,7 @@ namespace Microsoft.AspNetCore.Authentication.OpenIdConnect
                     var expiresAt = Options.SystemClock.UtcNow + TimeSpan.FromSeconds(value);
                     // https://www.w3.org/TR/xmlschema-2/#dateTime
                     // https://msdn.microsoft.com/en-us/library/az4se3k1(v=vs.110).aspx
-                    identity.AddClaim(new Claim("expires_at", expiresAt.ToString("o", CultureInfo.InvariantCulture),
-                                                ClaimValueTypes.DateTime, issuer));
+                    tokens.Add(new AuthenticationToken { Name = "expires_at", Value = expiresAt.ToString("o", CultureInfo.InvariantCulture) });
                 }
             }
         }

@@ -47,5 +47,13 @@ namespace Microsoft.AspNetCore.Builder
         /// Additional information about the authentication type which is made available to the application.
         /// </summary>
         public AuthenticationDescription Description { get; set; } = new AuthenticationDescription();
+
+        /// <summary>
+        /// Defines whether access and refresh tokens should be stored in the
+        /// <see cref="AuthenticationProperties"/> after a successful authorization.
+        /// This property is set to <c>false</c> by default to reduce
+        /// the size of the final authentication cookie.
+        /// </summary>
+        public bool SaveTokens { get; set; }
     }
 }
