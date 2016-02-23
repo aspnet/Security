@@ -105,9 +105,8 @@ namespace Microsoft.AspNetCore.Authentication.OpenIdConnect
                     message.PostLogoutRedirectUri = logoutRedirectUri;
                 }
 
-                var principal = await Context.Authentication.AuthenticateAsync(Options.SignInScheme);
-                message.IdTokenHint = principal?.FindFirst(OpenIdConnectParameterNames.IdToken)?.Value;
-
+                // REVIEW: is the id token hint required?
+                message.IdTokenHint = await Context.Authentication.GetTokenAsync(OpenIdConnectParameterNames.IdToken);
                 var redirectContext = new RedirectContext(Context, Options, properties)
                 {
                     ProtocolMessage = message
