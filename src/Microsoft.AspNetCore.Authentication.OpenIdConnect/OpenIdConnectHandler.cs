@@ -105,7 +105,6 @@ namespace Microsoft.AspNetCore.Authentication.OpenIdConnect
                     message.PostLogoutRedirectUri = logoutRedirectUri;
                 }
 
-                // REVIEW: is the id token hint required?
                 message.IdTokenHint = await Context.Authentication.GetTokenAsync(OpenIdConnectParameterNames.IdToken);
                 var redirectContext = new RedirectContext(Context, Options, properties)
                 {
