@@ -157,7 +157,7 @@ namespace Microsoft.AspNetCore.Authentication.JwtBearer
                         {
                             ticket.Properties.StoreTokens(new[]
                             {
-                                new AuthenticationToken { Name = "Bearer", Value = token }
+                                new AuthenticationToken { Name = "access_token", Value = token }
                             });
                         }
 
