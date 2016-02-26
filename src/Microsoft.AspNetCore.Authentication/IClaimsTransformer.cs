@@ -6,8 +6,16 @@ using System.Threading.Tasks;
 
 namespace Microsoft.AspNetCore.Authentication
 {
+    /// <summary>
+    /// Used for claims transformation.
+    /// </summary>
     public interface IClaimsTransformer
     {
+        /// <summary>
+        /// Transform a ClaimsPrincipal.
+        /// </summary>
+        /// <param name="principal"></param>
+        /// <returns></returns>
         Task<ClaimsPrincipal> TransformAsync(ClaimsPrincipal principal);
     }
 }

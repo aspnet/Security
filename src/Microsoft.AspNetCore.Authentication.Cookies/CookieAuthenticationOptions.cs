@@ -13,7 +13,7 @@ using Microsoft.Extensions.Options;
 namespace Microsoft.AspNetCore.Builder
 {
     /// <summary>
-    /// Contains the options used by the CookiesAuthenticationMiddleware
+    /// Contains the options used by the <see cref="CookiesAuthenticationMiddleware"/>.
     /// </summary>
     public class CookieAuthenticationOptions : AuthenticationOptions, IOptions<CookieAuthenticationOptions>
     {
