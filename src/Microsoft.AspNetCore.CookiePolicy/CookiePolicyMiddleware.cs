@@ -6,7 +6,6 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Http.Features.Internal;
-using Microsoft.Extensions.Options;
 
 namespace Microsoft.AspNetCore.CookiePolicy
 {
@@ -14,11 +13,9 @@ namespace Microsoft.AspNetCore.CookiePolicy
     {
         private readonly RequestDelegate _next;
 
-        public CookiePolicyMiddleware(
-            RequestDelegate next,
-            IOptions<CookiePolicyOptions> options)
+        public CookiePolicyMiddleware(RequestDelegate next, CookiePolicyOptions options)
         {
-            Options = options.Value;
+            Options = options;
             _next = next;
         }
 

@@ -23,6 +23,7 @@ namespace Microsoft.Extensions.DependencyInjection
                 throw new ArgumentNullException(nameof(services));
             }
 
+            services.AddSingleton<SharedAuthenticationOptions>();
             services.AddWebEncoders();
             services.AddDataProtection();
             return services;

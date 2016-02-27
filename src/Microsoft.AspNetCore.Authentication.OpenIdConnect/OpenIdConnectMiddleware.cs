@@ -38,8 +38,8 @@ namespace Microsoft.AspNetCore.Authentication.OpenIdConnect
             ILoggerFactory loggerFactory,
             UrlEncoder encoder,
             IServiceProvider services,
-            IOptions<SharedAuthenticationOptions> sharedOptions,
-            IOptions<OpenIdConnectOptions> options,
+            SharedAuthenticationOptions sharedOptions,
+            OpenIdConnectOptions options,
             HtmlEncoder htmlEncoder)
             : base(next, options, loggerFactory, encoder)
         {
@@ -90,7 +90,7 @@ namespace Microsoft.AspNetCore.Authentication.OpenIdConnect
 
             if (string.IsNullOrEmpty(Options.SignInScheme))
             {
-                Options.SignInScheme = sharedOptions.Value.SignInScheme;
+                Options.SignInScheme = sharedOptions.SignInScheme;
             }
             if (string.IsNullOrEmpty(Options.SignInScheme))
             {

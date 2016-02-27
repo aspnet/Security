@@ -5,7 +5,6 @@ using System;
 using System.Security.Claims;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authentication;
-using Microsoft.Extensions.Options;
 
 namespace Microsoft.AspNetCore.Builder
 {
@@ -69,7 +68,7 @@ namespace Microsoft.AspNetCore.Builder
                 throw new ArgumentNullException(nameof(options));
             }
 
-            return app.UseMiddleware<ClaimsTransformationMiddleware>(Options.Create(options));
+            return app.UseMiddleware<ClaimsTransformationMiddleware>(options);
         }
     }
 }

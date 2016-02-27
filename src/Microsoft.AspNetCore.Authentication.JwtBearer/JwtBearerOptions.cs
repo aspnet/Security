@@ -8,6 +8,7 @@ using System.IdentityModel.Tokens.Jwt;
 using System.Net.Http;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Protocols;
 using Microsoft.IdentityModel.Protocols.OpenIdConnect;
 using Microsoft.IdentityModel.Tokens;
@@ -22,8 +23,15 @@ namespace Microsoft.AspNetCore.Builder
         /// <summary>
         /// Creates an instance of bearer authentication options with default values.
         /// </summary>
-        public JwtBearerOptions() : base()
+        public JwtBearerOptions(IEnumerable<IConfigureOptions<JwtBearerOptions>> configureOptions = null)
         {
+            if (configureOptions != null)
+            {
+                foreach (var configure in configureOptions)
+                {
+                    configure.Configure(this);
+                }
+            }
             AuthenticationScheme = JwtBearerDefaults.AuthenticationScheme;
         }
 

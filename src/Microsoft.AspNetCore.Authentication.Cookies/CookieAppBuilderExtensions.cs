@@ -44,7 +44,7 @@ namespace Microsoft.AspNetCore.Builder
                 throw new ArgumentNullException(nameof(options));
             }
 
-            return app.UseMiddleware<CookieAuthenticationMiddleware>(Options.Create(options));
+            return app.UseMiddleware<CookieAuthenticationMiddleware>(options);
         }
     }
 }

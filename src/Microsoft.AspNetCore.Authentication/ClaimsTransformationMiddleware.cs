@@ -5,7 +5,6 @@ using System;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
-using Microsoft.Extensions.Options;
 
 namespace Microsoft.AspNetCore.Authentication
 {
@@ -15,7 +14,7 @@ namespace Microsoft.AspNetCore.Authentication
 
         public ClaimsTransformationMiddleware(
             RequestDelegate next,
-            IOptions<ClaimsTransformationOptions> options)
+            ClaimsTransformationOptions options)
         {
             if (next == null)
             {
@@ -27,7 +26,7 @@ namespace Microsoft.AspNetCore.Authentication
                 throw new ArgumentNullException(nameof(options));
             }
 
-            Options = options.Value;
+            Options = options;
             _next = next;
         }
 
