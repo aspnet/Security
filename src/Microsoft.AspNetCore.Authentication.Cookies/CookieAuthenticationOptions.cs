@@ -2,6 +2,7 @@
 // Licensed under the Apache License, Version 2.0. See License.txt in the project root for license information.
 
 using System;
+using System.Collections.Generic;
 using System.ComponentModel;
 using System.Diagnostics.CodeAnalysis;
 using Microsoft.AspNetCore.Authentication;
@@ -15,15 +16,23 @@ namespace Microsoft.AspNetCore.Builder
     /// <summary>
     /// Contains the options used by the CookiesAuthenticationMiddleware
     /// </summary>
-    public class CookieAuthenticationOptions : AuthenticationOptions, IOptions<CookieAuthenticationOptions>
+    public class CookieAuthenticationOptions : AuthenticationOptions
     {
         private string _cookieName;
 
         /// <summary>
         /// Create an instance of the options initialized with the default values
         /// </summary>
-        public CookieAuthenticationOptions()
+        public CookieAuthenticationOptions(IEnumerable<IConfigureOptions<CookieAuthenticationOptions>> configureOptions = null)
         {
+            if (configureOptions != null)
+            {
+                foreach (var configure in configureOptions)
+                {
+                    configure.Configure(this);
+                }
+            }
+
             AuthenticationScheme = CookieAuthenticationDefaults.AuthenticationScheme;
             AutomaticAuthenticate = true;
             ReturnUrlParameter = CookieAuthenticationDefaults.ReturnUrlParameter;
@@ -160,13 +169,5 @@ namespace Microsoft.AspNetCore.Builder
         /// to the client. This can be used to mitigate potential problems with very large identities.
         /// </summary>
         public ITicketStore SessionStore { get; set; }
-
-        CookieAuthenticationOptions IOptions<CookieAuthenticationOptions>.Value
-        {
-            get
-            {
-                return this;
-            }
-        }
     }
 }

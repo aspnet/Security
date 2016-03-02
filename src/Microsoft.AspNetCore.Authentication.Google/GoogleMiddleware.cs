@@ -9,7 +9,6 @@ using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.DataProtection;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Logging;
-using Microsoft.Extensions.Options;
 
 namespace Microsoft.AspNetCore.Authentication.Google
 {
@@ -34,8 +33,8 @@ namespace Microsoft.AspNetCore.Authentication.Google
             IDataProtectionProvider dataProtectionProvider,
             ILoggerFactory loggerFactory,
             UrlEncoder encoder,
-            IOptions<SharedAuthenticationOptions> sharedOptions,
-            IOptions<GoogleOptions> options)
+            SharedAuthenticationOptions sharedOptions,
+            GoogleOptions options)
             : base(next, dataProtectionProvider, loggerFactory, encoder, sharedOptions, options)
         {
             if (next == null)

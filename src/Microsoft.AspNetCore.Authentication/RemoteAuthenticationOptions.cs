@@ -8,7 +8,7 @@ using Microsoft.AspNetCore.Authentication;
 
 namespace Microsoft.AspNetCore.Builder
 {
-    public class RemoteAuthenticationOptions : AuthenticationOptions
+    public abstract class RemoteAuthenticationOptions : AuthenticationOptions
     {
         /// <summary>
         /// Gets or sets timeout value in milliseconds for back channel communications with the remote provider.

@@ -3,7 +3,6 @@
 
 using System;
 using System.Threading.Tasks;
-using Microsoft.Extensions.Options;
 
 namespace Microsoft.AspNetCore.Authorization
 {
@@ -14,14 +13,14 @@ namespace Microsoft.AspNetCore.Authorization
     {
         private readonly AuthorizationOptions _options;
 
-        public DefaultAuthorizationPolicyProvider(IOptions<AuthorizationOptions> options)
+        public DefaultAuthorizationPolicyProvider(AuthorizationOptions options)
         {
             if (options == null)
             {
                 throw new ArgumentNullException(nameof(options));
             }
 
-            _options = options.Value;
+            _options = options;
         } 
 
         /// <summary>

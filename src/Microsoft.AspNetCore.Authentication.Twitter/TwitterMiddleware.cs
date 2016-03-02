@@ -10,7 +10,6 @@ using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.DataProtection;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Logging;
-using Microsoft.Extensions.Options;
 
 namespace Microsoft.AspNetCore.Authentication.Twitter
 {
@@ -37,8 +36,8 @@ namespace Microsoft.AspNetCore.Authentication.Twitter
             IDataProtectionProvider dataProtectionProvider,
             ILoggerFactory loggerFactory,
             UrlEncoder encoder,
-            IOptions<SharedAuthenticationOptions> sharedOptions,
-            IOptions<TwitterOptions> options)
+            SharedAuthenticationOptions sharedOptions,
+            TwitterOptions options)
             : base(next, options, loggerFactory, encoder)
         {
             if (next == null)
@@ -99,7 +98,7 @@ namespace Microsoft.AspNetCore.Authentication.Twitter
 
             if (string.IsNullOrEmpty(Options.SignInScheme))
             {
-                Options.SignInScheme = sharedOptions.Value.SignInScheme;
+                Options.SignInScheme = sharedOptions.SignInScheme;
             }
             if (string.IsNullOrEmpty(Options.SignInScheme))
             {

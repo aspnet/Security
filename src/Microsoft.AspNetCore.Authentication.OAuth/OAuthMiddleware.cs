@@ -10,7 +10,6 @@ using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.DataProtection;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Logging;
-using Microsoft.Extensions.Options;
 
 namespace Microsoft.AspNetCore.Authentication.OAuth
 {
@@ -32,8 +31,8 @@ namespace Microsoft.AspNetCore.Authentication.OAuth
             IDataProtectionProvider dataProtectionProvider,
             ILoggerFactory loggerFactory,
             UrlEncoder encoder,
-            IOptions<SharedAuthenticationOptions> sharedOptions,
-            IOptions<TOptions> options)
+            SharedAuthenticationOptions sharedOptions,
+            TOptions options)
             : base(next, options, loggerFactory, encoder)
         {
             if (next == null)
@@ -116,7 +115,7 @@ namespace Microsoft.AspNetCore.Authentication.OAuth
 
             if (string.IsNullOrEmpty(Options.SignInScheme))
             {
-                Options.SignInScheme = sharedOptions.Value.SignInScheme;
+                Options.SignInScheme = sharedOptions.SignInScheme;
             }
             if (string.IsNullOrEmpty(Options.SignInScheme))
             {

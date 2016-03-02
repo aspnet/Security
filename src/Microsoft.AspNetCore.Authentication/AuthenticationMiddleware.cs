@@ -7,17 +7,16 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Logging;
-using Microsoft.Extensions.Options;
 
 namespace Microsoft.AspNetCore.Authentication
 {
-    public abstract class AuthenticationMiddleware<TOptions> where TOptions : AuthenticationOptions, new()
+    public abstract class AuthenticationMiddleware<TOptions> where TOptions : AuthenticationOptions
     {
         private readonly RequestDelegate _next;
 
         protected AuthenticationMiddleware(
             RequestDelegate next,
-            IOptions<TOptions> options,
+            TOptions options,
             ILoggerFactory loggerFactory,
             UrlEncoder encoder)
         {
@@ -41,7 +40,7 @@ namespace Microsoft.AspNetCore.Authentication
                 throw new ArgumentNullException(nameof(encoder));
             }
 
-            Options = options.Value;
+            Options = options;
             Logger = loggerFactory.CreateLogger(this.GetType().FullName);
             UrlEncoder = encoder;
 

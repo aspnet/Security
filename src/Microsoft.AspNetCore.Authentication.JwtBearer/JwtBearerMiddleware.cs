@@ -29,7 +29,7 @@ namespace Microsoft.AspNetCore.Authentication.JwtBearer
             RequestDelegate next,
             ILoggerFactory loggerFactory,
             UrlEncoder encoder,
-            IOptions<JwtBearerOptions> options)
+            JwtBearerOptions options)
             : base(next, options, loggerFactory, encoder)
         {
             if (next == null)
