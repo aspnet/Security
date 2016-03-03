@@ -18,10 +18,10 @@
     "web": {
       "commandName": "web",
       "launchBrowser": true,
-      "launchUrl": "http://localhost:54540/",
+      "launchUrl": "https://localhost:54541/",
       "environmentVariables": {
         "Hosting:Environment": "Development",
-        "ASPNET_server.urls": "http://localhost:54540/"
+        "ASPNET_server.urls": "https://localhost:54541/;http://localhost:54540/"
       }
     }
   }

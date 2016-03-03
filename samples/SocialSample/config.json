@@ -6,5 +6,7 @@
   "github:clientid": "49e302895d8b09ea5656",
   "github:clientsecret": "98f1bf028608901e9df91d64ee61536fe562064b",
   "github-token:clientid": "8c0c5a572abe8fe89588",
-  "github-token:clientsecret": "e1d95eaf03461d27acd6f49d4fc7bf19d6ac8cda"
+  "github-token:clientsecret": "e1d95eaf03461d27acd6f49d4fc7bf19d6ac8cda",
+  "msa:clientid": "a7bfff26-c032-47d9-883f-aaa9cda2a9b5",
+  "msa:clientsecret": "TWFzu11P6BthrmEebBPnaVz"
 }
