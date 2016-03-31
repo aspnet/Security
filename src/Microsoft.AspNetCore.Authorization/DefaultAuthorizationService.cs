@@ -74,21 +74,14 @@ namespace Microsoft.AspNetCore.Authorization
                 }
                 return GetClaimValue(identity, "sub")
                     ?? GetClaimValue(identity, ClaimTypes.Name)
-                    ?? GetClaimValue(identity, ClaimTypes.NameIdentifier)
-                    ?? GetClaimValue(identity, ClaimTypes.WindowsAccountName)
-                    ?? GetClaimValue(identity, ClaimTypes.X500DistinguishedName)
-                    ?? GetClaimValue(identity, ClaimTypes.PrimarySid)
-                    ?? GetClaimValue(identity, ClaimTypes.Sid)
-                    ?? GetClaimValue(identity, ClaimTypes.Upn);
+                    ?? GetClaimValue(identity, ClaimTypes.NameIdentifier);
             }
             return null;
         }
 
         private static string GetClaimValue(IIdentity identity, string claimsType)
         {
-            return (identity as ClaimsIdentity)
-                ?.FindFirst(c => string.Equals(c.Type, claimsType, StringComparison.OrdinalIgnoreCase))
-                ?.Value;
+            return (identity as ClaimsIdentity)?.FindFirst(claimsType)?.Value;
         }
 
         public async Task<bool> AuthorizeAsync(ClaimsPrincipal user, object resource, string policyName)
