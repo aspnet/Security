@@ -4,6 +4,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Security.Claims;
 
 namespace Microsoft.AspNetCore.Authorization.Infrastructure
 {
@@ -29,21 +30,25 @@ namespace Microsoft.AspNetCore.Authorization.Infrastructure
 
         protected override void Handle(AuthorizationContext context, RolesAuthorizationRequirement requirement)
         {
-            if (context.User != null)
+            var user = context.AuthorizationData as ClaimsPrincipal;
+            if (user == null)
             {
-                bool found = false;
-                if (requirement.AllowedRoles == null || !requirement.AllowedRoles.Any())
-                {
-                    // Review: What do we want to do here?  No roles requested is auto success?
-                }
-                else
-                {
-                    found = requirement.AllowedRoles.Any(r => context.User.IsInRole(r));
-                }
-                if (found)
-                {
-                    context.Succeed(requirement);
-                }
+                context.Fail();
+                return;
+            }
+
+            bool found = false;
+            if (requirement.AllowedRoles == null || !requirement.AllowedRoles.Any())
+            {
+                // Review: What do we want to do here?  No roles requested is auto success?
+            }
+            else
+            {
+                found = requirement.AllowedRoles.Any(r => user.IsInRole(r));
+            }
+            if (found)
+            {
+                context.Succeed(requirement);
             }
         }
 

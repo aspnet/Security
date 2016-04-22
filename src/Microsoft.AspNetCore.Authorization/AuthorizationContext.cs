@@ -4,7 +4,6 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Security.Claims;
 
 namespace Microsoft.AspNetCore.Authorization
 {
@@ -19,7 +18,7 @@ namespace Microsoft.AspNetCore.Authorization
 
         public AuthorizationContext(
             IEnumerable<IAuthorizationRequirement> requirements,
-            ClaimsPrincipal user,
+            object authorizationData,
             object resource)
         {
             if (requirements == null)
@@ -28,19 +27,21 @@ namespace Microsoft.AspNetCore.Authorization
             }
 
             Requirements = requirements;
-            User = user;
+            AuthorizationData = authorizationData;
             Resource = resource;
             _pendingRequirements = new HashSet<IAuthorizationRequirement>(requirements);
         }
 
         public IEnumerable<IAuthorizationRequirement> Requirements { get; }
-        public ClaimsPrincipal User { get; }
+        public object AuthorizationData { get; }
         public object Resource { get; }
+        
+        public string Identifier { get; private set; }
 
         public IEnumerable<IAuthorizationRequirement> PendingRequirements { get { return _pendingRequirements; } }
 
         public bool HasFailed { get { return _failCalled; } }
-
+        
         public bool HasSucceeded
         {
             get
@@ -56,8 +57,14 @@ namespace Microsoft.AspNetCore.Authorization
 
         public void Succeed(IAuthorizationRequirement requirement)
         {
+            Succeed(requirement, null);
+        }
+
+        public void Succeed(IAuthorizationRequirement requirement, string identifier)
+        {
             _succeedCalled = true;
             _pendingRequirements.Remove(requirement);
+            Identifier = identifier;
         }
     }
 }

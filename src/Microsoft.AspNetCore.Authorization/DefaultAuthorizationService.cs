@@ -3,11 +3,9 @@
 
 using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Security.Claims;
-using System.Security.Principal;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
+using System.Linq;
 
 namespace Microsoft.AspNetCore.Authorization
 {
@@ -37,14 +35,14 @@ namespace Microsoft.AspNetCore.Authorization
             _logger = logger;
         }
 
-        public async Task<bool> AuthorizeAsync(ClaimsPrincipal user, object resource, IEnumerable<IAuthorizationRequirement> requirements)
+        public async Task<bool> AuthorizeAsync(object authorizationData, object resource, IEnumerable<IAuthorizationRequirement> requirements)
         {
             if (requirements == null)
             {
                 throw new ArgumentNullException(nameof(requirements));
             }
 
-            var authContext = new AuthorizationContext(requirements, user, resource);
+            var authContext = new AuthorizationContext(requirements, authorizationData, resource);
             foreach (var handler in _handlers)
             {
                 await handler.HandleAsync(authContext);
@@ -52,39 +50,17 @@ namespace Microsoft.AspNetCore.Authorization
 
             if (authContext.HasSucceeded)
             {
-                _logger.UserAuthorizationSucceeded(GetUserNameForLogging(user));
+                _logger.AuthorizationSucceeded(authContext);
                 return true;
             }
             else
             {
-                _logger.UserAuthorizationFailed(GetUserNameForLogging(user));
+                _logger.AuthorizationFailed(authContext);
                 return false;
             }
         }
 
-        private string GetUserNameForLogging(ClaimsPrincipal user)
-        {
-            var identity = user?.Identity;
-            if (identity != null)
-            {
-                var name = identity.Name;
-                if (name != null)
-                {
-                    return name;
-                }
-                return GetClaimValue(identity, "sub")
-                    ?? GetClaimValue(identity, ClaimTypes.Name)
-                    ?? GetClaimValue(identity, ClaimTypes.NameIdentifier);
-            }
-            return null;
-        }
-
-        private static string GetClaimValue(IIdentity identity, string claimsType)
-        {
-            return (identity as ClaimsIdentity)?.FindFirst(claimsType)?.Value;
-        }
-
-        public async Task<bool> AuthorizeAsync(ClaimsPrincipal user, object resource, string policyName)
+        public async Task<bool> AuthorizeAsync(object authorizationData, object resource, string policyName)
         {
             if (policyName == null)
             {
@@ -96,7 +72,7 @@ namespace Microsoft.AspNetCore.Authorization
             {
                 throw new InvalidOperationException($"No policy found: {policyName}.");
             }
-            return await this.AuthorizeAsync(user, resource, policy);
+            return await this.AuthorizeAsync(authorizationData, resource, policy);
         }
     }
 }

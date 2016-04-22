@@ -3,6 +3,7 @@
 
 using System;
 using System.Linq;
+using System.Security.Claims;
 
 namespace Microsoft.AspNetCore.Authorization.Infrastructure
 {
@@ -25,13 +26,17 @@ namespace Microsoft.AspNetCore.Authorization.Infrastructure
 
         protected override void Handle(AuthorizationContext context, NameAuthorizationRequirement requirement)
         {
-            if (context.User != null)
+            var user = context.AuthorizationData as ClaimsPrincipal;
+            if (user == null)
             {
-                // REVIEW: Do we need to do normalization?  casing/loc?
-                if (context.User.Identities.Any(i => string.Equals(i.Name, requirement.RequiredName)))
-                {
-                    context.Succeed(requirement);
-                }
+                context.Fail();
+                return;
+            }
+
+            // REVIEW: Do we need to do normalization?  casing/loc?
+            if (user.Identities.Any(i => string.Equals(i.Name, requirement.RequiredName)))
+            {
+                context.Succeed(requirement);
             }
         }
     }

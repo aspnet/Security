@@ -4,6 +4,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Security.Claims;
 
 namespace Microsoft.AspNetCore.Authorization.Infrastructure
 {
@@ -27,23 +28,29 @@ namespace Microsoft.AspNetCore.Authorization.Infrastructure
 
         protected override void Handle(AuthorizationContext context, ClaimsAuthorizationRequirement requirement)
         {
-            if (context.User != null)
+            var user = context.AuthorizationData as ClaimsPrincipal;
+            if (user == null)
             {
-                var found = false;
-                if (requirement.AllowedValues == null || !requirement.AllowedValues.Any())
-                {
-                    found = context.User.Claims.Any(c => string.Equals(c.Type, requirement.ClaimType, StringComparison.OrdinalIgnoreCase));
-                }
-                else
-                {
-                    found = context.User.Claims.Any(c => string.Equals(c.Type, requirement.ClaimType, StringComparison.OrdinalIgnoreCase)
-                                                        && requirement.AllowedValues.Contains(c.Value, StringComparer.Ordinal));
-                }
-                if (found)
-                {
-                    context.Succeed(requirement);
-                }
+                context.Fail();
+                return;
             }
+
+            var found = false;
+
+            if (requirement.AllowedValues == null || !requirement.AllowedValues.Any())
+            {
+                found = user.Claims.Any(c => string.Equals(c.Type, requirement.ClaimType, StringComparison.OrdinalIgnoreCase));
+            }
+            else
+            {
+                found = user.Claims.Any(c => string.Equals(c.Type, requirement.ClaimType, StringComparison.OrdinalIgnoreCase)
+                                                    && requirement.AllowedValues.Contains(c.Value, StringComparer.Ordinal));
+            }
+            if (found)
+            {
+                context.Succeed(requirement, user.GetUserName());
+            }
+
         }
     }
 }
