@@ -779,7 +779,8 @@ namespace Microsoft.AspNetCore.Authorization.Test
         {
             protected override void Handle(AuthorizationContext context, OperationAuthorizationRequirement requirement)
             {
-                if (context.User.HasClaim("SuperUser", "yes"))
+                var user = context.AuthorizationData as ClaimsPrincipal;
+                if (user == null || user.HasClaim("SuperUser", "yes"))
                 {
                     context.Succeed(requirement);
                 }
