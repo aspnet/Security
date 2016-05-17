@@ -4,15 +4,15 @@
   },
   "dependencies": {
     "dotnet-test-xunit": "1.0.0-*",
-    "Microsoft.NETCore.Platforms": "1.0.1-*",
-    "Microsoft.AspNetCore.Authentication.Cookies": "1.0.0-*",
-    "Microsoft.AspNetCore.Authentication.Facebook": "1.0.0-*",
-    "Microsoft.AspNetCore.Authentication.Google": "1.0.0-*",
-    "Microsoft.AspNetCore.Authentication.JwtBearer": "1.0.0-*",
-    "Microsoft.AspNetCore.Authentication.MicrosoftAccount": "1.0.0-*",
-    "Microsoft.AspNetCore.Authentication.OpenIdConnect": "1.0.0-*",
-    "Microsoft.AspNetCore.Authentication.Twitter": "1.0.0-*",
-    "Microsoft.AspNetCore.TestHost": "1.0.0-*",
+    "Microsoft.NETCore.Platforms": "1.0.1-rc2-24027",
+    "Microsoft.AspNetCore.Authentication.Cookies": "1.0.0-rc2-final",
+    "Microsoft.AspNetCore.Authentication.Facebook": "1.0.0-rc2-final",
+    "Microsoft.AspNetCore.Authentication.Google": "1.0.0-rc2-final",
+    "Microsoft.AspNetCore.Authentication.JwtBearer": "1.0.0-rc2-final",
+    "Microsoft.AspNetCore.Authentication.MicrosoftAccount": "1.0.0-rc2-final",
+    "Microsoft.AspNetCore.Authentication.OpenIdConnect": "1.0.0-rc2-final",
+    "Microsoft.AspNetCore.Authentication.Twitter": "1.0.0-rc2-final",
+    "Microsoft.AspNetCore.TestHost": "1.0.0-rc2-final",
     "Microsoft.AspNetCore.Testing": "1.0.0-*",
     "xunit": "2.1.0"
   },
@@ -20,10 +20,10 @@
     "netcoreapp1.0": {
       "dependencies": {
         "Microsoft.NETCore.App": {
-          "version": "1.0.0-*",
+          "version": "1.0.0-rc2-3002702",
           "type": "platform"
         },
-        "System.Diagnostics.Process": "4.1.0-*"
+        "System.Diagnostics.Process": "4.1.0-rc2-24027"
       },
       "imports": [
         "dnxcore50",
