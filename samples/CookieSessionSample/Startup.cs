@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Caching.Redis;
 
 namespace CookieSessionSample
 {
@@ -24,7 +25,10 @@ namespace CookieSessionSample
             app.UseCookieAuthentication(new CookieAuthenticationOptions
             {
                 AutomaticAuthenticate = true,
-                SessionStore = new MemoryCacheTicketStore()
+                //SessionStore = new MemoryCacheTicketStore()
+                SessionStore = new RedisTicketStore(new RedisCacheOptions {
+                    Configuration = Configuration["Data:Redis:ConnectionString"],
+                });
             });
 
             app.Run(async context =>
