@@ -6,18 +6,14 @@ using System.Threading.Tasks;
 
 namespace Microsoft.AspNetCore.Authorization
 {
+    /// <summary>
+    /// Base class for authorization handlers that need to be called for a specific requirement type.
+    /// </summary>
+    /// <typeparam name="TRequirement">The type of the requirement to handle.</typeparam>
     public abstract class AuthorizationHandler<TRequirement> : IAuthorizationHandler
-        where TRequirement : IAuthorizationRequirement
+            where TRequirement : IAuthorizationRequirement
     {
-        public void Handle(AuthorizationHandlerContext context)
-        {
-            foreach (var req in context.Requirements.OfType<TRequirement>())
-            {
-                Handle(context, req);
-            }
-        }
-
-        public virtual async Task HandleAsync(AuthorizationHandlerContext context)
+        async Task IAuthorizationHandler.HandleAsync(AuthorizationHandlerContext context)
         {
             foreach (var req in context.Requirements.OfType<TRequirement>())
             {
@@ -25,8 +21,21 @@ namespace Microsoft.AspNetCore.Authorization
             }
         }
 
-        protected abstract void Handle(AuthorizationHandlerContext context, TRequirement requirement);
+        /// <summary>
+        /// Makes a decision if authorization is allowed based on a specific requirement.
+        /// </summary>
+        /// <param name="context">The authorization information.</param>
+        /// <param name="requirement">The requirement to evaluate.</param>
+        protected virtual void Handle(AuthorizationHandlerContext context, TRequirement requirement)
+        {
+            return;
+        }
 
+        /// <summary>
+        /// Makes a decision if authorization is allowed based on a specific requirement.
+        /// </summary>
+        /// <param name="context">The authorization information.</param>
+        /// <param name="requirement">The requirement to evaluate.</param>
         protected virtual Task HandleAsync(AuthorizationHandlerContext context, TRequirement requirement)
         {
             Handle(context, requirement);
@@ -34,10 +43,16 @@ namespace Microsoft.AspNetCore.Authorization
         }
     }
 
+    /// <summary>
+    /// Base class for authorization handlers that need to be called for specific requirement and
+    /// resource types.
+    /// </summary>
+    /// <typeparam name="TRequirement">The type of the requirement to evaluate.</typeparam>
+    /// <typeparam name="TResource">The type of the resource to evaluate.</typeparam>
     public abstract class AuthorizationHandler<TRequirement, TResource> : IAuthorizationHandler
         where TRequirement : IAuthorizationRequirement
     {
-        public virtual async Task HandleAsync(AuthorizationHandlerContext context)
+        async Task IAuthorizationHandler.HandleAsync(AuthorizationHandlerContext context)
         {
             if (context.Resource is TResource)
             {
@@ -48,23 +63,27 @@ namespace Microsoft.AspNetCore.Authorization
             }
         }
 
+        /// <summary>
+        /// Makes a decision if authorization is allowed based on a specific requirement and resource.
+        /// </summary>
+        /// <param name="context">The authorization information.</param>
+        /// <param name="requirement">The requirement to evaluate.</param>
+        /// <param name="resource">The resource to evaluate.</param>
+        protected virtual void Handle(AuthorizationHandlerContext context, TRequirement requirement, TResource resource)
+        {
+            return;
+        }
+
+        /// <summary>
+        /// Makes a decision if authorization is allowed based on a specific requirement and resource.
+        /// </summary>
+        /// <param name="context">The authorization information.</param>
+        /// <param name="requirement">The requirement to evaluate.</param>
+        /// <param name="resource">The resource to evaluate.</param>
         protected virtual Task HandleAsync(AuthorizationHandlerContext context, TRequirement requirement, TResource resource)
         {
             Handle(context, requirement, resource);
             return Task.FromResult(0);
         }
-
-        public virtual void Handle(AuthorizationHandlerContext context)
-        {
-            if (context.Resource is TResource)
-            {
-                foreach (var req in context.Requirements.OfType<TRequirement>())
-                {
-                    Handle(context, req, (TResource)context.Resource);
-                }
-            }
-        }
-
-        protected abstract void Handle(AuthorizationHandlerContext context, TRequirement requirement, TResource resource);
     }
 }
