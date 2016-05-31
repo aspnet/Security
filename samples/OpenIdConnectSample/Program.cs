@@ -3,7 +3,6 @@ using System.Reflection;
 using System.Security.Cryptography.X509Certificates;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.FileProviders;
-using Microsoft.Extensions.Logging;
 
 namespace OpenIdConnectSample
 {
@@ -21,8 +20,6 @@ namespace OpenIdConnectSample
                 .UseContentRoot(Directory.GetCurrentDirectory())
                 .UseIISIntegration()
                 .UseStartup<Startup>()
-                .ConfigureLogging(options => options.AddConsole(LogLevel.Information))
-                .ConfigureLogging(options => options.AddDebug(LogLevel.Information))
                 .Build();
 
             host.Run();

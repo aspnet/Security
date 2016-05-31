@@ -8,6 +8,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Http.Authentication;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
 using Microsoft.IdentityModel.Protocols.OpenIdConnect;
 
 namespace OpenIdConnectSample
@@ -37,8 +38,11 @@ namespace OpenIdConnectSample
                 sharedOptions.SignInScheme = CookieAuthenticationDefaults.AuthenticationScheme);
         }
 
-        public void Configure(IApplicationBuilder app)
+        public void Configure(IApplicationBuilder app, ILoggerFactory loggerfactory)
         {
+            loggerfactory.AddConsole(LogLevel.Information);
+            loggerfactory.AddDebug(LogLevel.Information);
+
             // Simple error page
             app.Use(async (context, next) =>
             {
