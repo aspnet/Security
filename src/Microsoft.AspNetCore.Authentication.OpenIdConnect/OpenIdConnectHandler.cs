@@ -112,13 +112,14 @@ namespace Microsoft.AspNetCore.Authentication.OpenIdConnect
             // If the identifier cannot be found, bypass the session identifier checks: this may indicate that the
             // authentication cookie was already cleared, that the session identifier was lost because of a lossy
             // external/application cookie conversion or that the identity provider doesn't support sessions.
-            var sid = await Context.Authentication.GetTokenAsync(Options.SignInScheme, "sid");
+            var sid = await Context.Authentication.GetTokenAsync(Options.SignInScheme, "sid")
+                   ?? await Context.Authentication.GetTokenAsync("sid");
             if (string.IsNullOrEmpty(sid))
             {
                 // If the session identifier cannot be extracted from the authentication tokens
                 // (e.g because SaveTokens is set to false), try to resolve it from the claims.
                 var principal = await Context.Authentication.AuthenticateAsync(Options.SignInScheme);
-                sid = principal?.FindFirst("sid")?.Value;
+                sid = principal?.FindFirst("sid")?.Value ?? Context.User?.FindFirst("sid")?.Value;
             }
 
             if (!string.IsNullOrEmpty(sid))
@@ -188,13 +189,15 @@ namespace Microsoft.AspNetCore.Authentication.OpenIdConnect
                 }
 
                 // Attach the identity token to the logout request when possible.
-                message.IdTokenHint = await Context.Authentication.GetTokenAsync(Options.SignInScheme, OpenIdConnectParameterNames.IdToken);
+                message.IdTokenHint = await Context.Authentication.GetTokenAsync(Options.SignInScheme, OpenIdConnectParameterNames.IdToken)
+                                   ?? await Context.Authentication.GetTokenAsync(OpenIdConnectParameterNames.IdToken);
                 if (string.IsNullOrEmpty(message.IdTokenHint))
                 {
                     // If the identity token cannot be extracted from the authentication tokens
                     // (e.g because SaveTokens is set to false), try to resolve it from the claims.
                     var principal = await Context.Authentication.AuthenticateAsync(Options.SignInScheme);
-                    message.IdTokenHint = principal?.FindFirst(OpenIdConnectParameterNames.IdToken)?.Value;
+                    message.IdTokenHint = principal?.FindFirst(OpenIdConnectParameterNames.IdToken)?.Value
+                                       ?? Context.User?.FindFirst(OpenIdConnectParameterNames.IdToken)?.Value;
                 }
 
                 var redirectContext = new RedirectContext(Context, Options, properties)
