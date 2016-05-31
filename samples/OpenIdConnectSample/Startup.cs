@@ -98,6 +98,7 @@ namespace OpenIdConnectSample
                 if (context.Request.Path.Equals("/signout-remote"))
                 {
                     // Redirects
+                    await context.Authentication.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
                     await context.Authentication.SignOutAsync(OpenIdConnectDefaults.AuthenticationScheme, new AuthenticationProperties()
                     {
                         RedirectUri = "/signedout"
