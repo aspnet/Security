@@ -6,10 +6,8 @@ using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Http.Authentication;
-using Microsoft.AspNetCore.Http.Extensions;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Logging;
 using Microsoft.IdentityModel.Protocols.OpenIdConnect;
 
 namespace OpenIdConnectSample
@@ -39,10 +37,8 @@ namespace OpenIdConnectSample
                 sharedOptions.SignInScheme = CookieAuthenticationDefaults.AuthenticationScheme);
         }
 
-        public void Configure(IApplicationBuilder app, ILoggerFactory loggerfactory)
+        public void Configure(IApplicationBuilder app)
         {
-            loggerfactory.AddConsole(LogLevel.Information);
-
             // Simple error page
             app.Use(async (context, next) =>
             {
@@ -102,7 +98,6 @@ namespace OpenIdConnectSample
                     {
                         RedirectUri = "/signedout"
                     });
-                    await context.Authentication.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
                     return;
                 }
                 if (context.Request.Path.Equals("/Account/AccessDenied"))

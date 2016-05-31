@@ -66,27 +66,82 @@ namespace Microsoft.AspNetCore.Authentication.OpenIdConnect
         {
             if (Options.RemoteSignOutPath.HasValue && Options.RemoteSignOutPath == Request.Path)
             {
-                var remoteSignOutContext = new RemoteSignOutContext(Context, Options);
-                await Options.Events.RemoteSignOut(remoteSignOutContext);
-
-                if (remoteSignOutContext.HandledResponse)
-                {
-                    Logger.RemoteSignOutHandledResponse();
-                    return true;
-                }
-                if (remoteSignOutContext.Skipped)
-                {
-                    Logger.RemoteSignOutSkipped();
-                    return false;
-                }
-
-                Logger.RemoteSignOut();
-
-                // We've received a remote sign-out request
-                await Context.Authentication.SignOutAsync(Options.SignOutScheme ?? Options.SignInScheme);
-                return true;
+                return await HandleRemoteSignOutAsync();
             }
             return await base.HandleRequestAsync();
+        }
+
+        protected virtual async Task<bool> HandleRemoteSignOutAsync()
+        {
+            OpenIdConnectMessage message = null;
+
+            if (string.Equals(Request.Method, "GET", StringComparison.OrdinalIgnoreCase))
+            {
+                message = new OpenIdConnectMessage(Request.Query.Select(pair => new KeyValuePair<string, string[]>(pair.Key, pair.Value)));
+            }
+            // assumption: if the ContentType is "application/x-www-form-urlencoded" it should be safe to read as it is small.
+            else if (string.Equals(Request.Method, "POST", StringComparison.OrdinalIgnoreCase)
+              && !string.IsNullOrEmpty(Request.ContentType)
+              // May have media/type; charset=utf-8, allow partial match.
+              && Request.ContentType.StartsWith("application/x-www-form-urlencoded", StringComparison.OrdinalIgnoreCase)
+              && Request.Body.CanRead) {
+                var form = await Request.ReadFormAsync();
+                message = new OpenIdConnectMessage(form.Select(pair => new KeyValuePair<string, string[]>(pair.Key, pair.Value)));
+            }
+
+            if (message == null)
+            {
+                return false;
+            }
+
+            var remoteSignOutContext = new RemoteSignOutContext(Context, Options, message);
+            await Options.Events.RemoteSignOut(remoteSignOutContext);
+
+            if (remoteSignOutContext.HandledResponse)
+            {
+                Logger.RemoteSignOutHandledResponse();
+                return true;
+            }
+            if (remoteSignOutContext.Skipped)
+            {
+                Logger.RemoteSignOutSkipped();
+                return false;
+            }
+
+            // Try to extract the session identifier from the authentication ticket persisted by the sign-in handler.
+            // If the identifier cannot be found, bypass the session identifier checks: this may indicate that the
+            // authentication cookie was already cleared, that the session identifier was lost because of a lossy
+            // external/application cookie conversion or that the identity provider doesn't support sessions.
+            var sid = await Context.Authentication.GetTokenAsync(Options.SignInScheme, "sid");
+            if (string.IsNullOrEmpty(sid))
+            {
+                // If the session identifier cannot be extracted from the authentication tokens
+                // (e.g because SaveTokens is set to false), try to resolve it from the claims.
+                var principal = await Context.Authentication.AuthenticateAsync(Options.SignInScheme);
+                sid = principal?.FindFirst("sid")?.Value;
+            }
+
+            if (!string.IsNullOrEmpty(sid))
+            {
+                // Ensure a 'sid' parameter was sent by the identity provider.
+                if (string.IsNullOrEmpty(message.GetParameter("sid")))
+                {
+                    Logger.RemoteSignOutSessionIdMissing();
+                    return true;
+                }
+                // Ensure the 'sid' parameter corresponds to the 'sid' stored in the authentication ticket.
+                if (!string.Equals(sid, message.GetParameter("sid"), StringComparison.Ordinal))
+                {
+                    Logger.RemoteSignOutSessionIdInvalid();
+                    return true;
+                }
+            }
+
+            Logger.RemoteSignOut();
+
+            // We've received a remote sign-out request
+            await Context.Authentication.SignOutAsync(Options.SignOutScheme ?? Options.SignInScheme);
+            return true;
         }
 
         /// <summary>
@@ -132,7 +187,16 @@ namespace Microsoft.AspNetCore.Authentication.OpenIdConnect
                     message.PostLogoutRedirectUri = logoutRedirectUri;
                 }
 
-                message.IdTokenHint = await Context.Authentication.GetTokenAsync(OpenIdConnectParameterNames.IdToken);
+                // Attach the identity token to the logout request when possible.
+                message.IdTokenHint = await Context.Authentication.GetTokenAsync(Options.SignInScheme, OpenIdConnectParameterNames.IdToken);
+                if (string.IsNullOrEmpty(message.IdTokenHint))
+                {
+                    // If the identity token cannot be extracted from the authentication tokens
+                    // (e.g because SaveTokens is set to false), try to resolve it from the claims.
+                    var principal = await Context.Authentication.AuthenticateAsync(Options.SignInScheme);
+                    message.IdTokenHint = principal?.FindFirst(OpenIdConnectParameterNames.IdToken)?.Value;
+                }
+
                 var redirectContext = new RedirectContext(Context, Options, properties)
                 {
                     ProtocolMessage = message
@@ -560,7 +624,7 @@ namespace Microsoft.AspNetCore.Authentication.OpenIdConnect
 
                 if (Options.SaveTokens)
                 {
-                    SaveTokens(ticket.Properties, tokenEndpointResponse ?? authorizationResponse);
+                    SaveTokens(ticket.Properties, ticket.Principal, tokenEndpointResponse ?? authorizationResponse);
                 }
 
                 if (Options.GetClaimsFromUserInfoEndpoint)
@@ -720,8 +784,9 @@ namespace Microsoft.AspNetCore.Authentication.OpenIdConnect
         /// Save the tokens contained in the <see cref="OpenIdConnectMessage"/> in the <see cref="ClaimsPrincipal"/>.
         /// </summary>
         /// <param name="properties">The <see cref="AuthenticationProperties"/> in which tokens are saved.</param>
+        /// <param name="principal">The principal containing the claims extracted from the identity token.</param>
         /// <param name="message">The OpenID Connect response.</param>
-        private void SaveTokens(AuthenticationProperties properties, OpenIdConnectMessage message)
+        private void SaveTokens(AuthenticationProperties properties, ClaimsPrincipal principal, OpenIdConnectMessage message)
         {
             var tokens = new List<AuthenticationToken>();
 
@@ -755,6 +820,12 @@ namespace Microsoft.AspNetCore.Authentication.OpenIdConnect
                     // https://msdn.microsoft.com/en-us/library/az4se3k1(v=vs.110).aspx
                     tokens.Add(new AuthenticationToken { Name = "expires_at", Value = expiresAt.ToString("o", CultureInfo.InvariantCulture) });
                 }
+            }
+
+            var sid = principal.FindFirst("sid")?.Value;
+            if (!string.IsNullOrEmpty(sid))
+            {
+                tokens.Add(new AuthenticationToken { Name = "sid", Value = sid });
             }
 
             properties.StoreTokens(tokens);
