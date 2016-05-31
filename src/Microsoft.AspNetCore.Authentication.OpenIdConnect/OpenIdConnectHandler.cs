@@ -89,11 +89,6 @@ namespace Microsoft.AspNetCore.Authentication.OpenIdConnect
                 message = new OpenIdConnectMessage(form.Select(pair => new KeyValuePair<string, string[]>(pair.Key, pair.Value)));
             }
 
-            if (message == null)
-            {
-                return false;
-            }
-
             var remoteSignOutContext = new RemoteSignOutContext(Context, Options, message);
             await Options.Events.RemoteSignOut(remoteSignOutContext);
 
@@ -105,6 +100,11 @@ namespace Microsoft.AspNetCore.Authentication.OpenIdConnect
             if (remoteSignOutContext.Skipped)
             {
                 Logger.RemoteSignOutSkipped();
+                return false;
+            }
+
+            if (message == null)
+            {
                 return false;
             }
 
