@@ -112,16 +112,9 @@ namespace Microsoft.AspNetCore.Authentication.OpenIdConnect
             // If the identifier cannot be found, bypass the session identifier checks: this may indicate that the
             // authentication cookie was already cleared, that the session identifier was lost because of a lossy
             // external/application cookie conversion or that the identity provider doesn't support sessions.
-            var sid = await Context.Authentication.GetTokenAsync(Options.SignInScheme, "sid")
-                   ?? await Context.Authentication.GetTokenAsync("sid");
-            if (string.IsNullOrEmpty(sid))
-            {
-                // If the session identifier cannot be extracted from the authentication tokens
-                // (e.g because SaveTokens is set to false), try to resolve it from the claims.
-                var principal = await Context.Authentication.AuthenticateAsync(Options.SignInScheme);
-                sid = principal?.FindFirst("sid")?.Value ?? Context.User?.FindFirst("sid")?.Value;
-            }
-
+            var sid = (await Context.Authentication.AuthenticateAsync(Options.SignOutScheme))?.FindFirst("sid")?.Value
+                   ?? (await Context.Authentication.AuthenticateAsync(Options.SignInScheme))?.FindFirst("sid")?.Value
+                   ?? Context.User?.FindFirst("sid")?.Value;
             if (!string.IsNullOrEmpty(sid))
             {
                 // Ensure a 'sid' parameter was sent by the identity provider.
@@ -141,7 +134,7 @@ namespace Microsoft.AspNetCore.Authentication.OpenIdConnect
             Logger.RemoteSignOut();
 
             // We've received a remote sign-out request
-            await Context.Authentication.SignOutAsync(Options.SignOutScheme ?? Options.SignInScheme);
+            await Context.Authentication.SignOutAsync(Options.SignOutScheme);
             return true;
         }
 
@@ -189,16 +182,9 @@ namespace Microsoft.AspNetCore.Authentication.OpenIdConnect
                 }
 
                 // Attach the identity token to the logout request when possible.
-                message.IdTokenHint = await Context.Authentication.GetTokenAsync(Options.SignInScheme, OpenIdConnectParameterNames.IdToken)
+                message.IdTokenHint = await Context.Authentication.GetTokenAsync(Options.SignOutScheme, OpenIdConnectParameterNames.IdToken)
+                                   ?? await Context.Authentication.GetTokenAsync(Options.SignInScheme, OpenIdConnectParameterNames.IdToken)
                                    ?? await Context.Authentication.GetTokenAsync(OpenIdConnectParameterNames.IdToken);
-                if (string.IsNullOrEmpty(message.IdTokenHint))
-                {
-                    // If the identity token cannot be extracted from the authentication tokens
-                    // (e.g because SaveTokens is set to false), try to resolve it from the claims.
-                    var principal = await Context.Authentication.AuthenticateAsync(Options.SignInScheme);
-                    message.IdTokenHint = principal?.FindFirst(OpenIdConnectParameterNames.IdToken)?.Value
-                                       ?? Context.User?.FindFirst(OpenIdConnectParameterNames.IdToken)?.Value;
-                }
 
                 var redirectContext = new RedirectContext(Context, Options, properties)
                 {
@@ -627,7 +613,7 @@ namespace Microsoft.AspNetCore.Authentication.OpenIdConnect
 
                 if (Options.SaveTokens)
                 {
-                    SaveTokens(ticket.Properties, ticket.Principal, tokenEndpointResponse ?? authorizationResponse);
+                    SaveTokens(ticket.Properties, tokenEndpointResponse ?? authorizationResponse);
                 }
 
                 if (Options.GetClaimsFromUserInfoEndpoint)
@@ -787,9 +773,8 @@ namespace Microsoft.AspNetCore.Authentication.OpenIdConnect
         /// Save the tokens contained in the <see cref="OpenIdConnectMessage"/> in the <see cref="ClaimsPrincipal"/>.
         /// </summary>
         /// <param name="properties">The <see cref="AuthenticationProperties"/> in which tokens are saved.</param>
-        /// <param name="principal">The principal containing the claims extracted from the identity token.</param>
         /// <param name="message">The OpenID Connect response.</param>
-        private void SaveTokens(AuthenticationProperties properties, ClaimsPrincipal principal, OpenIdConnectMessage message)
+        private void SaveTokens(AuthenticationProperties properties, OpenIdConnectMessage message)
         {
             var tokens = new List<AuthenticationToken>();
 
@@ -823,12 +808,6 @@ namespace Microsoft.AspNetCore.Authentication.OpenIdConnect
                     // https://msdn.microsoft.com/en-us/library/az4se3k1(v=vs.110).aspx
                     tokens.Add(new AuthenticationToken { Name = "expires_at", Value = expiresAt.ToString("o", CultureInfo.InvariantCulture) });
                 }
-            }
-
-            var sid = principal.FindFirst("sid")?.Value;
-            if (!string.IsNullOrEmpty(sid))
-            {
-                tokens.Add(new AuthenticationToken { Name = "sid", Value = sid });
             }
 
             properties.StoreTokens(tokens);
