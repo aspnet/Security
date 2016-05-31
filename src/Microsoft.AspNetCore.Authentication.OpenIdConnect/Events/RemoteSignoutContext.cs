@@ -15,12 +15,7 @@ namespace Microsoft.AspNetCore.Authentication.OpenIdConnect
             OpenIdConnectMessage message)
             : base(context, options)
         {
-            Message = message;
+            ProtocolMessage = message;
         }
-
-        /// <summary>
-        /// Gets the remote signout message.
-        /// </summary>
-        public OpenIdConnectMessage Message { get; }
     }
 }
