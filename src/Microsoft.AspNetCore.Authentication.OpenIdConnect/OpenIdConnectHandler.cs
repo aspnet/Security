@@ -112,9 +112,7 @@ namespace Microsoft.AspNetCore.Authentication.OpenIdConnect
             // If the identifier cannot be found, bypass the session identifier checks: this may indicate that the
             // authentication cookie was already cleared, that the session identifier was lost because of a lossy
             // external/application cookie conversion or that the identity provider doesn't support sessions.
-            var sid = (await Context.Authentication.AuthenticateAsync(Options.SignOutScheme))?.FindFirst("sid")?.Value
-                   ?? (await Context.Authentication.AuthenticateAsync(Options.SignInScheme))?.FindFirst("sid")?.Value
-                   ?? Context.User?.FindFirst("sid")?.Value;
+            var sid = (await Context.Authentication.AuthenticateAsync(Options.SignOutScheme))?.FindFirst("sid")?.Value;
             if (!string.IsNullOrEmpty(sid))
             {
                 // Ensure a 'sid' parameter was sent by the identity provider.
@@ -182,9 +180,7 @@ namespace Microsoft.AspNetCore.Authentication.OpenIdConnect
                 }
 
                 // Attach the identity token to the logout request when possible.
-                message.IdTokenHint = await Context.Authentication.GetTokenAsync(Options.SignOutScheme, OpenIdConnectParameterNames.IdToken)
-                                   ?? await Context.Authentication.GetTokenAsync(Options.SignInScheme, OpenIdConnectParameterNames.IdToken)
-                                   ?? await Context.Authentication.GetTokenAsync(OpenIdConnectParameterNames.IdToken);
+                message.IdTokenHint = await Context.Authentication.GetTokenAsync(Options.SignOutScheme, OpenIdConnectParameterNames.IdToken);
 
                 var redirectContext = new RedirectContext(Context, Options, properties)
                 {
