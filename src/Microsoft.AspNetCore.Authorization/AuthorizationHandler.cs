@@ -13,11 +13,15 @@ namespace Microsoft.AspNetCore.Authorization
     public abstract class AuthorizationHandler<TRequirement> : IAuthorizationHandler
             where TRequirement : IAuthorizationRequirement
     {
-        async Task IAuthorizationHandler.HandleAsync(AuthorizationHandlerContext context)
+        /// <summary>
+        /// Makes a decision if authorization is allowed.
+        /// </summary>
+        /// <param name="context">The authorization information.</param>
+        public virtual async Task HandleAsync(AuthorizationHandlerContext context)
         {
             foreach (var req in context.Requirements.OfType<TRequirement>())
             {
-                await HandleAsync(context, req);
+                await HandleRequirementAsync(context, req);
             }
         }
 
@@ -26,21 +30,7 @@ namespace Microsoft.AspNetCore.Authorization
         /// </summary>
         /// <param name="context">The authorization information.</param>
         /// <param name="requirement">The requirement to evaluate.</param>
-        protected virtual void Handle(AuthorizationHandlerContext context, TRequirement requirement)
-        {
-            return;
-        }
-
-        /// <summary>
-        /// Makes a decision if authorization is allowed based on a specific requirement.
-        /// </summary>
-        /// <param name="context">The authorization information.</param>
-        /// <param name="requirement">The requirement to evaluate.</param>
-        protected virtual Task HandleAsync(AuthorizationHandlerContext context, TRequirement requirement)
-        {
-            Handle(context, requirement);
-            return Task.FromResult(0);
-        }
+        protected abstract Task HandleRequirementAsync(AuthorizationHandlerContext context, TRequirement requirement);
     }
 
     /// <summary>
@@ -52,13 +42,17 @@ namespace Microsoft.AspNetCore.Authorization
     public abstract class AuthorizationHandler<TRequirement, TResource> : IAuthorizationHandler
         where TRequirement : IAuthorizationRequirement
     {
-        async Task IAuthorizationHandler.HandleAsync(AuthorizationHandlerContext context)
+        /// <summary>
+        /// Makes a decision if authorization is allowed.
+        /// </summary>
+        /// <param name="context">The authorization information.</param>
+        public virtual async Task HandleAsync(AuthorizationHandlerContext context)
         {
             if (context.Resource is TResource)
             {
                 foreach (var req in context.Requirements.OfType<TRequirement>())
                 {
-                    await HandleAsync(context, req, (TResource)context.Resource);
+                    await HandleRequirementAsync(context, req, (TResource)context.Resource);
                 }
             }
         }
@@ -69,21 +63,6 @@ namespace Microsoft.AspNetCore.Authorization
         /// <param name="context">The authorization information.</param>
         /// <param name="requirement">The requirement to evaluate.</param>
         /// <param name="resource">The resource to evaluate.</param>
-        protected virtual void Handle(AuthorizationHandlerContext context, TRequirement requirement, TResource resource)
-        {
-            return;
-        }
-
-        /// <summary>
-        /// Makes a decision if authorization is allowed based on a specific requirement and resource.
-        /// </summary>
-        /// <param name="context">The authorization information.</param>
-        /// <param name="requirement">The requirement to evaluate.</param>
-        /// <param name="resource">The resource to evaluate.</param>
-        protected virtual Task HandleAsync(AuthorizationHandlerContext context, TRequirement requirement, TResource resource)
-        {
-            Handle(context, requirement, resource);
-            return Task.FromResult(0);
-        }
+        protected abstract Task HandleRequirementAsync(AuthorizationHandlerContext context, TRequirement requirement, TResource resource);
     }
 }
