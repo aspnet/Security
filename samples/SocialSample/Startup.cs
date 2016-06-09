@@ -11,6 +11,7 @@ using Microsoft.AspNetCore.Authentication.Google;
 using Microsoft.AspNetCore.Authentication.MicrosoftAccount;
 using Microsoft.AspNetCore.Authentication.OAuth;
 using Microsoft.AspNetCore.Authentication.Twitter;
+using Microsoft.AspNetCore.Authentication.Vkontakte;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
@@ -86,6 +87,15 @@ namespace SocialSample
                 Scope = { "email" },
                 Fields = { "name", "email" },
                 SaveTokens = true,
+            });
+
+            // You must first create an app with vkontakte and add it's ID and Secret to your config.json or user-secrets.
+            // https://vk.com/dev
+            app.UseVkontakteAuthentication(new VkontakteOptions
+            {
+                ClientId = Configuration["vkontakte:appid"],
+                ClientSecret = Configuration["vkontakte:appsecret"],
+                SaveTokens = true
             });
 
             // See config.json
