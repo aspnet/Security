@@ -1,5 +1,5 @@
 {
-  "version": "1.0.0-*",
+  "version": "1.0.0",
   "description": "ASP.NET Core authorization classes.\r\nCommonly used types:\r\nMicrosoft.AspNetCore.Authorization.AllowAnonymousAttribute\r\nMicrosoft.AspNetCore.Authorization.AuthorizeAttribute",
   "packOptions": {
     "repository": {
@@ -20,8 +20,8 @@
     "xmlDoc": true
   },
   "dependencies": {
-    "Microsoft.Extensions.Logging.Abstractions": "1.0.0-*",
-    "Microsoft.Extensions.Options": "1.0.0-*"
+    "Microsoft.Extensions.Logging.Abstractions": "1.0.0",
+    "Microsoft.Extensions.Options": "1.0.0"
   },
   "frameworks": {
     "net451": {
@@ -33,7 +33,7 @@
     },
     "netstandard1.3": {
       "dependencies": {
-        "System.Security.Claims": "4.0.1-*"
+        "System.Security.Claims": "4.0.1"
       }
     }
   }

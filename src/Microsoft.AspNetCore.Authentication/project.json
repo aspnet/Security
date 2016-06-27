@@ -1,5 +1,5 @@
 {
-  "version": "1.0.0-*",
+  "version": "1.0.0",
   "description": "ASP.NET Core common types used by the various authentication middleware components.",
   "packOptions": {
     "repository": {
@@ -21,16 +21,16 @@
     "xmlDoc": true
   },
   "dependencies": {
-    "Microsoft.AspNetCore.DataProtection": "1.0.0-*",
-    "Microsoft.AspNetCore.Http": "1.0.0-*",
-    "Microsoft.AspNetCore.Http.Extensions": "1.0.0-*",
-    "Microsoft.Extensions.Logging.Abstractions": "1.0.0-*",
+    "Microsoft.AspNetCore.DataProtection": "1.0.0",
+    "Microsoft.AspNetCore.Http": "1.0.0",
+    "Microsoft.AspNetCore.Http.Extensions": "1.0.0",
+    "Microsoft.Extensions.Logging.Abstractions": "1.0.0",
     "Microsoft.Extensions.SecurityHelper.Sources": {
       "type": "build",
-      "version": "1.0.0-*"
+      "version": "1.0.0-rtm-21431"
     },
-    "Microsoft.Extensions.Options": "1.0.0-*",
-    "Microsoft.Extensions.WebEncoders": "1.0.0-*"
+    "Microsoft.Extensions.Options": "1.0.0",
+    "Microsoft.Extensions.WebEncoders": "1.0.0"
   },
   "frameworks": {
     "net451": {
@@ -40,7 +40,7 @@
     },
     "netstandard1.3": {
       "dependencies": {
-        "System.Net.Http": "4.1.0-*"
+        "System.Net.Http": "4.1.0"
       }
     }
   }
