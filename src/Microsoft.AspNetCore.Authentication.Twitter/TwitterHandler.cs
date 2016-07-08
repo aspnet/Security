@@ -131,10 +131,7 @@ namespace Microsoft.AspNetCore.Authentication.Twitter
                 throw new ArgumentNullException(nameof(context));
             }
 
-            var properties = new AuthenticationProperties(context.Properties)
-            {
-                ExpiresUtc = Options.SystemClock.UtcNow.Add(Options.RemoteAuthenticationTimeout)
-            };
+            var properties = new AuthenticationProperties(context.Properties);
 
             if (string.IsNullOrEmpty(properties.RedirectUri))
             {
