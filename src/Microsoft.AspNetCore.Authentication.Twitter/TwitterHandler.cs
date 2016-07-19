@@ -145,7 +145,8 @@ namespace Microsoft.AspNetCore.Authentication.Twitter
             var cookieOptions = new CookieOptions
             {
                 HttpOnly = true,
-                Secure = Request.IsHttps
+                Secure = Request.IsHttps,
+                Expires = Options.SystemClock.UtcNow.Add(Options.RemoteAuthenticationTimeout),
             };
 
             Response.Cookies.Append(StateCookie, Options.StateDataFormat.Protect(requestToken), cookieOptions);
