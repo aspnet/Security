@@ -166,20 +166,30 @@ namespace Microsoft.AspNetCore.Authentication.JwtBearer
             }
             catch (Exception ex)
             {
-                Logger.ErrorProcessingMessage(ex);
-
-                var authenticationFailedContext = new AuthenticationFailedContext(Context, Options)
+                try
                 {
-                    Exception = ex
-                };
+                    Logger.ErrorProcessingMessage(ex);
 
-                await Options.Events.AuthenticationFailed(authenticationFailedContext);
-                if (authenticationFailedContext.CheckEventResult(out result))
-                {
-                    return result;
+                    var authenticationFailedContext = new AuthenticationFailedContext(Context, Options)
+                    {
+                        Exception = ex
+                    };
+
+                    await Options.Events.AuthenticationFailed(authenticationFailedContext);
+                    if (authenticationFailedContext.CheckEventResult(out result))
+                    {
+                        return result;
+                    }
+                    else
+                    {
+                        return AuthenticateResult.Fail(ex);
+                    }
                 }
-
-                throw;
+                catch (Exception ex2)
+                {
+                    Logger.ErrorProcessingMessage(ex2);
+                    return AuthenticateResult.Fail(ex2);
+                }
             }
         }
 
