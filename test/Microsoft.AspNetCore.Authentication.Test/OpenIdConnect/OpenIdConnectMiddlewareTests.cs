@@ -7,7 +7,9 @@ using System.Globalization;
 using System.Net;
 using System.Text.Encodings.Web;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Authentication.OpenIdConnect;
 using Microsoft.AspNetCore.Builder;
+using Microsoft.AspNetCore.Http.Authentication;
 using Microsoft.IdentityModel.Protocols.OpenIdConnect;
 using Xunit;
 
@@ -103,6 +105,36 @@ namespace Microsoft.AspNetCore.Authentication.Tests.OpenIdConnect
             Assert.True(query.TryGetValue("state", out state));
             var properties = options.StateDataFormat.Unprotect(state);
             Assert.Equal("https://example.com/postlogout", properties.RedirectUri, true);
+        }
+
+        [Fact]
+        public async Task RedirectPostLogoutUriEventTriggered()
+        {
+            var visited = false;
+            var setting = new TestSettings(
+                opts =>
+                {
+                    opts.Events = new OpenIdConnectEvents
+                    {
+                        OnRedirectToPostLogoutRedirectUri = context =>
+                        {
+                            visited = true;
+                            context.Properties.RedirectUri = "http://www.example.com";
+                            return Task.FromResult(0);
+                        }
+                    };
+                }
+            );
+            var server = setting.CreateTestServer();
+            var callbackEndpoint = TestServerBuilder.TestHost + setting.Options.SignedOutCallbackPath;
+
+            var properties = new AuthenticationProperties() { RedirectUri = "/shoudnotbeused" };
+            var state = setting.Options.StateDataFormat.Protect(properties);
+            var transaction = await server.SendAsync(callbackEndpoint + $"?state={state}");
+
+            Assert.True(visited);
+            Assert.Equal(HttpStatusCode.Redirect, transaction.Response.StatusCode);
+            Assert.Equal("http://www.example.com/", transaction.Response.Headers.Location.AbsoluteUri);
         }
 
         [Fact]
