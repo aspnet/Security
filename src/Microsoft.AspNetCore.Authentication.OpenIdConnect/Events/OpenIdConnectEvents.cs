@@ -56,6 +56,11 @@ namespace Microsoft.AspNetCore.Authentication.OpenIdConnect
         /// </summary>
         public Func<UserInformationReceivedContext, Task> OnUserInformationReceived { get; set; } = context => Task.FromResult(0);
 
+        /// <summary>
+        /// Invoked before redirecting to the post logout uri after sign out from identity provider.
+        /// </summary>
+        public Func<RedirectContext, Task> OnRedirectToPostLogoutRedirectUri { get; set; } = context => Task.FromResult(0);
+
         public virtual Task AuthenticationFailed(AuthenticationFailedContext context) => OnAuthenticationFailed(context);
 
         public virtual Task AuthorizationCodeReceived(AuthorizationCodeReceivedContext context) => OnAuthorizationCodeReceived(context);
@@ -73,5 +78,7 @@ namespace Microsoft.AspNetCore.Authentication.OpenIdConnect
         public virtual Task TokenValidated(TokenValidatedContext context) => OnTokenValidated(context);
 
         public virtual Task UserInformationReceived(UserInformationReceivedContext context) => OnUserInformationReceived(context);
+
+        public virtual Task RedirectToPostLogoutRedirectUri(RedirectContext context) => OnRedirectToPostLogoutRedirectUri(context);
     }
 }

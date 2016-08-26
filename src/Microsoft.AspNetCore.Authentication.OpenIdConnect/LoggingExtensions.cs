@@ -54,6 +54,8 @@ namespace Microsoft.Extensions.Logging
         private static Action<ILogger, Exception> _remoteSignOut;
         private static Action<ILogger, Exception> _remoteSignOutSessionIdMissing;
         private static Action<ILogger, Exception> _remoteSignOutSessionIdInvalid;
+        private static Action<ILogger, Exception> _redirectToPostLogoutRedirectUriHandleResponse;
+        private static Action<ILogger, Exception> _redirectToPostLogoutRedirectUriSkipped;
 
         static LoggingExtensions()
         {
@@ -248,6 +250,14 @@ namespace Microsoft.Extensions.Logging
                logLevel: LogLevel.Error,
                formatString: "The remote signout request was ignored because the 'sid' parameter didn't match " +
                              "the expected value, which may indicate an unsolicited logout.");
+            _redirectToPostLogoutRedirectUriHandleResponse = LoggerMessage.Define(
+                eventId: 49,
+                logLevel: LogLevel.Debug,
+                formatString: "RedirectToPostLogoutRedirectUri.HandleResponse");
+            _redirectToPostLogoutRedirectUriSkipped = LoggerMessage.Define(
+                eventId: 45,
+                logLevel: LogLevel.Debug,
+                formatString: "RedirectToPostLogoutRedirectUri.Skipped");
         }
 
         public static void UpdatingConfiguration(this ILogger logger)
@@ -353,6 +363,16 @@ namespace Microsoft.Extensions.Logging
         public static void RedirectToIdentityProviderSkipped(this ILogger logger)
         {
             _redirectToIdentityProviderSkipped(logger, null);
+        }
+
+        public static void RedirectToPostLogoutRedirectUriHandleResponse(this ILogger logger)
+        {
+            _redirectToPostLogoutRedirectUriHandleResponse(logger, null);
+        }
+
+        public static void RedirectToPostLogoutRedirectUriSkipped(this ILogger logger)
+        {
+            _redirectToPostLogoutRedirectUriSkipped(logger, null);
         }
 
         public static void UserInformationReceivedHandledResponse(this ILogger logger)
