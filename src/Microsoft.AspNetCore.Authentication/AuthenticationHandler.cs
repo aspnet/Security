@@ -328,7 +328,7 @@ namespace Microsoft.AspNetCore.Authentication
         /// changing the 401 result to 302 of a login page or external sign-in location.)
         /// </summary>
         /// <param name="context"></param>
-        /// <returns>The returned boolean is ignored.</returns>
+        /// <returns>The returned boolean is no longer used.</returns>
         protected virtual Task<bool> HandleUnauthorizedAsync(ChallengeContext context)
         {
             Response.StatusCode = 401;
