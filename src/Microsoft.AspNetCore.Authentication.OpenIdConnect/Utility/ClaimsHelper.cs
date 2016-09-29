@@ -31,6 +31,6 @@ namespace Microsoft.AspNetCore.Authentication.OpenIdConnect
         }
 
         private static void AddClaimsToIdentity(JToken item, ClaimsIdentity identity, string key, string issuer)
-            => identity.AddClaim(new Claim(key, item.ToString(), ClaimValueTypes.String, issuer));
+            => identity.AddClaim(new Claim(key, item?.ToString() ?? string.Empty, ClaimValueTypes.String, issuer));
     }
 }
