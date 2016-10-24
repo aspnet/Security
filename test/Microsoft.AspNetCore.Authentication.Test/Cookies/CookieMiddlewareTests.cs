@@ -1027,6 +1027,104 @@ namespace Microsoft.AspNetCore.Authentication.Cookies
             Assert.Equal("/denied", location.LocalPath);
         }
 
+        private class WhutTransformer : IClaimsTransformer
+        {
+            private string _value;
+
+            public WhutTransformer(string value)
+            {
+                _value = value;
+            }
+
+            public Task<ClaimsPrincipal> TransformAsync(ClaimsTransformationContext context)
+            {
+                ((ClaimsIdentity)context.Principal.Identity).AddClaim(new Claim("whut", _value));
+                return Task.FromResult(context.Principal);
+            }
+        }
+
+        [Fact]
+        public async Task CanUseSpecificClaimsTransformationService()
+        {
+            var builder = new WebHostBuilder()
+                .Configure(app =>
+                {
+                    app.UseCookieAuthentication();
+                    app.UseClaimsTransformation<WhutTransformer>();
+                    app.Run(async context => 
+                    {
+                        if (context.Request.Path.StartsWithSegments(new PathString("/me")))
+                        {
+                            context.Response.StatusCode = 200;
+                            context.Response.ContentType = "text/xml";
+                            var xml = new XElement("xml");
+                                xml.Add(context.User.Claims.Select(c => new XElement("claim", new XAttribute("type", c.Type), new XAttribute("value", c.Value))));
+                            var xmlBytes = Encoding.UTF8.GetBytes(xml.ToString());
+                            context.Response.Body.Write(xmlBytes, 0, xmlBytes.Length);
+                        }
+                        else
+                        {
+                            await context.Authentication.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme, new ClaimsPrincipal(new ClaimsIdentity()));
+                        }
+                    });
+                })
+                .ConfigureServices(services =>
+                {
+                    services.AddSingleton(new WhutTransformer("yar"));
+                    services.AddAuthentication();
+                });
+            var server = new TestServer(builder);
+
+            var transaction1 = await SendAsync(server, "http://example.com");
+
+            Assert.Equal(HttpStatusCode.OK, transaction1.Response.StatusCode);
+
+            var transaction2 = await SendAsync(server, "http://example.com/me/Cookies", transaction1.CookieNameValue);
+            Assert.Equal(HttpStatusCode.OK, transaction2.Response.StatusCode);
+            Assert.Equal("yar", FindClaimValue(transaction2, "whut"));
+        }
+
+        [Fact]
+        public async Task CanUseIClaimsTransformationService()
+        {
+            var builder = new WebHostBuilder()
+                .Configure(app =>
+                {
+                    app.UseCookieAuthentication();
+                    app.UseClaimsTransformation<IClaimsTransformer>();
+                    app.Run(async context =>
+                    {
+                        if (context.Request.Path.StartsWithSegments(new PathString("/me")))
+                        {
+                            context.Response.StatusCode = 200;
+                            context.Response.ContentType = "text/xml";
+                            var xml = new XElement("xml");
+                            xml.Add(context.User.Claims.Select(c => new XElement("claim", new XAttribute("type", c.Type), new XAttribute("value", c.Value))));
+                            var xmlBytes = Encoding.UTF8.GetBytes(xml.ToString());
+                            context.Response.Body.Write(xmlBytes, 0, xmlBytes.Length);
+                        }
+                        else
+                        {
+                            await context.Authentication.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme, new ClaimsPrincipal(new ClaimsIdentity()));
+                        }
+                    });
+                })
+                .ConfigureServices(services =>
+                {
+                    services.AddSingleton<IClaimsTransformer>(new WhutTransformer("yar"));
+                    services.AddAuthentication();
+                });
+            var server = new TestServer(builder);
+
+            var transaction1 = await SendAsync(server, "http://example.com");
+
+            Assert.Equal(HttpStatusCode.OK, transaction1.Response.StatusCode);
+
+            var transaction2 = await SendAsync(server, "http://example.com/me/Cookies", transaction1.CookieNameValue);
+            Assert.Equal(HttpStatusCode.OK, transaction2.Response.StatusCode);
+            Assert.Equal("yar", FindClaimValue(transaction2, "whut"));
+        }
+
         [Fact]
         public async Task NestedMapWillNotAffectLogin()
         {
