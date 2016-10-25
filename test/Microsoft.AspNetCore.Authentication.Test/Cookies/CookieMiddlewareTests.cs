@@ -1043,6 +1043,29 @@ namespace Microsoft.AspNetCore.Authentication.Cookies
             }
         }
 
+        [Fact]
+        public async Task ClaimsTransformationTypeThrowsIfNotSpecified()
+        {
+            var builder = new WebHostBuilder()
+                .Configure(app =>
+                {
+                    app.UseCookieAuthentication();
+                    app.UseClaimsTransformation(new ClaimsTransformationOptions
+                    {
+                        TransformerType = typeof(IClaimsTransformer),
+                    });
+                })
+                .ConfigureServices(services =>
+                {
+                    services.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();
+                    services.AddAuthentication();
+                });
+            var server = new TestServer(builder);
+
+            var error = await Assert.ThrowsAsync<InvalidOperationException>(() => SendAsync(server, "http://example.com"));
+            Assert.True(error.Message.StartsWith("No service for type"));
+        }
+
         [Theory]
         [InlineData(true)]
         [InlineData(false)]

@@ -5,6 +5,7 @@ using System;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
 
 namespace Microsoft.AspNetCore.Authentication
@@ -38,7 +39,7 @@ namespace Microsoft.AspNetCore.Authentication
             var transform = Options.Transformer;
             if (transform == null && Options.TransformerType != null)
             {
-                transform = context.RequestServices.GetService(Options.TransformerType) as IClaimsTransformer;
+                transform = context.RequestServices.GetRequiredService(Options.TransformerType) as IClaimsTransformer;
             }
             var handler = new ClaimsTransformationHandler(transform, context);
             handler.RegisterAuthenticationHandler(context.GetAuthentication());
