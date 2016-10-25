@@ -9,42 +9,48 @@ using Microsoft.Extensions.Options;
 
 namespace Microsoft.AspNetCore.Authentication
 {
-    public class ClaimsTransformationMiddleware<TClaimsTransformer> where TClaimsTransformer : IClaimsTransformer
+    public class ClaimsTransformationMiddleware
     {
         private readonly RequestDelegate _next;
-        private readonly IClaimsTransformer _transform;
 
         public ClaimsTransformationMiddleware(
             RequestDelegate next,
-            TClaimsTransformer transformer)
+            IOptions<ClaimsTransformationOptions> options)
         {
             if (next == null)
             {
                 throw new ArgumentNullException(nameof(next));
             }
 
-            if (transformer == null)
+            if (options == null)
             {
-                throw new ArgumentNullException(nameof(transformer));
+                throw new ArgumentNullException(nameof(options));
             }
 
-            _transform = transformer;
+            Options = options.Value;
             _next = next;
         }
 
+        public ClaimsTransformationOptions Options { get; set; }
+
         public async Task Invoke(HttpContext context)
         {
-            var handler = new ClaimsTransformationHandler(_transform, context);
+            var handler = new ClaimsTransformationHandler(Options.Transformer, context);
             handler.RegisterAuthenticationHandler(context.GetAuthentication());
             try
             {
-                if (_transform != null)
+                var transform = Options.Transformer;
+                if (transform == null && Options.TransformerType != null)
+                {
+                    transform = context.RequestServices.GetService(Options.TransformerType) as IClaimsTransformer;
+                }
+                if (transform != null)
                 {
                     var transformationContext = new ClaimsTransformationContext(context)
                     {
                         Principal = context.User
                     };
-                    context.User = await _transform.TransformAsync(transformationContext);
+                    context.User = await transform.TransformAsync(transformationContext);
                 }
                 await _next(context);
             }
@@ -53,15 +59,5 @@ namespace Microsoft.AspNetCore.Authentication
                 handler.UnregisterAuthenticationHandler(context.GetAuthentication());
             }
         }
-    }
-
-    public class ClaimsTransformationMiddleware : ClaimsTransformationMiddleware<IClaimsTransformer>
-    {
-        public ClaimsTransformationMiddleware(
-            RequestDelegate next,
-            IOptions<ClaimsTransformationOptions> options) : base(next, options.Value.Transformer)
-        { }
-
-        public ClaimsTransformationOptions Options { get; set; }
     }
 }

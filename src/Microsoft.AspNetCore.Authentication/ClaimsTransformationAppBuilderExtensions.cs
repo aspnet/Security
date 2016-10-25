@@ -30,22 +30,6 @@ namespace Microsoft.AspNetCore.Builder
         }
 
         /// <summary>
-        /// Adds the <see cref="ClaimsTransformationMiddleware{TClaimsTransformer}"/> middleware to the specified <see cref="IApplicationBuilder"/>, which enables claims transformation capabilities.
-        /// </summary>
-        /// <typeparam name="TClaimsTransformer">The service type responsible for doing claims transformation.</typeparam>
-        /// <param name="app">The <see cref="IApplicationBuilder"/> to add the middleware to.</param>
-        /// <returns>A reference to this instance after the operation has completed.</returns>
-        public static IApplicationBuilder UseClaimsTransformation<TClaimsTransformer>(this IApplicationBuilder app) where TClaimsTransformer : IClaimsTransformer
-        {
-            if (app == null)
-            {
-                throw new ArgumentNullException(nameof(app));
-            }
-
-            return app.UseMiddleware<ClaimsTransformationMiddleware<TClaimsTransformer>>();
-        }
-
-        /// <summary>
         /// Adds the <see cref="ClaimsTransformationMiddleware"/> middleware to the specified <see cref="IApplicationBuilder"/>, which enables claims transformation capabilities.
         /// </summary>
         /// <param name="app">The <see cref="IApplicationBuilder"/> to add the middleware to.</param>

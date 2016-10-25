@@ -1029,69 +1029,31 @@ namespace Microsoft.AspNetCore.Authentication.Cookies
 
         private class WhutTransformer : IClaimsTransformer
         {
-            private string _value;
+            private static int _count;
 
-            public WhutTransformer(string value)
+            public WhutTransformer()
             {
-                _value = value;
+                _count++;
             }
 
             public Task<ClaimsPrincipal> TransformAsync(ClaimsTransformationContext context)
             {
-                ((ClaimsIdentity)context.Principal.Identity).AddClaim(new Claim("whut", _value));
+                ((ClaimsIdentity)context.Principal.Identity).AddClaim(new Claim("whut", _count.ToString()));
                 return Task.FromResult(context.Principal);
             }
         }
 
         [Fact]
-        public async Task CanUseSpecificClaimsTransformationService()
+        public async Task CanUseScopedIClaimsTransformationService()
         {
             var builder = new WebHostBuilder()
                 .Configure(app =>
                 {
                     app.UseCookieAuthentication();
-                    app.UseClaimsTransformation<WhutTransformer>();
-                    app.Run(async context => 
+                    app.UseClaimsTransformation(new ClaimsTransformationOptions
                     {
-                        if (context.Request.Path.StartsWithSegments(new PathString("/me")))
-                        {
-                            context.Response.StatusCode = 200;
-                            context.Response.ContentType = "text/xml";
-                            var xml = new XElement("xml");
-                                xml.Add(context.User.Claims.Select(c => new XElement("claim", new XAttribute("type", c.Type), new XAttribute("value", c.Value))));
-                            var xmlBytes = Encoding.UTF8.GetBytes(xml.ToString());
-                            context.Response.Body.Write(xmlBytes, 0, xmlBytes.Length);
-                        }
-                        else
-                        {
-                            await context.Authentication.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme, new ClaimsPrincipal(new ClaimsIdentity()));
-                        }
+                        TransformerType = typeof(IClaimsTransformer)
                     });
-                })
-                .ConfigureServices(services =>
-                {
-                    services.AddSingleton(new WhutTransformer("yar"));
-                    services.AddAuthentication();
-                });
-            var server = new TestServer(builder);
-
-            var transaction1 = await SendAsync(server, "http://example.com");
-
-            Assert.Equal(HttpStatusCode.OK, transaction1.Response.StatusCode);
-
-            var transaction2 = await SendAsync(server, "http://example.com/me/Cookies", transaction1.CookieNameValue);
-            Assert.Equal(HttpStatusCode.OK, transaction2.Response.StatusCode);
-            Assert.Equal("yar", FindClaimValue(transaction2, "whut"));
-        }
-
-        [Fact]
-        public async Task CanUseIClaimsTransformationService()
-        {
-            var builder = new WebHostBuilder()
-                .Configure(app =>
-                {
-                    app.UseCookieAuthentication();
-                    app.UseClaimsTransformation<IClaimsTransformer>();
                     app.Run(async context =>
                     {
                         if (context.Request.Path.StartsWithSegments(new PathString("/me")))
@@ -1111,7 +1073,7 @@ namespace Microsoft.AspNetCore.Authentication.Cookies
                 })
                 .ConfigureServices(services =>
                 {
-                    services.AddSingleton<IClaimsTransformer>(new WhutTransformer("yar"));
+                    services.AddScoped<IClaimsTransformer, WhutTransformer>();
                     services.AddAuthentication();
                 });
             var server = new TestServer(builder);
@@ -1122,7 +1084,13 @@ namespace Microsoft.AspNetCore.Authentication.Cookies
 
             var transaction2 = await SendAsync(server, "http://example.com/me/Cookies", transaction1.CookieNameValue);
             Assert.Equal(HttpStatusCode.OK, transaction2.Response.StatusCode);
-            Assert.Equal("yar", FindClaimValue(transaction2, "whut"));
+            // Second request so second transformer
+            Assert.Equal("2", FindClaimValue(transaction2, "whut"));
+
+            var transaction3 = await SendAsync(server, "http://example.com/me/Cookies", transaction1.CookieNameValue);
+            Assert.Equal(HttpStatusCode.OK, transaction3.Response.StatusCode);
+            // Third request so third transformer
+            Assert.Equal("3", FindClaimValue(transaction3, "whut"));
         }
 
         [Fact]
