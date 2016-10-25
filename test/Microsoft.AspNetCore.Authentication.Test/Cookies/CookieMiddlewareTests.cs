@@ -1057,7 +1057,6 @@ namespace Microsoft.AspNetCore.Authentication.Cookies
                 })
                 .ConfigureServices(services =>
                 {
-                    services.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();
                     services.AddAuthentication();
                 });
             var server = new TestServer(builder);
