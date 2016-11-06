@@ -4,10 +4,10 @@
   },
   "dependencies": {
     "dotnet-test-xunit": "1.0.0-rc3-000000-01",
-    "Microsoft.AspNetCore.Authorization": "1.0.0",
-    "Microsoft.AspNetCore.Testing": "1.0.0-rtm-21431",
-    "Microsoft.Extensions.DependencyInjection": "1.0.0",
-    "Microsoft.Extensions.Logging": "1.0.0",
+    "Microsoft.AspNetCore.Authorization": "1.0.1",
+    "Microsoft.AspNetCore.Testing": "1.0.1",
+    "Microsoft.Extensions.DependencyInjection": "1.0.1",
+    "Microsoft.Extensions.Logging": "1.0.1",
     "xunit": "2.1.0"
   },
   "frameworks": {
