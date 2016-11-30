@@ -41,7 +41,7 @@ namespace Microsoft.AspNetCore.Authentication.OpenIdConnect
             IOptions<SharedAuthenticationOptions> sharedOptions,
             IOptions<OpenIdConnectOptions> options,
             HtmlEncoder htmlEncoder)
-            : base(next, options, loggerFactory, encoder, services)
+            : base(next, options, loggerFactory, encoder)
         {
             if (next == null)
             {

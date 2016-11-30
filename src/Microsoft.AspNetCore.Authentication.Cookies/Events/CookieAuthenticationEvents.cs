@@ -155,5 +155,11 @@ namespace Microsoft.AspNetCore.Authentication.Cookies
         /// </summary>
         /// <param name="context">Contains information about the event</param>
         public virtual Task RedirectToAccessDenied(CookieRedirectContext context) => OnRedirectToAccessDenied(context);
+
+        public new CookieAuthenticationEvents ResolveEvents(IServiceProvider services)
+        {
+            return base.ResolveEvents(services) as CookieAuthenticationEvents;
+        }
+
     }
 }

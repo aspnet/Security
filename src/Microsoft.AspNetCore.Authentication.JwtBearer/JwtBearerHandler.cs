@@ -22,6 +22,8 @@ namespace Microsoft.AspNetCore.Authentication.JwtBearer
     {
         private OpenIdConnectConfiguration _configuration;
 
+        private JwtBearerEvents Events => Options.Events.ResolveEvents(Context.RequestServices);
+
         /// <summary>
         /// Searches the 'Authorization' header for a 'Bearer' token. If the 'Bearer' token is found, it is validated using <see cref="TokenValidationParameters"/> set in the options.
         /// </summary>
@@ -36,7 +38,7 @@ namespace Microsoft.AspNetCore.Authentication.JwtBearer
                 var messageReceivedContext = new MessageReceivedContext(Context, Options);
 
                 // event can set the token
-                await Options.Events.MessageReceived(messageReceivedContext);
+                await Events.MessageReceived(messageReceivedContext);
                 if (messageReceivedContext.CheckEventResult(out result))
                 {
                     return result;
@@ -127,7 +129,7 @@ namespace Microsoft.AspNetCore.Authentication.JwtBearer
                             SecurityToken = validatedToken,
                         };
 
-                        await Options.Events.TokenValidated(tokenValidatedContext);
+                        await Events.TokenValidated(tokenValidatedContext);
                         if (tokenValidatedContext.CheckEventResult(out result))
                         {
                             return result;
@@ -153,7 +155,7 @@ namespace Microsoft.AspNetCore.Authentication.JwtBearer
                         Exception = (validationFailures.Count == 1) ? validationFailures[0] : new AggregateException(validationFailures)
                     };
 
-                    await Options.Events.AuthenticationFailed(authenticationFailedContext);
+                    await Events.AuthenticationFailed(authenticationFailedContext);
                     if (authenticationFailedContext.CheckEventResult(out result))
                     {
                         return result;
@@ -173,7 +175,7 @@ namespace Microsoft.AspNetCore.Authentication.JwtBearer
                     Exception = ex
                 };
 
-                await Options.Events.AuthenticationFailed(authenticationFailedContext);
+                await Events.AuthenticationFailed(authenticationFailedContext);
                 if (authenticationFailedContext.CheckEventResult(out result))
                 {
                     return result;
@@ -199,7 +201,7 @@ namespace Microsoft.AspNetCore.Authentication.JwtBearer
                 eventContext.ErrorDescription = CreateErrorDescription(eventContext.AuthenticateFailure);
             }
 
-            await Options.Events.Challenge(eventContext);
+            await Events.Challenge(eventContext);
             if (eventContext.HandledResponse)
             {
                 return true;

@@ -39,5 +39,10 @@ namespace Microsoft.AspNetCore.Authentication.JwtBearer
         public virtual Task TokenValidated(TokenValidatedContext context) => OnTokenValidated(context);
 
         public virtual Task Challenge(JwtBearerChallengeContext context) => OnChallenge(context);
+
+        public new JwtBearerEvents ResolveEvents(IServiceProvider services)
+        {
+            return base.ResolveEvents(services) as JwtBearerEvents;
+        }
     }
 }
