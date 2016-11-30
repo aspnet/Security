@@ -8,6 +8,7 @@ using System.Text.Encodings.Web;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.DataProtection;
 using Microsoft.AspNetCore.Http;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Protocols;
@@ -129,10 +130,12 @@ namespace Microsoft.AspNetCore.Authentication.OpenIdConnect
                 Options.StringDataFormat = new SecureDataFormat<string>(new StringSerializer(), dataProtector);
             }
 
-            if (Options.Events == null)
+            // Events allow for replacement via DI
+            if (Options.Events != null && Options.Events.EventsType != null)
             {
-                Options.Events = new OpenIdConnectEvents();
+                Options.Events = services.GetRequiredService(Options.Events.EventsType) as OpenIdConnectEvents;
             }
+            Options.Events = Options.Events ?? new OpenIdConnectEvents();
 
             if (string.IsNullOrEmpty(Options.TokenValidationParameters.ValidAudience) && !string.IsNullOrEmpty(Options.ClientId))
             {

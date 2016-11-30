@@ -2,7 +2,6 @@
 // Licensed under the Apache License, Version 2.0. See License.txt in the project root for license information.
 
 using System;
-using System.ComponentModel;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Twitter;
 using Microsoft.AspNetCore.Http;
@@ -52,11 +51,11 @@ namespace Microsoft.AspNetCore.Builder
         public ISecureDataFormat<RequestToken> StateDataFormat { get; set; }
 
         /// <summary>
-        /// Gets or sets the <see cref="ITwitterEvents"/> used to handle authentication events.
+        /// Gets or sets the <see cref="TwitterEvents"/> used to handle authentication events.
         /// </summary>
-        public new ITwitterEvents Events
+        public new TwitterEvents Events
         {
-            get { return (ITwitterEvents)base.Events; }
+            get { return (TwitterEvents)base.Events; }
             set { base.Events = value; }
         }
     }

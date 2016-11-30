@@ -8,6 +8,7 @@ using System.Text.Encodings.Web;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.DataProtection;
 using Microsoft.AspNetCore.Http;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 
@@ -27,13 +28,15 @@ namespace Microsoft.AspNetCore.Authentication.OAuth
         /// <param name="encoder">The <see cref="UrlEncoder"/>.</param>
         /// <param name="sharedOptions">The <see cref="SharedAuthenticationOptions"/> configuration options for this middleware.</param>
         /// <param name="options">Configuration options for the middleware.</param>
+        /// <param name="services"></param>
         public OAuthMiddleware(
             RequestDelegate next,
             IDataProtectionProvider dataProtectionProvider,
             ILoggerFactory loggerFactory,
             UrlEncoder encoder,
             IOptions<SharedAuthenticationOptions> sharedOptions,
-            IOptions<TOptions> options)
+            IOptions<TOptions> options,
+            IServiceProvider services)
             : base(next, options, loggerFactory, encoder)
         {
             if (next == null)
@@ -97,10 +100,12 @@ namespace Microsoft.AspNetCore.Authentication.OAuth
                 throw new ArgumentException(string.Format(CultureInfo.CurrentCulture, Resources.Exception_OptionMustBeProvided, nameof(Options.CallbackPath)));
             }
 
-            if (Options.Events == null)
+            // Events allow for replacement via DI
+            if (Options.Events != null && Options.Events.EventsType != null)
             {
-                Options.Events = new OAuthEvents();
+                Options.Events = services.GetRequiredService(Options.Events.EventsType) as OAuthEvents;
             }
+            Options.Events = Options.Events ?? new OAuthEvents();
 
             if (Options.StateDataFormat == null)
             {

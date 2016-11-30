@@ -26,14 +26,16 @@ namespace Microsoft.AspNetCore.Authentication.Google
         /// <param name="encoder"></param>
         /// <param name="sharedOptions"></param>
         /// <param name="options">Configuration options for the middleware.</param>
+        /// <param name="services"></param>
         public GoogleMiddleware(
             RequestDelegate next,
             IDataProtectionProvider dataProtectionProvider,
             ILoggerFactory loggerFactory,
             UrlEncoder encoder,
             IOptions<SharedAuthenticationOptions> sharedOptions,
-            IOptions<GoogleOptions> options)
-            : base(next, dataProtectionProvider, loggerFactory, encoder, sharedOptions, options)
+            IOptions<GoogleOptions> options,
+            IServiceProvider services)
+            : base(next, dataProtectionProvider, loggerFactory, encoder, sharedOptions, options, services)
         {
             if (next == null)
             {

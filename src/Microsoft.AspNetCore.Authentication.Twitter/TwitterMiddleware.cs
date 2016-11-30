@@ -8,6 +8,7 @@ using System.Text.Encodings.Web;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.DataProtection;
 using Microsoft.AspNetCore.Http;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 
@@ -29,13 +30,15 @@ namespace Microsoft.AspNetCore.Authentication.Twitter
         /// <param name="encoder"></param>
         /// <param name="sharedOptions"></param>
         /// <param name="options">Configuration options for the middleware</param>
+        /// <param name="services"></param>
         public TwitterMiddleware(
             RequestDelegate next,
             IDataProtectionProvider dataProtectionProvider,
             ILoggerFactory loggerFactory,
             UrlEncoder encoder,
             IOptions<SharedAuthenticationOptions> sharedOptions,
-            IOptions<TwitterOptions> options)
+            IOptions<TwitterOptions> options,
+            IServiceProvider services)
             : base(next, options, loggerFactory, encoder)
         {
             if (next == null)
@@ -81,10 +84,13 @@ namespace Microsoft.AspNetCore.Authentication.Twitter
                 throw new ArgumentException(string.Format(CultureInfo.CurrentCulture, Resources.Exception_OptionMustBeProvided, nameof(Options.CallbackPath)));
             }
 
-            if (Options.Events == null)
+            // Events allow for replacement via DI
+            if (Options.Events != null && Options.Events.EventsType != null)
             {
-                Options.Events = new TwitterEvents();
+                Options.Events = services.GetRequiredService(Options.Events.EventsType) as TwitterEvents;
             }
+            Options.Events = Options.Events ?? new TwitterEvents();
+
             if (Options.StateDataFormat == null)
             {
                 var dataProtector = dataProtectionProvider.CreateProtector(

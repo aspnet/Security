@@ -2,7 +2,6 @@
 // Licensed under the Apache License, Version 2.0. See License.txt in the project root for license information.
 
 using System.Collections.Generic;
-using System.ComponentModel;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.OAuth;
 using Microsoft.AspNetCore.Http.Authentication;
@@ -47,11 +46,11 @@ namespace Microsoft.AspNetCore.Builder
         public string UserInformationEndpoint { get; set; }
 
         /// <summary>
-        /// Gets or sets the <see cref="IOAuthEvents"/> used to handle authentication events.
+        /// Gets or sets the <see cref="OAuthEvents"/> used to handle authentication events.
         /// </summary>
-        public new IOAuthEvents Events
+        public new OAuthEvents Events
         {
-            get { return (IOAuthEvents)base.Events; }
+            get { return (OAuthEvents)base.Events; }
             set { base.Events = value; }
         }
 

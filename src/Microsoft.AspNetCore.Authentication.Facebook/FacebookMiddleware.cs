@@ -27,14 +27,16 @@ namespace Microsoft.AspNetCore.Authentication.Facebook
         /// <param name="encoder"></param>
         /// <param name="sharedOptions"></param>
         /// <param name="options">Configuration options for the middleware.</param>
+        /// <param name="services"></param>
         public FacebookMiddleware(
             RequestDelegate next,
             IDataProtectionProvider dataProtectionProvider,
             ILoggerFactory loggerFactory,
             UrlEncoder encoder,
             IOptions<SharedAuthenticationOptions> sharedOptions,
-            IOptions<FacebookOptions> options)
-            : base(next, dataProtectionProvider, loggerFactory, encoder, sharedOptions, options)
+            IOptions<FacebookOptions> options,
+            IServiceProvider services)
+            : base(next, dataProtectionProvider, loggerFactory, encoder, sharedOptions, options, services)
         {
             if (next == null)
             {
