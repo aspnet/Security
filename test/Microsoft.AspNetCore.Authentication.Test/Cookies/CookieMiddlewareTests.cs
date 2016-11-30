@@ -441,6 +441,43 @@ namespace Microsoft.AspNetCore.Authentication.Cookies
             Assert.Null(FindClaimValue(transaction2, ClaimTypes.Name));
         }
 
+        public class RejectEventType : CookieAuthenticationEvents
+        {
+            public RejectEventType()
+            {
+                OnValidatePrincipal = ctx =>
+                {
+                    ctx.RejectPrincipal();
+                    ctx.HttpContext.Authentication.SignOutAsync("Cookies");
+                    return Task.FromResult(0);
+                };
+            }
+        }
+
+        [Fact]
+        public async Task CookieEventsTypeUsedIfSet()
+        {
+            var clock = new TestClock();
+            var options = new CookieAuthenticationOptions
+            {
+                SystemClock = clock,
+                ExpireTimeSpan = TimeSpan.FromMinutes(10),
+                SlidingExpiration = false
+            };
+
+            options.Events.EventsType = typeof(RejectEventType);
+            var server = CreateServer(options,
+                context =>
+                    context.Authentication.SignInAsync("Cookies",
+                        new ClaimsPrincipal(new ClaimsIdentity(new GenericIdentity("Alice", "Cookies")))));
+
+            var transaction1 = await SendAsync(server, "http://example.com/testpath");
+
+            var transaction2 = await SendAsync(server, "http://example.com/me/Cookies", transaction1.CookieNameValue);
+            Assert.Contains(".AspNetCore.Cookies=; expires=", transaction2.SetCookie);
+            Assert.Null(FindClaimValue(transaction2, ClaimTypes.Name));
+        }
+
         [Fact]
         public async Task CookieCanBeRenewedByValidator()
         {
@@ -1365,7 +1402,10 @@ namespace Microsoft.AspNetCore.Authentication.Cookies
                         }
                     });
                 })
-                .ConfigureServices(services => services.AddAuthentication());
+                .ConfigureServices(services => {
+                    services.AddAuthentication();
+                    services.AddScoped<RejectEventType>();
+                });
             var server = new TestServer(builder);
             server.BaseAddress = baseAddress;
             return server;

@@ -18,8 +18,9 @@ namespace Microsoft.AspNetCore.Authentication.Cookies
             IDataProtectionProvider dataProtectionProvider,
             ILoggerFactory loggerFactory,
             UrlEncoder urlEncoder,
-            IOptions<CookieAuthenticationOptions> options)
-            : base(next, options, loggerFactory, urlEncoder)
+            IOptions<CookieAuthenticationOptions> options,
+            IServiceProvider services)
+            : base(next, options, loggerFactory, urlEncoder, services)
         {
             if (dataProtectionProvider == null)
             {

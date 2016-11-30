@@ -6,6 +6,7 @@ using System.Text.Encodings.Web;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 
@@ -19,7 +20,8 @@ namespace Microsoft.AspNetCore.Authentication
             RequestDelegate next,
             IOptions<TOptions> options,
             ILoggerFactory loggerFactory,
-            UrlEncoder encoder)
+            UrlEncoder encoder,
+            IServiceProvider services)
         {
             if (next == null)
             {
@@ -42,6 +44,13 @@ namespace Microsoft.AspNetCore.Authentication
             }
 
             Options = options.Value;
+
+            if (Options?.Events?.EventsType != null)
+            {
+                var events = services.GetRequiredService(Options.Events.EventsType) as AuthenticationEvents;
+                Options.Events = events ?? Options.Events;
+            }
+
             Logger = loggerFactory.CreateLogger(this.GetType().FullName);
             UrlEncoder = encoder;
 

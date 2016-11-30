@@ -13,6 +13,11 @@ namespace Microsoft.AspNetCore.Builder
     /// </summary>
     public class RemoteAuthenticationOptions : AuthenticationOptions
     {
+        public RemoteAuthenticationOptions()
+        {
+            Events = new RemoteAuthenticationEvents();
+        }
+
         /// <summary>
         /// Gets or sets timeout value in milliseconds for back channel communications with the remote identity provider.
         /// </summary>
@@ -59,7 +64,11 @@ namespace Microsoft.AspNetCore.Builder
         /// <summary>
         /// Gets or sets the instance used to handle events.
         /// </summary>
-        public RemoteAuthenticationEvents Events { get; set; }
+        public new RemoteAuthenticationEvents Events
+        {
+            get { return (RemoteAuthenticationEvents)base.Events; }
+            set { base.Events = value; }
+        }
 
         /// <summary>
         /// Defines whether access and refresh tokens should be stored in the

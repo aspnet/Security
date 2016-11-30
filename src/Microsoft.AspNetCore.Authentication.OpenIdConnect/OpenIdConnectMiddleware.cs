@@ -41,7 +41,7 @@ namespace Microsoft.AspNetCore.Authentication.OpenIdConnect
             IOptions<SharedAuthenticationOptions> sharedOptions,
             IOptions<OpenIdConnectOptions> options,
             HtmlEncoder htmlEncoder)
-            : base(next, options, loggerFactory, encoder)
+            : base(next, options, loggerFactory, encoder, services)
         {
             if (next == null)
             {
@@ -130,12 +130,10 @@ namespace Microsoft.AspNetCore.Authentication.OpenIdConnect
                 Options.StringDataFormat = new SecureDataFormat<string>(new StringSerializer(), dataProtector);
             }
 
-            // Events allow for replacement via DI
-            if (Options.Events != null && Options.Events.EventsType != null)
+            if (Options.Events == null)
             {
-                Options.Events = services.GetRequiredService(Options.Events.EventsType) as OpenIdConnectEvents;
+                Options.Events = new OpenIdConnectEvents();
             }
-            Options.Events = Options.Events ?? new OpenIdConnectEvents();
 
             if (string.IsNullOrEmpty(Options.TokenValidationParameters.ValidAudience) && !string.IsNullOrEmpty(Options.ClientId))
             {

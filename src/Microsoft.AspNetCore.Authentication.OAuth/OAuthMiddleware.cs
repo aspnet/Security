@@ -37,7 +37,7 @@ namespace Microsoft.AspNetCore.Authentication.OAuth
             IOptions<SharedAuthenticationOptions> sharedOptions,
             IOptions<TOptions> options,
             IServiceProvider services)
-            : base(next, options, loggerFactory, encoder)
+            : base(next, options, loggerFactory, encoder, services)
         {
             if (next == null)
             {
@@ -100,12 +100,10 @@ namespace Microsoft.AspNetCore.Authentication.OAuth
                 throw new ArgumentException(string.Format(CultureInfo.CurrentCulture, Resources.Exception_OptionMustBeProvided, nameof(Options.CallbackPath)));
             }
 
-            // Events allow for replacement via DI
-            if (Options.Events != null && Options.Events.EventsType != null)
+            if (Options.Events == null)
             {
-                Options.Events = services.GetRequiredService(Options.Events.EventsType) as OAuthEvents;
+                Options.Events = new OAuthEvents();
             }
-            Options.Events = Options.Events ?? new OAuthEvents();
 
             if (Options.StateDataFormat == null)
             {

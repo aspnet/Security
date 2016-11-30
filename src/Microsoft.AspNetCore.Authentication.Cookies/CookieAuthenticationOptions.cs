@@ -128,7 +128,10 @@ namespace Microsoft.AspNetCore.Builder
         /// calls methods on the provider which give the application control at certain points where processing is occurring. 
         /// If it is not provided a default instance is supplied which does nothing when the methods are called.
         /// </summary>
-        public ICookieAuthenticationEvents Events { get; set; }
+        public new CookieAuthenticationEvents Events {
+            get { return (CookieAuthenticationEvents)base.Events; }
+            set { base.Events = value; }
+        }
 
         /// <summary>
         /// The TicketDataFormat is used to protect and unprotect the identity and other properties which are stored in the
