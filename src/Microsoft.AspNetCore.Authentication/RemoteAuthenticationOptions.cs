@@ -56,7 +56,10 @@ namespace Microsoft.AspNetCore.Builder
         /// </summary>
         public TimeSpan RemoteAuthenticationTimeout { get; set; } = TimeSpan.FromMinutes(15);
 
-        public IRemoteAuthenticationEvents Events = new RemoteAuthenticationEvents();
+        /// <summary>
+        /// Gets or sets the instance used to handle events.
+        /// </summary>
+        public RemoteAuthenticationEvents Events { get; set; }
 
         /// <summary>
         /// Defines whether access and refresh tokens should be stored in the

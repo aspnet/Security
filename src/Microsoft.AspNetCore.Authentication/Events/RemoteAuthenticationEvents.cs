@@ -7,8 +7,13 @@ using Microsoft.Extensions.Internal;
 
 namespace Microsoft.AspNetCore.Authentication
 {
-    public class RemoteAuthenticationEvents : IRemoteAuthenticationEvents
+    public class RemoteAuthenticationEvents
     {
+        /// <summary>
+        /// If set, this will be used to query the service container for the EventType to use instead of this instance.
+        /// </summary>
+        public Type EventsType { get; set; }
+
         public Func<FailureContext, Task> OnRemoteFailure { get; set; } = context => TaskCache.CompletedTask;
 
         public Func<TicketReceivedContext, Task> OnTicketReceived { get; set; } = context => TaskCache.CompletedTask;
