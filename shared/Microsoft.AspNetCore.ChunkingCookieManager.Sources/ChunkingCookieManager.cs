@@ -12,7 +12,7 @@ using Microsoft.Net.Http.Headers;
 // Keep the type public for Security repo as it would be a breaking change to change the accessor now.
 // Make this type internal for other repos as it could be used by multiple projects and having it public causes type conflicts.
 #if SECURITY
-namespace Microsoft.AspNetCore.Authentication.Cookies
+namespace Microsoft.AspNetCore.Authentication2.Cookies
 {
     /// <summary>
     /// This handles cookies that are limited by per cookie length. It breaks down long cookies for responses, and reassembles them

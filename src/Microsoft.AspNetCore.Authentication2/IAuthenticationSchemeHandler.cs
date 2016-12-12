@@ -1,0 +1,208 @@
+// Copyright (c) .NET Foundation. All rights reserved.
+// Licensed under the Apache License, Version 2.0. See License.txt in the project root for license information.
+
+using System;
+using System.Text.Encodings.Web;
+using System.Threading.Tasks;
+using Microsoft.AspNetCore.Http;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Internal;
+using Microsoft.Extensions.Logging;
+
+namespace Microsoft.AspNetCore.Authentication2
+{
+    // Created on a per request basis to handle one particular scheme.
+    public interface IAuthenticationSchemeHandler
+    {
+        // Gives the handler access to the configuration data
+        Task InitializeAsync(AuthenticationScheme scheme, HttpContext context);
+
+        Task AuthenticateAsync(AuthenticateContext context);
+        Task ChallengeAsync(ChallengeContext context);
+        Task SignInAsync(SignInContext context);
+        Task SignOutAsync(SignOutContext context);
+    }
+
+    public abstract class AuthenticationSchemeHandler<TOptions> where TOptions : class
+    {
+        private Task<AuthenticateResult> _authenticateTask;
+
+        protected AuthenticationScheme Scheme { get; private set; }
+        protected TOptions Options { get; private set; }
+        protected HttpContext Context { get; private set; }
+        protected PathString OriginalPathBase { get; private set; }
+
+        protected PathString OriginalPath { get; private set; }
+
+        protected ILogger Logger { get; private set; }
+
+        protected UrlEncoder UrlEncoder { get; private set; }
+
+        protected HttpRequest Request
+        {
+            get { return Context.Request; }
+        }
+
+        protected HttpResponse Response
+        {
+            get { return Context.Response; }
+        }
+
+        public virtual Task InitializeAsync(AuthenticationScheme scheme, HttpContext context)
+        {
+            Scheme = scheme;
+            Options = scheme.Settings["Options"] as TOptions;
+            Context = context;
+            OriginalPathBase = Request.PathBase;
+            OriginalPath = Request.Path;
+
+            Logger = context.RequestServices.GetService<ILogger>();
+            UrlEncoder = context.RequestServices.GetService<UrlEncoder>();
+
+            return Task.FromResult(0);
+        }
+
+        protected string BuildRedirectUri(string targetPath)
+        {
+            return Request.Scheme + "://" + Request.Host + OriginalPathBase + targetPath;
+        }
+
+        public async Task AuthenticateAsync(AuthenticateContext context)
+        {
+            // Calling Authenticate more than once should always return the original value.
+            var result = await HandleAuthenticateOnceAsync();
+
+            if (result?.Failure != null)
+            {
+                context.Failed(result.Failure);
+            }
+            else
+            {
+                var ticket = result?.Ticket;
+                if (ticket?.Principal != null)
+                {
+                    context.Authenticated(ticket.Principal, ticket.Properties.Items);
+                    //Logger.AuthenticationSchemeAuthenticated(Options.AuthenticationScheme);
+                }
+                else
+                {
+                    context.NotAuthenticated();
+                    //Logger.AuthenticationSchemeNotAuthenticated(Options.AuthenticationScheme);
+                }
+            }
+        }
+
+        /// <summary>
+        /// Used to ensure HandleAuthenticateAsync is only invoked once. The subsequent calls
+        /// will return the same authenticate result.
+        /// </summary>
+        protected Task<AuthenticateResult> HandleAuthenticateOnceAsync()
+        {
+            if (_authenticateTask == null)
+            {
+                _authenticateTask = HandleAuthenticateAsync();
+            }
+
+            return _authenticateTask;
+        }
+
+        /// <summary>
+        /// Used to ensure HandleAuthenticateAsync is only invoked once safely. The subsequent
+        /// calls will return the same authentication result. Any exceptions will be converted
+        /// into a failed authentication result containing the exception.
+        /// </summary>
+        protected async Task<AuthenticateResult> HandleAuthenticateOnceSafeAsync()
+        {
+            try
+            {
+                return await HandleAuthenticateOnceAsync();
+            }
+            catch (Exception ex)
+            {
+                return AuthenticateResult.Fail(ex);
+            }
+        }
+
+        protected abstract Task<AuthenticateResult> HandleAuthenticateAsync();
+
+        public async Task SignInAsync(SignInContext context)
+        {
+            //SignInAccepted = true;
+            await HandleSignInAsync(context);
+                //Logger.AuthenticationSchemeSignedIn(Options.AuthenticationScheme);
+            context.Accept();
+        }
+
+        protected virtual Task HandleSignInAsync(SignInContext context)
+        {
+            return TaskCache.CompletedTask;
+        }
+
+        public async Task SignOutAsync(SignOutContext context)
+        {
+            if (context == null)
+            {
+                throw new ArgumentNullException(nameof(context));
+            }
+
+            await HandleSignOutAsync(context);
+            //Logger.AuthenticationSchemeSignedOut(Options.AuthenticationScheme);
+            context.Accept();
+        }
+
+        protected virtual Task HandleSignOutAsync(SignOutContext context)
+        {
+            return TaskCache.CompletedTask;
+        }
+
+        /// <summary>
+        /// Override this method to deal with a challenge that is forbidden.
+        /// </summary>
+        /// <param name="context"></param>
+        /// <returns>The returned boolean is ignored.</returns>
+        protected virtual Task<bool> HandleForbiddenAsync(ChallengeContext context)
+        {
+            Response.StatusCode = 403;
+            return Task.FromResult(true);
+        }
+
+        /// <summary>
+        /// Override this method to deal with 401 challenge concerns, if an authentication scheme in question
+        /// deals an authentication interaction as part of it's request flow. (like adding a response header, or
+        /// changing the 401 result to 302 of a login page or external sign-in location.)
+        /// </summary>
+        /// <param name="context"></param>
+        /// <returns>The returned boolean is no longer used.</returns>
+        protected virtual Task<bool> HandleUnauthorizedAsync(ChallengeContext context)
+        {
+            Response.StatusCode = 401;
+            return Task.FromResult(false);
+        }
+
+        public async Task ChallengeAsync(ChallengeContext context)
+        {
+            switch (context.Behavior)
+            {
+                case ChallengeBehavior.Automatic:
+                    // If there is a principal already, invoke the forbidden code path
+                    var result = await HandleAuthenticateOnceSafeAsync();
+                    if (result?.Ticket?.Principal != null)
+                    {
+                        goto case ChallengeBehavior.Forbidden;
+                    }
+                    goto case ChallengeBehavior.Unauthorized;
+                case ChallengeBehavior.Unauthorized:
+                    await HandleUnauthorizedAsync(context);
+                    //Logger.AuthenticationSchemeChallenged(Options.AuthenticationScheme);
+                    break;
+                case ChallengeBehavior.Forbidden:
+                    await HandleForbiddenAsync(context);
+                    //Logger.AuthenticationSchemeForbidden(Options.AuthenticationScheme);
+                    break;
+            }
+            context.Accept();
+        }
+
+
+    }
+}
