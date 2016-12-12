@@ -3,18 +3,15 @@
 
 using System;
 using System.ComponentModel;
-using Microsoft.AspNetCore.Authentication2.Cookies;
-using Microsoft.AspNetCore.Authentication2;
 using Microsoft.AspNetCore.DataProtection;
 using Microsoft.AspNetCore.Http;
-using Microsoft.Extensions.Options;
 
-namespace Microsoft.AspNetCore.Builder
+namespace Microsoft.AspNetCore.Authentication2.Cookies
 {
     /// <summary>
     /// Configuration options for <see cref="CookieAuthenticationOptions"/>.
     /// </summary>
-    public class CookieAuthenticationOptions : AuthenticationOptions, IOptions<CookieAuthenticationOptions>
+    public class CookieAuthenticationOptions
     {
         private string _cookieName;
 
@@ -23,8 +20,6 @@ namespace Microsoft.AspNetCore.Builder
         /// </summary>
         public CookieAuthenticationOptions()
         {
-            AuthenticationScheme = CookieAuthenticationDefaults.AuthenticationScheme;
-            AutomaticAuthenticate = true;
             ReturnUrlParameter = CookieAuthenticationDefaults.ReturnUrlParameter;
             ExpireTimeSpan = TimeSpan.FromDays(14);
             SlidingExpiration = true;
@@ -36,6 +31,11 @@ namespace Microsoft.AspNetCore.Builder
 
         [EditorBrowsable(EditorBrowsableState.Never)]
         public ISystemClock SystemClock { get; set; } = new SystemClock();
+
+        /// <summary>
+        /// Gets or sets the issuer that should be used for any claims that are created
+        /// </summary>
+        public string ClaimsIssuer { get; set; }
 
         /// <summary>
         /// Determines the cookie name used to persist the identity. The default value is ".AspNetCore.Cookies".
@@ -153,13 +153,5 @@ namespace Microsoft.AspNetCore.Builder
         /// to the client. This can be used to mitigate potential problems with very large identities.
         /// </summary>
         public ITicketStore SessionStore { get; set; }
-
-        CookieAuthenticationOptions IOptions<CookieAuthenticationOptions>.Value
-        {
-            get
-            {
-                return this;
-            }
-        }
     }
 }

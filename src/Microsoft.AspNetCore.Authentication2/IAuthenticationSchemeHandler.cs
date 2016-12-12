@@ -48,6 +48,10 @@ namespace Microsoft.AspNetCore.Authentication2
             get { return Context.Response; }
         }
 
+        // Can we get rid of this?? (Cookies.FinishResponse / renew uses 
+        protected bool SignInAccepted { get; set; }
+        protected bool SignOutAccepted { get; set; }
+
         public virtual Task InitializeAsync(AuthenticationScheme scheme, HttpContext context)
         {
             Scheme = scheme;

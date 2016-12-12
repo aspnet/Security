@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 namespace Microsoft.AspNetCore.Authentication2.Cookies
 {
     /// <summary>
-    /// Specifies callback methods which the <see cref="CookieAuthenticationMiddleware"></see> invokes to enable developer control over the authentication process. />
+    /// Specifies callback methods which the <see cref="CookieAuthenticationOptions"></see> invokes to enable developer control over the authentication process. />
     /// </summary>
     public interface ICookieAuthenticationEvents
     {

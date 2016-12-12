@@ -6,8 +6,6 @@ using System;
 using System.Linq;
 using System.Security.Claims;
 using System.Threading.Tasks;
-using Microsoft.AspNetCore.Authentication2;
-using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Http.Features;
 using Microsoft.Net.Http.Headers;
@@ -20,11 +18,20 @@ namespace Microsoft.AspNetCore.Authentication2.Cookies
         private const string HeaderValueMinusOne = "-1";
         private const string SessionIdClaim = "Microsoft.AspNetCore.Authentication2.Cookies-SessionId";
 
+        private bool _finishCalled;
         private bool _shouldRefresh;
         private DateTimeOffset? _refreshIssuedUtc;
         private DateTimeOffset? _refreshExpiresUtc;
         private string _sessionKey;
         private Task<AuthenticateResult> _readCookieTask;
+
+        public async override Task InitializeAsync(AuthenticationScheme scheme, HttpContext context)
+        {
+            await base.InitializeAsync(scheme, context);
+
+            // Cookies needs to finish the response
+            context.Response.OnStarting(FinishResponseOnce);
+        }
 
         private Task<AuthenticateResult> EnsureCookieTicket()
         {
@@ -138,7 +145,7 @@ namespace Microsoft.AspNetCore.Authentication2.Cookies
                 RequestRefresh(result.Ticket);
             }
 
-            return AuthenticateResult.Success(new AuthenticationTicket2(context.Principal, context.Properties, Options.AuthenticationScheme));
+            return AuthenticateResult.Success(new AuthenticationTicket2(context.Principal, context.Properties, Scheme.Name));
         }
 
         private CookieOptions BuildCookieOptions()
@@ -162,56 +169,66 @@ namespace Microsoft.AspNetCore.Authentication2.Cookies
             return cookieOptions;
         }
 
-        //protected override async Task FinishResponseAsync()
-        //{
-        //    // Only renew if requested, and neither sign in or sign out was called
-        //    if (!_shouldRefresh || SignInAccepted || SignOutAccepted)
-        //    {
-        //        return;
-        //    }
+        private async Task FinishResponseOnce()
+        {
+            if (!_finishCalled)
+            {
+                _finishCalled = true;
+                await FinishResponseAsync();
+                //await HandleAutomaticChallengeIfNeeded();
+            }
+        }
 
-        //    var ticket = (await HandleAuthenticateOnceSafeAsync())?.Ticket;
-        //    if (ticket != null)
-        //    {
-        //        var properties = ticket.Properties;
+        protected virtual async Task FinishResponseAsync()
+        {
+            // Only renew if requested, and neither sign in or sign out was called
+            if (!_shouldRefresh || SignInAccepted || SignOutAccepted)
+            {
+                return;
+            }
 
-        //        if (_refreshIssuedUtc.HasValue)
-        //        {
-        //            properties.IssuedUtc = _refreshIssuedUtc;
-        //        }
+            var ticket = (await HandleAuthenticateOnceSafeAsync())?.Ticket;
+            if (ticket != null)
+            {
+                var properties = ticket.Properties;
 
-        //        if (_refreshExpiresUtc.HasValue)
-        //        {
-        //            properties.ExpiresUtc = _refreshExpiresUtc;
-        //        }
+                if (_refreshIssuedUtc.HasValue)
+                {
+                    properties.IssuedUtc = _refreshIssuedUtc;
+                }
 
-        //        if (Options.SessionStore != null && _sessionKey != null)
-        //        {
-        //            await Options.SessionStore.RenewAsync(_sessionKey, ticket);
-        //            var principal = new ClaimsPrincipal(
-        //                new ClaimsIdentity(
-        //                    new[] { new Claim(SessionIdClaim, _sessionKey, ClaimValueTypes.String, Options.ClaimsIssuer) },
-        //                    Options.AuthenticationScheme));
-        //            ticket = new AuthenticationTicket2(principal, null, Options.AuthenticationScheme);
-        //        }
+                if (_refreshExpiresUtc.HasValue)
+                {
+                    properties.ExpiresUtc = _refreshExpiresUtc;
+                }
 
-        //        var cookieValue = Options.TicketDataFormat.Protect(ticket, GetTlsTokenBinding());
+                if (Options.SessionStore != null && _sessionKey != null)
+                {
+                    await Options.SessionStore.RenewAsync(_sessionKey, ticket);
+                    var principal = new ClaimsPrincipal(
+                        new ClaimsIdentity(
+                            new[] { new Claim(SessionIdClaim, _sessionKey, ClaimValueTypes.String, Options.ClaimsIssuer) },
+                            Scheme.Name));
+                    ticket = new AuthenticationTicket2(principal, null, Scheme.Name);
+                }
 
-        //        var cookieOptions = BuildCookieOptions();
-        //        if (properties.IsPersistent && _refreshExpiresUtc.HasValue)
-        //        {
-        //            cookieOptions.Expires = _refreshExpiresUtc.Value.ToUniversalTime();
-        //        }
+                var cookieValue = Options.TicketDataFormat.Protect(ticket, GetTlsTokenBinding());
 
-        //        Options.CookieManager.AppendResponseCookie(
-        //            Context,
-        //            Options.CookieName,
-        //            cookieValue,
-        //            cookieOptions);
+                var cookieOptions = BuildCookieOptions();
+                if (properties.IsPersistent && _refreshExpiresUtc.HasValue)
+                {
+                    cookieOptions.Expires = _refreshExpiresUtc.Value.ToUniversalTime();
+                }
 
-        //        await ApplyHeaders(shouldRedirectToReturnUrl: false, properties: properties);
-        //    }
-        //}
+                Options.CookieManager.AppendResponseCookie(
+                    Context,
+                    Options.CookieName,
+                    cookieValue,
+                    cookieOptions);
+
+                await ApplyHeaders(shouldRedirectToReturnUrl: false, properties: properties);
+            }
+        }
 
         protected override async Task HandleSignInAsync(SignInContext signin)
         {
@@ -222,7 +239,7 @@ namespace Microsoft.AspNetCore.Authentication2.Cookies
             var signInContext = new CookieSigningInContext(
                 Context,
                 Options,
-                Options.AuthenticationScheme,
+                Scheme.Name,
                 signin.Principal,
                 signin.Properties,
                 cookieOptions);
@@ -263,7 +280,7 @@ namespace Microsoft.AspNetCore.Authentication2.Cookies
                     new ClaimsIdentity(
                         new[] { new Claim(SessionIdClaim, _sessionKey, ClaimValueTypes.String, Options.ClaimsIssuer) },
                         Options.ClaimsIssuer));
-                ticket = new AuthenticationTicket2(principal, null, Options.AuthenticationScheme);
+                ticket = new AuthenticationTicket2(principal, null, Scheme.Name);
             }
 
             var cookieValue = Options.TicketDataFormat.Protect(ticket, GetTlsTokenBinding());
@@ -277,7 +294,7 @@ namespace Microsoft.AspNetCore.Authentication2.Cookies
             var signedInContext = new CookieSignedInContext(
                 Context,
                 Options,
-                Options.AuthenticationScheme,
+                Scheme.Name,
                 signInContext.Principal,
                 signInContext.Properties);
 
