@@ -8,7 +8,7 @@ namespace Microsoft.AspNetCore.Authentication2
 {
     public class AuthenticationOptions2
     {
-        public IDictionary<string, AuthenticationScheme> SchemeMap { get; }
+        public IDictionary<string, AuthenticationScheme> SchemeMap { get; } = new Dictionary<string, AuthenticationScheme>(); // case sensitive?
 
         public void AddScheme(string name, Action<AuthenticationSchemeBuilder> configureBuilder)
         {

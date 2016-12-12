@@ -2,9 +2,8 @@
 // Licensed under the Apache License, Version 2.0. See License.txt in the project root for license information.
 
 using System;
-using Microsoft.AspNetCore.Authentication2.Cookies;
 
-namespace Microsoft.AspNetCore.Authentication2
+namespace Microsoft.AspNetCore.Authentication2.Cookies
 {
     /// <summary>
     /// Extension methods for setting up cookie authentication services in an <see cref="AuthenticationOptions2" />.

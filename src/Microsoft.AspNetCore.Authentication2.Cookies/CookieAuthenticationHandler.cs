@@ -6,8 +6,10 @@ using System;
 using System.Linq;
 using System.Security.Claims;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.DataProtection;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Http.Features;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Net.Http.Headers;
 
 namespace Microsoft.AspNetCore.Authentication2.Cookies
@@ -28,6 +30,43 @@ namespace Microsoft.AspNetCore.Authentication2.Cookies
         public async override Task InitializeAsync(AuthenticationScheme scheme, HttpContext context)
         {
             await base.InitializeAsync(scheme, context);
+
+            // TODO: This needs to go into some kind of base class for reuse
+            if (Options.EventsType != null)
+            {
+                Options.Events = context.RequestServices.GetRequiredService(Options.EventsType) as CookieAuthenticationEvents;
+            }
+
+            if (Options.Events == null)
+            {
+                Options.Events = new CookieAuthenticationEvents();
+            }
+            if (String.IsNullOrEmpty(Options.CookieName))
+            {
+                Options.CookieName = CookieAuthenticationDefaults.CookiePrefix + Scheme.Name;
+            }
+            if (Options.TicketDataFormat == null)
+            {
+                var provider = Options.DataProtectionProvider ?? context.RequestServices.GetRequiredService<IDataProtectionProvider>();
+                var dataProtector = provider.CreateProtector(typeof(CookieAuthenticationHandler).FullName, Scheme.Name, "v2");
+                Options.TicketDataFormat = new TicketDataFormat(dataProtector);
+            }
+            if (Options.CookieManager == null)
+            {
+                Options.CookieManager = new ChunkingCookieManager();
+            }
+            if (!Options.LoginPath.HasValue)
+            {
+                Options.LoginPath = CookieAuthenticationDefaults.LoginPath;
+            }
+            if (!Options.LogoutPath.HasValue)
+            {
+                Options.LogoutPath = CookieAuthenticationDefaults.LogoutPath;
+            }
+            if (!Options.AccessDeniedPath.HasValue)
+            {
+                Options.AccessDeniedPath = CookieAuthenticationDefaults.AccessDeniedPath;
+            }
 
             // Cookies needs to finish the response
             context.Response.OnStarting(FinishResponseOnce);

@@ -3,6 +3,7 @@
 
 using System;
 using Microsoft.AspNetCore.Authentication2;
+using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 
 namespace Microsoft.Extensions.DependencyInjection
@@ -23,7 +24,9 @@ namespace Microsoft.Extensions.DependencyInjection
                 throw new ArgumentNullException(nameof(configureOptions));
             }
 
-            services.TryAddSingleton<IAuthenticationManager2, DefaultAuthenticationManager>();
+            services.AddDataProtection();
+            services.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();
+            services.TryAddScoped<IAuthenticationManager2, DefaultAuthenticationManager>();
             services.TryAddSingleton<IAuthenticationSchemeProvider, DefaultAuthenticationSchemeProvider>();
             services.Configure(configureOptions);
             return services;

@@ -29,6 +29,11 @@ namespace Microsoft.AspNetCore.Authentication2.Cookies
             Events = new CookieAuthenticationEvents();
         }
 
+        /// <summary>
+        /// If set, will be used as the service type to get the Events instance instead of the property.
+        /// </summary>
+        public Type EventsType { get; set; }
+
         [EditorBrowsable(EditorBrowsableState.Never)]
         public ISystemClock SystemClock { get; set; } = new SystemClock();
 
@@ -131,7 +136,7 @@ namespace Microsoft.AspNetCore.Authentication2.Cookies
         /// calls methods on the provider which give the application control at certain points where processing is occurring. 
         /// If it is not provided a default instance is supplied which does nothing when the methods are called.
         /// </summary>
-        public ICookieAuthenticationEvents Events { get; set; }
+        public CookieAuthenticationEvents Events { get; set; }
 
         /// <summary>
         /// The TicketDataFormat is used to protect and unprotect the identity and other properties which are stored in the

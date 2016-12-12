@@ -23,7 +23,7 @@ namespace Microsoft.AspNetCore.Authentication2
         Task SignOutAsync(SignOutContext context);
     }
 
-    public abstract class AuthenticationSchemeHandler<TOptions> where TOptions : class
+    public abstract class AuthenticationSchemeHandler<TOptions> : IAuthenticationSchemeHandler where TOptions : class
     {
         private Task<AuthenticateResult> _authenticateTask;
 

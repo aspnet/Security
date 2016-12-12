@@ -1,7 +1,7 @@
 ﻿using System.IO;
 using Microsoft.AspNetCore.Hosting;
 
-namespace CookieSample
+namespace Cookie2Sample
 {
     public static class Program
     {

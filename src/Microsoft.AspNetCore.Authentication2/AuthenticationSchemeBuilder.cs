@@ -18,7 +18,7 @@ namespace Microsoft.AspNetCore.Authentication2
         public Type HandlerType { get; set; }
 
         // Holds things like the configured options instances for the handler
-        public Dictionary<string, object> Settings { get; set; }
+        public Dictionary<string, object> Settings { get; set; } = new Dictionary<string, object>(); // casing?
 
         public AuthenticationScheme Build() => new AuthenticationScheme(Name, HandlerType, Settings);
     }

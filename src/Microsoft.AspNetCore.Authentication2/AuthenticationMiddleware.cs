@@ -4,6 +4,8 @@
 using System;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.DependencyInjection.Extensions;
 
 namespace Microsoft.AspNetCore.Authentication2
 {
@@ -11,7 +13,7 @@ namespace Microsoft.AspNetCore.Authentication2
     {
         private readonly RequestDelegate _next;
 
-        protected AuthenticationMiddleware(RequestDelegate next, IAuthenticationSchemeProvider schemes, IAuthenticationManager2 auth)
+        public AuthenticationMiddleware(RequestDelegate next, IAuthenticationSchemeProvider schemes)
         {
             if (next == null)
             {
@@ -23,19 +25,11 @@ namespace Microsoft.AspNetCore.Authentication2
                 throw new ArgumentNullException(nameof(schemes));
             }
 
-            if (auth == null)
-            {
-                throw new ArgumentNullException(nameof(auth));
-            }
-
             _next = next;
             Schemes = schemes;
-            Authentication = auth;
         }
 
         public IAuthenticationSchemeProvider Schemes { get; set; }
-
-        public IAuthenticationManager2 Authentication { get; set; }
 
         public async Task Invoke(HttpContext context)
         {
@@ -43,7 +37,8 @@ namespace Microsoft.AspNetCore.Authentication2
             var defaultAuthenticate = await Schemes.GetDefaultAuthenticateSchemeAsync();
             if (defaultAuthenticate != null)
             {
-                var ticket = await Authentication.AuthenticateAsync(defaultAuthenticate.Name);
+                var manager = context.RequestServices.GetRequiredService<IAuthenticationManager2>();
+                var ticket = await manager.AuthenticateAsync(defaultAuthenticate.Name);
                 context.User = ticket.Principal;
             }
             await _next(context);
