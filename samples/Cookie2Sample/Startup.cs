@@ -26,19 +26,41 @@ namespace Cookie2Sample
 
             app.Run(async context =>
             {
-                var auth = context.RequestServices.GetRequiredService<IAuthenticationManager2>();
-                if (!context.User.Identities.Any(identity => identity.IsAuthenticated))
+                if (context.Request.Path == CookieAuthenticationDefaults.AccessDeniedPath)
                 {
-                    var user = new ClaimsPrincipal(new ClaimsIdentity(new[] { new Claim(ClaimTypes.Name, "bob") }, CookieAuthenticationDefaults.AuthenticationScheme));
-                    await auth.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme, user);
-
                     context.Response.ContentType = "text/plain";
-                    await context.Response.WriteAsync("Hello First timer");
+                    await context.Response.WriteAsync("Access Denied");
                     return;
                 }
 
-                context.Response.ContentType = "text/plain";
-                await context.Response.WriteAsync("Hello old timer");
+                if (context.Request.Path == "/login")
+                {
+                    var u = new ClaimsPrincipal(new ClaimsIdentity(new[] { new Claim(ClaimTypes.Name, "bob") }, CookieAuthenticationDefaults.AuthenticationScheme));
+                    await context.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme, u);
+
+                    context.Response.ContentType = "text/plain";
+                    await context.Response.WriteAsync("Logged in");
+                    return;
+                }
+
+                if (context.Request.Path == CookieAuthenticationDefaults.LoginPath)
+                {
+                    context.Response.ContentType = "text/plain";
+                    await context.Response.WriteAsync("Normally this would log you in, but you have to go to /login");
+                    return;
+                }
+
+                // [Authorize] would usually handle this
+                var user = context.User; // We can do this because of UseAuthentication
+                if (user?.Identity?.IsAuthenticated ?? false)
+                {
+                    context.Response.ContentType = "text/plain";
+                    await context.Response.WriteAsync("Hello old timer");
+                }
+                else
+                {
+                    await context.ChallengeAsync(CookieAuthenticationDefaults.AuthenticationScheme);
+                }
             });
         }
     }
