@@ -14,8 +14,7 @@ namespace Cookie2Sample
     {
         public void ConfigureServices(IServiceCollection services)
         {
-            services.AddAuthentication(o => o.AddCookies(CookieAuthenticationDefaults.AuthenticationScheme, cookieOpt => { }));
-            services.AddTransient<CookieAuthenticationHandler>();
+            services.AddCookieAuthentication();
         }
 
         public void Configure(IApplicationBuilder app, ILoggerFactory loggerfactory)
@@ -40,6 +39,21 @@ namespace Cookie2Sample
 
                     context.Response.ContentType = "text/plain";
                     await context.Response.WriteAsync("Logged in");
+                    return;
+                }
+
+                if (context.Request.Path == "/logout")
+                {
+                    await context.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
+
+                    context.Response.ContentType = "text/plain";
+                    await context.Response.WriteAsync("Logged out");
+                    return;
+                }
+
+                if (context.Request.Path == "/forbid")
+                {
+                    await context.ForbidAsync(CookieAuthenticationDefaults.AuthenticationScheme);
                     return;
                 }
 
