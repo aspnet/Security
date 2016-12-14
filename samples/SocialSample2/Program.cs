@@ -29,7 +29,7 @@ namespace SocialSample
         private static X509Certificate2 LoadCertificate()
         {
             var socialSampleAssembly = typeof(Startup).GetTypeInfo().Assembly;
-            var embeddedFileProvider = new EmbeddedFileProvider(socialSampleAssembly, "SocialSample");
+            var embeddedFileProvider = new EmbeddedFileProvider(socialSampleAssembly, "SocialSample2");
             var certificateFileInfo = embeddedFileProvider.GetFileInfo("compiler/resources/cert.pfx");
             using (var certificateStream = certificateFileInfo.CreateReadStream())
             {

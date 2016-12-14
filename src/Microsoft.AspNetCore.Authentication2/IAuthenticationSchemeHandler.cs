@@ -92,7 +92,7 @@ namespace Microsoft.AspNetCore.Authentication2
             OriginalPathBase = Request.PathBase;
             OriginalPath = Request.Path;
 
-            Logger = context.RequestServices.GetService<ILogger>();
+            Logger = context.RequestServices.GetRequiredService<ILoggerFactory>().CreateLogger(this.GetType().FullName);
             UrlEncoder = context.RequestServices.GetService<UrlEncoder>();
 
             return Task.FromResult(0);

@@ -25,12 +25,32 @@ namespace Microsoft.Extensions.DependencyInjection
             }
 
             services.AddDataProtection();
+            services.AddWebEncoders();
             services.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();
             services.TryAddScoped<IAuthenticationManager2, DefaultAuthenticationManager>();
             services.TryAddScoped<SchemeHandlerCache>(); // Add interface for the shared instance cache?
             services.TryAddSingleton<IAuthenticationSchemeProvider, DefaultAuthenticationSchemeProvider>();
             services.Configure(configureOptions);
             return services;
+        }
+
+        public static IServiceCollection AddSchemeHandler<TOptions, THandler>(this IServiceCollection services, Action<TOptions> configureOptions)
+            where TOptions : AuthenticationSchemeOptions, new()
+            where THandler : AuthenticationSchemeHandler<TOptions>
+        {
+            var handlerOptions = new TOptions();
+            configureOptions?.Invoke(handlerOptions);
+            services.AddAuthentication(o =>
+            {
+                o.AddScheme(handlerOptions.AuthenticationScheme, b =>
+                {
+                    b.HandlerType = typeof(THandler);
+                    b.Settings["Options"] = handlerOptions;
+                });
+            });
+            services.AddTransient<THandler>();
+            return services;
+
         }
     }
 }

@@ -8,20 +8,7 @@ namespace Microsoft.Extensions.DependencyInjection
 {
     public static class TwitterExtensions
     {
-        public static IServiceCollection AddTwitterAuthentication(this IServiceCollection services, Action<TwitterOptions> configureOptions)
-        {
-            var options = new TwitterOptions();
-            configureOptions?.Invoke(options);
-            services.AddAuthentication(o =>
-            {
-                o.AddScheme(options.AuthenticationScheme, b =>
-                {
-                    b.HandlerType = typeof(TwitterHandler);
-                    b.Settings["Options"] = options;
-                });
-            });
-            services.AddTransient<TwitterHandler>();
-            return services;
-        }
+        public static IServiceCollection AddTwitterAuthentication(this IServiceCollection services, Action<TwitterOptions> configureOptions) =>
+            services.AddSchemeHandler<TwitterOptions, TwitterHandler>(configureOptions);
     }
 }

@@ -19,6 +19,7 @@ namespace Microsoft.AspNetCore.Authentication2.Cookies
         /// </summary>
         public CookieAuthenticationOptions()
         {
+            AuthenticationScheme = CookieAuthenticationDefaults.AuthenticationScheme;
             ReturnUrlParameter = CookieAuthenticationDefaults.ReturnUrlParameter;
             ExpireTimeSpan = TimeSpan.FromDays(14);
             SlidingExpiration = true;

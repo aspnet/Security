@@ -15,7 +15,10 @@ namespace Microsoft.AspNetCore.Authentication2
             context.RequestServices.GetRequiredService<IAuthenticationManager2>().AuthenticateAsync(scheme);
 
         public static Task ChallengeAsync(this HttpContext context, string scheme) =>
-            context.RequestServices.GetRequiredService<IAuthenticationManager2>().ChallengeAsync(scheme, properties: null, behavior: ChallengeBehavior.Automatic);
+            context.ChallengeAsync(scheme, properties: null);
+
+        public static Task ChallengeAsync(this HttpContext context, string scheme, AuthenticationProperties2 properties) =>
+            context.ChallengeAsync(scheme, properties: properties, behavior: ChallengeBehavior.Automatic);
 
         public static Task ChallengeAsync(this HttpContext context, string scheme, AuthenticationProperties2 properties, ChallengeBehavior behavior) =>
             context.RequestServices.GetRequiredService<IAuthenticationManager2>().ChallengeAsync(scheme, properties, behavior);
