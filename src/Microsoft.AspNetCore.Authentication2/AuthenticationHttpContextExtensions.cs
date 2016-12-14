@@ -27,7 +27,10 @@ namespace Microsoft.AspNetCore.Authentication2
             context.RequestServices.GetRequiredService<IAuthenticationManager2>().ChallengeAsync(scheme, properties, ChallengeBehavior.Forbidden);
 
         public static Task SignInAsync(this HttpContext context, string scheme, ClaimsPrincipal principal) =>
-            context.RequestServices.GetRequiredService<IAuthenticationManager2>().SignInAsync(scheme, principal);
+            context.SignInAsync(scheme, principal, properties: null);
+
+        public static Task SignInAsync(this HttpContext context, string scheme, ClaimsPrincipal principal, AuthenticationProperties2 properties) =>
+            context.RequestServices.GetRequiredService<IAuthenticationManager2>().SignInAsync(scheme, principal, properties);
 
         public static Task SignOutAsync(this HttpContext context, string scheme) => context.SignOutAsync(scheme, properties: null);
 

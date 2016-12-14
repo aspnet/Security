@@ -5,7 +5,6 @@ using System;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.DependencyInjection.Extensions;
 
 namespace Microsoft.AspNetCore.Authentication2
 {
@@ -40,6 +39,23 @@ namespace Microsoft.AspNetCore.Authentication2
                 var manager = context.RequestServices.GetRequiredService<IAuthenticationManager2>();
                 var ticket = await manager.AuthenticateAsync(defaultAuthenticate.Name);
                 context.User = ticket.Principal;
+            }
+
+            // Give each scheme a chance to handle the request
+            var handlers = context.RequestServices.GetRequiredService<SchemeHandlerCache>();
+            foreach (var scheme in await Schemes.GetPriorityOrderedSchemes())
+            {
+                var handler = await handlers.GetHandlerAsync(scheme.Name);
+                var result = await handler.HandleRequestAsync();
+                if (result.Handled)
+                {
+                    return;
+                }
+                if (result.Bypassed)
+                {
+                    break;
+                }
+                // result.Skipped is a no-op
             }
             await _next(context);
         }

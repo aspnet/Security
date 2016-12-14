@@ -27,6 +27,7 @@ namespace Microsoft.Extensions.DependencyInjection
             services.AddDataProtection();
             services.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();
             services.TryAddScoped<IAuthenticationManager2, DefaultAuthenticationManager>();
+            services.TryAddScoped<SchemeHandlerCache>(); // Add interface for the shared instance cache?
             services.TryAddSingleton<IAuthenticationSchemeProvider, DefaultAuthenticationSchemeProvider>();
             services.Configure(configureOptions);
             return services;

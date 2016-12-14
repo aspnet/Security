@@ -21,6 +21,30 @@ namespace Microsoft.AspNetCore.Authentication2
         Task ChallengeAsync(ChallengeContext context);
         Task SignInAsync(SignInContext context);
         Task SignOutAsync(SignOutContext context);
+
+        Task<AuthenticationRequestResult> HandleRequestAsync();
+    }
+
+    public class AuthenticationRequestResult
+    {
+        /// <summary>
+        /// If true the request is handled and middleware execution should stop.
+        /// </summary>
+        public bool Handled { get; private set; }
+
+        /// <summary>
+        /// If true, skip this handler, and go to the next
+        /// </summary>
+        public bool Skipped { get; private set; }
+
+        /// <summary>
+        /// If true, continue with the rest of the middleware pipeline, but bypass the rest of the handlers.
+        /// </summary>
+        public bool Bypassed { get; private set; }
+
+        public static AuthenticationRequestResult Skip = new AuthenticationRequestResult { Skipped = true };
+        public static AuthenticationRequestResult Handle = new AuthenticationRequestResult { Handled = true };
+        public static AuthenticationRequestResult Bypass = new AuthenticationRequestResult { Bypassed = true };
     }
 
     public abstract class AuthenticationSchemeHandler<TOptions> : IAuthenticationSchemeHandler where TOptions : class
@@ -46,6 +70,14 @@ namespace Microsoft.AspNetCore.Authentication2
         protected HttpResponse Response
         {
             get { return Context.Response; }
+        }
+
+        protected string CurrentUri
+        {
+            get
+            {
+                return Request.Scheme + "://" + Request.Host + Request.PathBase + Request.Path + Request.QueryString;
+            }
         }
 
         // Can we get rid of this?? (Cookies.FinishResponse / renew uses 
@@ -85,7 +117,7 @@ namespace Microsoft.AspNetCore.Authentication2
                 var ticket = result?.Ticket;
                 if (ticket?.Principal != null)
                 {
-                    context.Authenticated(ticket.Principal, ticket.Properties.Items);
+                    context.Authenticated(ticket.Principal, ticket.Properties);
                     //Logger.AuthenticationSchemeAuthenticated(Options.AuthenticationScheme);
                 }
                 else
@@ -207,6 +239,21 @@ namespace Microsoft.AspNetCore.Authentication2
             context.Accept();
         }
 
-
+        /// <summary>
+        /// Called once by common code after initialization. If an authentication middleware responds directly to
+        /// specifically known paths it must override this virtual, compare the request path to it's known paths,
+        /// provide any response information as appropriate, and true to stop further processing.
+        /// </summary>
+        /// <returns>Returning Continue will cause the common code to call the next middleware in line. Returning Handled will
+        /// cause the common code to begin the async completion journey without calling the rest of the middleware
+        /// pipeline.</returns>
+        public virtual Task<AuthenticationRequestResult> HandleRequestAsync()
+        {
+            //if (InitializeResult?.Handled == true)
+            //{
+            //    return Task.FromResult(true);
+            //}
+            return Task.FromResult(AuthenticationRequestResult.Skip);
+        }
     }
 }

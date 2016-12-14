@@ -25,13 +25,13 @@ namespace Microsoft.AspNetCore.Authentication2
 
         public ClaimsPrincipal Principal { get; private set; }
 
-        public IDictionary<string, string> Properties { get; private set; }
+        public AuthenticationProperties2 Properties { get; private set; }
 
         public IDictionary<string, object> Description { get; private set; }
 
         public Exception Error { get; private set; }
 
-        public virtual void Authenticated(ClaimsPrincipal principal, IDictionary<string, string> properties)
+        public virtual void Authenticated(ClaimsPrincipal principal, AuthenticationProperties2 properties)
         {
             Accepted = true;
 

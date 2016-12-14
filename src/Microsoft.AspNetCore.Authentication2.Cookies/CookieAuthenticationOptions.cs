@@ -2,7 +2,6 @@
 // Licensed under the Apache License, Version 2.0. See License.txt in the project root for license information.
 
 using System;
-using System.ComponentModel;
 using Microsoft.AspNetCore.DataProtection;
 using Microsoft.AspNetCore.Http;
 
@@ -11,7 +10,7 @@ namespace Microsoft.AspNetCore.Authentication2.Cookies
     /// <summary>
     /// Configuration options for <see cref="CookieAuthenticationOptions"/>.
     /// </summary>
-    public class CookieAuthenticationOptions
+    public class CookieAuthenticationOptions : AuthenticationSchemeOptions
     {
         private string _cookieName;
 
@@ -28,19 +27,6 @@ namespace Microsoft.AspNetCore.Authentication2.Cookies
             SystemClock = new SystemClock();
             Events = new CookieAuthenticationEvents();
         }
-
-        /// <summary>
-        /// If set, will be used as the service type to get the Events instance instead of the property.
-        /// </summary>
-        public Type EventsType { get; set; }
-
-        [EditorBrowsable(EditorBrowsableState.Never)]
-        public ISystemClock SystemClock { get; set; } = new SystemClock();
-
-        /// <summary>
-        /// Gets or sets the issuer that should be used for any claims that are created
-        /// </summary>
-        public string ClaimsIssuer { get; set; }
 
         /// <summary>
         /// Determines the cookie name used to persist the identity. The default value is ".AspNetCore.Cookies".
@@ -136,7 +122,11 @@ namespace Microsoft.AspNetCore.Authentication2.Cookies
         /// calls methods on the provider which give the application control at certain points where processing is occurring. 
         /// If it is not provided a default instance is supplied which does nothing when the methods are called.
         /// </summary>
-        public CookieAuthenticationEvents Events { get; set; }
+        public new CookieAuthenticationEvents Events
+        {
+            get { return (CookieAuthenticationEvents)base.Events; }
+            set { base.Events = value; }
+        }
 
         /// <summary>
         /// The TicketDataFormat is used to protect and unprotect the identity and other properties which are stored in the

@@ -14,7 +14,7 @@ namespace Microsoft.AspNetCore.Authentication2
 
         // Should SignIn/SignOut live in a separate service? If yes, we could have a parallel stack of
         // SignInScheme/Builder/SignInHandler
-        Task SignInAsync(string scheme, ClaimsPrincipal principal);
+        Task SignInAsync(string scheme, ClaimsPrincipal principal, AuthenticationProperties2 properties);
         Task SignOutAsync(string scheme, AuthenticationProperties2 properties);
     }
 

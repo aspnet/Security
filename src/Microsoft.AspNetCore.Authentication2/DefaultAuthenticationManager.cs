@@ -9,10 +9,10 @@ using Microsoft.AspNetCore.Http;
 
 namespace Microsoft.AspNetCore.Authentication2
 {
-    public class DefaultAuthenticationManager : IAuthenticationManager2
+    public class SchemeHandlerCache
     {
         // TODO: figure out some other way to get the context??
-        public DefaultAuthenticationManager(IAuthenticationSchemeProvider schemes, IHttpContextAccessor context)
+        public SchemeHandlerCache(IAuthenticationSchemeProvider schemes, IHttpContextAccessor context)
         {
             Schemes = schemes;
             _accessor = context;
@@ -20,14 +20,14 @@ namespace Microsoft.AspNetCore.Authentication2
 
         public IAuthenticationSchemeProvider Schemes { get; }
 
-        // handler instance cache, need to initialize once per request, manager lifetime should be per request
+        // handler instance cache, need to initialize once per request
         private Dictionary<string, IAuthenticationSchemeHandler> _handlerMap = new Dictionary<string, IAuthenticationSchemeHandler>();
 
         private readonly IHttpContextAccessor _accessor;
 
         private HttpContext Context => _accessor.HttpContext;
 
-        private async Task<IAuthenticationSchemeHandler> ResolveHandler(string authenticationScheme)
+        public async Task<IAuthenticationSchemeHandler> GetHandlerAsync(string authenticationScheme)
         {
             if (_handlerMap.ContainsKey(authenticationScheme))
             {
@@ -43,6 +43,17 @@ namespace Microsoft.AspNetCore.Authentication2
             }
             return handler;
         }
+    }
+
+    public class DefaultAuthenticationManager : IAuthenticationManager2
+    {
+        // TODO: figure out some other way to get the context??
+        public DefaultAuthenticationManager(SchemeHandlerCache cache)
+        {
+            Handlers = cache;
+        }
+
+        public SchemeHandlerCache Handlers { get; }
 
         public virtual async Task<AuthenticationTicket2> AuthenticateAsync(string authenticationScheme)
         {
@@ -52,7 +63,7 @@ namespace Microsoft.AspNetCore.Authentication2
             }
 
             var context = new AuthenticateContext(authenticationScheme);
-            var handler = await ResolveHandler(authenticationScheme);
+            var handler = await Handlers.GetHandlerAsync(authenticationScheme);
             if (handler != null)
             {
                 await handler.AuthenticateAsync(context);
@@ -64,7 +75,7 @@ namespace Microsoft.AspNetCore.Authentication2
             }
 
             return new AuthenticationTicket2(context.Principal,
-                new AuthenticationProperties2(context.Properties),
+                context.Properties,
                 authenticationScheme);
         }
 
@@ -76,7 +87,7 @@ namespace Microsoft.AspNetCore.Authentication2
             }
 
             var challengeContext = new ChallengeContext(authenticationScheme, properties, behavior);
-            var handler = await ResolveHandler(authenticationScheme);
+            var handler = await Handlers.GetHandlerAsync(authenticationScheme);
             if (handler != null)
             {
                 await handler.ChallengeAsync(challengeContext);
@@ -101,7 +112,7 @@ namespace Microsoft.AspNetCore.Authentication2
             }
 
             var signInContext = new SignInContext(authenticationScheme, principal, properties);
-            var handler = await ResolveHandler(authenticationScheme);
+            var handler = await Handlers.GetHandlerAsync(authenticationScheme);
             if (handler != null)
             {
                 await handler.SignInAsync(signInContext);
@@ -121,7 +132,7 @@ namespace Microsoft.AspNetCore.Authentication2
             }
 
             var signOutContext = new SignOutContext(authenticationScheme, properties);
-            var handler = await ResolveHandler(authenticationScheme);
+            var handler = await Handlers.GetHandlerAsync(authenticationScheme);
             if (handler != null)
             {
                 await handler.SignOutAsync(signOutContext);

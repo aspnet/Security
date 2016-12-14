@@ -31,6 +31,8 @@ namespace Microsoft.AspNetCore.Authentication2.Cookies
         {
             await base.InitializeAsync(scheme, context);
 
+            Options.AuthenticationScheme = scheme.Name;
+
             // TODO: This needs to go into some kind of base class for reuse
             if (Options.EventsType != null)
             {
