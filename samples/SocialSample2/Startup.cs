@@ -1,15 +1,13 @@
 using System;
 using System.Linq;
-using System.Net.Http;
-using System.Net.Http.Headers;
 using System.Security.Claims;
 using System.Text.Encodings.Web;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authentication2;
 using Microsoft.AspNetCore.Authentication2.Cookies;
-//using Microsoft.AspNetCore.Authentication2.Google;
+using Microsoft.AspNetCore.Authentication2.Google;
+using Microsoft.AspNetCore.Authentication2.OAuth;
 //using Microsoft.AspNetCore.Authentication2.MicrosoftAccount;
-//using Microsoft.AspNetCore.Authentication2.OAuth;
 using Microsoft.AspNetCore.Authentication2.Twitter;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
@@ -69,6 +67,24 @@ namespace SocialSample
                     }
                 };
             });
+            services.AddGoogleAuthentication(options =>
+            {
+                options.ClientId = "667949426586-0bor1qj05d9fjqkvhil6tvoupjfv46fr.apps.googleusercontent.com";
+                options.ClientSecret = "tPycZp08PGQBNDz2XycEB145";
+                options.SignInScheme = CookieAuthenticationDefaults.AuthenticationScheme;
+                options.SaveTokens = true;
+                options.Events = new OAuthEvents()
+                {
+                    OnRemoteFailure = ctx =>
+                    {
+                        ctx.Response.Redirect("/error?FailureMessage=" + UrlEncoder.Default.Encode(ctx.Failure.Message));
+                        ctx.HandleResponse();
+                        return Task.FromResult(0);
+                    }
+                };
+            });
+
+
             services.AddAuthentication(options =>
             {
                 options.DefaultAuthenticationScheme = CookieAuthenticationDefaults.AuthenticationScheme;
@@ -131,51 +147,6 @@ namespace SocialSample
             //    TokenEndpoint = GoogleDefaults.TokenEndpoint,
             //    Scope = { "openid", "profile", "email" },
             //    SaveTokens = true
-            //});
-
-            //// You must first create an app with GitHub and add its ID and Secret to your user-secrets.
-            //// https://console.developers.google.com/project
-            //app.UseGoogleAuthentication(new GoogleOptions
-            //{
-            //    ClientId = Configuration["google:clientid"],
-            //    ClientSecret = Configuration["google:clientsecret"],
-            //    SaveTokens = true,
-            //    Events = new OAuthEvents()
-            //    {
-            //        OnRemoteFailure = ctx =>
-            //        {
-            //            ctx.Response.Redirect("/error?FailureMessage=" + UrlEncoder.Default.Encode(ctx.Failure.Message));
-            //            ctx.HandleResponse();
-            //            return Task.FromResult(0);
-            //        }
-            //    }
-            //});
-
-            //// You must first create an app with Twitter and add its key and Secret to your user-secrets.
-            //// https://apps.twitter.com/
-            //app.UseTwitterAuthentication(new TwitterOptions
-            //{
-            //    ConsumerKey = Configuration["twitter:consumerkey"],
-            //    ConsumerSecret = Configuration["twitter:consumersecret"],
-            //    // http://stackoverflow.com/questions/22627083/can-we-get-email-id-from-twitter-oauth-api/32852370#32852370
-            //    // http://stackoverflow.com/questions/36330675/get-users-email-from-twitter-api-for-external-login-authentication-asp-net-mvc?lq=1
-            //    RetrieveUserDetails = true,
-            //    SaveTokens = true,
-            //    Events = new TwitterEvents()
-            //    {
-            //        OnCreatingTicket = ctx =>
-            //        {
-            //            var profilePic = ctx.User.Value<string>("profile_image_url");
-            //            ctx.Principal.Identities.First().AddClaim(new Claim("urn:twitter:profilepicture", profilePic, ClaimTypes.Uri, ctx.Options.ClaimsIssuer));
-            //            return Task.FromResult(0);
-            //        },
-            //        OnRemoteFailure = ctx =>
-            //        {
-            //            ctx.Response.Redirect("/error?FailureMessage=" + UrlEncoder.Default.Encode(ctx.Failure.Message));
-            //            ctx.HandleResponse();
-            //            return Task.FromResult(0);
-            //        }
-            //    }
             //});
 
             ///* Azure AD app model v2 has restrictions that prevent the use of plain HTTP for redirect URLs.
@@ -294,9 +265,9 @@ namespace SocialSample
             //});
 
             // Choose an authentication type
-            app.Map("/login", signoutApp =>
+            app.Map("/login", signinApp =>
             {
-                signoutApp.Run(async context =>
+                signinApp.Run(async context =>
                 {
                     var authType = context.Request.Query["authscheme"];
                     if (!string.IsNullOrEmpty(authType))
@@ -314,7 +285,7 @@ namespace SocialSample
                     //foreach (var type in context.Authentication.GetAuthenticationSchemes())
                     foreach (var type in context.RequestServices.GetRequiredService<IOptions<AuthenticationOptions2>>().Value.Schemes)
                     {
-                        // TODO: display name?
+                        // TODO: display name (lives on schema instance options)?
                         await context.Response.WriteAsync("<a href=\"?authscheme=" + type.Name + "\">" + (type.Name ?? "(suppressed)") + "</a><br>");
                     }
                     await context.Response.WriteAsync("</body></html>");
@@ -353,25 +324,6 @@ namespace SocialSample
             {
                 // CookieAuthenticationOptions.AutomaticAuthenticate = true (default) causes User to be set
                 var user = context.User;
-
-                // This is what [Authorize] calls
-                // var user = await context.Authentication.AuthenticateAsync(AuthenticationManager.AutomaticScheme);
-
-                // This is what [Authorize(ActiveAuthenticationSchemes = MicrosoftAccountDefaults.AuthenticationScheme)] calls
-                // var user = await context.Authentication.AuthenticateAsync(MicrosoftAccountDefaults.AuthenticationScheme);
-
-                // Deny anonymous request beyond this point.
-                //if (user == null || !user.Identities.Any(identity => identity.IsAuthenticated))
-                //{
-                //    // This is what [Authorize] calls
-                //    // The cookie middleware will intercept this 401 and redirect to /login
-                //    await context.ChallengeAsync(CookieAuthenticationDefaults.AuthenticationScheme);
-
-                //    // This is what [Authorize(ActiveAuthenticationSchemes = MicrosoftAccountDefaults.AuthenticationScheme)] calls
-                //    // await context.Authentication.ChallengeAsync(MicrosoftAccountDefaults.AuthenticationScheme);
-
-                //    return;
-                //}
 
                 // Display user information
                 context.Response.ContentType = "text/html";

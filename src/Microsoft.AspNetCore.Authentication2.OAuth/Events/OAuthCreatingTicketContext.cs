@@ -14,7 +14,7 @@ namespace Microsoft.AspNetCore.Authentication2.OAuth
     /// <summary>
     /// Contains information about the login session as well as the user <see cref="System.Security.Claims.ClaimsIdentity"/>.
     /// </summary>
-    public class OAuthCreatingTicketContext : BaseContext
+    public class OAuthCreatingTicketContext : BaseAuthenticationContext
     {
         /// <summary>
         /// Initializes a new <see cref="OAuthCreatingTicketContext"/>.
@@ -50,7 +50,7 @@ namespace Microsoft.AspNetCore.Authentication2.OAuth
             HttpClient backchannel,
             OAuthTokenResponse tokens,
             JObject user)
-            : base(context)
+            : base(context, options.AuthenticationScheme, ticket.Properties)
         {
             if (context == null)
             {

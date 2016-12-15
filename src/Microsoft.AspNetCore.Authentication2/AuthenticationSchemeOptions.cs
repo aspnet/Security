@@ -17,6 +17,11 @@ namespace Microsoft.AspNetCore.Authentication2
         /// </summary>
         public string AuthenticationScheme { get; set; }
 
+        /// <summary>
+        /// Gets or sets the display name for the authentication provider.
+        /// </summary>
+        public string DisplayName { get; set; }
+
         [EditorBrowsable(EditorBrowsableState.Never)]
         public ISystemClock SystemClock { get; set; } = new SystemClock();
 

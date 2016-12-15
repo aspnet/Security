@@ -2,6 +2,7 @@
   "dependencies": {
     "Microsoft.AspNetCore.Authentication2.Cookies": "1.2.0-*",
     "Microsoft.AspNetCore.Authentication2.Twitter": "1.2.0-*",
+    "Microsoft.AspNetCore.Authentication2.Google": "1.2.0-*",
     "Microsoft.AspNetCore.DataProtection": "1.2.0-*",
     "Microsoft.AspNetCore.Server.IISIntegration": "1.2.0-*",
     "Microsoft.AspNetCore.Server.Kestrel": "1.2.0-*",
