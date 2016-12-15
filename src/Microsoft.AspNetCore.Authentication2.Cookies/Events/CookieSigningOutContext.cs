@@ -1,9 +1,7 @@
 // Copyright (c) .NET Foundation. All rights reserved.
 // Licensed under the Apache License, Version 2.0. See License.txt in the project root for license information.
 
-using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Http.Authentication;
 
 namespace Microsoft.AspNetCore.Authentication2.Cookies
 {
@@ -24,10 +22,9 @@ namespace Microsoft.AspNetCore.Authentication2.Cookies
             CookieAuthenticationOptions options, 
             AuthenticationProperties2 properties, 
             CookieOptions cookieOptions)
-            : base(context, options)
+            : base(context, options, properties)
         {
             CookieOptions = cookieOptions;
-            Properties = properties;
         }
 
         /// <summary>
@@ -35,7 +32,5 @@ namespace Microsoft.AspNetCore.Authentication2.Cookies
         /// May be replace or altered during the SigningOut call.
         /// </summary>
         public CookieOptions CookieOptions { get; set; }
-
-        public AuthenticationProperties2 Properties { get; set; }
     }
 }

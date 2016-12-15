@@ -3,19 +3,20 @@
 
 using System.Security.Claims;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Http;
 
 namespace Microsoft.AspNetCore.Authentication2
 {
     public interface IAuthenticationManager2
     {
-        Task<AuthenticationTicket2> AuthenticateAsync(string scheme);
-        Task ChallengeAsync(string scheme, AuthenticationProperties2 properties, ChallengeBehavior behavior);
-        Task ForbidAsync(string scheme, AuthenticationProperties2 properties);
+        Task<AuthenticationTicket2> AuthenticateAsync(HttpContext context, string scheme);
+        Task ChallengeAsync(HttpContext context, string scheme, AuthenticationProperties2 properties, ChallengeBehavior behavior);
+        Task ForbidAsync(HttpContext context, string scheme, AuthenticationProperties2 properties);
 
         // Should SignIn/SignOut live in a separate service? If yes, we could have a parallel stack of
         // SignInScheme/Builder/SignInHandler
-        Task SignInAsync(string scheme, ClaimsPrincipal principal, AuthenticationProperties2 properties);
-        Task SignOutAsync(string scheme, AuthenticationProperties2 properties);
+        Task SignInAsync(HttpContext context, string scheme, ClaimsPrincipal principal, AuthenticationProperties2 properties);
+        Task SignOutAsync(HttpContext context, string scheme, AuthenticationProperties2 properties);
     }
 
     // Should probably revisit the (auto) challenge behavior as part of this

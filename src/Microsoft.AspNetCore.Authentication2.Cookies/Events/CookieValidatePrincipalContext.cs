@@ -3,9 +3,7 @@
 
 using System;
 using System.Security.Claims;
-using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Http.Authentication;
 
 namespace Microsoft.AspNetCore.Authentication2.Cookies
 {
@@ -21,7 +19,7 @@ namespace Microsoft.AspNetCore.Authentication2.Cookies
         /// <param name="ticket">Contains the initial values for identity and extra data</param>
         /// <param name="options"></param>
         public CookieValidatePrincipalContext(HttpContext context, AuthenticationTicket2 ticket, CookieAuthenticationOptions options)
-            : base(context, options)
+            : base(context, options, ticket?.Properties)
         {
             if (context == null)
             {
@@ -39,7 +37,6 @@ namespace Microsoft.AspNetCore.Authentication2.Cookies
             }
 
             Principal = ticket.Principal;
-            Properties = ticket.Properties;
         }
 
         /// <summary>
@@ -47,11 +44,6 @@ namespace Microsoft.AspNetCore.Authentication2.Cookies
         /// details of the authenticated user.
         /// </summary>
         public ClaimsPrincipal Principal { get; private set; }
-
-        /// <summary>
-        /// Contains the extra meta-data arriving with the request ticket. May be altered.
-        /// </summary>
-        public AuthenticationProperties2 Properties { get; private set; }
 
         /// <summary>
         /// If true, the cookie will be renewed

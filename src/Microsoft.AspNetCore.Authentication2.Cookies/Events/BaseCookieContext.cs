@@ -2,17 +2,17 @@
 // Licensed under the Apache License, Version 2.0. See License.txt in the project root for license information.
 
 using System;
-using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
 
 namespace Microsoft.AspNetCore.Authentication2.Cookies
 {
-    public class BaseCookieContext : BaseContext
+    public class BaseCookieContext : BaseAuthenticationContext
     {
         public BaseCookieContext(
             HttpContext context,
-            CookieAuthenticationOptions options)
-            : base(context)
+            CookieAuthenticationOptions options,
+            AuthenticationProperties2 properties)
+            : base(context, options.AuthenticationScheme, properties)
         {
             if (options == null)
             {

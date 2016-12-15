@@ -166,7 +166,6 @@ namespace Microsoft.AspNetCore.Authentication2
             //SignInAccepted = true;
             await HandleSignInAsync(context);
                 //Logger.AuthenticationSchemeSignedIn(Options.AuthenticationScheme);
-            context.Accept();
         }
 
         protected virtual Task HandleSignInAsync(SignInContext context)
@@ -183,7 +182,6 @@ namespace Microsoft.AspNetCore.Authentication2
 
             await HandleSignOutAsync(context);
             //Logger.AuthenticationSchemeSignedOut(Options.AuthenticationScheme);
-            context.Accept();
         }
 
         protected virtual Task HandleSignOutAsync(SignOutContext context)
@@ -236,7 +234,6 @@ namespace Microsoft.AspNetCore.Authentication2
                     //Logger.AuthenticationSchemeForbidden(Options.AuthenticationScheme);
                     break;
             }
-            context.Accept();
         }
 
         /// <summary>

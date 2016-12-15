@@ -22,15 +22,17 @@ namespace Microsoft.AspNetCore.Authentication2.Twitter
         /// <param name="accessToken">Twitter access token</param>
         /// <param name="accessTokenSecret">Twitter access token secret</param>
         /// <param name="user">User details</param>
+        /// <param name="properties">AuthenticationProperties.</param>
         public TwitterCreatingTicketContext(
             HttpContext context,
             TwitterOptions options,
+            AuthenticationProperties2 properties,
             string userId,
             string screenName,
             string accessToken,
             string accessTokenSecret,
             JObject user)
-            : base(context, options)
+            : base(context, options, properties)
         {
             UserId = userId;
             ScreenName = screenName;
@@ -69,10 +71,5 @@ namespace Microsoft.AspNetCore.Authentication2.Twitter
         /// Gets the <see cref="ClaimsPrincipal"/> representing the user
         /// </summary>
         public ClaimsPrincipal Principal { get; set; }
-
-        /// <summary>
-        /// Gets or sets a property bag for common authentication properties
-        /// </summary>
-        public AuthenticationProperties2 Properties { get; set; }
     }
 }

@@ -36,8 +36,7 @@ namespace Microsoft.AspNetCore.Authentication2
             var defaultAuthenticate = await Schemes.GetDefaultAuthenticateSchemeAsync();
             if (defaultAuthenticate != null)
             {
-                var manager = context.RequestServices.GetRequiredService<IAuthenticationManager2>();
-                var ticket = await manager.AuthenticateAsync(defaultAuthenticate.Name);
+                var ticket = await context.AuthenticateAsync(defaultAuthenticate.Name);
                 context.User = ticket.Principal;
             }
 
@@ -45,7 +44,7 @@ namespace Microsoft.AspNetCore.Authentication2
             var handlers = context.RequestServices.GetRequiredService<SchemeHandlerCache>();
             foreach (var scheme in await Schemes.GetPriorityOrderedSchemes())
             {
-                var handler = await handlers.GetHandlerAsync(scheme.Name);
+                var handler = await handlers.GetHandlerAsync(context, scheme.Name);
                 var result = await handler.HandleRequestAsync();
                 if (result.Handled)
                 {

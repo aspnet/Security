@@ -9,15 +9,16 @@ namespace Microsoft.AspNetCore.Authentication2.Twitter
     /// <summary>
     /// Base class for other Twitter contexts.
     /// </summary>
-    public class BaseTwitterContext : BaseContext
+    public class BaseTwitterContext : BaseAuthenticationContext
     {
         /// <summary>
         /// Initializes a <see cref="BaseTwitterContext"/>
         /// </summary>
         /// <param name="context">The HTTP environment</param>
         /// <param name="options">The options for Twitter</param>
-        public BaseTwitterContext(HttpContext context, TwitterOptions options)
-            : base(context)
+        /// <param name="properties">The AuthenticationProperties</param>
+        public BaseTwitterContext(HttpContext context, TwitterOptions options, AuthenticationProperties2 properties)
+            : base(context, options.AuthenticationScheme, properties)
         {
             Options = options;
         }

@@ -19,7 +19,7 @@ namespace Microsoft.AspNetCore.Authentication2.Twitter
         /// <param name="redirectUri">The initial redirect URI.</param>
         public TwitterRedirectToAuthorizationEndpointContext(HttpContext context, TwitterOptions options,
             AuthenticationProperties2 properties, string redirectUri)
-            : base(context, options)
+            : base(context, options, properties)
         {
             RedirectUri = redirectUri;
             Properties = properties;
@@ -29,10 +29,5 @@ namespace Microsoft.AspNetCore.Authentication2.Twitter
         /// Gets the URI used for the redirect operation.
         /// </summary>
         public string RedirectUri { get; private set; }
-
-        /// <summary>
-        /// Gets the authentication properties of the challenge.
-        /// </summary>
-        public AuthenticationProperties2 Properties { get; private set; }
     }
 }

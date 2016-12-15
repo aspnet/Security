@@ -280,7 +280,6 @@ namespace Microsoft.AspNetCore.Authentication2.Cookies
             var signInContext = new CookieSigningInContext(
                 Context,
                 Options,
-                Scheme.Name,
                 signin.Principal,
                 signin.Properties,
                 cookieOptions);

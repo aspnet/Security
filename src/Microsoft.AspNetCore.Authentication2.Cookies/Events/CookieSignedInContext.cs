@@ -26,26 +26,14 @@ namespace Microsoft.AspNetCore.Authentication2.Cookies
             string authenticationScheme,
             ClaimsPrincipal principal,
             AuthenticationProperties2 properties)
-            : base(context, options)
+            : base(context, options, properties)
         {
-            AuthenticationScheme = authenticationScheme;
             Principal = principal;
-            Properties = properties;
         }
-
-        /// <summary>
-        /// The name of the AuthenticationScheme creating a cookie
-        /// </summary>
-        public string AuthenticationScheme { get; }
 
         /// <summary>
         /// Contains the claims that were converted into the outgoing cookie.
         /// </summary>
         public ClaimsPrincipal Principal { get; }
-
-        /// <summary>
-        /// Contains the extra data that was contained in the outgoing cookie.
-        /// </summary>
-        public AuthenticationProperties2 Properties { get; }
     }
 }

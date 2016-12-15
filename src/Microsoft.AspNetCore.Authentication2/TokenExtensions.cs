@@ -4,6 +4,7 @@
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Http;
 
 namespace Microsoft.AspNetCore.Authentication2
 {
@@ -110,7 +111,7 @@ namespace Microsoft.AspNetCore.Authentication2
         //    return manager.GetTokenAsync(AuthenticationManager.AutomaticScheme, tokenName);
         //}
 
-        public static async Task<string> GetTokenAsync(this IAuthenticationManager2 manager, string signInScheme, string tokenName)
+        public static async Task<string> GetTokenAsync(this IAuthenticationManager2 manager, HttpContext context, string signInScheme, string tokenName)
         {
             if (manager == null)
             {
@@ -125,7 +126,7 @@ namespace Microsoft.AspNetCore.Authentication2
                 throw new ArgumentNullException(nameof(tokenName));
             }
 
-            var ticket = await manager.AuthenticateAsync(signInScheme);
+            var ticket = await manager.AuthenticateAsync(context, signInScheme);
             return ticket.Properties.GetTokenValue(tokenName);
         }
     }

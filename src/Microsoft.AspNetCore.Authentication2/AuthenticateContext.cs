@@ -4,28 +4,19 @@
 using System;
 using System.Collections.Generic;
 using System.Security.Claims;
+using Microsoft.AspNetCore.Http;
 
 namespace Microsoft.AspNetCore.Authentication2
 {
-    public class AuthenticateContext
+    public class AuthenticateContext : BaseAuthenticationContext
     {
-        public AuthenticateContext(string authenticationScheme)
+        public AuthenticateContext(HttpContext context, string authenticationScheme) : base(context, authenticationScheme, properties: null)
         {
-            if (string.IsNullOrEmpty(authenticationScheme))
-            {
-                throw new ArgumentException(nameof(authenticationScheme));
-            }
-
-            AuthenticationScheme = authenticationScheme;
         }
-
-        public string AuthenticationScheme { get; }
 
         public bool Accepted { get; private set; }
 
         public ClaimsPrincipal Principal { get; private set; }
-
-        public AuthenticationProperties2 Properties { get; private set; }
 
         public IDictionary<string, object> Description { get; private set; }
 

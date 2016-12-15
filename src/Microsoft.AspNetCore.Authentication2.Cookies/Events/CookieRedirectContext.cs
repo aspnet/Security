@@ -20,17 +20,14 @@ namespace Microsoft.AspNetCore.Authentication2.Cookies
         /// <param name="redirectUri">The initial redirect URI</param>
         /// <param name="properties">The <see cref="AuthenticationProperties"/>.</param>
         public CookieRedirectContext(HttpContext context, CookieAuthenticationOptions options, string redirectUri, AuthenticationProperties2 properties)
-            : base(context, options)
+            : base(context, options, properties)
         {
             RedirectUri = redirectUri;
-            Properties = properties;
         }
 
         /// <summary>
         /// Gets or Sets the URI used for the redirect operation.
         /// </summary>
         public string RedirectUri { get; set; }
-
-        public AuthenticationProperties2 Properties { get; }
     }
 }

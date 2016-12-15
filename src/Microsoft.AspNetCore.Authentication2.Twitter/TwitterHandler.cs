@@ -137,10 +137,9 @@ namespace Microsoft.AspNetCore.Authentication2.Twitter
         protected virtual async Task<AuthenticationTicket2> CreateTicketAsync(
             ClaimsIdentity identity, AuthenticationProperties2 properties, AccessToken token, JObject user)
         {
-            var context = new TwitterCreatingTicketContext(Context, Options, token.UserId, token.ScreenName, token.Token, token.TokenSecret, user)
+            var context = new TwitterCreatingTicketContext(Context, Options, properties, token.UserId, token.ScreenName, token.Token, token.TokenSecret, user)
             {
-                Principal = new ClaimsPrincipal(identity),
-                Properties = properties
+                Principal = new ClaimsPrincipal(identity)
             };
 
             await Options.Events.CreatingTicket(context);

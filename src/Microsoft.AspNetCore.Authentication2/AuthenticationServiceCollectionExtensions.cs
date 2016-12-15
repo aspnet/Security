@@ -3,7 +3,6 @@
 
 using System;
 using Microsoft.AspNetCore.Authentication2;
-using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 
 namespace Microsoft.Extensions.DependencyInjection
@@ -26,7 +25,6 @@ namespace Microsoft.Extensions.DependencyInjection
 
             services.AddDataProtection();
             services.AddWebEncoders();
-            services.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();
             services.TryAddScoped<IAuthenticationManager2, DefaultAuthenticationManager>();
             services.TryAddScoped<SchemeHandlerCache>(); // Add interface for the shared instance cache?
             services.TryAddSingleton<IAuthenticationSchemeProvider, DefaultAuthenticationSchemeProvider>();
@@ -50,7 +48,6 @@ namespace Microsoft.Extensions.DependencyInjection
             });
             services.AddTransient<THandler>();
             return services;
-
         }
     }
 }
