@@ -27,10 +27,6 @@
     "Microsoft.AspNetCore.Authentication2": {
       "target": "project"
     },
-    "Microsoft.AspNetCore.ChunkingCookieManager.Sources": {
-      "type": "build",
-      "target": "project"
-    },
     "Microsoft.Extensions.Options": "1.2.0-*",
     "Microsoft.Extensions.TaskCache.Sources": {
       "version": "1.2.0-*",

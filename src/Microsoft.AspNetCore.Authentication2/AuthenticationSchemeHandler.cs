@@ -11,7 +11,7 @@ using Microsoft.Extensions.Logging;
 
 namespace Microsoft.AspNetCore.Authentication2
 {
-    public abstract class AuthenticationSchemeHandler<TOptions> : IAuthenticationSchemeHandler where TOptions : class
+    public abstract class AuthenticationSchemeHandler<TOptions> : IAuthenticationSchemeHandler where TOptions : AuthenticationSchemeOptions, new()
     {
         private Task<AuthenticateResult> _authenticateTask;
 
@@ -48,10 +48,25 @@ namespace Microsoft.AspNetCore.Authentication2
         protected bool SignInAccepted { get; set; }
         protected bool SignOutAccepted { get; set; }
 
+        public virtual Task<Exception> ValidateAsync(AuthenticationScheme scheme)
+        {
+            var options = scheme.Settings["Options"] as TOptions;
+            if (options == null)
+            {
+                return Task.FromResult<Exception>(new InvalidOperationException(@"No options found in Settings[""Options""]"));
+            }
+            return ValidateOptionsAsync(options);
+        }
+
+        public abstract Task<Exception> ValidateOptionsAsync(TOptions options);
+
         public virtual Task InitializeAsync(AuthenticationScheme scheme, HttpContext context)
         {
             Scheme = scheme;
-            Options = scheme.Settings["Options"] as TOptions;
+            Options = new TOptions();
+            var configureOptions = scheme.Settings["ConfigureOptions"] as Action<TOptions>;
+            configureOptions?.Invoke(Options);
+            Options.AuthenticationScheme = Scheme.Name; // REVIEW: maybe dedupe and remove scheme from options
             Context = context;
             OriginalPathBase = Request.PathBase;
             OriginalPath = Request.Path;

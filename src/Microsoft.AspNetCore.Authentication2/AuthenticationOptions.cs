@@ -34,6 +34,6 @@ namespace Microsoft.AspNetCore.Authentication2
 
         public string DefaultAuthenticationScheme { get; set; }
 
-        public string DefaultChallengeScheme { get; set; }
+        //public string DefaultChallengeScheme { get; set; }
     }
 }

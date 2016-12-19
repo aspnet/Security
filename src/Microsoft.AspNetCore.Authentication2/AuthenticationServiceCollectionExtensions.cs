@@ -32,18 +32,16 @@ namespace Microsoft.Extensions.DependencyInjection
             return services;
         }
 
-        public static IServiceCollection AddSchemeHandler<TOptions, THandler>(this IServiceCollection services, Action<TOptions> configureOptions)
+        public static IServiceCollection AddSchemeHandler<TOptions, THandler>(this IServiceCollection services, string authenticationScheme, Action<TOptions> configureOptions)
             where TOptions : AuthenticationSchemeOptions, new()
             where THandler : AuthenticationSchemeHandler<TOptions>
         {
-            var handlerOptions = new TOptions();
-            configureOptions?.Invoke(handlerOptions);
             services.AddAuthentication(o =>
             {
-                o.AddScheme(handlerOptions.AuthenticationScheme, b =>
+                o.AddScheme(authenticationScheme, b =>
                 {
                     b.HandlerType = typeof(THandler);
-                    b.Settings["Options"] = handlerOptions;
+                    b.Settings["ConfigureOptions"] = configureOptions;
                 });
             });
             services.AddTransient<THandler>();

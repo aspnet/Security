@@ -9,10 +9,10 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Primitives;
 using Microsoft.Net.Http.Headers;
 
+// TODO: remove copy
 // Keep the type public for Security repo as it would be a breaking change to change the accessor now.
 // Make this type internal for other repos as it could be used by multiple projects and having it public causes type conflicts.
-#if SECURITY
-namespace Microsoft.AspNetCore.Authentication.Cookies
+namespace Microsoft.AspNetCore.Authentication2.Cookies
 {
     /// <summary>
     /// This handles cookies that are limited by per cookie length. It breaks down long cookies for responses, and reassembles them
@@ -20,16 +20,6 @@ namespace Microsoft.AspNetCore.Authentication.Cookies
     /// </summary>
     public class ChunkingCookieManager : ICookieManager
     {
-#else
-namespace Microsoft.AspNetCore.Internal
-{
-    /// <summary>
-    /// This handles cookies that are limited by per cookie length. It breaks down long cookies for responses, and reassembles them
-    /// from requests.
-    /// </summary>
-    internal class ChunkingCookieManager
-    {
-#endif
         /// <summary>
         /// The default maximum size of characters in a cookie to send back to the client.
         /// </summary>

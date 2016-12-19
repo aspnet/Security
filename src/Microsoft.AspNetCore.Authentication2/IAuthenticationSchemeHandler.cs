@@ -1,6 +1,7 @@
 // Copyright (c) .NET Foundation. All rights reserved.
 // Licensed under the Apache License, Version 2.0. See License.txt in the project root for license information.
 
+using System;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 
@@ -9,6 +10,13 @@ namespace Microsoft.AspNetCore.Authentication2
     // Created on a per request basis to handle one particular scheme.
     public interface IAuthenticationSchemeHandler
     {
+        /// <summary>
+        /// Validate that the handler is configured correctly
+        /// </summary>
+        /// <param name="scheme">The scheme to validate.</param>
+        /// <returns>An exception describing the error, or null if validation succeeds.</returns>
+        Task<Exception> ValidateAsync(AuthenticationScheme scheme);
+
         // Gives the handler access to the configuration data
         Task InitializeAsync(AuthenticationScheme scheme, HttpContext context);
 

@@ -10,7 +10,9 @@ namespace Microsoft.AspNetCore.Authentication2
     {
         Task<AuthenticationScheme> GetSchemeAsync(string name);
         Task<AuthenticationScheme> GetDefaultAuthenticateSchemeAsync();
-        Task<AuthenticationScheme> GetDefaultChallengeSchemeAsync();
+
+        // Maybe can remove this
+        //Task<AuthenticationScheme> GetDefaultChallengeSchemeAsync();
 
         /// <summary>
         /// Returns the schemes in priority order for request handling.

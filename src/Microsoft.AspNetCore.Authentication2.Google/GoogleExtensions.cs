@@ -9,6 +9,9 @@ namespace Microsoft.Extensions.DependencyInjection
     public static class GoogleExtensions
     {
         public static IServiceCollection AddGoogleAuthentication(this IServiceCollection services, Action<GoogleOptions> configureOptions) =>
-            services.AddSchemeHandler<GoogleOptions, GoogleHandler>(configureOptions);
+            services.AddGoogleAuthentication(GoogleDefaults.AuthenticationScheme, configureOptions);
+
+        public static IServiceCollection AddGoogleAuthentication(this IServiceCollection services, string authenticationScheme, Action<GoogleOptions> configureOptions) =>
+            services.AddSchemeHandler<GoogleOptions, GoogleHandler>(authenticationScheme, configureOptions);
     }
 }

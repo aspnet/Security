@@ -30,18 +30,18 @@ namespace Microsoft.AspNetCore.Authentication2
             return Task.FromResult<AuthenticationScheme>(null);
         }
 
-        public Task<AuthenticationScheme> GetDefaultChallengeSchemeAsync()
-        {
-            if (_options.DefaultAuthenticationScheme != null)
-            {
-                return GetSchemeAsync(_options.DefaultChallengeScheme);
-            }
-            if (_options.SchemeMap.Count == 1)
-            {
-                return Task.FromResult(_options.SchemeMap.First().Value);
-            }
-            return Task.FromResult<AuthenticationScheme>(null);
-        }
+        //public Task<AuthenticationScheme> GetDefaultChallengeSchemeAsync()
+        //{
+        //    if (_options.DefaultAuthenticationScheme != null)
+        //    {
+        //        return GetSchemeAsync(_options.DefaultChallengeScheme);
+        //    }
+        //    if (_options.SchemeMap.Count == 1)
+        //    {
+        //        return Task.FromResult(_options.SchemeMap.First().Value);
+        //    }
+        //    return Task.FromResult<AuthenticationScheme>(null);
+        //}
 
         public Task<AuthenticationScheme> GetSchemeAsync(string name)
         {

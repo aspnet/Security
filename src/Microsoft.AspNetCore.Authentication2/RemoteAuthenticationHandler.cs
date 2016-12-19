@@ -4,14 +4,13 @@
 using System;
 using System.Security.Cryptography;
 using System.Threading.Tasks;
-using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 
 namespace Microsoft.AspNetCore.Authentication2
 {
-    public abstract class RemoteAuthenticationHandler<TOptions> : AuthenticationSchemeHandler<TOptions> where TOptions : RemoteAuthenticationOptions
+    public abstract class RemoteAuthenticationHandler<TOptions> : AuthenticationSchemeHandler<TOptions> where TOptions : RemoteAuthenticationOptions, new()
     {
         private const string CorrelationPrefix = ".AspNetCore.Correlation.";
         private const string CorrelationProperty = ".xsrf";
@@ -19,6 +18,27 @@ namespace Microsoft.AspNetCore.Authentication2
         private const string AuthSchemeKey = ".AuthScheme";
 
         private static readonly RandomNumberGenerator CryptoRandom = RandomNumberGenerator.Create();
+
+        public override Task<Exception> ValidateOptionsAsync(TOptions options)
+        {
+            if (!Options.CallbackPath.HasValue)
+            {
+                return Task.FromResult<Exception>(new ArgumentException("Resources.Exception_OptionMustBeProvided, nameof(Options.CallbackPath)"));
+            }
+
+            // TODO: figure out default
+            if (string.IsNullOrEmpty(Options.SignInScheme))
+            {
+                // TODO: shared sign in scheme
+                //Options.SignInScheme = sharedOptions.Value.SignInScheme;
+            }
+            if (string.IsNullOrEmpty(Options.SignInScheme))
+            {
+                return Task.FromResult<Exception>(new ArgumentException("Resources.Exception_OptionMustBeProvided, nameof(Options.CallbackPath)"));
+            }
+            return Task.FromResult<Exception>(null);
+        }
+
 
         // This should be moved
         public async override Task InitializeAsync(AuthenticationScheme scheme, HttpContext context)

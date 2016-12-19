@@ -14,7 +14,12 @@ namespace Cookie2Sample
     {
         public void ConfigureServices(IServiceCollection services)
         {
-            services.AddCookieAuthentication();
+            //services.AddCookieAuthentication(o => o.LoginPath = "/Account/Login");
+            services.AddCookieAuthentication("Cookies2", o =>
+            {
+                o.LoginPath = "/Account/Login2";
+            });
+            //services.AddAuthentication(o => o.DefaultAuthenticationScheme = CookieAuthenticationDefaults.AuthenticationScheme);
         }
 
         public void Configure(IApplicationBuilder app, ILoggerFactory loggerfactory)
@@ -34,11 +39,21 @@ namespace Cookie2Sample
 
                 if (context.Request.Path == "/login")
                 {
-                    var u = new ClaimsPrincipal(new ClaimsIdentity(new[] { new Claim(ClaimTypes.Name, "bob") }, CookieAuthenticationDefaults.AuthenticationScheme));
+                    var u = new ClaimsPrincipal(new ClaimsIdentity(new[] { new Claim(ClaimTypes.Name, "User1") }, CookieAuthenticationDefaults.AuthenticationScheme));
                     await context.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme, u);
 
                     context.Response.ContentType = "text/plain";
-                    await context.Response.WriteAsync("Logged in");
+                    await context.Response.WriteAsync("Cookie1 Logged in");
+                    return;
+                }
+
+                if (context.Request.Path == "/login2")
+                {
+                    var u = new ClaimsPrincipal(new ClaimsIdentity(new[] { new Claim(ClaimTypes.Name, "User2") }, CookieAuthenticationDefaults.AuthenticationScheme));
+                    await context.SignInAsync("Cookies2", u);
+
+                    context.Response.ContentType = "text/plain";
+                    await context.Response.WriteAsync("Cookie2 Logged in");
                     return;
                 }
 
@@ -69,7 +84,7 @@ namespace Cookie2Sample
                 if (user?.Identity?.IsAuthenticated ?? false)
                 {
                     context.Response.ContentType = "text/plain";
-                    await context.Response.WriteAsync("Hello old timer");
+                    await context.Response.WriteAsync("Hello "+user.Identity.Name);
                 }
                 else
                 {

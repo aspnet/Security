@@ -27,6 +27,11 @@ namespace Microsoft.AspNetCore.Authentication2.Cookies
         private string _sessionKey;
         private Task<AuthenticateResult> _readCookieTask;
 
+        public override Task<Exception> ValidateOptionsAsync(CookieAuthenticationOptions options)
+        {
+            return Task.FromResult<Exception>(null);
+        }
+
         public async override Task InitializeAsync(AuthenticationScheme scheme, HttpContext context)
         {
             await base.InitializeAsync(scheme, context);
