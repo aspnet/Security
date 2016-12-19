@@ -127,7 +127,7 @@ namespace Microsoft.AspNetCore.Authentication.OAuth
             }
             else
             {
-                return AuthenticateResult.Fail("Failed to retrieve user information from remote server.");
+                null;
             }
         }
 
