@@ -1,8 +1,10 @@
 // Copyright (c) .NET Foundation. All rights reserved.
 // Licensed under the Apache License, Version 2.0. See License.txt in the project root for license information.
 
+using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Http;
 
 namespace Microsoft.AspNetCore.Authentication2
 {
@@ -10,6 +12,8 @@ namespace Microsoft.AspNetCore.Authentication2
     {
         Task<AuthenticationScheme> GetSchemeAsync(string name);
         Task<AuthenticationScheme> GetDefaultAuthenticateSchemeAsync();
+
+        Task<Exception> ValidateSchemesAsync(HttpContext context);
 
         // Maybe can remove this
         //Task<AuthenticationScheme> GetDefaultChallengeSchemeAsync();

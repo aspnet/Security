@@ -9,7 +9,7 @@ namespace Microsoft.AspNetCore.Authentication2
     /// <summary>
     /// Contains the options used by the <see cref="AuthenticationSchemeHandler{T}"/>.
     /// </summary>
-    public class AuthenticationSchemeOptions
+    public abstract class AuthenticationSchemeOptions
     {
         /// <summary>
         /// The AuthenticationScheme in the options corresponds to the logical name for a particular authentication scheme. A different
@@ -39,6 +39,5 @@ namespace Microsoft.AspNetCore.Authentication2
         /// If set, will be used as the service type to get the Events instance instead of the property.
         /// </summary>
         public Type EventsType { get; set; }
-
     }
 }

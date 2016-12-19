@@ -50,12 +50,15 @@ namespace Microsoft.AspNetCore.Authentication2
 
         public virtual Task<Exception> ValidateAsync(AuthenticationScheme scheme)
         {
-            var options = scheme.Settings["Options"] as TOptions;
-            if (options == null)
-            {
-                return Task.FromResult<Exception>(new InvalidOperationException(@"No options found in Settings[""Options""]"));
-            }
-            return ValidateOptionsAsync(options);
+            return ValidateOptionsAsync(GetOptionsFromScheme(scheme));
+        }
+
+        protected virtual TOptions GetOptionsFromScheme(AuthenticationScheme scheme)
+        {
+            var options = new TOptions();
+            var configureOptions = scheme.Settings["ConfigureOptions"] as Action<TOptions>;
+            configureOptions?.Invoke(options);
+            return options;
         }
 
         public abstract Task<Exception> ValidateOptionsAsync(TOptions options);

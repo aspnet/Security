@@ -48,7 +48,7 @@ namespace SocialSample
             {
                 options.ConsumerKey = "BSdJJ0CrDuvEhpkchnukXZBUv";
                 options.ConsumerSecret = "xKUNuKhsRdHD03eLn67xhPAyE1wFFEndFo1X2UJaK2m1jdAxf4";
-                options.SignInScheme = CookieAuthenticationDefaults.AuthenticationScheme;
+                //options.SignInScheme = CookieAuthenticationDefaults.AuthenticationScheme;
                 options.RetrieveUserDetails = true;
                 options.SaveTokens = true;
                 options.Events = new TwitterEvents()

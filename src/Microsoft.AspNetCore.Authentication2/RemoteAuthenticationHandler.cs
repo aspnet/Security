@@ -21,20 +21,20 @@ namespace Microsoft.AspNetCore.Authentication2
 
         public override Task<Exception> ValidateOptionsAsync(TOptions options)
         {
-            if (!Options.CallbackPath.HasValue)
+            if (options.CallbackPath == null || !options.CallbackPath.HasValue)
             {
                 return Task.FromResult<Exception>(new ArgumentException("Resources.Exception_OptionMustBeProvided, nameof(Options.CallbackPath)"));
             }
 
             // TODO: figure out default
-            if (string.IsNullOrEmpty(Options.SignInScheme))
+            if (string.IsNullOrEmpty(options.SignInScheme))
             {
                 // TODO: shared sign in scheme
                 //Options.SignInScheme = sharedOptions.Value.SignInScheme;
             }
-            if (string.IsNullOrEmpty(Options.SignInScheme))
+            if (string.IsNullOrEmpty(options.SignInScheme))
             {
-                return Task.FromResult<Exception>(new ArgumentException("Resources.Exception_OptionMustBeProvided, nameof(Options.CallbackPath)"));
+                return Task.FromResult<Exception>(new ArgumentException("Resources.Exception_OptionMustBeProvided, nameof(Options.SignInScheme)"));
             }
             return Task.FromResult<Exception>(null);
         }
