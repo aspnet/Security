@@ -14,12 +14,12 @@ namespace Cookie2Sample
     {
         public void ConfigureServices(IServiceCollection services)
         {
-            //services.AddCookieAuthentication(o => o.LoginPath = "/Account/Login");
+            services.AddCookieAuthentication(o => o.LoginPath = "/Account/Login");
             services.AddCookieAuthentication("Cookies2", o =>
             {
                 o.LoginPath = "/Account/Login2";
             });
-            //services.AddAuthentication(o => o.DefaultAuthenticationScheme = CookieAuthenticationDefaults.AuthenticationScheme);
+            services.AddAuthentication(o => o.DefaultAuthenticationScheme = CookieAuthenticationDefaults.AuthenticationScheme);
         }
 
         public void Configure(IApplicationBuilder app, ILoggerFactory loggerfactory)
