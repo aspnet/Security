@@ -23,7 +23,7 @@ namespace Microsoft.AspNetCore.Authentication2
         {
             if (options.CallbackPath == null || !options.CallbackPath.HasValue)
             {
-                return Task.FromResult<Exception>(new ArgumentException("Resources.Exception_OptionMustBeProvided, nameof(Options.CallbackPath)"));
+                return Task.FromResult<Exception>(new ArgumentException(Resources.FormatException_OptionMustBeProvided(nameof(Options.CallbackPath))));
             }
 
             // TODO: figure out default
@@ -34,11 +34,10 @@ namespace Microsoft.AspNetCore.Authentication2
             }
             if (string.IsNullOrEmpty(options.SignInScheme))
             {
-                return Task.FromResult<Exception>(new ArgumentException("Resources.Exception_OptionMustBeProvided, nameof(Options.SignInScheme)"));
+                return Task.FromResult<Exception>(new ArgumentException(Resources.FormatException_OptionMustBeProvided(nameof(Options.SignInScheme))));
             }
             return Task.FromResult<Exception>(null);
         }
-
 
         // This should be moved
         public async override Task InitializeAsync(AuthenticationScheme scheme, HttpContext context)
@@ -104,7 +103,7 @@ namespace Microsoft.AspNetCore.Authentication2
 
             if (exception != null)
             {
-                //Logger.RemoteAuthenticationError(exception.Message);
+                Logger.RemoteAuthenticationError(exception.Message);
                 var errorContext = new FailureContext(Context, exception);
                 await Options.Events.RemoteFailure(errorContext);
 
@@ -164,36 +163,31 @@ namespace Microsoft.AspNetCore.Authentication2
         /// </summary>
         protected abstract Task<AuthenticateResult> HandleRemoteAuthenticateAsync();
 
-        protected override Task<AuthenticateResult> HandleAuthenticateAsync()
+        protected override async Task<AuthenticateResult> HandleAuthenticateAsync()
         {
-            // Most RemoteAuthenticationHandlers will have a PriorHandler, but it might not be set up during unit tests.
-            //if (PriorHandler != null)
-            //{
-            //    var authenticateContext = new AuthenticateContext(Options.SignInScheme);
-            //    await PriorHandler.AuthenticateAsync(authenticateContext);
-            //    if (authenticateContext.Accepted)
-            //    {
-            //        if (authenticateContext.Error != null)
-            //        {
-            //            return AuthenticateResult.Fail(authenticateContext.Error);
-            //        }
+            var ticket = await Context.AuthenticateAsync(Options.SignInScheme);
+            if (ticket != null)
+            {
+                // todo error
+                //if (authenticateContext.Error != null)
+                //{
+                //    return AuthenticateResult.Fail(authenticateContext.Error);
+                //}
 
-            //        // The SignInScheme may be shared with multiple providers, make sure this middleware issued the identity.
-            //        string authenticatedScheme;
-            //        if (authenticateContext.Principal != null && authenticateContext.Properties != null
-            //            && authenticateContext.Properties.TryGetValue(AuthSchemeKey, out authenticatedScheme)
-            //            && string.Equals(Scheme.Name, authenticatedScheme, StringComparison.Ordinal))
-            //        {
-            //            return AuthenticateResult.Success(new AuthenticationTicket2(authenticateContext.Principal,
-            //                authenticateContext.Properties, Scheme.Name));
-            //        }
+                // The SignInScheme may be shared with multiple providers, make sure this middleware issued the identity.
+                string authenticatedScheme;
+                if (ticket.Principal != null && ticket.Properties != null
+                    && ticket.Properties.Items.TryGetValue(AuthSchemeKey, out authenticatedScheme)
+                    && string.Equals(Scheme.Name, authenticatedScheme, StringComparison.Ordinal))
+                {
+                    return AuthenticateResult.Success(new AuthenticationTicket2(ticket.Principal,
+                        ticket.Properties, Scheme.Name));
+                }
 
-            //        return AuthenticateResult.Fail("Not authenticated");
-            //    }
+                return AuthenticateResult.Fail("Not authenticated");
+            }
 
-            //}
-
-            return Task.FromResult(AuthenticateResult.Fail("Remote authentication does not directly support authenticate"));
+            return AuthenticateResult.Fail("Remote authentication does not directly support authenticate");
         }
 
         protected override Task HandleSignOutAsync(SignOutContext context)
@@ -249,7 +243,7 @@ namespace Microsoft.AspNetCore.Authentication2
             string correlationId;
             if (!properties.Items.TryGetValue(CorrelationProperty, out correlationId))
             {
-                //Logger.CorrelationPropertyNotFound(CorrelationPrefix);
+                Logger.CorrelationPropertyNotFound(CorrelationPrefix);
                 return false;
             }
 
@@ -260,7 +254,7 @@ namespace Microsoft.AspNetCore.Authentication2
             var correlationCookie = Request.Cookies[cookieName];
             if (string.IsNullOrEmpty(correlationCookie))
             {
-                //Logger.CorrelationCookieNotFound(cookieName);
+                Logger.CorrelationCookieNotFound(cookieName);
                 return false;
             }
 

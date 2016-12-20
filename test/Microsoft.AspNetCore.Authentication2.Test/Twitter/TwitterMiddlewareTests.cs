@@ -181,13 +181,12 @@ namespace Microsoft.AspNetCore.Authentication2.Twitter
                 .ConfigureServices(services =>
                 {
                     services.AddCookieAuthentication("External", _ => { });
-                    services.AddTwitterAuthentication(options);
-
-                    //services.AddAuthentication();
-                    //services.Configure<SharedAuthenticationOptions>(authOptions =>
-                    //{
-                    //    authOptions.SignInScheme = "External";
-                    //});
+                    Action<TwitterOptions> wrapOptions = o =>
+                    {
+                        o.SignInScheme = "External";
+                        options(o);
+                    };
+                    services.AddTwitterAuthentication(wrapOptions);
                 });
             return new TestServer(builder);
         }
