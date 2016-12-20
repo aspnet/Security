@@ -18,7 +18,7 @@ namespace Microsoft.AspNetCore.Authentication2
 
         public SchemeHandlerCache Handlers { get; }
 
-        public virtual async Task<AuthenticationTicket2> AuthenticateAsync(HttpContext httpContext, string authenticationScheme)
+        public virtual async Task<AuthenticateResult> AuthenticateAsync(HttpContext httpContext, string authenticationScheme)
         {
             if (authenticationScheme == null)
             {
@@ -32,10 +32,7 @@ namespace Microsoft.AspNetCore.Authentication2
             }
 
             var context = new AuthenticateContext(httpContext, authenticationScheme);
-            await handler.AuthenticateAsync(context);
-            return new AuthenticationTicket2(context.Principal,
-                context.Properties,
-                authenticationScheme);
+            return await handler.AuthenticateAsync(context);
         }
 
         public virtual async Task ChallengeAsync(HttpContext httpContext, string authenticationScheme, AuthenticationProperties2 properties, ChallengeBehavior behavior)

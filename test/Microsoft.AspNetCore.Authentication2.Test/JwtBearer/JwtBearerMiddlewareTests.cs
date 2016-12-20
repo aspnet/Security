@@ -724,11 +724,11 @@ namespace Microsoft.AspNetCore.Authentication2.JwtBearer
                     {
                         if (context.Request.Path == new PathString("/checkforerrors"))
                         {
-                            var ticket = await context.AuthenticateAsync(JwtBearerDefaults.AuthenticationScheme); // this used to be "Automatic"
-                            //if (authContext.Error != null)
-                            //{
-                            //    throw new Exception("Failed to authenticate", authContext.Error);
-                            //}
+                            var result = await context.AuthenticateAsync(JwtBearerDefaults.AuthenticationScheme); // this used to be "Automatic"
+                            if (result.Failure != null)
+                            {
+                                throw new Exception("Failed to authenticate", result.Failure);
+                            }
                             return;
                         }
                         else if (context.Request.Path == new PathString("/oauth"))
@@ -738,7 +738,8 @@ namespace Microsoft.AspNetCore.Authentication2.JwtBearer
                                 !context.User.Identity.IsAuthenticated)
                             {
                                 context.Response.StatusCode = 401;
-
+                                // REVIEW: no more automatic challenge
+                                await context.ChallengeAsync(JwtBearerDefaults.AuthenticationScheme);
                                 return;
                             }
 
@@ -746,7 +747,6 @@ namespace Microsoft.AspNetCore.Authentication2.JwtBearer
                             if (identifier == null)
                             {
                                 context.Response.StatusCode = 500;
-
                                 return;
                             }
 

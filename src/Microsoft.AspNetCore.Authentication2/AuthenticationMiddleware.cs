@@ -48,8 +48,11 @@ namespace Microsoft.AspNetCore.Authentication2
             var defaultAuthenticate = await Schemes.GetDefaultAuthenticateSchemeAsync();
             if (defaultAuthenticate != null)
             {
-                var ticket = await context.AuthenticateAsync(defaultAuthenticate.Name);
-                context.User = ticket.Principal;
+                var result = await context.AuthenticateAsync(defaultAuthenticate.Name);
+                if (result?.Ticket?.Principal != null)
+                {
+                    context.User = result.Ticket.Principal;
+                }
             }
 
             // Give each scheme a chance to handle the request

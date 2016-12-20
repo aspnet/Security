@@ -126,8 +126,8 @@ namespace Microsoft.AspNetCore.Authentication2
                 throw new ArgumentNullException(nameof(tokenName));
             }
 
-            var ticket = await manager.AuthenticateAsync(context, signInScheme);
-            return ticket.Properties.GetTokenValue(tokenName);
+            var result = await manager.AuthenticateAsync(context, signInScheme);
+            return result?.Ticket?.Properties.GetTokenValue(tokenName);
         }
     }
 }

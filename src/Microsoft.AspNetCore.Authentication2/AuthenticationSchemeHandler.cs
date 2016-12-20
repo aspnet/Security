@@ -85,29 +85,23 @@ namespace Microsoft.AspNetCore.Authentication2
             return Request.Scheme + "://" + Request.Host + OriginalPathBase + targetPath;
         }
 
-        public async Task AuthenticateAsync(AuthenticateContext context)
+        public async Task<AuthenticateResult> AuthenticateAsync(AuthenticateContext context)
         {
             // Calling Authenticate more than once should always return the original value.
             var result = await HandleAuthenticateOnceAsync();
-
-            if (result?.Failure != null)
-            {
-                context.Failed(result.Failure);
-            }
-            else
+            if (result?.Failure == null)
             {
                 var ticket = result?.Ticket;
                 if (ticket?.Principal != null)
                 {
-                    context.Authenticated(ticket.Principal, ticket.Properties);
-                    //Logger.AuthenticationSchemeAuthenticated(Options.AuthenticationScheme);
+                    Logger.AuthenticationSchemeAuthenticated(Options.AuthenticationScheme);
                 }
                 else
                 {
-                    context.NotAuthenticated();
-                    //Logger.AuthenticationSchemeNotAuthenticated(Options.AuthenticationScheme);
+                    Logger.AuthenticationSchemeNotAuthenticated(Options.AuthenticationScheme);
                 }
             }
+            return result;
         }
 
         /// <summary>
@@ -145,9 +139,8 @@ namespace Microsoft.AspNetCore.Authentication2
 
         public async Task SignInAsync(SignInContext context)
         {
-            //SignInAccepted = true;
             await HandleSignInAsync(context);
-                //Logger.AuthenticationSchemeSignedIn(Options.AuthenticationScheme);
+            Logger.AuthenticationSchemeSignedIn(Options.AuthenticationScheme);
         }
 
         protected virtual Task HandleSignInAsync(SignInContext context)
@@ -209,11 +202,11 @@ namespace Microsoft.AspNetCore.Authentication2
                     goto case ChallengeBehavior.Unauthorized;
                 case ChallengeBehavior.Unauthorized:
                     await HandleUnauthorizedAsync(context);
-                    //Logger.AuthenticationSchemeChallenged(Options.AuthenticationScheme);
+                    Logger.AuthenticationSchemeChallenged(Options.AuthenticationScheme);
                     break;
                 case ChallengeBehavior.Forbidden:
                     await HandleForbiddenAsync(context);
-                    //Logger.AuthenticationSchemeForbidden(Options.AuthenticationScheme);
+                    Logger.AuthenticationSchemeForbidden(Options.AuthenticationScheme);
                     break;
             }
         }
@@ -228,6 +221,7 @@ namespace Microsoft.AspNetCore.Authentication2
         /// pipeline.</returns>
         public virtual Task<AuthenticationRequestResult> HandleRequestAsync()
         {
+            // TODO: review
             //if (InitializeResult?.Handled == true)
             //{
             //    return Task.FromResult(true);

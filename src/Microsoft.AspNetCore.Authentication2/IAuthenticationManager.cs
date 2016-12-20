@@ -9,7 +9,7 @@ namespace Microsoft.AspNetCore.Authentication2
 {
     public interface IAuthenticationManager2
     {
-        Task<AuthenticationTicket2> AuthenticateAsync(HttpContext context, string scheme);
+        Task<AuthenticateResult> AuthenticateAsync(HttpContext context, string scheme);
         Task ChallengeAsync(HttpContext context, string scheme, AuthenticationProperties2 properties, ChallengeBehavior behavior);
         Task ForbidAsync(HttpContext context, string scheme, AuthenticationProperties2 properties);
 

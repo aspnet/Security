@@ -20,7 +20,7 @@ namespace Microsoft.AspNetCore.Authentication2
         // Gives the handler access to the configuration data
         Task InitializeAsync(AuthenticationScheme scheme, HttpContext context);
 
-        Task AuthenticateAsync(AuthenticateContext context);
+        Task<AuthenticateResult> AuthenticateAsync(AuthenticateContext context);
         Task ChallengeAsync(ChallengeContext context);
         Task SignInAsync(SignInContext context);
         Task SignOutAsync(SignOutContext context);

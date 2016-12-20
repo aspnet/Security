@@ -10,7 +10,7 @@ namespace Microsoft.AspNetCore.Authentication2
 {
     public static class AuthenticationHttpContextExtensions
     {
-        public static Task<AuthenticationTicket2> AuthenticateAsync(this HttpContext context, string scheme) =>
+        public static Task<AuthenticateResult> AuthenticateAsync(this HttpContext context, string scheme) =>
             context.RequestServices.GetRequiredService<IAuthenticationManager2>().AuthenticateAsync(context, scheme);
 
         public static Task ChallengeAsync(this HttpContext context, string scheme) =>

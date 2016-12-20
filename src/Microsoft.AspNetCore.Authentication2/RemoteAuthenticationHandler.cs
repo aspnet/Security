@@ -165,18 +165,19 @@ namespace Microsoft.AspNetCore.Authentication2
 
         protected override async Task<AuthenticateResult> HandleAuthenticateAsync()
         {
-            var ticket = await Context.AuthenticateAsync(Options.SignInScheme);
-            if (ticket != null)
+            var result = await Context.AuthenticateAsync(Options.SignInScheme);
+            if (result != null)
             {
                 // todo error
-                //if (authenticateContext.Error != null)
-                //{
-                //    return AuthenticateResult.Fail(authenticateContext.Error);
-                //}
+                if (result.Failure != null)
+                {
+                    return AuthenticateResult.Fail(result.Failure);
+                }
 
                 // The SignInScheme may be shared with multiple providers, make sure this middleware issued the identity.
                 string authenticatedScheme;
-                if (ticket.Principal != null && ticket.Properties != null
+                var ticket = result.Ticket;
+                if (ticket != null && ticket.Principal != null && ticket.Properties != null
                     && ticket.Properties.Items.TryGetValue(AuthSchemeKey, out authenticatedScheme)
                     && string.Equals(Scheme.Name, authenticatedScheme, StringComparison.Ordinal))
                 {

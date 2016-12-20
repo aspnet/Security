@@ -1031,8 +1031,8 @@ namespace Microsoft.AspNetCore.Authentication2.Google
                         }
                         else if (req.Path == new PathString("/tokens"))
                         {
-                            var ticket = await context.AuthenticateAsync(TestExtensions.CookieAuthenticationScheme);
-                            var tokens = ticket.Properties.GetTokens();
+                            var result = await context.AuthenticateAsync(TestExtensions.CookieAuthenticationScheme);
+                            var tokens = result.Ticket.Properties.GetTokens();
                             res.Describe(tokens);
                         }
                         else if (req.Path == new PathString("/me"))
@@ -1041,18 +1041,18 @@ namespace Microsoft.AspNetCore.Authentication2.Google
                         }
                         else if (req.Path == new PathString("/authenticate"))
                         {
-                            var user = await context.AuthenticateAsync(Http.Authentication.AuthenticationManager.AutomaticScheme);
-                            res.Describe(user.Principal);
+                            var result = await context.AuthenticateAsync(Http.Authentication.AuthenticationManager.AutomaticScheme);
+                            res.Describe(result.Ticket.Principal);
                         }
                         else if (req.Path == new PathString("/authenticateGoogle"))
                         {
-                            var user = await context.AuthenticateAsync("Google");
-                            res.Describe(user.Principal);
+                            var result = await context.AuthenticateAsync("Google");
+                            res.Describe(result.Ticket.Principal);
                         }
                         else if (req.Path == new PathString("/authenticateFacebook"))
                         {
-                            var user = await context.AuthenticateAsync("Facebook");
-                            res.Describe(user.Principal);
+                            var result = await context.AuthenticateAsync("Facebook");
+                            res.Describe(result.Ticket.Principal);
                         }
                         else if (req.Path == new PathString("/unauthorized"))
                         {
