@@ -74,6 +74,12 @@ namespace Microsoft.AspNetCore.Authentication2
             OriginalPathBase = Request.PathBase;
             OriginalPath = Request.Path;
 
+            if (string.IsNullOrEmpty(Options.ClaimsIssuer))
+            {
+                // Default to something reasonable
+                Options.ClaimsIssuer = Scheme.Name;
+            }
+
             Logger = context.RequestServices.GetRequiredService<ILoggerFactory>().CreateLogger(this.GetType().FullName);
             UrlEncoder = context.RequestServices.GetService<UrlEncoder>();
 
