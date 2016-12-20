@@ -15,6 +15,7 @@ using Microsoft.AspNetCore.DataProtection;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.TestHost;
+using Microsoft.AspNetCore.Testing.xunit;
 using Microsoft.Extensions.DependencyInjection;
 using Newtonsoft.Json;
 using Xunit;
@@ -83,7 +84,7 @@ namespace Microsoft.AspNetCore.Authentication2.Google
             Assert.Equal(HttpStatusCode.OK, transaction.Response.StatusCode);
         }
 
-        [Fact]
+        [ConditionalFact(Skip = "challenge 401 is gone")]
         public async Task Challenge401WillTriggerRedirection()
         {
             var server = CreateServer(o =>
@@ -114,7 +115,7 @@ namespace Microsoft.AspNetCore.Authentication2.Google
             Assert.Contains(transaction.SetCookie, cookie => cookie.StartsWith(".AspNetCore.Correlation.Google."));
         }
 
-        [Fact]
+        [ConditionalFact(Skip = "challenge 401 is gone")]
         public async Task Challenge401WillSetCorrelationCookie()
         {
             var server = CreateServer(o =>
@@ -141,7 +142,7 @@ namespace Microsoft.AspNetCore.Authentication2.Google
             Assert.Contains("&scope=" + UrlEncoder.Default.Encode("openid profile email"), query);
         }
 
-        [Fact]
+        [ConditionalFact(Skip = "challenge 401 is gone")]
         public async Task Challenge401WillSetDefaultScope()
         {
             var server = CreateServer(o =>
@@ -232,9 +233,8 @@ namespace Microsoft.AspNetCore.Authentication2.Google
                 var res = context.Response;
                 if (req.Path == new PathString("/auth"))
                 {
-                    var ticket = await context.AuthenticateAsync("Google");
-                    Assert.False(true);
-                    //Assert.NotNull(auth.Error);
+                    var result = await context.AuthenticateAsync("Google");
+                    Assert.NotNull(result.Failure);
                 }
             });
             var transaction = await server.SendAsync("https://example.com/auth");
@@ -845,7 +845,7 @@ namespace Microsoft.AspNetCore.Authentication2.Google
             //Assert.Equal("yup", transaction.FindClaimValue("xform"));
         }
 
-        [Fact]
+        [ConditionalFact(Skip = "Revisit, cookies no longer automatically redirects the 403")]
         public async Task ChallengeGoogleWhenAlreadySignedInReturnsForbidden()
         {
             var stateFormat = new PropertiesDataFormat(new EphemeralDataProtectionProvider().CreateProtector("GoogleTest"));
@@ -881,7 +881,7 @@ namespace Microsoft.AspNetCore.Authentication2.Google
             Assert.StartsWith("https://example.com/Account/AccessDenied?", transaction.Response.Headers.Location.OriginalString);
         }
 
-        [Fact]
+        [ConditionalFact(Skip = "Revisit, can't auth handlers that aren't registered")]
         public async Task AuthenticateFacebookWhenAlreadySignedWithGoogleReturnsNull()
         {
             var stateFormat = new PropertiesDataFormat(new EphemeralDataProtectionProvider().CreateProtector("GoogleTest"));
@@ -917,7 +917,7 @@ namespace Microsoft.AspNetCore.Authentication2.Google
             Assert.Equal(null, transaction.FindClaimValue(ClaimTypes.Name));
         }
 
-        [Fact]
+        [ConditionalFact(Skip = "Revisit, can't auth handlers that aren't registered")]
         public async Task ChallengeFacebookWhenAlreadySignedWithGoogleSucceeds()
         {
             var stateFormat = new PropertiesDataFormat(new EphemeralDataProtectionProvider().CreateProtector("GoogleTest"));
@@ -1041,7 +1041,7 @@ namespace Microsoft.AspNetCore.Authentication2.Google
                         }
                         else if (req.Path == new PathString("/authenticate"))
                         {
-                            var result = await context.AuthenticateAsync(Http.Authentication.AuthenticationManager.AutomaticScheme);
+                            var result = await context.AuthenticateAsync(TestExtensions.CookieAuthenticationScheme);
                             res.Describe(result.Ticket.Principal);
                         }
                         else if (req.Path == new PathString("/authenticateGoogle"))
