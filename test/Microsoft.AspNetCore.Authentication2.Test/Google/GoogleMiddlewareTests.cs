@@ -1094,7 +1094,12 @@ namespace Microsoft.AspNetCore.Authentication2.Google
                 .ConfigureServices(services =>
                 {
                     services.AddCookieAuthentication(TestExtensions.CookieAuthenticationScheme, _ => { });
-                    services.AddGoogleAuthentication(configureOptions);
+                    Action<GoogleOptions> configureWrap = o =>
+                    {
+                        o.SignInScheme = TestExtensions.CookieAuthenticationScheme;
+                        configureOptions(o);
+                    };
+                    services.AddGoogleAuthentication(configureWrap);
                     //services.AddAuthentication(authOptions => authOptions. = TestExtensions.CookieAuthenticationScheme);
                 });
             return new TestServer(builder);
