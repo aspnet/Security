@@ -47,7 +47,11 @@ namespace Microsoft.AspNetCore.Authentication2
 
         public Task<AuthenticationScheme> GetSchemeAsync(string name)
         {
-            return Task.FromResult(_options.SchemeMap[name]);
+            if (_options.SchemeMap.ContainsKey(name))
+            {
+                return Task.FromResult(_options.SchemeMap[name]);
+            }
+            return Task.FromResult<AuthenticationScheme>(null);
         }
 
         public Task<IEnumerable<AuthenticationScheme>> GetPriorityOrderedSchemes()
