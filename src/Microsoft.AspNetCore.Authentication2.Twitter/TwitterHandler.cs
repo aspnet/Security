@@ -8,6 +8,7 @@ using System.Net.Http;
 using System.Security.Claims;
 using System.Security.Cryptography;
 using System.Text;
+using System.Text.Encodings.Web;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.DataProtection;
 using Microsoft.AspNetCore.Http;
@@ -29,6 +30,14 @@ namespace Microsoft.AspNetCore.Authentication2.Twitter
 
         private HttpClient _httpClient;
 
+        protected IDataProtectionProvider DataProtection { get; }
+
+        public TwitterHandler(ILoggerFactory logger, UrlEncoder encoder, IDataProtectionProvider dataProtection)
+            : base(logger, encoder)
+        {
+            DataProtection = dataProtection;
+        }
+
         public async override Task InitializeAsync(AuthenticationScheme scheme, HttpContext context)
         {
             await base.InitializeAsync(scheme, context);
@@ -39,21 +48,12 @@ namespace Microsoft.AspNetCore.Authentication2.Twitter
             }
             if (Options.StateDataFormat == null)
             {
-                var provider = Options.DataProtectionProvider ?? context.RequestServices.GetRequiredService<IDataProtectionProvider>();
+                var provider = Options.DataProtectionProvider ?? DataProtection;
                 var dataProtector = provider.CreateProtector(
                     GetType().FullName, Options.AuthenticationScheme, "v1");
                 Options.StateDataFormat = new SecureDataFormat<RequestToken>(
                     new RequestTokenSerializer(),
                     dataProtector);
-            }
-
-            if (string.IsNullOrEmpty(Options.SignInScheme))
-            {
-                //Options.SignInScheme = sharedOptions.Value.SignInScheme;
-            }
-            if (string.IsNullOrEmpty(Options.SignInScheme))
-            {
-                throw new ArgumentException(string.Format(CultureInfo.CurrentCulture, Resources.Exception_OptionMustBeProvided, "SignInScheme"));
             }
 
             _httpClient = new HttpClient(Options.BackchannelHttpHandler ?? new HttpClientHandler());

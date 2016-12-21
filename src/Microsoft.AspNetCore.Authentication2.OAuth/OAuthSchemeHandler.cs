@@ -15,12 +15,22 @@ using Microsoft.AspNetCore.WebUtilities;
 using Microsoft.AspNetCore.DataProtection;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
+using System.Text.Encodings.Web;
 
 namespace Microsoft.AspNetCore.Authentication2.OAuth
 {
     public class OAuthHandler<TOptions> : RemoteAuthenticationHandler<TOptions> where TOptions : OAuthOptions, new()
     {
         protected HttpClient Backchannel { get; private set; }
+
+        protected IDataProtectionProvider DataProtection { get; }
+
+        public OAuthHandler(ILoggerFactory logger, UrlEncoder encoder, IDataProtectionProvider dataProtection)
+            : base(logger, encoder)
+        {
+            DataProtection = dataProtection;
+        }
 
         public async override Task InitializeAsync(AuthenticationScheme scheme, HttpContext context)
         {
@@ -38,7 +48,7 @@ namespace Microsoft.AspNetCore.Authentication2.OAuth
 
             if (Options.StateDataFormat == null)
             {
-                var provider = Options.DataProtectionProvider ?? context.RequestServices.GetRequiredService<IDataProtectionProvider>();
+                var provider = Options.DataProtectionProvider ?? DataProtection;
                 var dataProtector = provider.CreateProtector(
                     GetType().FullName, Options.AuthenticationScheme, "v1");
                 Options.StateDataFormat = new PropertiesDataFormat(dataProtector);
@@ -48,17 +58,6 @@ namespace Microsoft.AspNetCore.Authentication2.OAuth
             Backchannel.DefaultRequestHeaders.UserAgent.ParseAdd("Microsoft ASP.NET Core OAuth middleware");
             Backchannel.Timeout = Options.BackchannelTimeout;
             Backchannel.MaxResponseContentBufferSize = 1024 * 1024 * 10; // 10 MB
-
-            if (string.IsNullOrEmpty(Options.SignInScheme))
-            {
-                // TODO: shared sign in scheme
-                //Options.SignInScheme = sharedOptions.Value.SignInScheme;
-            }
-            if (string.IsNullOrEmpty(Options.SignInScheme))
-            {
-                throw new ArgumentException(string.Format(CultureInfo.CurrentCulture, Resources.Exception_OptionMustBeProvided, nameof(Options.SignInScheme)));
-            }
-
         }
 
 

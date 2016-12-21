@@ -7,6 +7,7 @@ using System.Linq;
 using System.Net.Http;
 using System.Security.Claims;
 using System.Text;
+using System.Text.Encodings.Web;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
@@ -21,6 +22,10 @@ namespace Microsoft.AspNetCore.Authentication2.JwtBearer
     internal class JwtBearerHandler : AuthenticationSchemeHandler<JwtBearerOptions>
     {
         private OpenIdConnectConfiguration _configuration;
+
+        public JwtBearerHandler(ILoggerFactory logger, UrlEncoder encoder)
+            : base(logger, encoder)
+        { }
 
         public override Task<Exception> ValidateOptionsAsync(JwtBearerOptions options)
         {

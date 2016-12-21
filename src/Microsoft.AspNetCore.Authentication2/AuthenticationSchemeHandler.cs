@@ -48,6 +48,13 @@ namespace Microsoft.AspNetCore.Authentication2
         protected bool SignInAccepted { get; set; }
         protected bool SignOutAccepted { get; set; }
 
+        protected AuthenticationSchemeHandler(ILoggerFactory logger, UrlEncoder encoder)
+        {
+            Logger = logger.CreateLogger(this.GetType().FullName);
+            UrlEncoder = encoder;
+        }
+
+
         public virtual Task<Exception> ValidateAsync(AuthenticationScheme scheme)
         {
             return ValidateOptionsAsync(GetOptionsFromScheme(scheme));
@@ -79,9 +86,6 @@ namespace Microsoft.AspNetCore.Authentication2
                 // Default to something reasonable
                 Options.ClaimsIssuer = Scheme.Name;
             }
-
-            Logger = context.RequestServices.GetRequiredService<ILoggerFactory>().CreateLogger(this.GetType().FullName);
-            UrlEncoder = context.RequestServices.GetService<UrlEncoder>();
 
             return Task.FromResult(0);
         }

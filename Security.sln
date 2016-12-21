@@ -72,6 +72,8 @@ Project("{8BB2217D-0F2D-49D1-97BC-3654ED321F3B}") = "Microsoft.AspNetCore.Authen
 EndProject
 Project("{8BB2217D-0F2D-49D1-97BC-3654ED321F3B}") = "Microsoft.AspNetCore.Authentication2.Test", "test\Microsoft.AspNetCore.Authentication2.Test\Microsoft.AspNetCore.Authentication2.Test.xproj", "{1103FA98-E21F-4520-9A50-B62073A8EBE7}"
 EndProject
+Project("{8BB2217D-0F2D-49D1-97BC-3654ED321F3B}") = "Microsoft.AspNetCore.Authentication2.OpenIdConnect", "src\Microsoft.AspNetCore.Authentication2.OpenIdConnect\Microsoft.AspNetCore.Authentication2.OpenIdConnect.xproj", "{FAE352FF-8728-4FD4-8588-13EF2E7763BC}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -460,6 +462,18 @@ Global
 		{1103FA98-E21F-4520-9A50-B62073A8EBE7}.Release|Mixed Platforms.Build.0 = Release|Any CPU
 		{1103FA98-E21F-4520-9A50-B62073A8EBE7}.Release|x86.ActiveCfg = Release|Any CPU
 		{1103FA98-E21F-4520-9A50-B62073A8EBE7}.Release|x86.Build.0 = Release|Any CPU
+		{FAE352FF-8728-4FD4-8588-13EF2E7763BC}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{FAE352FF-8728-4FD4-8588-13EF2E7763BC}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{FAE352FF-8728-4FD4-8588-13EF2E7763BC}.Debug|Mixed Platforms.ActiveCfg = Debug|Any CPU
+		{FAE352FF-8728-4FD4-8588-13EF2E7763BC}.Debug|Mixed Platforms.Build.0 = Debug|Any CPU
+		{FAE352FF-8728-4FD4-8588-13EF2E7763BC}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{FAE352FF-8728-4FD4-8588-13EF2E7763BC}.Debug|x86.Build.0 = Debug|Any CPU
+		{FAE352FF-8728-4FD4-8588-13EF2E7763BC}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{FAE352FF-8728-4FD4-8588-13EF2E7763BC}.Release|Any CPU.Build.0 = Release|Any CPU
+		{FAE352FF-8728-4FD4-8588-13EF2E7763BC}.Release|Mixed Platforms.ActiveCfg = Release|Any CPU
+		{FAE352FF-8728-4FD4-8588-13EF2E7763BC}.Release|Mixed Platforms.Build.0 = Release|Any CPU
+		{FAE352FF-8728-4FD4-8588-13EF2E7763BC}.Release|x86.ActiveCfg = Release|Any CPU
+		{FAE352FF-8728-4FD4-8588-13EF2E7763BC}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -497,5 +511,6 @@ Global
 		{4094C501-7C83-43F4-BD40-27E3C736AE67} = {4D2B6A51-2F9F-44F5-8131-EA5CAC053652}
 		{91443835-5965-465E-99B8-F44E50B2B161} = {4D2B6A51-2F9F-44F5-8131-EA5CAC053652}
 		{1103FA98-E21F-4520-9A50-B62073A8EBE7} = {7BF11F3A-60B6-4796-B504-579C67FFBA34}
+		{FAE352FF-8728-4FD4-8588-13EF2E7763BC} = {4D2B6A51-2F9F-44F5-8131-EA5CAC053652}
 	EndGlobalSection
 EndGlobal

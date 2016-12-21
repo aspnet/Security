@@ -3,6 +3,7 @@
 
 using System;
 using System.Security.Cryptography;
+using System.Text.Encodings.Web;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.DependencyInjection;
@@ -18,6 +19,10 @@ namespace Microsoft.AspNetCore.Authentication2
         private const string AuthSchemeKey = ".AuthScheme";
 
         private static readonly RandomNumberGenerator CryptoRandom = RandomNumberGenerator.Create();
+
+        protected RemoteAuthenticationHandler(ILoggerFactory logger, UrlEncoder encoder)
+            : base(logger, encoder)
+        { }
 
         public override Task<Exception> ValidateOptionsAsync(TOptions options)
         {
@@ -135,12 +140,12 @@ namespace Microsoft.AspNetCore.Authentication2
 
             if (context.HandledResponse)
             {
-                //Logger.SigninHandled();
+                Logger.SigninHandled();
                 return AuthenticationRequestResult.Handle;
             }
             else if (context.Skipped)
             {
-                //Logger.SigninSkipped();
+                Logger.SigninSkipped();
                 return AuthenticationRequestResult.Skip;
             }
 

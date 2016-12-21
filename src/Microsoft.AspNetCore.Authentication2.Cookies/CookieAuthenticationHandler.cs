@@ -5,11 +5,13 @@
 using System;
 using System.Linq;
 using System.Security.Claims;
+using System.Text.Encodings.Web;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.DataProtection;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Http.Features;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
 using Microsoft.Net.Http.Headers;
 
 namespace Microsoft.AspNetCore.Authentication2.Cookies
@@ -26,6 +28,10 @@ namespace Microsoft.AspNetCore.Authentication2.Cookies
         private DateTimeOffset? _refreshExpiresUtc;
         private string _sessionKey;
         private Task<AuthenticateResult> _readCookieTask;
+
+        public CookieAuthenticationHandler(ILoggerFactory logger, UrlEncoder encoder)
+            : base(logger, encoder)
+        { }
 
         public override Task<Exception> ValidateOptionsAsync(CookieAuthenticationOptions options)
         {

@@ -38,5 +38,8 @@ namespace Microsoft.AspNetCore.Authentication2
 
         public static Task SignOutAsync(this HttpContext context, string scheme, AuthenticationProperties2 properties) =>
             context.RequestServices.GetRequiredService<IAuthenticationManager2>().SignOutAsync(context, scheme, properties);
+
+        public static Task<string> GetTokenAsync(this HttpContext context, string signInScheme, string tokenName) =>
+            context.RequestServices.GetRequiredService<IAuthenticationManager2>().GetTokenAsync(context, signInScheme, tokenName);
     }
 }
