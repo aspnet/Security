@@ -44,7 +44,7 @@ namespace Microsoft.AspNetCore.Authentication2.Facebook
 
             var payload = JObject.Parse(await response.Content.ReadAsStringAsync());
 
-            var ticket = new AuthenticationTicket(new ClaimsPrincipal(identity), properties, Options.AuthenticationScheme);
+            var ticket = new AuthenticationTicket2(new ClaimsPrincipal(identity), properties, Options.AuthenticationScheme);
             var context = new OAuthCreatingTicketContext(ticket, Context, Options, Backchannel, tokens, payload);
 
             var identifier = FacebookHelper.GetId(payload);
