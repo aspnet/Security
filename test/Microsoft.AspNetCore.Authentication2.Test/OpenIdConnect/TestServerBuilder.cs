@@ -85,8 +85,7 @@ namespace Microsoft.AspNetCore.Authentication2.Test.OpenIdConnect
                         }
                         else if (req.Path == new PathString(Signin))
                         {
-                            // REVIEW: this used to just be res.SignIn()
-                            await context.Authentication.SignInAsync(OpenIdConnectDefaults.AuthenticationScheme, new ClaimsPrincipal());
+                            await context.SignInAsync(OpenIdConnectDefaults.AuthenticationScheme, new ClaimsPrincipal());
                         }
                         else if (req.Path == new PathString(Signout))
                         {
@@ -118,6 +117,7 @@ namespace Microsoft.AspNetCore.Authentication2.Test.OpenIdConnect
                         options?.Invoke(o);
                     };
                     services.AddOpenIdConnectAuthentication(wrap);
+                    services.AddAuthentication(o => o.DefaultAuthenticationScheme = CookieAuthenticationDefaults.AuthenticationScheme);
                     //services.Configure<SharedAuthenticationOptions>(authOptions => authOptions.SignInScheme = CookieAuthenticationDefaults.AuthenticationScheme);
                 });
 

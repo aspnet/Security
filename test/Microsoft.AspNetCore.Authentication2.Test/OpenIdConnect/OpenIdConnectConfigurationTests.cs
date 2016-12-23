@@ -2,6 +2,7 @@
 // Licensed under the Apache License, Version 2.0. See License.txt in the project root for license information.
 
 using System;
+using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authentication2.OpenIdConnect;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
@@ -28,9 +29,10 @@ namespace Microsoft.AspNetCore.Authentication2.Test.OpenIdConnect
             //Assert.Equal($"{TestServerBuilder.DefaultAuthority}/.well-known/openid-configuration", options.MetadataAddress);
         }
 
-        public void ThrowsWhenSignInSchemeIsMissing()
+        [Fact]
+        public Task ThrowsWhenSignInSchemeIsMissing()
         {
-            TestConfigurationException<ArgumentException>(
+            return TestConfigurationException<ArgumentException>(
                  o =>
                  {
                      o.Authority = TestServerBuilder.DefaultAuthority;
@@ -40,9 +42,9 @@ namespace Microsoft.AspNetCore.Authentication2.Test.OpenIdConnect
         }
 
         [Fact]
-        public void ThrowsWhenClientIdIsMissing()
+        public Task ThrowsWhenClientIdIsMissing()
         {
-            TestConfigurationException<ArgumentException>(
+            return TestConfigurationException<ArgumentException>(
                 o =>
                 {
                     o.SignInScheme = "TestScheme";
@@ -52,9 +54,9 @@ namespace Microsoft.AspNetCore.Authentication2.Test.OpenIdConnect
         }
 
         [Fact]
-        public void ThrowsWhenAuthorityIsMissing()
+        public Task ThrowsWhenAuthorityIsMissing()
         {
-            TestConfigurationException<InvalidOperationException>(
+            return TestConfigurationException<InvalidOperationException>(
                 o =>
                 {
                     o.SignInScheme = "TestScheme";
@@ -65,9 +67,9 @@ namespace Microsoft.AspNetCore.Authentication2.Test.OpenIdConnect
         }
 
         [Fact]
-        public void ThrowsWhenAuthorityIsNotHttps()
+        public Task ThrowsWhenAuthorityIsNotHttps()
         {
-            TestConfigurationException<InvalidOperationException>(
+            return TestConfigurationException<InvalidOperationException>(
                 o =>
                 {
                     o.SignInScheme = "TestScheme";
@@ -79,9 +81,9 @@ namespace Microsoft.AspNetCore.Authentication2.Test.OpenIdConnect
         }
 
         [Fact]
-        public void ThrowsWhenMetadataAddressIsNotHttps()
+        public Task ThrowsWhenMetadataAddressIsNotHttps()
         {
-            TestConfigurationException<InvalidOperationException>(
+            return TestConfigurationException<InvalidOperationException>(
                 o =>
                 {
                     o.SignInScheme = "TestScheme";
@@ -95,26 +97,22 @@ namespace Microsoft.AspNetCore.Authentication2.Test.OpenIdConnect
         private TestServer BuildTestServer(Action<OpenIdConnectOptions> options)
         {
             var builder = new WebHostBuilder()
-                .ConfigureServices(services => services.AddOpenIdConnectAuthentication(options))
+                .ConfigureServices(services =>
+                {
+                    services.AddCookieAuthentication();
+                    services.AddOpenIdConnectAuthentication(options);
+                })
                 .Configure(app => app.UseAuthentication());
 
             return new TestServer(builder);
         }
 
-        private void TestConfigurationException<T>(
+        private async Task TestConfigurationException<T>(
             Action<OpenIdConnectOptions> options,
             Action<T> verifyException)
             where T : Exception
         {
-            var builder = new WebHostBuilder()
-                .ConfigureServices(services => services.AddOpenIdConnectAuthentication(options))
-                .Configure(app => app.UseAuthentication());
-
-            var exception = Assert.Throws<T>(() =>
-            {
-                new TestServer(builder);
-            });
-
+            var exception = await Assert.ThrowsAsync<T>(() => BuildTestServer(options).SendAsync("/"));
             verifyException(exception);
         }
     }

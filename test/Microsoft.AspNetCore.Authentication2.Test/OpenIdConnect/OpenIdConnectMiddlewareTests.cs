@@ -7,6 +7,7 @@ using System.Linq;
 using System.Net;
 using System.Text.Encodings.Web;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Authentication2.Cookies;
 using Microsoft.AspNetCore.Authentication2.OpenIdConnect;
 using Microsoft.AspNetCore.DataProtection;
 using Microsoft.IdentityModel.Protocols.OpenIdConnect;
@@ -33,6 +34,7 @@ namespace Microsoft.AspNetCore.Authentication2.Test.OpenIdConnect
         {
             var setting = new TestSettings(opt =>
             {
+                opt.SignInScheme = CookieAuthenticationDefaults.AuthenticationScheme;
                 opt.Configuration = new OpenIdConnectConfiguration
                 {
                     EndSessionEndpoint = "https://example.com/signout_test/signout_request"

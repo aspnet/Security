@@ -21,7 +21,11 @@ namespace Microsoft.AspNetCore.Authentication2.Test.OpenIdConnect
         public async Task ChallengeIsIssuedCorrectly()
         {
             var settings = new TestSettings(
-                opt => opt.AuthenticationMethod = OpenIdConnectRedirectBehavior.RedirectGet);
+                opt =>
+                {
+                    opt.Authority = TestServerBuilder.DefaultAuthority;
+                    opt.AuthenticationMethod = OpenIdConnectRedirectBehavior.RedirectGet;
+                });
 
             var server = settings.CreateTestServer();
             var transaction = await server.SendAsync(ChallengeEndpoint);
@@ -62,7 +66,11 @@ namespace Microsoft.AspNetCore.Authentication2.Test.OpenIdConnect
         public async Task ChallengeIssueedCorrectlyForFormPost()
         {
             var settings = new TestSettings(
-                opt => opt.AuthenticationMethod = OpenIdConnectRedirectBehavior.FormPost);
+                opt =>
+                {
+                    opt.Authority = TestServerBuilder.DefaultAuthority;
+                    opt.AuthenticationMethod = OpenIdConnectRedirectBehavior.FormPost;
+                });
 
             var server = settings.CreateTestServer();
             var transaction = await server.SendAsync(ChallengeEndpoint);
@@ -86,7 +94,7 @@ namespace Microsoft.AspNetCore.Authentication2.Test.OpenIdConnect
         [InlineData(null)]
         public async Task ChallengeCanSetUserStateThroughProperties(string userState)
         {
-            var settings = new TestSettings();
+            var settings = new TestSettings(o => o.Authority = TestServerBuilder.DefaultAuthority);
 
             var properties = new AuthenticationProperties2();
             properties.Items.Add(OpenIdConnectDefaults.UserstatePropertiesKey, userState);

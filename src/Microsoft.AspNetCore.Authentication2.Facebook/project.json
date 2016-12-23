@@ -1,0 +1,33 @@
+{
+  "version": "1.2.0-*",
+  "description": "ASP.NET Core middleware that enables an application to support Facebook's OAuth 2.0 authentication workflow.",
+  "packOptions": {
+    "repository": {
+      "type": "git",
+      "url": "git://github.com/aspnet/security"
+    },
+    "tags": [
+      "aspnetcore",
+      "authentication",
+      "security"
+    ]
+  },
+  "buildOptions": {
+    "warningsAsErrors": true,
+    "keyFile": "../../tools/Key.snk",
+    "nowarn": [
+      "CS1591"
+    ],
+    "xmlDoc": true
+  },
+  "dependencies": {
+    "Microsoft.AspNetCore.Authentication2.OAuth": {
+      "target": "project"
+    },
+    "NETStandard.Library": "1.6.1-*"
+  },
+  "frameworks": {
+    "net451": {},
+    "netstandard1.3": {}
+  }
+}

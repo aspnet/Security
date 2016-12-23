@@ -65,9 +65,44 @@ namespace Microsoft.AspNetCore.Authentication2.OpenIdConnect
             DataProtection = dataProtection;
         }
 
+        public override async Task<Exception> ValidateOptionsAsync(OpenIdConnectOptions options)
+        {
+            var error = await base.ValidateOptionsAsync(options);
+            if (error != null)
+            {
+                return error;
+            }
+
+            if (string.IsNullOrEmpty(options.ClientId))
+            {
+                return new ArgumentException("Options.ClientId must be provided", nameof(Options.ClientId));
+            }
+
+            if (!options.CallbackPath.HasValue)
+            {
+                return new ArgumentException("Options.CallbackPath must be provided.");
+            }
+
+            //if (string.IsNullOrEmpty(Options.SignInScheme))
+            //{
+            //    Options.SignInScheme = sharedOptions.Value.SignInScheme;
+            //}
+            if (string.IsNullOrEmpty(Options.SignInScheme))
+            {
+                return new ArgumentException("Options.SignInScheme is required.");
+            }
+
+            return null;
+        }
+
         public override async Task InitializeAsync(AuthenticationScheme scheme, HttpContext context)
         {
             await base.InitializeAsync(scheme, context);
+            if (string.IsNullOrEmpty(Options.SignOutScheme))
+            {
+                Options.SignOutScheme = Options.SignInScheme;
+            }
+
             if (Options.StateDataFormat == null)
             {
                 var provider = Options.DataProtectionProvider ?? DataProtection;
@@ -132,11 +167,12 @@ namespace Microsoft.AspNetCore.Authentication2.OpenIdConnect
                 }
             }
 
-            if (Options.ConfigurationManager == null)
-            {
-                throw new InvalidOperationException($"Provide {nameof(Options.Authority)}, {nameof(Options.MetadataAddress)}, "
-                + $"{nameof(Options.Configuration)}, or {nameof(Options.ConfigurationManager)} to {nameof(OpenIdConnectOptions)}");
-            }
+            // REVIEW: revisit
+            //if (Options.ConfigurationManager == null)
+            //{
+            //    throw new InvalidOperationException($"Provide {nameof(Options.Authority)}, {nameof(Options.MetadataAddress)}, "
+            //    + $"{nameof(Options.Configuration)}, or {nameof(Options.ConfigurationManager)} to {nameof(OpenIdConnectOptions)}");
+            //}
         }
 
         public override async Task<AuthenticationRequestResult> HandleRequestAsync()
