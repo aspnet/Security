@@ -10,13 +10,15 @@ namespace Microsoft.AspNetCore.Authentication2
 {
     public class DefaultAuthenticationManager : IAuthenticationManager2
     {
-        // TODO: figure out some other way to get the context??
-        public DefaultAuthenticationManager(SchemeHandlerCache cache)
+        public DefaultAuthenticationManager(SchemeHandlerCache cache, IClaimsTransformation transform)
         {
             Handlers = cache;
+            Transform = transform;
         }
 
         public SchemeHandlerCache Handlers { get; }
+
+        public IClaimsTransformation Transform { get; }
 
         public virtual async Task<AuthenticateResult> AuthenticateAsync(HttpContext httpContext, string authenticationScheme)
         {
@@ -32,7 +34,13 @@ namespace Microsoft.AspNetCore.Authentication2
             }
 
             var context = new AuthenticateContext(httpContext, authenticationScheme);
-            return await handler.AuthenticateAsync(context);
+            var result = await handler.AuthenticateAsync(context);
+            if (result.Succeeded)
+            {
+                var transformed = await Transform.TransformAsync(result.Ticket.Principal);
+                return AuthenticateResult.Success(new AuthenticationTicket2(transformed, result.Ticket.Properties, result.Ticket.AuthenticationScheme));
+            }
+            return result;
         }
 
         public virtual async Task ChallengeAsync(HttpContext httpContext, string authenticationScheme, AuthenticationProperties2 properties, ChallengeBehavior behavior)

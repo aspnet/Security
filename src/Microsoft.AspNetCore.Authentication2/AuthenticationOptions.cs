@@ -3,6 +3,8 @@
 
 using System;
 using System.Collections.Generic;
+using System.Security.Claims;
+using System.Threading.Tasks;
 
 namespace Microsoft.AspNetCore.Authentication2
 {
@@ -35,5 +37,10 @@ namespace Microsoft.AspNetCore.Authentication2
         public string DefaultAuthenticationScheme { get; set; }
 
         //public string DefaultChallengeScheme { get; set; }
+
+        /// <summary>
+        /// Will be called after a successful authentication.
+        /// </summary>
+        public Func<ClaimsPrincipal, Task<ClaimsPrincipal>> ClaimsTransform { get; set; }
     }
 }

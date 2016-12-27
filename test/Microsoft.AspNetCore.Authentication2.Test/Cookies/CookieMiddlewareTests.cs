@@ -276,42 +276,32 @@ namespace Microsoft.AspNetCore.Authentication2.Cookies
             Assert.Equal("Alice", FindClaimValue(transaction2, ClaimTypes.Name));
         }
 
-        [ConditionalFact(Skip = "No claims transformation yet")]
-        public void CookieAppliesClaimsTransform()
+        [Fact]
+        public async Task CookieAppliesClaimsTransform()
         {
-            Assert.False(true);
-            //var clock = new TestClock();
-            //var server = CreateServer(new CookieAuthenticationOptions
-            //{
-            //    SystemClock = clock
-            //},
-            //SignInAsAlice,
-            //baseAddress: null,
-            //claimsTransform: new ClaimsTransformationOptions
-            //{
-            //    Transformer = new ClaimsTransformer
-            //    {
-            //        OnTransform = context =>
-            //        {
-            //            if (!context.Principal.Identities.Any(i => i.AuthenticationType == "xform"))
-            //            {
-            //                // REVIEW: Xform runs twice, once on Authenticate, and then once from the middleware
-            //                var id = new ClaimsIdentity("xform");
-            //                id.AddClaim(new Claim("xform", "yup"));
-            //                context.Principal.AddIdentity(id);
-            //            }
-            //            return Task.FromResult(context.Principal);
-            //        }
-            //    }
-            //});
+            var clock = new TestClock();
+            var server = CreateServer(o => o.SystemClock = clock,
+            SignInAsAlice,
+            baseAddress: null,
+            claimsTransform: p =>
+            {
+                if (!p.Identities.Any(i => i.AuthenticationType == "xform"))
+                {
+                    // REVIEW: Xform runs twice, once on Authenticate, and then once from the middleware
+                    var id = new ClaimsIdentity("xform");
+                    id.AddClaim(new Claim("xform", "yup"));
+                    p.AddIdentity(id);
+                }
+                return Task.FromResult(p);
+            });
 
-            //var transaction1 = await SendAsync(server, "http://example.com/testpath");
+            var transaction1 = await SendAsync(server, "http://example.com/testpath");
 
-            //var transaction2 = await SendAsync(server, "http://example.com/me/Cookies", transaction1.CookieNameValue);
+            var transaction2 = await SendAsync(server, "http://example.com/me/Cookies", transaction1.CookieNameValue);
 
-            //Assert.Equal("Alice", FindClaimValue(transaction2, ClaimTypes.Name));
-            //Assert.Equal("yup", FindClaimValue(transaction2, "xform"));
-            //Assert.Null(FindClaimValue(transaction2, "sync"));
+            Assert.Equal("Alice", FindClaimValue(transaction2, ClaimTypes.Name));
+            Assert.Equal("yup", FindClaimValue(transaction2, "xform"));
+            Assert.Null(FindClaimValue(transaction2, "sync"));
         }
 
         [Fact]
@@ -1269,7 +1259,7 @@ namespace Microsoft.AspNetCore.Authentication2.Cookies
             return me;
         }
 
-        private static TestServer CreateServer(Action<CookieAuthenticationOptions> configureOptions, Func<HttpContext, Task> testpath = null, Uri baseAddress = null/*, ClaimsTransformationOptions claimsTransform = null*/)
+        private static TestServer CreateServer(Action<CookieAuthenticationOptions> configureOptions, Func<HttpContext, Task> testpath = null, Uri baseAddress = null, Func<ClaimsPrincipal, Task<ClaimsPrincipal>> claimsTransform = null)
         {
             var builder = new WebHostBuilder()
                 .Configure(app =>
@@ -1334,7 +1324,11 @@ namespace Microsoft.AspNetCore.Authentication2.Cookies
                         }
                     });
                 })
-                .ConfigureServices(services => services.AddCookieAuthentication(configureOptions));
+                .ConfigureServices(services =>
+                {
+                    services.AddCookieAuthentication(configureOptions);
+                    services.AddAuthentication(o => o.ClaimsTransform = claimsTransform);
+                });
             var server = new TestServer(builder);
             server.BaseAddress = baseAddress;
             return server;
