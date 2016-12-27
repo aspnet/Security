@@ -34,6 +34,7 @@ namespace Microsoft.AspNetCore.Authentication2.Test.OpenIdConnect
         {
             var setting = new TestSettings(opt =>
             {
+                opt.ClientId = "Test Id";
                 opt.SignInScheme = CookieAuthenticationDefaults.AuthenticationScheme;
                 opt.Configuration = new OpenIdConnectConfiguration
                 {
@@ -73,7 +74,7 @@ namespace Microsoft.AspNetCore.Authentication2.Test.OpenIdConnect
 
             string redirectUri;
             Assert.True(query.TryGetValue("post_logout_redirect_uri", out redirectUri));
-            Assert.Equal(UrlEncoder.Default.Encode("https://example.com"/* + options.SignedOutCallbackPath*/), redirectUri, true);
+            Assert.Equal(UrlEncoder.Default.Encode("https://example.com/signout-callback-oidc"), redirectUri, true);
         }
 
         [Fact]
@@ -131,7 +132,7 @@ namespace Microsoft.AspNetCore.Authentication2.Test.OpenIdConnect
 
             string redirectUri;
             Assert.True(query.TryGetValue("post_logout_redirect_uri", out redirectUri));
-            Assert.Equal(UrlEncoder.Default.Encode("https://example.com"/* + options.SignedOutCallbackPath*/), redirectUri, true);
+            Assert.Equal(UrlEncoder.Default.Encode("https://example.com/signout-callback-oidc"), redirectUri, true);
 
             string state;
             Assert.True(query.TryGetValue("state", out state));
@@ -142,8 +143,10 @@ namespace Microsoft.AspNetCore.Authentication2.Test.OpenIdConnect
         [Fact]
         public async Task SignOut_WithMissingConfig_Throws()
         {
-            var setting = new TestSettings(opt => opt.Configuration = new OpenIdConnectConfiguration());
-
+            var setting = new TestSettings(opt => {
+                opt.ClientId = "Test Id";
+                opt.Configuration = new OpenIdConnectConfiguration();
+            });
             var server = setting.CreateTestServer();
 
             var exception = await Assert.ThrowsAsync<InvalidOperationException>(() => server.SendAsync(DefaultHost + TestServerBuilder.Signout));

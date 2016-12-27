@@ -80,7 +80,7 @@ namespace Microsoft.AspNetCore.Authentication2.OpenIdConnect
 
             if (!options.CallbackPath.HasValue)
             {
-                return new ArgumentException("Options.CallbackPath must be provided.");
+                return new ArgumentException("Options.CallbackPath must be provided.", nameof(Options.CallbackPath));
             }
 
             //if (string.IsNullOrEmpty(Options.SignInScheme))
@@ -89,7 +89,7 @@ namespace Microsoft.AspNetCore.Authentication2.OpenIdConnect
             //}
             if (string.IsNullOrEmpty(options.SignInScheme))
             {
-                return new ArgumentException("Options.SignInScheme is required.");
+                return new ArgumentException("Options.SignInScheme is required.", nameof(Options.SignInScheme));
             }
 
             return null;
