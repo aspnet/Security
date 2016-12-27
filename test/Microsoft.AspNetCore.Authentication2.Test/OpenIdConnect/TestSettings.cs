@@ -29,6 +29,10 @@ namespace Microsoft.AspNetCore.Authentication2.Test.OpenIdConnect
         public TestSettings(Action<OpenIdConnectOptions> configure)
         {
             _configureOptions = configure;
+
+            // REVIEW:
+            _options = new OpenIdConnectOptions();
+            _configureOptions?.Invoke(_options);
         }
 
         public UrlEncoder Encoder => UrlEncoder.Default;
