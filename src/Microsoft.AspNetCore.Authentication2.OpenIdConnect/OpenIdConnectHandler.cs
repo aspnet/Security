@@ -87,7 +87,7 @@ namespace Microsoft.AspNetCore.Authentication2.OpenIdConnect
             //{
             //    Options.SignInScheme = sharedOptions.Value.SignInScheme;
             //}
-            if (string.IsNullOrEmpty(Options.SignInScheme))
+            if (string.IsNullOrEmpty(options.SignInScheme))
             {
                 return new ArgumentException("Options.SignInScheme is required.");
             }

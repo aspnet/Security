@@ -7,7 +7,6 @@ using System.Net;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authentication2.OpenIdConnect;
 using Microsoft.AspNetCore.DataProtection;
-using Microsoft.AspNetCore.Http.Authentication;
 using Microsoft.IdentityModel.Protocols.OpenIdConnect;
 using Xunit;
 
@@ -25,6 +24,7 @@ namespace Microsoft.AspNetCore.Authentication2.Test.OpenIdConnect
                 {
                     opt.Authority = TestServerBuilder.DefaultAuthority;
                     opt.AuthenticationMethod = OpenIdConnectRedirectBehavior.RedirectGet;
+                    opt.ClientId = "Test Id";
                 });
 
             var server = settings.CreateTestServer();
@@ -70,6 +70,7 @@ namespace Microsoft.AspNetCore.Authentication2.Test.OpenIdConnect
                 {
                     opt.Authority = TestServerBuilder.DefaultAuthority;
                     opt.AuthenticationMethod = OpenIdConnectRedirectBehavior.FormPost;
+                    opt.ClientId = "Test Id";
                 });
 
             var server = settings.CreateTestServer();
@@ -94,13 +95,18 @@ namespace Microsoft.AspNetCore.Authentication2.Test.OpenIdConnect
         [InlineData(null)]
         public async Task ChallengeCanSetUserStateThroughProperties(string userState)
         {
-            var settings = new TestSettings(o => o.Authority = TestServerBuilder.DefaultAuthority);
+            var stateFormat = new PropertiesDataFormat(new EphemeralDataProtectionProvider().CreateProtector("OIDCTest"));
+            var settings = new TestSettings(o =>
+            {
+                o.ClientId = "Test Id";
+                o.Authority = TestServerBuilder.DefaultAuthority;
+                o.StateDataFormat = stateFormat;
+            });
 
             var properties = new AuthenticationProperties2();
             properties.Items.Add(OpenIdConnectDefaults.UserstatePropertiesKey, userState);
 
-            var stateFormat = new PropertiesDataFormat(new EphemeralDataProtectionProvider().CreateProtector("OIDCTest"));
-            var server = TestServerBuilder.CreateServer(o => o.StateDataFormat = stateFormat, handler: null, properties: properties);
+            var server = settings.CreateTestServer(properties);
             var transaction = await server.SendAsync(TestServerBuilder.TestHost + TestServerBuilder.ChallengeWithProperties);
 
             var res = transaction.Response;
@@ -123,6 +129,7 @@ namespace Microsoft.AspNetCore.Authentication2.Test.OpenIdConnect
             var settings = new TestSettings(opt =>
             {
                 opt.StateDataFormat = stateFormat;
+                opt.ClientId = "Test Id";
                 opt.Events = new OpenIdConnectEvents()
                 {
                     OnRedirectToIdentityProvider = context =>
@@ -160,6 +167,7 @@ namespace Microsoft.AspNetCore.Authentication2.Test.OpenIdConnect
             var settings = new TestSettings(
                 opts =>
                 {
+                    opts.ClientId = "Test Id";
                     opts.Events = new OpenIdConnectEvents()
                     {
                         OnRedirectToIdentityProvider = context =>
@@ -198,6 +206,7 @@ namespace Microsoft.AspNetCore.Authentication2.Test.OpenIdConnect
             var settings = new TestSettings(
                 opts =>
                 {
+                    opts.ClientId = "Test Id";
                     opts.Events = new OpenIdConnectEvents()
                     {
                         OnRedirectToIdentityProvider = context =>
@@ -240,6 +249,7 @@ namespace Microsoft.AspNetCore.Authentication2.Test.OpenIdConnect
             var settings = new TestSettings(
                 opts =>
                 {
+                    opts.ClientId = "Test Id";
                     opts.Events = new OpenIdConnectEvents()
                     {
                         OnRedirectToIdentityProvider = context =>
@@ -269,6 +279,7 @@ namespace Microsoft.AspNetCore.Authentication2.Test.OpenIdConnect
             var settings = new TestSettings(
                 opts =>
                 {
+                    opts.ClientId = "Test Id";
                     opts.Events = new OpenIdConnectEvents()
                     {
                         OnRedirectToIdentityProvider = context =>
@@ -300,6 +311,7 @@ namespace Microsoft.AspNetCore.Authentication2.Test.OpenIdConnect
             var settings = new TestSettings(
                 opts =>
                 {
+                    opts.ClientId = "Test Id";
                     opts.Events = new OpenIdConnectEvents()
                     {
                         OnRedirectToIdentityProvider = context =>
@@ -322,7 +334,11 @@ namespace Microsoft.AspNetCore.Authentication2.Test.OpenIdConnect
         [Fact]
         public async Task ChallengeSetsNonceAndStateCookies()
         {
-            var settings = new TestSettings(o => o.Authority = TestServerBuilder.DefaultAuthority);
+            var settings = new TestSettings(o =>
+            {
+                o.ClientId = "Test Id";
+                o.Authority = TestServerBuilder.DefaultAuthority;
+            });
             var server = settings.CreateTestServer();
             var transaction = await server.SendAsync(ChallengeEndpoint);
 
@@ -339,7 +355,11 @@ namespace Microsoft.AspNetCore.Authentication2.Test.OpenIdConnect
         public async Task Challenge_WithEmptyConfig_Fails()
         {
             var settings = new TestSettings(
-                opt => opt.Configuration = new OpenIdConnectConfiguration());
+                opt =>
+                {
+                    opt.ClientId = "Test Id";
+                    opt.Configuration = new OpenIdConnectConfiguration();
+                });
 
             var server = settings.CreateTestServer();
             var exception = await Assert.ThrowsAsync<InvalidOperationException>(() => server.SendAsync(ChallengeEndpoint));

@@ -35,7 +35,7 @@ namespace Microsoft.AspNetCore.Authentication2.Test.OpenIdConnect
 
         public string ExpectedState { get; set; }
 
-        public TestServer CreateTestServer() => TestServerBuilder.CreateServer(_configureOptions);
+        public TestServer CreateTestServer(AuthenticationProperties2 properties = null) => TestServerBuilder.CreateServer(_configureOptions, handler: null, properties: properties);
 
         public IDictionary<string, string> ValidateChallengeFormPost(string responseBody, params string[] parametersToValidate)
         {
