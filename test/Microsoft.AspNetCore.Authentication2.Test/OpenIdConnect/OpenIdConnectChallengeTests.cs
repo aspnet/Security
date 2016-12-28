@@ -121,7 +121,7 @@ namespace Microsoft.AspNetCore.Authentication2.Test.OpenIdConnect
             Assert.Equal(userState ?? string.Empty, actualProperties.Items[OpenIdConnectDefaults.UserstatePropertiesKey]);
         }
 
-        [ConditionalTheory(Skip = "message issuer is null for some reason")]
+        [Theory]
         [InlineData("sample_user_state")]
         [InlineData(null)]
         public async Task OnRedirectToIdentityProviderEventCanSetState(string userState)
@@ -162,7 +162,7 @@ namespace Microsoft.AspNetCore.Authentication2.Test.OpenIdConnect
             }
         }
 
-        [ConditionalFact(Skip = "message issuer is null for some reason")]
+        [Fact]
         public async Task OnRedirectToIdentityProviderEventIsHit()
         {
             var eventIsHit = false;
@@ -201,7 +201,7 @@ namespace Microsoft.AspNetCore.Authentication2.Test.OpenIdConnect
         }
 
 
-        [ConditionalFact(Skip = "message issuer is null for some reason")]
+        [Fact]
         public async Task OnRedirectToIdentityProviderEventCanReplaceValues()
         {
             var newClientId = Guid.NewGuid().ToString();
@@ -216,7 +216,6 @@ namespace Microsoft.AspNetCore.Authentication2.Test.OpenIdConnect
                         OnRedirectToIdentityProvider = context =>
                         {
                             context.ProtocolMessage.ClientId = newClientId;
-
                             return Task.FromResult(0);
                         }
                     };
