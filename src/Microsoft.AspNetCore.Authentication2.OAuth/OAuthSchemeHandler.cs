@@ -31,32 +31,39 @@ namespace Microsoft.AspNetCore.Authentication2.OAuth
             DataProtection = dataProtection;
         }
 
-        public async override Task InitializeAsync(AuthenticationScheme scheme, HttpContext context)
+        public override async Task InitializeAsync(AuthenticationScheme scheme, HttpContext context)
         {
             await base.InitializeAsync(scheme, context);
-
-            if (!Options.CallbackPath.HasValue)
-            {
-                throw new ArgumentException(string.Format(CultureInfo.CurrentCulture, Resources.Exception_OptionMustBeProvided, nameof(Options.CallbackPath)));
-            }
-
-            if (Options.Events == null)
-            {
-                Options.Events = new OAuthEvents();
-            }
-
-            if (Options.StateDataFormat == null)
-            {
-                var provider = Options.DataProtectionProvider ?? DataProtection;
-                var dataProtector = provider.CreateProtector(
-                    GetType().FullName, Options.AuthenticationScheme, "v1");
-                Options.StateDataFormat = new PropertiesDataFormat(dataProtector);
-            }
 
             Backchannel = new HttpClient(Options.BackchannelHttpHandler ?? new HttpClientHandler());
             Backchannel.DefaultRequestHeaders.UserAgent.ParseAdd("Microsoft ASP.NET Core OAuth middleware");
             Backchannel.Timeout = Options.BackchannelTimeout;
             Backchannel.MaxResponseContentBufferSize = 1024 * 1024 * 10; // 10 MB
+        }
+
+        protected async override Task<TOptions> CreateOptionsAsync()
+        {
+            var options = await base.CreateOptionsAsync();
+
+            if (!options.CallbackPath.HasValue)
+            {
+                throw new ArgumentException(string.Format(CultureInfo.CurrentCulture, Resources.Exception_OptionMustBeProvided, nameof(options.CallbackPath)));
+            }
+
+            if (options.Events == null)
+            {
+                options.Events = new OAuthEvents();
+            }
+
+            if (options.StateDataFormat == null)
+            {
+                var provider = options.DataProtectionProvider ?? DataProtection;
+                var dataProtector = provider.CreateProtector(
+                    GetType().FullName, options.AuthenticationScheme, "v1");
+                options.StateDataFormat = new PropertiesDataFormat(dataProtector);
+            }
+
+            return options;
         }
 
 

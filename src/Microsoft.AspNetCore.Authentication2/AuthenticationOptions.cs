@@ -29,12 +29,14 @@ namespace Microsoft.AspNetCore.Authentication2
         {
             var builder = new AuthenticationSchemeBuilder(name);
             configureBuilder(builder);
-            var scheme = builder.Build();
+            var scheme = builder.Build(this);
             _schemes.Add(scheme);
             SchemeMap[name] = scheme;
         }
 
         public string DefaultAuthenticationScheme { get; set; }
+
+        public string DefaultSignInScheme { get; set; }
 
         //public string DefaultChallengeScheme { get; set; }
 

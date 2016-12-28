@@ -24,43 +24,39 @@ namespace Microsoft.AspNetCore.Authentication2
             : base(logger, encoder)
         { }
 
-        public override Task<Exception> ValidateOptionsAsync(TOptions options)
+        public override Task<Exception> ValidateOptionsAsync()
         {
-            if (options.CallbackPath == null || !options.CallbackPath.HasValue)
+            if (Options.CallbackPath == null || !Options.CallbackPath.HasValue)
             {
-                return Task.FromResult<Exception>(new ArgumentException(Resources.FormatException_OptionMustBeProvided(nameof(Options.CallbackPath))));
+                return Task.FromResult<Exception>(new ArgumentException(Resources.FormatException_OptionMustBeProvided(nameof(Options.CallbackPath)), nameof(Options.CallbackPath)));
             }
 
-            // TODO: figure out default
-            if (string.IsNullOrEmpty(options.SignInScheme))
+            if (string.IsNullOrEmpty(Options.SignInScheme))
             {
-                // TODO: shared sign in scheme
-                //Options.SignInScheme = sharedOptions.Value.SignInScheme;
-            }
-            if (string.IsNullOrEmpty(options.SignInScheme))
-            {
-                return Task.FromResult<Exception>(new ArgumentException(Resources.FormatException_OptionMustBeProvided(nameof(Options.SignInScheme))));
+                return Task.FromResult<Exception>(new ArgumentException(Resources.FormatException_OptionMustBeProvided(nameof(Options.SignInScheme)), nameof(Options.SignInScheme)));
             }
             return Task.FromResult<Exception>(null);
         }
 
-        // This should be moved
-        public async override Task InitializeAsync(AuthenticationScheme scheme, HttpContext context)
+        protected async override Task<TOptions> CreateOptionsAsync()
         {
-            await base.InitializeAsync(scheme, context);
-
-            Options.AuthenticationScheme = scheme.Name;
-
+            var options = await base.CreateOptionsAsync();
             // TODO: This needs to go into some kind of base class for reuse
-            if (Options.EventsType != null)
+            if (options.EventsType != null)
             {
-                Options.Events = context.RequestServices.GetRequiredService(Options.EventsType) as RemoteAuthenticationEvents;
+                options.Events = Context.RequestServices.GetRequiredService(Options.EventsType) as RemoteAuthenticationEvents;
             }
 
-            if (Options.Events == null)
+            if (options.SignInScheme == null && Scheme.SharedOptions.DefaultSignInScheme != null)
             {
-                Options.Events = new RemoteAuthenticationEvents();
+                options.SignInScheme = Scheme.SharedOptions.DefaultSignInScheme;
             }
+            if (options.Events == null)
+            {
+                options.Events = new RemoteAuthenticationEvents();
+            }
+
+            return options;
         }
 
         public override async Task<AuthenticationRequestResult> HandleRequestAsync()

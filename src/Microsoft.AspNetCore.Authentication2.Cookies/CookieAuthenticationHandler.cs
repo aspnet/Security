@@ -33,56 +33,61 @@ namespace Microsoft.AspNetCore.Authentication2.Cookies
             : base(logger, encoder)
         { }
 
-        public override Task<Exception> ValidateOptionsAsync(CookieAuthenticationOptions options)
+        public override Task<Exception> ValidateOptionsAsync()
         {
             return Task.FromResult<Exception>(null);
         }
 
-        public async override Task InitializeAsync(AuthenticationScheme scheme, HttpContext context)
+        public override async Task InitializeAsync(AuthenticationScheme scheme, HttpContext context)
         {
             await base.InitializeAsync(scheme, context);
 
-            Options.AuthenticationScheme = scheme.Name;
+            // Cookies needs to finish the response
+            Context.Response.OnStarting(FinishResponseOnce);
+        }
+
+        protected async override Task<CookieAuthenticationOptions> CreateOptionsAsync()
+        {
+            var options = await base.CreateOptionsAsync();
 
             // TODO: This needs to go into some kind of base class for reuse
-            if (Options.EventsType != null)
+            if (options.EventsType != null)
             {
-                Options.Events = context.RequestServices.GetRequiredService(Options.EventsType) as CookieAuthenticationEvents;
+                options.Events = Context.RequestServices.GetRequiredService(options.EventsType) as CookieAuthenticationEvents;
             }
 
-            if (Options.Events == null)
+            if (options.Events == null)
             {
-                Options.Events = new CookieAuthenticationEvents();
+                options.Events = new CookieAuthenticationEvents();
             }
-            if (String.IsNullOrEmpty(Options.CookieName))
+            if (String.IsNullOrEmpty(options.CookieName))
             {
-                Options.CookieName = CookieAuthenticationDefaults.CookiePrefix + Scheme.Name;
+                options.CookieName = CookieAuthenticationDefaults.CookiePrefix + Scheme.Name;
             }
-            if (Options.TicketDataFormat == null)
+            if (options.TicketDataFormat == null)
             {
-                var provider = Options.DataProtectionProvider ?? context.RequestServices.GetRequiredService<IDataProtectionProvider>();
+                var provider = options.DataProtectionProvider ?? Context.RequestServices.GetRequiredService<IDataProtectionProvider>();
                 var dataProtector = provider.CreateProtector(typeof(CookieAuthenticationHandler).FullName, Scheme.Name, "v2");
-                Options.TicketDataFormat = new TicketDataFormat(dataProtector);
+                options.TicketDataFormat = new TicketDataFormat(dataProtector);
             }
-            if (Options.CookieManager == null)
+            if (options.CookieManager == null)
             {
-                Options.CookieManager = new ChunkingCookieManager();
+                options.CookieManager = new ChunkingCookieManager();
             }
-            if (!Options.LoginPath.HasValue)
+            if (!options.LoginPath.HasValue)
             {
-                Options.LoginPath = CookieAuthenticationDefaults.LoginPath;
+                options.LoginPath = CookieAuthenticationDefaults.LoginPath;
             }
-            if (!Options.LogoutPath.HasValue)
+            if (!options.LogoutPath.HasValue)
             {
-                Options.LogoutPath = CookieAuthenticationDefaults.LogoutPath;
+                options.LogoutPath = CookieAuthenticationDefaults.LogoutPath;
             }
-            if (!Options.AccessDeniedPath.HasValue)
+            if (!options.AccessDeniedPath.HasValue)
             {
-                Options.AccessDeniedPath = CookieAuthenticationDefaults.AccessDeniedPath;
+                options.AccessDeniedPath = CookieAuthenticationDefaults.AccessDeniedPath;
             }
 
-            // Cookies needs to finish the response
-            context.Response.OnStarting(FinishResponseOnce);
+            return options;
         }
 
         private Task<AuthenticateResult> EnsureCookieTicket()

@@ -9,8 +9,8 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Internal;
 using Microsoft.Extensions.Logging;
 
-namespace Microsoft.AspNetCore.Authentication2
-{
+namespace Microsoft.AspNetCore.Authentication2{
+
     public abstract class AuthenticationSchemeHandler<TOptions> : IAuthenticationSchemeHandler where TOptions : AuthenticationSchemeOptions, new()
     {
         private Task<AuthenticateResult> _authenticateTask;
@@ -57,37 +57,40 @@ namespace Microsoft.AspNetCore.Authentication2
 
         public virtual Task<Exception> ValidateAsync(AuthenticationScheme scheme)
         {
-            return ValidateOptionsAsync(GetOptionsFromScheme(scheme));
+            return Task.FromResult<Exception>(null);
+            //// REVIEW: revisit
+            //return ValidateOptionsAsync(GetOptionsFromScheme(scheme));
         }
 
-        protected virtual TOptions GetOptionsFromScheme(AuthenticationScheme scheme)
-        {
-            var options = new TOptions();
-            var configureOptions = scheme.Settings["ConfigureOptions"] as Action<TOptions>;
-            configureOptions?.Invoke(options);
-            return options;
-        }
+        public abstract Task<Exception> ValidateOptionsAsync();
 
-        public abstract Task<Exception> ValidateOptionsAsync(TOptions options);
-
-        public virtual Task InitializeAsync(AuthenticationScheme scheme, HttpContext context)
+        public virtual async Task InitializeAsync(AuthenticationScheme scheme, HttpContext context)
         {
             Scheme = scheme;
-            Options = new TOptions();
-            var configureOptions = scheme.Settings["ConfigureOptions"] as Action<TOptions>;
-            configureOptions?.Invoke(Options);
-            Options.AuthenticationScheme = Scheme.Name; // REVIEW: maybe dedupe and remove scheme from options
             Context = context;
             OriginalPathBase = Request.PathBase;
             OriginalPath = Request.Path;
+            Options = await CreateOptionsAsync();
+            var error = await ValidateOptionsAsync();
+            if (error != null)
+            {
+                throw error;
+            }
+        }
 
-            if (string.IsNullOrEmpty(Options.ClaimsIssuer))
+        protected virtual Task<TOptions> CreateOptionsAsync()
+        {
+            var options = new TOptions();
+            var configureOptions = Scheme.Settings["ConfigureOptions"] as Action<TOptions>;
+            configureOptions?.Invoke(options);
+            options.AuthenticationScheme = Scheme.Name; // REVIEW: maybe dedupe and remove scheme from options
+            if (string.IsNullOrEmpty(options.ClaimsIssuer))
             {
                 // Default to something reasonable
-                Options.ClaimsIssuer = Scheme.Name;
+                options.ClaimsIssuer = Scheme.Name;
             }
 
-            return Task.FromResult(0);
+            return Task.FromResult(options);
         }
 
         protected string BuildRedirectUri(string targetPath)

@@ -9,12 +9,13 @@ namespace Microsoft.AspNetCore.Authentication2
 {
     public class AuthenticationScheme
     {
-        public AuthenticationScheme(string name, Type handlerType, Dictionary<string, object> settings)
+        public AuthenticationScheme(string name, Type handlerType, Dictionary<string, object> settings, AuthenticationOptions2 sharedOptions)
         {
             // todo: throw for null/empty name, handlerType null or not IAuthenticationSchemeHandler
             Name = name;
             HandlerType = handlerType;
             Settings = settings;
+            SharedOptions = sharedOptions;
         }
 
         public string Name { get; }
@@ -23,6 +24,8 @@ namespace Microsoft.AspNetCore.Authentication2
         // Holds things like the configured options instances for the handler
         // Also replacement for AuthenticationDescription
         public IReadOnlyDictionary<string, object> Settings { get; }
+
+        public AuthenticationOptions2 SharedOptions { get; }
 
         public IAuthenticationSchemeHandler ResolveHandler(HttpContext context)
         {

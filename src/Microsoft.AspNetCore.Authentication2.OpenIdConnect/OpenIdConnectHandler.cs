@@ -65,29 +65,25 @@ namespace Microsoft.AspNetCore.Authentication2.OpenIdConnect
             DataProtection = dataProtection;
         }
 
-        public override async Task<Exception> ValidateOptionsAsync(OpenIdConnectOptions options)
+        public override async Task<Exception> ValidateOptionsAsync()
         {
-            var error = await base.ValidateOptionsAsync(options);
+            var error = await base.ValidateOptionsAsync();
             if (error != null)
             {
                 return error;
             }
 
-            if (string.IsNullOrEmpty(options.ClientId))
+            if (string.IsNullOrEmpty(Options.ClientId))
             {
                 return new ArgumentException("Options.ClientId must be provided", nameof(Options.ClientId));
             }
 
-            if (!options.CallbackPath.HasValue)
+            if (!Options.CallbackPath.HasValue)
             {
                 return new ArgumentException("Options.CallbackPath must be provided.", nameof(Options.CallbackPath));
             }
 
-            //if (string.IsNullOrEmpty(Options.SignInScheme))
-            //{
-            //    Options.SignInScheme = sharedOptions.Value.SignInScheme;
-            //}
-            if (string.IsNullOrEmpty(options.SignInScheme))
+            if (string.IsNullOrEmpty(Options.SignInScheme))
             {
                 return new ArgumentException("Options.SignInScheme is required.", nameof(Options.SignInScheme));
             }
@@ -95,85 +91,93 @@ namespace Microsoft.AspNetCore.Authentication2.OpenIdConnect
             return null;
         }
 
-        public override async Task InitializeAsync(AuthenticationScheme scheme, HttpContext context)
+        protected async override Task<OpenIdConnectOptions> CreateOptionsAsync()
         {
-            await base.InitializeAsync(scheme, context);
-            if (string.IsNullOrEmpty(Options.SignOutScheme))
+            var options = await base.CreateOptionsAsync();
+            if (string.IsNullOrEmpty(options.SignOutScheme))
             {
-                Options.SignOutScheme = Options.SignInScheme;
+                options.SignOutScheme = options.SignInScheme;
             }
 
-            if (Options.StateDataFormat == null)
+            if (options.StateDataFormat == null)
             {
-                var provider = Options.DataProtectionProvider ?? DataProtection;
+                var provider = options.DataProtectionProvider ?? DataProtection;
                 var dataProtector = provider.CreateProtector(
-                    GetType().FullName, Options.AuthenticationScheme, "v1");
-                Options.StateDataFormat = new PropertiesDataFormat(dataProtector);
+                    GetType().FullName, options.AuthenticationScheme, "v1");
+                options.StateDataFormat = new PropertiesDataFormat(dataProtector);
             }
 
-            if (Options.StringDataFormat == null)
+            if (options.StringDataFormat == null)
             {
-                var provider = Options.DataProtectionProvider ?? DataProtection;
+                var provider = options.DataProtectionProvider ?? DataProtection;
                 var dataProtector = provider.CreateProtector(
                     GetType().FullName,
                     typeof(string).FullName,
-                    Options.AuthenticationScheme,
+                    options.AuthenticationScheme,
                     "v1");
 
-                Options.StringDataFormat = new SecureDataFormat<string>(new StringSerializer(), dataProtector);
+                options.StringDataFormat = new SecureDataFormat<string>(new StringSerializer(), dataProtector);
             }
 
-            if (Options.Events == null)
+            if (options.Events == null)
             {
-                Options.Events = new OpenIdConnectEvents();
+                options.Events = new OpenIdConnectEvents();
             }
 
-            if (string.IsNullOrEmpty(Options.TokenValidationParameters.ValidAudience) && !string.IsNullOrEmpty(Options.ClientId))
+            if (string.IsNullOrEmpty(options.TokenValidationParameters.ValidAudience) && !string.IsNullOrEmpty(options.ClientId))
             {
-                Options.TokenValidationParameters.ValidAudience = Options.ClientId;
+                options.TokenValidationParameters.ValidAudience = options.ClientId;
             }
 
-            Backchannel = new HttpClient(Options.BackchannelHttpHandler ?? new HttpClientHandler());
+            Backchannel = new HttpClient(options.BackchannelHttpHandler ?? new HttpClientHandler());
             Backchannel.DefaultRequestHeaders.UserAgent.ParseAdd("Microsoft ASP.NET Core OpenIdConnect middleware");
-            Backchannel.Timeout = Options.BackchannelTimeout;
+            Backchannel.Timeout = options.BackchannelTimeout;
             Backchannel.MaxResponseContentBufferSize = 1024 * 1024 * 10; // 10 MB
 
-            if (Options.ConfigurationManager == null)
+            if (options.ConfigurationManager == null)
             {
-                if (Options.Configuration != null)
+                if (options.Configuration != null)
                 {
-                    Options.ConfigurationManager = new StaticConfigurationManager<OpenIdConnectConfiguration>(Options.Configuration);
+                    options.ConfigurationManager = new StaticConfigurationManager<OpenIdConnectConfiguration>(options.Configuration);
                 }
-                else if (!(string.IsNullOrEmpty(Options.MetadataAddress) && string.IsNullOrEmpty(Options.Authority)))
+                else if (!(string.IsNullOrEmpty(options.MetadataAddress) && string.IsNullOrEmpty(options.Authority)))
                 {
-                    if (string.IsNullOrEmpty(Options.MetadataAddress) && !string.IsNullOrEmpty(Options.Authority))
+                    if (string.IsNullOrEmpty(options.MetadataAddress) && !string.IsNullOrEmpty(options.Authority))
                     {
-                        Options.MetadataAddress = Options.Authority;
-                        if (!Options.MetadataAddress.EndsWith("/", StringComparison.Ordinal))
+                        options.MetadataAddress = options.Authority;
+                        if (!options.MetadataAddress.EndsWith("/", StringComparison.Ordinal))
                         {
-                            Options.MetadataAddress += "/";
+                            options.MetadataAddress += "/";
                         }
 
-                        Options.MetadataAddress += ".well-known/openid-configuration";
+                        options.MetadataAddress += ".well-known/openid-configuration";
                     }
 
-                    if (Options.RequireHttpsMetadata && !Options.MetadataAddress.StartsWith("https://", StringComparison.OrdinalIgnoreCase))
+                    if (options.RequireHttpsMetadata && !options.MetadataAddress.StartsWith("https://", StringComparison.OrdinalIgnoreCase))
                     {
                         throw new InvalidOperationException("The MetadataAddress or Authority must use HTTPS unless disabled for development by setting RequireHttpsMetadata=false.");
                     }
 
-                    Options.ConfigurationManager = new ConfigurationManager<OpenIdConnectConfiguration>(Options.MetadataAddress, new OpenIdConnectConfigurationRetriever(),
-                        new HttpDocumentRetriever(Backchannel) { RequireHttps = Options.RequireHttpsMetadata });
+                    options.ConfigurationManager = new ConfigurationManager<OpenIdConnectConfiguration>(options.MetadataAddress, new OpenIdConnectConfigurationRetriever(),
+                        new HttpDocumentRetriever(Backchannel) { RequireHttps = options.RequireHttpsMetadata });
                 }
             }
 
-            // REVIEW: revisit
-            if (Options.ConfigurationManager == null)
+            if (options.ConfigurationManager == null)
             {
-                throw new InvalidOperationException($"Provide {nameof(Options.Authority)}, {nameof(Options.MetadataAddress)}, "
-                + $"{nameof(Options.Configuration)}, or {nameof(Options.ConfigurationManager)} to {nameof(OpenIdConnectOptions)}");
+                throw new InvalidOperationException($"Provide {nameof(options.Authority)}, {nameof(options.MetadataAddress)}, "
+                + $"{nameof(options.Configuration)}, or {nameof(options.ConfigurationManager)} to {nameof(OpenIdConnectOptions)}");
             }
+
+            return options;
         }
+
+        public override async Task InitializeAsync(AuthenticationScheme scheme, HttpContext context)
+        {
+            await base.InitializeAsync(scheme, context);
+
+        }
+
 
         public override async Task<AuthenticationRequestResult> HandleRequestAsync()
         {

@@ -9,7 +9,6 @@ using System.Security.Claims;
 using System.Text;
 using System.Text.Encodings.Web;
 using System.Threading.Tasks;
-using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Logging;
 using Microsoft.IdentityModel.Protocols;
@@ -27,59 +26,61 @@ namespace Microsoft.AspNetCore.Authentication2.JwtBearer
             : base(logger, encoder)
         { }
 
-        public override Task<Exception> ValidateOptionsAsync(JwtBearerOptions options)
+        public override Task<Exception> ValidateOptionsAsync()
         {
             // TODO: what can we move from Initialize?
             return Task.FromResult<Exception>(null);
         }
 
-        public override async Task InitializeAsync(AuthenticationScheme scheme, HttpContext context)
+        protected async override Task<JwtBearerOptions> CreateOptionsAsync()
         {
-            await base.InitializeAsync(scheme, context);
+            var options = await base.CreateOptionsAsync();
 
-            if (Options.Events == null)
+            // TODO: add DI event activation
+            if (options.Events == null)
             {
-                Options.Events = new JwtBearerEvents();
+                options.Events = new JwtBearerEvents();
             }
 
-            if (string.IsNullOrEmpty(Options.TokenValidationParameters.ValidAudience) && !string.IsNullOrEmpty(Options.Audience))
+            if (string.IsNullOrEmpty(options.TokenValidationParameters.ValidAudience) && !string.IsNullOrEmpty(options.Audience))
             {
-                Options.TokenValidationParameters.ValidAudience = Options.Audience;
+                options.TokenValidationParameters.ValidAudience = options.Audience;
             }
 
-            if (Options.ConfigurationManager == null)
+            if (options.ConfigurationManager == null)
             {
-                if (Options.Configuration != null)
+                if (options.Configuration != null)
                 {
-                    Options.ConfigurationManager = new StaticConfigurationManager<OpenIdConnectConfiguration>(Options.Configuration);
+                    options.ConfigurationManager = new StaticConfigurationManager<OpenIdConnectConfiguration>(options.Configuration);
                 }
-                else if (!(string.IsNullOrEmpty(Options.MetadataAddress) && string.IsNullOrEmpty(Options.Authority)))
+                else if (!(string.IsNullOrEmpty(options.MetadataAddress) && string.IsNullOrEmpty(options.Authority)))
                 {
-                    if (string.IsNullOrEmpty(Options.MetadataAddress) && !string.IsNullOrEmpty(Options.Authority))
+                    if (string.IsNullOrEmpty(options.MetadataAddress) && !string.IsNullOrEmpty(options.Authority))
                     {
-                        Options.MetadataAddress = Options.Authority;
-                        if (!Options.MetadataAddress.EndsWith("/", StringComparison.Ordinal))
+                        options.MetadataAddress = options.Authority;
+                        if (!options.MetadataAddress.EndsWith("/", StringComparison.Ordinal))
                         {
-                            Options.MetadataAddress += "/";
+                            options.MetadataAddress += "/";
                         }
 
-                        Options.MetadataAddress += ".well-known/openid-configuration";
+                        options.MetadataAddress += ".well-known/openid-configuration";
                     }
 
-                    if (Options.RequireHttpsMetadata && !Options.MetadataAddress.StartsWith("https://", StringComparison.OrdinalIgnoreCase))
+                    if (options.RequireHttpsMetadata && !options.MetadataAddress.StartsWith("https://", StringComparison.OrdinalIgnoreCase))
                     {
                         throw new InvalidOperationException("The MetadataAddress or Authority must use HTTPS unless disabled for development by setting RequireHttpsMetadata=false.");
                     }
 
-                    var httpClient = new HttpClient(Options.BackchannelHttpHandler ?? new HttpClientHandler());
-                    httpClient.Timeout = Options.BackchannelTimeout;
+                    var httpClient = new HttpClient(options.BackchannelHttpHandler ?? new HttpClientHandler());
+                    httpClient.Timeout = options.BackchannelTimeout;
                     httpClient.MaxResponseContentBufferSize = 1024 * 1024 * 10; // 10 MB
 
-                    Options.ConfigurationManager = new ConfigurationManager<OpenIdConnectConfiguration>(Options.MetadataAddress, new OpenIdConnectConfigurationRetriever(),
-                        new HttpDocumentRetriever(httpClient) { RequireHttps = Options.RequireHttpsMetadata });
+                    options.ConfigurationManager = new ConfigurationManager<OpenIdConnectConfiguration>(options.MetadataAddress, new OpenIdConnectConfigurationRetriever(),
+                        new HttpDocumentRetriever(httpClient) { RequireHttps = options.RequireHttpsMetadata });
                 }
             }
 
+            return options;
         }
 
         /// <summary>

@@ -13,7 +13,6 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.DataProtection;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.WebUtilities;
-using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Primitives;
 using Newtonsoft.Json.Linq;
@@ -38,23 +37,9 @@ namespace Microsoft.AspNetCore.Authentication2.Twitter
             DataProtection = dataProtection;
         }
 
-        public async override Task InitializeAsync(AuthenticationScheme scheme, HttpContext context)
+        public override async Task InitializeAsync(AuthenticationScheme scheme, HttpContext context)
         {
             await base.InitializeAsync(scheme, context);
-
-            if (Options.Events == null)
-            {
-                Options.Events = new TwitterEvents();
-            }
-            if (Options.StateDataFormat == null)
-            {
-                var provider = Options.DataProtectionProvider ?? DataProtection;
-                var dataProtector = provider.CreateProtector(
-                    GetType().FullName, Options.AuthenticationScheme, "v1");
-                Options.StateDataFormat = new SecureDataFormat<RequestToken>(
-                    new RequestTokenSerializer(),
-                    dataProtector);
-            }
 
             _httpClient = new HttpClient(Options.BackchannelHttpHandler ?? new HttpClientHandler());
             _httpClient.Timeout = Options.BackchannelTimeout;
@@ -62,6 +47,27 @@ namespace Microsoft.AspNetCore.Authentication2.Twitter
             _httpClient.DefaultRequestHeaders.Accept.ParseAdd("*/*");
             _httpClient.DefaultRequestHeaders.UserAgent.ParseAdd("Microsoft ASP.NET Core Twitter middleware");
             _httpClient.DefaultRequestHeaders.ExpectContinue = false;
+        }
+
+        protected async override Task<TwitterOptions> CreateOptionsAsync()
+        {
+            var options = await base.CreateOptionsAsync();
+
+            if (options.Events == null)
+            {
+                options.Events = new TwitterEvents();
+            }
+            if (options.StateDataFormat == null)
+            {
+                var provider = options.DataProtectionProvider ?? DataProtection;
+                var dataProtector = provider.CreateProtector(
+                    GetType().FullName, options.AuthenticationScheme, "v1");
+                options.StateDataFormat = new SecureDataFormat<RequestToken>(
+                    new RequestTokenSerializer(),
+                    dataProtector);
+            }
+
+            return options;
         }
 
         protected override async Task<AuthenticateResult> HandleRemoteAuthenticateAsync()

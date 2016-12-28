@@ -6,6 +6,8 @@
     "dotnet-test-xunit": "2.2.0-*",
     "Microsoft.AspNetCore.Authentication2.Cookies": "1.2.0-*",
     "Microsoft.AspNetCore.Authentication2.Google": "1.2.0-*",
+    "Microsoft.AspNetCore.Authentication2.Facebook": "1.2.0-*",
+    "Microsoft.AspNetCore.Authentication2.MicrosoftAccount": "1.2.0-*",
     "Microsoft.AspNetCore.Authentication2.OpenIdConnect": "1.2.0-*",
     "Microsoft.AspNetCore.Authentication2.JwtBearer": "1.2.0-*",
     "Microsoft.AspNetCore.Authentication2.Twitter": "1.2.0-*",

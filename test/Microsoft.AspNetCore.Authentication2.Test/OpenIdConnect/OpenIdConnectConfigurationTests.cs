@@ -35,9 +35,9 @@ namespace Microsoft.AspNetCore.Authentication2.Test.OpenIdConnect
                 o =>
                 {
                     o.ClientId = "Test Id";
+                    o.Authority = TestServerBuilder.DefaultAuthority;
                 },
-                ex => Assert.True(ex.Message.Contains("SignInScheme"))
-            );
+                ex => Assert.Equal("SignInScheme", ex.ParamName));
         }
 
         [Fact]
