@@ -168,11 +168,11 @@ namespace Microsoft.AspNetCore.Authentication2.OpenIdConnect
             }
 
             // REVIEW: revisit
-            //if (Options.ConfigurationManager == null)
-            //{
-            //    throw new InvalidOperationException($"Provide {nameof(Options.Authority)}, {nameof(Options.MetadataAddress)}, "
-            //    + $"{nameof(Options.Configuration)}, or {nameof(Options.ConfigurationManager)} to {nameof(OpenIdConnectOptions)}");
-            //}
+            if (Options.ConfigurationManager == null)
+            {
+                throw new InvalidOperationException($"Provide {nameof(Options.Authority)}, {nameof(Options.MetadataAddress)}, "
+                + $"{nameof(Options.Configuration)}, or {nameof(Options.ConfigurationManager)} to {nameof(OpenIdConnectOptions)}");
+            }
         }
 
         public override async Task<AuthenticationRequestResult> HandleRequestAsync()

@@ -131,6 +131,7 @@ namespace Microsoft.AspNetCore.Authentication2.Test.OpenIdConnect
             {
                 opt.StateDataFormat = stateFormat;
                 opt.ClientId = "Test Id";
+                opt.Authority = TestServerBuilder.DefaultAuthority;
                 opt.Events = new OpenIdConnectEvents()
                 {
                     OnRedirectToIdentityProvider = context =>
@@ -169,6 +170,7 @@ namespace Microsoft.AspNetCore.Authentication2.Test.OpenIdConnect
                 opts =>
                 {
                     opts.ClientId = "Test Id";
+                    opts.Authority = TestServerBuilder.DefaultAuthority;
                     opts.Events = new OpenIdConnectEvents()
                     {
                         OnRedirectToIdentityProvider = context =>
@@ -208,6 +210,7 @@ namespace Microsoft.AspNetCore.Authentication2.Test.OpenIdConnect
                 opts =>
                 {
                     opts.ClientId = "Test Id";
+                    opts.Authority = TestServerBuilder.DefaultAuthority;
                     opts.Events = new OpenIdConnectEvents()
                     {
                         OnRedirectToIdentityProvider = context =>
@@ -251,6 +254,7 @@ namespace Microsoft.AspNetCore.Authentication2.Test.OpenIdConnect
                 opts =>
                 {
                     opts.ClientId = "Test Id";
+                    opts.Authority = TestServerBuilder.DefaultAuthority;
                     opts.Events = new OpenIdConnectEvents()
                     {
                         OnRedirectToIdentityProvider = context =>
@@ -274,6 +278,7 @@ namespace Microsoft.AspNetCore.Authentication2.Test.OpenIdConnect
             // query string is not generated and the authorization endpoint is replaced.
             Assert.Equal(newMessage.TestAuthorizeEndpoint, res.Headers.Location.AbsoluteUri);
         }
+
         [Fact]
         public async Task OnRedirectToIdentityProviderEventHandlesResponse()
         {
@@ -281,6 +286,7 @@ namespace Microsoft.AspNetCore.Authentication2.Test.OpenIdConnect
                 opts =>
                 {
                     opts.ClientId = "Test Id";
+                    opts.Authority = TestServerBuilder.DefaultAuthority;
                     opts.Events = new OpenIdConnectEvents()
                     {
                         OnRedirectToIdentityProvider = context =>
@@ -313,6 +319,7 @@ namespace Microsoft.AspNetCore.Authentication2.Test.OpenIdConnect
                 opts =>
                 {
                     opts.ClientId = "Test Id";
+                    opts.Authority = TestServerBuilder.DefaultAuthority;
                     opts.Events = new OpenIdConnectEvents()
                     {
                         OnRedirectToIdentityProvider = context =>
