@@ -5,7 +5,6 @@ using System;
 using System.Text.Encodings.Web;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
-using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Internal;
 using Microsoft.Extensions.Logging;
 
@@ -52,14 +51,6 @@ namespace Microsoft.AspNetCore.Authentication2{
         {
             Logger = logger.CreateLogger(this.GetType().FullName);
             UrlEncoder = encoder;
-        }
-
-
-        public virtual Task<Exception> ValidateAsync(AuthenticationScheme scheme)
-        {
-            return Task.FromResult<Exception>(null);
-            //// REVIEW: revisit
-            //return ValidateOptionsAsync(GetOptionsFromScheme(scheme));
         }
 
         public abstract Task<Exception> ValidateOptionsAsync();
@@ -169,7 +160,7 @@ namespace Microsoft.AspNetCore.Authentication2{
             }
 
             await HandleSignOutAsync(context);
-            //Logger.AuthenticationSchemeSignedOut(Options.AuthenticationScheme);
+            Logger.AuthenticationSchemeSignedOut(Options.AuthenticationScheme);
         }
 
         protected virtual Task HandleSignOutAsync(SignOutContext context)

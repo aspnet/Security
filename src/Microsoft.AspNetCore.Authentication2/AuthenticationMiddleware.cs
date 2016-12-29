@@ -30,20 +30,8 @@ namespace Microsoft.AspNetCore.Authentication2
 
         public IAuthenticationSchemeProvider Schemes { get; set; }
 
-        private bool _validatedSchemes;
-
         public async Task Invoke(HttpContext context)
         {
-            if (!_validatedSchemes)
-            {
-                var error = await Schemes.ValidateSchemesAsync(context);
-                if (error != null)
-                {
-                    throw error;
-                }
-                _validatedSchemes = true;
-            }
-
             // Only is responsible for automatic authentication now
             var defaultAuthenticate = await Schemes.GetDefaultAuthenticateSchemeAsync();
             if (defaultAuthenticate != null)

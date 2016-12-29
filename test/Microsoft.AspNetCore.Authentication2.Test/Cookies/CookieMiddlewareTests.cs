@@ -287,7 +287,6 @@ namespace Microsoft.AspNetCore.Authentication2.Cookies
             {
                 if (!p.Identities.Any(i => i.AuthenticationType == "xform"))
                 {
-                    // REVIEW: Xform runs twice, once on Authenticate, and then once from the middleware
                     var id = new ClaimsIdentity("xform");
                     id.AddClaim(new Claim("xform", "yup"));
                     p.AddIdentity(id);
@@ -1265,13 +1264,6 @@ namespace Microsoft.AspNetCore.Authentication2.Cookies
                 .Configure(app =>
                 {
                     app.UseAuthentication();
-                    //app.UseCookieAuthentication(options);
-                    // app.UseCookieAuthentication(new CookieAuthenticationOptions { AuthenticationScheme = "Cookie2" });
-
-                    //if (claimsTransform != null)
-                    //{
-                    //    app.UseClaimsTransformation(claimsTransform);
-                    //}
                     app.Use(async (context, next) =>
                     {
                         var req = context.Request;

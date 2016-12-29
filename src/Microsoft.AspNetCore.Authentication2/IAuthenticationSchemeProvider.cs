@@ -13,8 +13,6 @@ namespace Microsoft.AspNetCore.Authentication2
         Task<AuthenticationScheme> GetSchemeAsync(string name);
         Task<AuthenticationScheme> GetDefaultAuthenticateSchemeAsync();
 
-        Task<Exception> ValidateSchemesAsync(HttpContext context);
-
         // Maybe can remove this
         //Task<AuthenticationScheme> GetDefaultChallengeSchemeAsync();
 
