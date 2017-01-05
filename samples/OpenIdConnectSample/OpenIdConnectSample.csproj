@@ -9,9 +9,8 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Content Include="web.config">
-      <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
-    </Content>
+    <Content Include="web.config" CopyToPublishDirectory="PreserveNewest" />
+    <EmbeddedResource Include="compiler\resources\**\*" />
   </ItemGroup>
 
   <ItemGroup>
