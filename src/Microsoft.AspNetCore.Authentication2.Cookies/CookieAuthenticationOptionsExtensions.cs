@@ -8,7 +8,9 @@ namespace Microsoft.Extensions.DependencyInjection
 {
     public static class CookieAuthenticationOptionsExtensions
     {
-        public static IServiceCollection AddCookieAuthentication(this IServiceCollection services) => services.AddCookieAuthentication(CookieAuthenticationDefaults.AuthenticationScheme, configureOptions: null);
+        public static IServiceCollection AddCookieAuthentication(this IServiceCollection services) => services.AddCookieAuthentication(CookieAuthenticationDefaults.AuthenticationScheme);
+
+        public static IServiceCollection AddCookieAuthentication(this IServiceCollection services, string authenticationScheme) => services.AddCookieAuthentication(authenticationScheme, configureOptions: null);
 
         public static IServiceCollection AddCookieAuthentication(this IServiceCollection services, Action<CookieAuthenticationOptions> configureOptions) =>
             services.AddCookieAuthentication(CookieAuthenticationDefaults.AuthenticationScheme, configureOptions);

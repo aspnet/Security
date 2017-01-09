@@ -33,6 +33,7 @@ namespace Microsoft.Extensions.DependencyInjection
             return services;
         }
 
+        // REVIEW: rename to just AddScheme?
         public static IServiceCollection AddSchemeHandler<TOptions, THandler>(this IServiceCollection services, string authenticationScheme, Action<TOptions> configureOptions)
             where TOptions : AuthenticationSchemeOptions, new()
             where THandler : AuthenticationSchemeHandler<TOptions>
@@ -48,5 +49,44 @@ namespace Microsoft.Extensions.DependencyInjection
             services.AddTransient<THandler>();
             return services;
         }
+
+        // REVIEW: rename to just ConfigureScheme?
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <typeparam name="TOptions"></typeparam>
+        /// <param name="services"></param>
+        /// <param name="authenticationScheme"></param>
+        /// <param name="configureOptions"></param>
+        /// <returns></returns>
+        public static IServiceCollection ConfigureSchemeHandler<TOptions>(this IServiceCollection services, string authenticationScheme, Action<TOptions> configureOptions)
+            where TOptions : AuthenticationSchemeOptions, new()
+        {
+            services.Configure<AuthenticationOptions2>(o =>
+            {
+                if (o.SchemeMap.ContainsKey(authenticationScheme))
+                {
+                    var wrappedConfigure = configureOptions;
+                    var oldConfigure = o.SchemeMap[authenticationScheme].Settings as Action<TOptions>;
+                    if (oldConfigure != null)
+                    {
+                        wrappedConfigure = options =>
+                        {
+                            oldConfigure?.Invoke(options);
+                            configureOptions?.Invoke(options);
+                        };
+                    }
+                    o.SchemeMap[authenticationScheme].Settings["ConfigureOptions"] = wrappedConfigure;
+
+                }
+                else
+                {
+                    throw new InvalidOperationException("No scheme registered for " + authenticationScheme);
+                }
+
+            });
+            return services;
+        }
+
     }
 }

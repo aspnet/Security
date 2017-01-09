@@ -10,12 +10,12 @@ namespace Microsoft.AspNetCore.Authentication2
 {
     public class AuthenticationOptions2
     {
-        private readonly IList<AuthenticationScheme> _schemes = new List<AuthenticationScheme>();
+        private readonly IList<AuthenticationSchemeBuilder> _schemes = new List<AuthenticationSchemeBuilder>();
 
         /// <summary>
         /// Returns the schemes in the order they were added (important for request handling priority)
         /// </summary>
-        public IEnumerable<AuthenticationScheme> Schemes
+        public IEnumerable<AuthenticationSchemeBuilder> Schemes
         {
             get
             {
@@ -23,15 +23,45 @@ namespace Microsoft.AspNetCore.Authentication2
             }
         }
 
-        public IDictionary<string, AuthenticationScheme> SchemeMap { get; } = new Dictionary<string, AuthenticationScheme>(); // case sensitive?
+        public IDictionary<string, AuthenticationSchemeBuilder> SchemeMap { get; } = new Dictionary<string, AuthenticationSchemeBuilder>(); // case sensitive?
 
         public void AddScheme(string name, Action<AuthenticationSchemeBuilder> configureBuilder)
         {
+            if (name == null)
+            {
+                throw new ArgumentNullException(nameof(name));
+            }
+            if (configureBuilder == null)
+            {
+                throw new ArgumentNullException(nameof(configureBuilder));
+            }
+            if (SchemeMap.ContainsKey(name))
+            {
+                throw new InvalidOperationException("Scheme already exists: " + name);
+            }
+
             var builder = new AuthenticationSchemeBuilder(name);
             configureBuilder(builder);
-            var scheme = builder.Build(this);
-            _schemes.Add(scheme);
-            SchemeMap[name] = scheme;
+            _schemes.Add(builder);
+            SchemeMap[name] = builder;
+        }
+
+        public void ConfigureScheme(string name, Action<AuthenticationSchemeBuilder> configureBuilder)
+        {
+            if (name == null)
+            {
+                throw new ArgumentNullException(nameof(name));
+            }
+            if (configureBuilder == null)
+            {
+                throw new ArgumentNullException(nameof(configureBuilder));
+            }
+            if (!SchemeMap.ContainsKey(name))
+            {
+                throw new InvalidOperationException("Scheme does not exists: " + name);
+            }
+
+            configureBuilder(SchemeMap[name]);
         }
 
         public string DefaultAuthenticationScheme { get; set; }

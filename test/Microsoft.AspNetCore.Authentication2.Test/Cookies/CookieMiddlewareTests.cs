@@ -882,7 +882,7 @@ namespace Microsoft.AspNetCore.Authentication2.Cookies
         }
 
         [Fact]
-        public async Task UseCookieWithInstanceDoesntUseSharedOptions()
+        public async Task CanConfigureDefaultCookieInstance()
         {
             var builder = new WebHostBuilder()
                 .Configure(app =>
@@ -892,15 +892,39 @@ namespace Microsoft.AspNetCore.Authentication2.Cookies
                 })
                 .ConfigureServices(services =>
                 {
-                    services.AddCookieAuthentication(o => o.CookieName = "One");
                     services.AddCookieAuthentication();
+                    services.ConfigureSchemeHandler<CookieAuthenticationOptions>(CookieAuthenticationDefaults.AuthenticationScheme,
+                        o => o.CookieName = "One");
                 });
             var server = new TestServer(builder);
 
             var transaction = await server.SendAsync("http://example.com");
 
             Assert.Equal(HttpStatusCode.OK, transaction.Response.StatusCode);
-            Assert.True(transaction.SetCookie[0].StartsWith(".AspNetCore.Cookies="));
+            Assert.True(transaction.SetCookie[0].StartsWith("One="));
+        }
+
+        [Fact]
+        public async Task CanConfigureNamedCookieInstance()
+        {
+            var builder = new WebHostBuilder()
+                .Configure(app =>
+                {
+                    app.UseAuthentication();
+                    app.Run(context => context.SignInAsync("Cookie1", new ClaimsPrincipal(new ClaimsIdentity())));
+                })
+                .ConfigureServices(services =>
+                {
+                    services.AddCookieAuthentication("Cookie1");
+                    services.ConfigureSchemeHandler<CookieAuthenticationOptions>("Cookie1",
+                        o => o.CookieName = "One");
+                });
+            var server = new TestServer(builder);
+
+            var transaction = await server.SendAsync("http://example.com");
+
+            Assert.Equal(HttpStatusCode.OK, transaction.Response.StatusCode);
+            Assert.True(transaction.SetCookie[0].StartsWith("One="));
         }
 
         [Fact]
