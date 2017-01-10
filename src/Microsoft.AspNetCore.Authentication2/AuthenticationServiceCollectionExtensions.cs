@@ -43,7 +43,9 @@ namespace Microsoft.Extensions.DependencyInjection
                 o.AddScheme(authenticationScheme, b =>
                 {
                     b.HandlerType = typeof(THandler);
-                    b.Settings["ConfigureOptions"] = configureOptions;
+                    var options = new TOptions();
+                    configureOptions?.Invoke(options);
+                    b.Settings["Options"] = options;
                 });
             });
             services.AddTransient<THandler>();
@@ -66,18 +68,12 @@ namespace Microsoft.Extensions.DependencyInjection
             {
                 if (o.SchemeMap.ContainsKey(authenticationScheme))
                 {
-                    var wrappedConfigure = configureOptions;
-                    var oldConfigure = o.SchemeMap[authenticationScheme].Settings as Action<TOptions>;
-                    if (oldConfigure != null)
+                    var options = o.SchemeMap[authenticationScheme].Settings["Options"] as TOptions;
+                    if (options == null)
                     {
-                        wrappedConfigure = options =>
-                        {
-                            oldConfigure?.Invoke(options);
-                            configureOptions?.Invoke(options);
-                        };
+                        throw new InvalidOperationException("Unable to find options in authenticationScheme settings for: " + authenticationScheme);
                     }
-                    o.SchemeMap[authenticationScheme].Settings["ConfigureOptions"] = wrappedConfigure;
-
+                    configureOptions?.Invoke(options);
                 }
                 else
                 {
@@ -87,6 +83,5 @@ namespace Microsoft.Extensions.DependencyInjection
             });
             return services;
         }
-
     }
 }

@@ -13,7 +13,6 @@ using Microsoft.Extensions.Primitives;
 using Newtonsoft.Json.Linq;
 using Microsoft.AspNetCore.WebUtilities;
 using Microsoft.AspNetCore.DataProtection;
-using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Logging;
 using System.Text.Encodings.Web;
 
@@ -25,45 +24,44 @@ namespace Microsoft.AspNetCore.Authentication2.OAuth
 
         protected IDataProtectionProvider DataProtection { get; }
 
+        /// <summary>
+        /// The handler calls methods on the events which give the application control at certain points where processing is occurring. 
+        /// If it is not provided a default instance is supplied which does nothing when the methods are called.
+        /// </summary>
+        protected new OAuthEvents Events
+        {
+            get { return (OAuthEvents)base.Events; }
+            set { base.Events = value; }
+        }
+
         public OAuthHandler(ILoggerFactory logger, UrlEncoder encoder, IDataProtectionProvider dataProtection)
             : base(logger, encoder)
         {
             DataProtection = dataProtection;
         }
 
-        public override async Task InitializeAsync(AuthenticationScheme scheme, HttpContext context)
+        protected override async Task InitializeOptionsAsync()
         {
-            await base.InitializeAsync(scheme, context);
+            await base.InitializeOptionsAsync();
+            Events = Events ?? new OAuthEvents();
 
             Backchannel = new HttpClient(Options.BackchannelHttpHandler ?? new HttpClientHandler());
             Backchannel.DefaultRequestHeaders.UserAgent.ParseAdd("Microsoft ASP.NET Core OAuth middleware");
             Backchannel.Timeout = Options.BackchannelTimeout;
             Backchannel.MaxResponseContentBufferSize = 1024 * 1024 * 10; // 10 MB
-        }
 
-        protected async override Task<TOptions> CreateOptionsAsync()
-        {
-            var options = await base.CreateOptionsAsync();
-
-            if (!options.CallbackPath.HasValue)
+            if (!Options.CallbackPath.HasValue)
             {
-                throw new ArgumentException(string.Format(CultureInfo.CurrentCulture, Resources.Exception_OptionMustBeProvided, nameof(options.CallbackPath)));
+                throw new ArgumentException(string.Format(CultureInfo.CurrentCulture, Resources.Exception_OptionMustBeProvided, nameof(Options.CallbackPath)));
             }
 
-            if (options.Events == null)
+            if (Options.StateDataFormat == null)
             {
-                options.Events = new OAuthEvents();
-            }
-
-            if (options.StateDataFormat == null)
-            {
-                var provider = options.DataProtectionProvider ?? DataProtection;
+                var provider = Options.DataProtectionProvider ?? DataProtection;
                 var dataProtector = provider.CreateProtector(
-                    GetType().FullName, options.AuthenticationScheme, "v1");
-                options.StateDataFormat = new PropertiesDataFormat(dataProtector);
+                    GetType().FullName, Options.AuthenticationScheme, "v1");
+                Options.StateDataFormat = new PropertiesDataFormat(dataProtector);
             }
-
-            return options;
         }
 
 
@@ -212,7 +210,7 @@ namespace Microsoft.AspNetCore.Authentication2.OAuth
         {
             var ticket = new AuthenticationTicket2(new ClaimsPrincipal(identity), properties, Scheme.Name);
             var context = new OAuthCreatingTicketContext(ticket, Context, Options, Backchannel, tokens);
-            await Options.Events.CreatingTicket(context);
+            await Events.CreatingTicket(context);
             return context.Ticket;
         }
 
@@ -237,7 +235,7 @@ namespace Microsoft.AspNetCore.Authentication2.OAuth
             var redirectContext = new OAuthRedirectToAuthorizationContext(
                 Context, Options,
                 properties, authorizationEndpoint);
-            await Options.Events.RedirectToAuthorizationEndpoint(redirectContext);
+            await Events.RedirectToAuthorizationEndpoint(redirectContext);
             return true;
         }
 

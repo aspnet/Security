@@ -31,15 +31,36 @@ namespace Microsoft.AspNetCore.Authentication2.Twitter
 
         protected IDataProtectionProvider DataProtection { get; }
 
+        /// <summary>
+        /// The handler calls methods on the events which give the application control at certain points where processing is occurring. 
+        /// If it is not provided a default instance is supplied which does nothing when the methods are called.
+        /// </summary>
+        protected new TwitterEvents Events
+        {
+            get { return (TwitterEvents)base.Events; }
+            set { base.Events = value; }
+        }
+
         public TwitterHandler(ILoggerFactory logger, UrlEncoder encoder, IDataProtectionProvider dataProtection)
             : base(logger, encoder)
         {
             DataProtection = dataProtection;
         }
 
-        public override async Task InitializeAsync(AuthenticationScheme scheme, HttpContext context)
+        protected override async Task InitializeOptionsAsync()
         {
-            await base.InitializeAsync(scheme, context);
+            await base.InitializeOptionsAsync();
+            Events = Events ?? new TwitterEvents();
+
+            if (Options.StateDataFormat == null)
+            {
+                var provider = Options.DataProtectionProvider ?? DataProtection;
+                var dataProtector = provider.CreateProtector(
+                    GetType().FullName, Options.AuthenticationScheme, "v1");
+                Options.StateDataFormat = new SecureDataFormat<RequestToken>(
+                    new RequestTokenSerializer(),
+                    dataProtector);
+            }
 
             _httpClient = new HttpClient(Options.BackchannelHttpHandler ?? new HttpClientHandler());
             _httpClient.Timeout = Options.BackchannelTimeout;
@@ -47,27 +68,6 @@ namespace Microsoft.AspNetCore.Authentication2.Twitter
             _httpClient.DefaultRequestHeaders.Accept.ParseAdd("*/*");
             _httpClient.DefaultRequestHeaders.UserAgent.ParseAdd("Microsoft ASP.NET Core Twitter middleware");
             _httpClient.DefaultRequestHeaders.ExpectContinue = false;
-        }
-
-        protected async override Task<TwitterOptions> CreateOptionsAsync()
-        {
-            var options = await base.CreateOptionsAsync();
-
-            if (options.Events == null)
-            {
-                options.Events = new TwitterEvents();
-            }
-            if (options.StateDataFormat == null)
-            {
-                var provider = options.DataProtectionProvider ?? DataProtection;
-                var dataProtector = provider.CreateProtector(
-                    GetType().FullName, options.AuthenticationScheme, "v1");
-                options.StateDataFormat = new SecureDataFormat<RequestToken>(
-                    new RequestTokenSerializer(),
-                    dataProtector);
-            }
-
-            return options;
         }
 
         protected override async Task<AuthenticateResult> HandleRemoteAuthenticateAsync()
@@ -148,7 +148,7 @@ namespace Microsoft.AspNetCore.Authentication2.Twitter
                 Principal = new ClaimsPrincipal(identity)
             };
 
-            await Options.Events.CreatingTicket(context);
+            await Events.CreatingTicket(context);
 
             if (context.Principal?.Identity == null)
             {
@@ -188,7 +188,7 @@ namespace Microsoft.AspNetCore.Authentication2.Twitter
             var redirectContext = new TwitterRedirectToAuthorizationEndpointContext(
                 Context, Options,
                 properties, twitterAuthenticationEndpoint);
-            await Options.Events.RedirectToAuthorizationEndpoint(redirectContext);
+            await Events.RedirectToAuthorizationEndpoint(redirectContext);
             return true;
         }
 

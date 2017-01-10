@@ -33,9 +33,14 @@ namespace Microsoft.AspNetCore.Authentication2.Cookies
             : base(logger, encoder)
         { }
 
-        public override Task<Exception> ValidateOptionsAsync()
+        /// <summary>
+        /// The handler calls methods on the events which give the application control at certain points where processing is occurring. 
+        /// If it is not provided a default instance is supplied which does nothing when the methods are called.
+        /// </summary>
+        protected new CookieAuthenticationEvents Events
         {
-            return Task.FromResult<Exception>(null);
+            get { return (CookieAuthenticationEvents)base.Events; }
+            set { base.Events = value; }
         }
 
         public override async Task InitializeAsync(AuthenticationScheme scheme, HttpContext context)
@@ -46,48 +51,37 @@ namespace Microsoft.AspNetCore.Authentication2.Cookies
             Context.Response.OnStarting(FinishResponseOnce);
         }
 
-        protected async override Task<CookieAuthenticationOptions> CreateOptionsAsync()
+        protected override async Task InitializeOptionsAsync()
         {
-            var options = await base.CreateOptionsAsync();
+            await base.InitializeOptionsAsync();
+            Events = Events ?? new CookieAuthenticationEvents();
 
-            // TODO: This needs to go into some kind of base class for reuse
-            if (options.EventsType != null)
+            if (String.IsNullOrEmpty(Options.CookieName))
             {
-                options.Events = Context.RequestServices.GetRequiredService(options.EventsType) as CookieAuthenticationEvents;
+                Options.CookieName = CookieAuthenticationDefaults.CookiePrefix + Scheme.Name;
             }
-
-            if (options.Events == null)
+            if (Options.TicketDataFormat == null)
             {
-                options.Events = new CookieAuthenticationEvents();
-            }
-            if (String.IsNullOrEmpty(options.CookieName))
-            {
-                options.CookieName = CookieAuthenticationDefaults.CookiePrefix + Scheme.Name;
-            }
-            if (options.TicketDataFormat == null)
-            {
-                var provider = options.DataProtectionProvider ?? Context.RequestServices.GetRequiredService<IDataProtectionProvider>();
+                var provider = Options.DataProtectionProvider ?? Context.RequestServices.GetRequiredService<IDataProtectionProvider>();
                 var dataProtector = provider.CreateProtector(typeof(CookieAuthenticationHandler).FullName, Scheme.Name, "v2");
-                options.TicketDataFormat = new TicketDataFormat(dataProtector);
+                Options.TicketDataFormat = new TicketDataFormat(dataProtector);
             }
-            if (options.CookieManager == null)
+            if (Options.CookieManager == null)
             {
-                options.CookieManager = new ChunkingCookieManager();
+                Options.CookieManager = new ChunkingCookieManager();
             }
-            if (!options.LoginPath.HasValue)
+            if (!Options.LoginPath.HasValue)
             {
-                options.LoginPath = CookieAuthenticationDefaults.LoginPath;
+                Options.LoginPath = CookieAuthenticationDefaults.LoginPath;
             }
-            if (!options.LogoutPath.HasValue)
+            if (!Options.LogoutPath.HasValue)
             {
-                options.LogoutPath = CookieAuthenticationDefaults.LogoutPath;
+                Options.LogoutPath = CookieAuthenticationDefaults.LogoutPath;
             }
-            if (!options.AccessDeniedPath.HasValue)
+            if (!Options.AccessDeniedPath.HasValue)
             {
-                options.AccessDeniedPath = CookieAuthenticationDefaults.AccessDeniedPath;
+                Options.AccessDeniedPath = CookieAuthenticationDefaults.AccessDeniedPath;
             }
-
-            return options;
         }
 
         private Task<AuthenticateResult> EnsureCookieTicket()
@@ -190,7 +184,7 @@ namespace Microsoft.AspNetCore.Authentication2.Cookies
             }
 
             var context = new CookieValidatePrincipalContext(Context, result.Ticket, Options);
-            await Options.Events.ValidatePrincipal(context);
+            await Events.ValidatePrincipal(context);
 
             if (context.Principal == null)
             {
@@ -316,7 +310,7 @@ namespace Microsoft.AspNetCore.Authentication2.Cookies
                 signInContext.Properties.ExpiresUtc = issuedUtc.Add(Options.ExpireTimeSpan);
             }
 
-            await Options.Events.SigningIn(signInContext);
+            await Events.SigningIn(signInContext);
 
             if (signInContext.Properties.IsPersistent)
             {
@@ -354,7 +348,7 @@ namespace Microsoft.AspNetCore.Authentication2.Cookies
                 signInContext.Principal,
                 signInContext.Properties);
 
-            await Options.Events.SignedIn(signedInContext);
+            await Events.SignedIn(signedInContext);
 
             // Only redirect on the login path
             var shouldRedirect = Options.LoginPath.HasValue && OriginalPath == Options.LoginPath;
@@ -377,7 +371,7 @@ namespace Microsoft.AspNetCore.Authentication2.Cookies
                 signOutContext.Properties,
                 cookieOptions);
 
-            await Options.Events.SigningOut(context);
+            await Events.SigningOut(context);
 
             Options.CookieManager.DeleteCookie(
                 Context,
@@ -415,7 +409,7 @@ namespace Microsoft.AspNetCore.Authentication2.Cookies
 
                 if (redirectUri != null)
                 {
-                    await Options.Events.RedirectToReturnUrl(
+                    await Events.RedirectToReturnUrl(
                         new CookieRedirectContext(Context, Options, redirectUri, properties));
                 }
             }
@@ -444,7 +438,7 @@ namespace Microsoft.AspNetCore.Authentication2.Cookies
             }
             var accessDeniedUri = Options.AccessDeniedPath + QueryString.Create(Options.ReturnUrlParameter, returnUrl);
             var redirectContext = new CookieRedirectContext(Context, Options, BuildRedirectUri(accessDeniedUri), properties);
-            await Options.Events.RedirectToAccessDenied(redirectContext);
+            await Events.RedirectToAccessDenied(redirectContext);
             return true;
         }
 
@@ -464,7 +458,7 @@ namespace Microsoft.AspNetCore.Authentication2.Cookies
 
             var loginUri = Options.LoginPath + QueryString.Create(Options.ReturnUrlParameter, redirectUri);
             var redirectContext = new CookieRedirectContext(Context, Options, BuildRedirectUri(loginUri), properties);
-            await Options.Events.RedirectToLogin(redirectContext);
+            await Events.RedirectToLogin(redirectContext);
             return true;
 
         }

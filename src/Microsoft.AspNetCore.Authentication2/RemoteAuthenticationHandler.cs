@@ -6,7 +6,6 @@ using System.Security.Cryptography;
 using System.Text.Encodings.Web;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
-using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 
 namespace Microsoft.AspNetCore.Authentication2
@@ -24,39 +23,24 @@ namespace Microsoft.AspNetCore.Authentication2
             : base(logger, encoder)
         { }
 
-        public override Task<Exception> ValidateOptionsAsync()
+        protected override async Task InitializeOptionsAsync()
         {
+            await base.InitializeOptionsAsync();
+            Events = Events ?? new RemoteAuthenticationEvents();
+            if (Options.SignInScheme == null && Scheme.SharedOptions.DefaultSignInScheme != null)
+            {
+                Options.SignInScheme = Scheme.SharedOptions.DefaultSignInScheme;
+            }
+
             if (Options.CallbackPath == null || !Options.CallbackPath.HasValue)
             {
-                return Task.FromResult<Exception>(new ArgumentException(Resources.FormatException_OptionMustBeProvided(nameof(Options.CallbackPath)), nameof(Options.CallbackPath)));
+                throw new ArgumentException(Resources.FormatException_OptionMustBeProvided(nameof(Options.CallbackPath)), nameof(Options.CallbackPath));
             }
 
             if (string.IsNullOrEmpty(Options.SignInScheme))
             {
-                return Task.FromResult<Exception>(new ArgumentException(Resources.FormatException_OptionMustBeProvided(nameof(Options.SignInScheme)), nameof(Options.SignInScheme)));
+                throw new ArgumentException(Resources.FormatException_OptionMustBeProvided(nameof(Options.SignInScheme)), nameof(Options.SignInScheme));
             }
-            return Task.FromResult<Exception>(null);
-        }
-
-        protected async override Task<TOptions> CreateOptionsAsync()
-        {
-            var options = await base.CreateOptionsAsync();
-            // TODO: This needs to go into some kind of base class for reuse
-            if (options.EventsType != null)
-            {
-                options.Events = Context.RequestServices.GetRequiredService(Options.EventsType) as RemoteAuthenticationEvents;
-            }
-
-            if (options.SignInScheme == null && Scheme.SharedOptions.DefaultSignInScheme != null)
-            {
-                options.SignInScheme = Scheme.SharedOptions.DefaultSignInScheme;
-            }
-            if (options.Events == null)
-            {
-                options.Events = new RemoteAuthenticationEvents();
-            }
-
-            return options;
         }
 
         public override async Task<AuthenticationRequestResult> HandleRequestAsync()

@@ -5,6 +5,7 @@ using System;
 using System.Text.Encodings.Web;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Internal;
 using Microsoft.Extensions.Logging;
 
@@ -24,6 +25,12 @@ namespace Microsoft.AspNetCore.Authentication2{
         protected ILogger Logger { get; private set; }
 
         protected UrlEncoder UrlEncoder { get; private set; }
+
+        /// <summary>
+        /// The handler calls methods on the events which give the application control at certain points where processing is occurring. 
+        /// If it is not provided a default instance is supplied which does nothing when the methods are called.
+        /// </summary>
+        protected virtual object Events { get; set; }
 
         protected HttpRequest Request
         {
@@ -53,35 +60,29 @@ namespace Microsoft.AspNetCore.Authentication2{
             UrlEncoder = encoder;
         }
 
-        public abstract Task<Exception> ValidateOptionsAsync();
-
         public virtual async Task InitializeAsync(AuthenticationScheme scheme, HttpContext context)
         {
             Scheme = scheme;
             Context = context;
             OriginalPathBase = Request.PathBase;
             OriginalPath = Request.Path;
-            Options = await CreateOptionsAsync();
-            var error = await ValidateOptionsAsync();
-            if (error != null)
-            {
-                throw error;
-            }
+            Options = scheme.Settings["Options"] as TOptions;
+            await InitializeOptionsAsync();
         }
 
-        protected virtual Task<TOptions> CreateOptionsAsync()
+        protected virtual Task InitializeOptionsAsync()
         {
-            var options = new TOptions();
-            var configureOptions = Scheme.Settings["ConfigureOptions"] as Action<TOptions>;
-            configureOptions?.Invoke(options);
-            options.AuthenticationScheme = Scheme.Name; // REVIEW: maybe dedupe and remove scheme from options
-            if (string.IsNullOrEmpty(options.ClaimsIssuer))
+            Events = Options.Events;
+            if (Options.EventsType != null)
+            {
+                Events = Context.RequestServices.GetRequiredService(Options.EventsType);
+            }
+            if (string.IsNullOrEmpty(Options.ClaimsIssuer))
             {
                 // Default to something reasonable
-                options.ClaimsIssuer = Scheme.Name;
+                Options.ClaimsIssuer = Scheme.Name;
             }
-
-            return Task.FromResult(options);
+            return TaskCache.CompletedTask;
         }
 
         protected string BuildRedirectUri(string targetPath)

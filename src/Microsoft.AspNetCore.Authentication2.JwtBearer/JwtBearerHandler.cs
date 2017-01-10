@@ -26,61 +26,58 @@ namespace Microsoft.AspNetCore.Authentication2.JwtBearer
             : base(logger, encoder)
         { }
 
-        public override Task<Exception> ValidateOptionsAsync()
+        /// <summary>
+        /// The handler calls methods on the events which give the application control at certain points where processing is occurring. 
+        /// If it is not provided a default instance is supplied which does nothing when the methods are called.
+        /// </summary>
+        protected new JwtBearerEvents Events
         {
-            // TODO: what can we move from Initialize?
-            return Task.FromResult<Exception>(null);
+            get { return (JwtBearerEvents)base.Events; }
+            set { base.Events = value; }
         }
 
-        protected async override Task<JwtBearerOptions> CreateOptionsAsync()
+        protected override async Task InitializeOptionsAsync()
         {
-            var options = await base.CreateOptionsAsync();
+            await base.InitializeOptionsAsync();
+            Events = Events ?? new JwtBearerEvents();
 
-            // TODO: add DI event activation
-            if (options.Events == null)
+            if (string.IsNullOrEmpty(Options.TokenValidationParameters.ValidAudience) && !string.IsNullOrEmpty(Options.Audience))
             {
-                options.Events = new JwtBearerEvents();
+                Options.TokenValidationParameters.ValidAudience = Options.Audience;
             }
 
-            if (string.IsNullOrEmpty(options.TokenValidationParameters.ValidAudience) && !string.IsNullOrEmpty(options.Audience))
+            if (Options.ConfigurationManager == null)
             {
-                options.TokenValidationParameters.ValidAudience = options.Audience;
-            }
-
-            if (options.ConfigurationManager == null)
-            {
-                if (options.Configuration != null)
+                if (Options.Configuration != null)
                 {
-                    options.ConfigurationManager = new StaticConfigurationManager<OpenIdConnectConfiguration>(options.Configuration);
+                    Options.ConfigurationManager = new StaticConfigurationManager<OpenIdConnectConfiguration>(Options.Configuration);
                 }
-                else if (!(string.IsNullOrEmpty(options.MetadataAddress) && string.IsNullOrEmpty(options.Authority)))
+                else if (!(string.IsNullOrEmpty(Options.MetadataAddress) && string.IsNullOrEmpty(Options.Authority)))
                 {
-                    if (string.IsNullOrEmpty(options.MetadataAddress) && !string.IsNullOrEmpty(options.Authority))
+                    if (string.IsNullOrEmpty(Options.MetadataAddress) && !string.IsNullOrEmpty(Options.Authority))
                     {
-                        options.MetadataAddress = options.Authority;
-                        if (!options.MetadataAddress.EndsWith("/", StringComparison.Ordinal))
+                        Options.MetadataAddress = Options.Authority;
+                        if (!Options.MetadataAddress.EndsWith("/", StringComparison.Ordinal))
                         {
-                            options.MetadataAddress += "/";
+                            Options.MetadataAddress += "/";
                         }
 
-                        options.MetadataAddress += ".well-known/openid-configuration";
+                        Options.MetadataAddress += ".well-known/openid-configuration";
                     }
 
-                    if (options.RequireHttpsMetadata && !options.MetadataAddress.StartsWith("https://", StringComparison.OrdinalIgnoreCase))
+                    if (Options.RequireHttpsMetadata && !Options.MetadataAddress.StartsWith("https://", StringComparison.OrdinalIgnoreCase))
                     {
                         throw new InvalidOperationException("The MetadataAddress or Authority must use HTTPS unless disabled for development by setting RequireHttpsMetadata=false.");
                     }
 
-                    var httpClient = new HttpClient(options.BackchannelHttpHandler ?? new HttpClientHandler());
-                    httpClient.Timeout = options.BackchannelTimeout;
+                    var httpClient = new HttpClient(Options.BackchannelHttpHandler ?? new HttpClientHandler());
+                    httpClient.Timeout = Options.BackchannelTimeout;
                     httpClient.MaxResponseContentBufferSize = 1024 * 1024 * 10; // 10 MB
 
-                    options.ConfigurationManager = new ConfigurationManager<OpenIdConnectConfiguration>(options.MetadataAddress, new OpenIdConnectConfigurationRetriever(),
-                        new HttpDocumentRetriever(httpClient) { RequireHttps = options.RequireHttpsMetadata });
+                    Options.ConfigurationManager = new ConfigurationManager<OpenIdConnectConfiguration>(Options.MetadataAddress, new OpenIdConnectConfigurationRetriever(),
+                        new HttpDocumentRetriever(httpClient) { RequireHttps = Options.RequireHttpsMetadata });
                 }
             }
-
-            return options;
         }
 
         /// <summary>
@@ -97,7 +94,7 @@ namespace Microsoft.AspNetCore.Authentication2.JwtBearer
                 var messageReceivedContext = new MessageReceivedContext(Context, Options);
 
                 // event can set the token
-                await Options.Events.MessageReceived(messageReceivedContext);
+                await Events.MessageReceived(messageReceivedContext);
                 if (messageReceivedContext.CheckEventResult(out result))
                 {
                     return result;
@@ -188,7 +185,7 @@ namespace Microsoft.AspNetCore.Authentication2.JwtBearer
                             SecurityToken = validatedToken,
                         };
 
-                        await Options.Events.TokenValidated(tokenValidatedContext);
+                        await Events.TokenValidated(tokenValidatedContext);
                         if (tokenValidatedContext.CheckEventResult(out result))
                         {
                             return result;
@@ -214,7 +211,7 @@ namespace Microsoft.AspNetCore.Authentication2.JwtBearer
                         Exception = (validationFailures.Count == 1) ? validationFailures[0] : new AggregateException(validationFailures)
                     };
 
-                    await Options.Events.AuthenticationFailed(authenticationFailedContext);
+                    await Events.AuthenticationFailed(authenticationFailedContext);
                     if (authenticationFailedContext.CheckEventResult(out result))
                     {
                         return result;
@@ -234,7 +231,7 @@ namespace Microsoft.AspNetCore.Authentication2.JwtBearer
                     Exception = ex
                 };
 
-                await Options.Events.AuthenticationFailed(authenticationFailedContext);
+                await Events.AuthenticationFailed(authenticationFailedContext);
                 if (authenticationFailedContext.CheckEventResult(out result))
                 {
                     return result;
@@ -260,7 +257,7 @@ namespace Microsoft.AspNetCore.Authentication2.JwtBearer
                 eventContext.ErrorDescription = CreateErrorDescription(eventContext.AuthenticateFailure);
             }
 
-            await Options.Events.Challenge(eventContext);
+            await Events.Challenge(eventContext);
             if (eventContext.HandledResponse)
             {
                 return true;

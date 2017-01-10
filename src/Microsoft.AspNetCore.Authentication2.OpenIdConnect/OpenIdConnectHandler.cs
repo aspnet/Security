@@ -65,119 +65,111 @@ namespace Microsoft.AspNetCore.Authentication2.OpenIdConnect
             DataProtection = dataProtection;
         }
 
-        public override async Task<Exception> ValidateOptionsAsync()
+        /// <summary>
+        /// The handler calls methods on the events which give the application control at certain points where processing is occurring. 
+        /// If it is not provided a default instance is supplied which does nothing when the methods are called.
+        /// </summary>
+        protected new OpenIdConnectEvents Events
         {
-            var error = await base.ValidateOptionsAsync();
-            if (error != null)
-            {
-                return error;
-            }
-
-            if (string.IsNullOrEmpty(Options.ClientId))
-            {
-                return new ArgumentException("Options.ClientId must be provided", nameof(Options.ClientId));
-            }
-
-            if (!Options.CallbackPath.HasValue)
-            {
-                return new ArgumentException("Options.CallbackPath must be provided.", nameof(Options.CallbackPath));
-            }
-
-            if (string.IsNullOrEmpty(Options.SignInScheme))
-            {
-                return new ArgumentException("Options.SignInScheme is required.", nameof(Options.SignInScheme));
-            }
-
-            return null;
+            get { return (OpenIdConnectEvents)base.Events; }
+            set { base.Events = value; }
         }
 
-        protected async override Task<OpenIdConnectOptions> CreateOptionsAsync()
+        protected override async Task InitializeOptionsAsync()
         {
-            var options = await base.CreateOptionsAsync();
-            if (string.IsNullOrEmpty(options.SignOutScheme))
+            await base.InitializeOptionsAsync();
+            Events = Events ?? new OpenIdConnectEvents();
+
+            if (string.IsNullOrEmpty(Options.SignOutScheme))
             {
-                options.SignOutScheme = options.SignInScheme;
+                Options.SignOutScheme = Options.SignInScheme;
             }
 
-            if (options.StateDataFormat == null)
+            if (Options.StateDataFormat == null)
             {
-                var provider = options.DataProtectionProvider ?? DataProtection;
+                var provider = Options.DataProtectionProvider ?? DataProtection;
                 var dataProtector = provider.CreateProtector(
-                    GetType().FullName, options.AuthenticationScheme, "v1");
-                options.StateDataFormat = new PropertiesDataFormat(dataProtector);
+                    GetType().FullName, Options.AuthenticationScheme, "v1");
+                Options.StateDataFormat = new PropertiesDataFormat(dataProtector);
             }
 
-            if (options.StringDataFormat == null)
+            if (Options.StringDataFormat == null)
             {
-                var provider = options.DataProtectionProvider ?? DataProtection;
+                var provider = Options.DataProtectionProvider ?? DataProtection;
                 var dataProtector = provider.CreateProtector(
                     GetType().FullName,
                     typeof(string).FullName,
-                    options.AuthenticationScheme,
+                    Options.AuthenticationScheme,
                     "v1");
 
-                options.StringDataFormat = new SecureDataFormat<string>(new StringSerializer(), dataProtector);
+                Options.StringDataFormat = new SecureDataFormat<string>(new StringSerializer(), dataProtector);
             }
 
-            if (options.Events == null)
+            if (Events == null)
             {
-                options.Events = new OpenIdConnectEvents();
+                Events = new OpenIdConnectEvents();
             }
 
-            if (string.IsNullOrEmpty(options.TokenValidationParameters.ValidAudience) && !string.IsNullOrEmpty(options.ClientId))
+            if (string.IsNullOrEmpty(Options.TokenValidationParameters.ValidAudience) && !string.IsNullOrEmpty(Options.ClientId))
             {
-                options.TokenValidationParameters.ValidAudience = options.ClientId;
+                Options.TokenValidationParameters.ValidAudience = Options.ClientId;
             }
 
-            Backchannel = new HttpClient(options.BackchannelHttpHandler ?? new HttpClientHandler());
+            Backchannel = new HttpClient(Options.BackchannelHttpHandler ?? new HttpClientHandler());
             Backchannel.DefaultRequestHeaders.UserAgent.ParseAdd("Microsoft ASP.NET Core OpenIdConnect middleware");
-            Backchannel.Timeout = options.BackchannelTimeout;
+            Backchannel.Timeout = Options.BackchannelTimeout;
             Backchannel.MaxResponseContentBufferSize = 1024 * 1024 * 10; // 10 MB
 
-            if (options.ConfigurationManager == null)
+            if (Options.ConfigurationManager == null)
             {
-                if (options.Configuration != null)
+                if (Options.Configuration != null)
                 {
-                    options.ConfigurationManager = new StaticConfigurationManager<OpenIdConnectConfiguration>(options.Configuration);
+                    Options.ConfigurationManager = new StaticConfigurationManager<OpenIdConnectConfiguration>(Options.Configuration);
                 }
-                else if (!(string.IsNullOrEmpty(options.MetadataAddress) && string.IsNullOrEmpty(options.Authority)))
+                else if (!(string.IsNullOrEmpty(Options.MetadataAddress) && string.IsNullOrEmpty(Options.Authority)))
                 {
-                    if (string.IsNullOrEmpty(options.MetadataAddress) && !string.IsNullOrEmpty(options.Authority))
+                    if (string.IsNullOrEmpty(Options.MetadataAddress) && !string.IsNullOrEmpty(Options.Authority))
                     {
-                        options.MetadataAddress = options.Authority;
-                        if (!options.MetadataAddress.EndsWith("/", StringComparison.Ordinal))
+                        Options.MetadataAddress = Options.Authority;
+                        if (!Options.MetadataAddress.EndsWith("/", StringComparison.Ordinal))
                         {
-                            options.MetadataAddress += "/";
+                            Options.MetadataAddress += "/";
                         }
 
-                        options.MetadataAddress += ".well-known/openid-configuration";
+                        Options.MetadataAddress += ".well-known/openid-configuration";
                     }
 
-                    if (options.RequireHttpsMetadata && !options.MetadataAddress.StartsWith("https://", StringComparison.OrdinalIgnoreCase))
+                    if (Options.RequireHttpsMetadata && !Options.MetadataAddress.StartsWith("https://", StringComparison.OrdinalIgnoreCase))
                     {
                         throw new InvalidOperationException("The MetadataAddress or Authority must use HTTPS unless disabled for development by setting RequireHttpsMetadata=false.");
                     }
 
-                    options.ConfigurationManager = new ConfigurationManager<OpenIdConnectConfiguration>(options.MetadataAddress, new OpenIdConnectConfigurationRetriever(),
-                        new HttpDocumentRetriever(Backchannel) { RequireHttps = options.RequireHttpsMetadata });
+                    Options.ConfigurationManager = new ConfigurationManager<OpenIdConnectConfiguration>(Options.MetadataAddress, new OpenIdConnectConfigurationRetriever(),
+                        new HttpDocumentRetriever(Backchannel) { RequireHttps = Options.RequireHttpsMetadata });
                 }
             }
 
-            if (options.ConfigurationManager == null)
+            if (string.IsNullOrEmpty(Options.ClientId))
             {
-                throw new InvalidOperationException($"Provide {nameof(options.Authority)}, {nameof(options.MetadataAddress)}, "
-                + $"{nameof(options.Configuration)}, or {nameof(options.ConfigurationManager)} to {nameof(OpenIdConnectOptions)}");
+                throw new ArgumentException("Options.ClientId must be provided", nameof(Options.ClientId));
             }
 
-            return options;
+            if (!Options.CallbackPath.HasValue)
+            {
+                throw new ArgumentException("Options.CallbackPath must be provided.", nameof(Options.CallbackPath));
+            }
+
+            if (string.IsNullOrEmpty(Options.SignInScheme))
+            {
+                throw new ArgumentException("Options.SignInScheme is required.", nameof(Options.SignInScheme));
+            }
+
+            if (Options.ConfigurationManager == null)
+            {
+                throw new InvalidOperationException($"Provide {nameof(Options.Authority)}, {nameof(Options.MetadataAddress)}, "
+                + $"{nameof(Options.Configuration)}, or {nameof(Options.ConfigurationManager)} to {nameof(OpenIdConnectOptions)}");
+            }
         }
-
-        public override async Task InitializeAsync(AuthenticationScheme scheme, HttpContext context)
-        {
-            await base.InitializeAsync(scheme, context);
-
-        }
-
 
         public override async Task<AuthenticationRequestResult> HandleRequestAsync()
         {
@@ -214,7 +206,7 @@ namespace Microsoft.AspNetCore.Authentication2.OpenIdConnect
             }
 
             var remoteSignOutContext = new RemoteSignOutContext(Context, Options, message);
-            await Options.Events.RemoteSignOut(remoteSignOutContext);
+            await Events.RemoteSignOut(remoteSignOutContext);
 
             if (remoteSignOutContext.HandledResponse)
             {
@@ -303,7 +295,7 @@ namespace Microsoft.AspNetCore.Authentication2.OpenIdConnect
                 ProtocolMessage = message
             };
 
-            await Options.Events.RedirectToIdentityProviderForSignOut(redirectContext);
+            await Events.RedirectToIdentityProviderForSignOut(redirectContext);
             if (redirectContext.HandledResponse)
             {
                 Logger.RedirectToIdentityProviderForSignOutHandledResponse();
@@ -452,7 +444,7 @@ namespace Microsoft.AspNetCore.Authentication2.OpenIdConnect
                 ProtocolMessage = message
             };
 
-            await Options.Events.RedirectToIdentityProvider(redirectContext);
+            await Events.RedirectToIdentityProvider(redirectContext);
             if (redirectContext.HandledResponse)
             {
                 Logger.RedirectToIdentityProviderHandledResponse();
@@ -1099,7 +1091,7 @@ namespace Microsoft.AspNetCore.Authentication2.OpenIdConnect
                 Properties = properties,
             };
 
-            await Options.Events.MessageReceived(messageReceivedContext);
+            await Events.MessageReceived(messageReceivedContext);
             if (messageReceivedContext.HandledResponse)
             {
                 Logger.MessageReceivedContextHandledResponse();
@@ -1124,7 +1116,7 @@ namespace Microsoft.AspNetCore.Authentication2.OpenIdConnect
                 Nonce = nonce,
             };
 
-            await Options.Events.TokenValidated(tokenValidatedContext);
+            await Events.TokenValidated(tokenValidatedContext);
             if (tokenValidatedContext.HandledResponse)
             {
                 Logger.TokenValidatedHandledResponse();
@@ -1160,7 +1152,7 @@ namespace Microsoft.AspNetCore.Authentication2.OpenIdConnect
                 Backchannel = Backchannel,
             };
 
-            await Options.Events.AuthorizationCodeReceived(authorizationCodeReceivedContext);
+            await Events.AuthorizationCodeReceived(authorizationCodeReceivedContext);
             if (authorizationCodeReceivedContext.HandledResponse)
             {
                 Logger.AuthorizationCodeReceivedContextHandledResponse();
@@ -1187,7 +1179,7 @@ namespace Microsoft.AspNetCore.Authentication2.OpenIdConnect
                 Ticket = ticket
             };
 
-            await Options.Events.TokenResponseReceived(eventContext);
+            await Events.TokenResponseReceived(eventContext);
             if (eventContext.HandledResponse)
             {
                 Logger.TokenResponseReceivedHandledResponse();
@@ -1211,7 +1203,7 @@ namespace Microsoft.AspNetCore.Authentication2.OpenIdConnect
                 User = user,
             };
 
-            await Options.Events.UserInformationReceived(userInformationReceivedContext);
+            await Events.UserInformationReceived(userInformationReceivedContext);
             if (userInformationReceivedContext.HandledResponse)
             {
                 Logger.UserInformationReceivedHandledResponse();
@@ -1232,7 +1224,7 @@ namespace Microsoft.AspNetCore.Authentication2.OpenIdConnect
                 Exception = exception
             };
 
-            await Options.Events.AuthenticationFailed(authenticationFailedContext);
+            await Events.AuthenticationFailed(authenticationFailedContext);
             if (authenticationFailedContext.HandledResponse)
             {
                 Logger.AuthenticationFailedContextHandledResponse();
