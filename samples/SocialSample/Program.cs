@@ -1,8 +1,9 @@
-﻿using System.IO;
+﻿using System;
+using System.IO;
+using System.Net;
 using System.Reflection;
 using System.Security.Cryptography.X509Certificates;
 using Microsoft.AspNetCore.Hosting;
-using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.FileProviders;
 
 namespace SocialSample
@@ -11,14 +12,34 @@ namespace SocialSample
     {
         public static void Main(string[] args)
         {
-            var host = new WebHostBuilder()
-                .UseKestrel(options =>
+            var builder = new WebHostBuilder();
+            var url = Environment.GetEnvironmentVariable("ASPNETCORE_URLS");
+
+            if (!string.IsNullOrEmpty(Environment.GetEnvironmentVariable("ASPNETCORE_TOKEN"))
+                || string.IsNullOrEmpty(url))
+            {
+                // IIS/ANCM or no config
+                builder.UseKestrel();
+            }
+            else
+            {
+                // Remove or Kestrel will complain
+                builder.UseSetting(WebHostDefaults.ServerUrlsKey, string.Empty);
+
+                var uri = new Uri(url);
+                builder.UseKestrel(options =>
                 {
-                    //Configure SSL
-                    var serverCertificate = LoadCertificate();
-                    options.UseHttps(serverCertificate);
-                })
-                .UseContentRoot(Directory.GetCurrentDirectory())
+                    options.Listen(IPAddress.Loopback, uri.Port, endpointOptions =>
+                    {
+                        if (string.Equals(uri.Scheme, "https", StringComparison.Ordinal))
+                        {
+                            endpointOptions.UseHttps(LoadCertificate());
+                        }
+                    });
+                });
+            }
+
+            var host = builder.UseContentRoot(Directory.GetCurrentDirectory())
                 .UseIISIntegration()
                 .UseStartup<Startup>()
                 .Build();
