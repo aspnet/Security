@@ -1,7 +1,6 @@
 // Copyright (c) .NET Foundation. All rights reserved.
 // Licensed under the Apache License, Version 2.0. See License.txt in the project root for license information.
 
-using System;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 
@@ -21,6 +20,7 @@ namespace Microsoft.AspNetCore.Authentication2
         Task<AuthenticationRequestResult> HandleRequestAsync();
     }
 
+    // REVIEW: Name?  Or just return to a bool for Skip/Handled
     public class AuthenticationRequestResult
     {
         /// <summary>
@@ -33,13 +33,7 @@ namespace Microsoft.AspNetCore.Authentication2
         /// </summary>
         public bool Skipped { get; private set; }
 
-        /// <summary>
-        /// If true, continue with the rest of the middleware pipeline, but bypass the rest of the handlers.
-        /// </summary>
-        public bool Bypassed { get; private set; }
-
         public static AuthenticationRequestResult Skip = new AuthenticationRequestResult { Skipped = true };
         public static AuthenticationRequestResult Handle = new AuthenticationRequestResult { Handled = true };
-        public static AuthenticationRequestResult Bypass = new AuthenticationRequestResult { Bypassed = true };
     }
 }

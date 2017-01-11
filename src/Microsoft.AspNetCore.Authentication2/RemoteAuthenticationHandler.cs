@@ -253,7 +253,7 @@ namespace Microsoft.AspNetCore.Authentication2
 
             if (!string.Equals(correlationCookie, CorrelationMarker, StringComparison.Ordinal))
             {
-                //Logger.UnexpectedCorrelationCookieValue(cookieName, correlationCookie);
+                Logger.UnexpectedCorrelationCookieValue(cookieName, correlationCookie);
                 return false;
             }
 

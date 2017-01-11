@@ -62,6 +62,15 @@ namespace Microsoft.AspNetCore.Authentication2{
 
         public virtual async Task InitializeAsync(AuthenticationScheme scheme, HttpContext context)
         {
+            if (scheme == null)
+            {
+                throw new ArgumentNullException(nameof(scheme));
+            }
+            if (context == null)
+            {
+                throw new ArgumentNullException(nameof(context));
+            }
+
             Scheme = scheme;
             Context = context;
             OriginalPathBase = Request.PathBase;
@@ -73,6 +82,7 @@ namespace Microsoft.AspNetCore.Authentication2{
         protected virtual Task InitializeOptionsAsync()
         {
             Events = Options.Events;
+            Options.AuthenticationScheme = Scheme.Name; // REVIEW: should consider removing?
             if (Options.EventsType != null)
             {
                 Events = Context.RequestServices.GetRequiredService(Options.EventsType);

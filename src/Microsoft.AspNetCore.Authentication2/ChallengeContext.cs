@@ -24,7 +24,6 @@ namespace Microsoft.AspNetCore.Authentication2
             Behavior = behavior;
         }
 
-
         public ChallengeBehavior Behavior { get; }
     }
 }

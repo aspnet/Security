@@ -53,10 +53,6 @@ namespace Microsoft.AspNetCore.Authentication2
                 {
                     return;
                 }
-                if (result.Bypassed)
-                {
-                    break;
-                }
                 // result.Skipped is a no-op
             }
             await _next(context);
