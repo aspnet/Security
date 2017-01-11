@@ -64,7 +64,6 @@ namespace Microsoft.AspNetCore.Authentication2.OAuth
             }
         }
 
-
         protected override async Task<AuthenticateResult> HandleRemoteAuthenticateAsync()
         {
             AuthenticationProperties2 properties = null;
@@ -214,7 +213,7 @@ namespace Microsoft.AspNetCore.Authentication2.OAuth
             return context.Ticket;
         }
 
-        protected override async Task<bool> HandleUnauthorizedAsync(ChallengeContext context)
+        protected override async Task HandleUnauthorizedAsync(ChallengeContext context)
         {
             if (context == null)
             {
@@ -222,7 +221,6 @@ namespace Microsoft.AspNetCore.Authentication2.OAuth
             }
 
             var properties = context.Properties;
-
             if (string.IsNullOrEmpty(properties.RedirectUri))
             {
                 properties.RedirectUri = CurrentUri;
@@ -236,7 +234,6 @@ namespace Microsoft.AspNetCore.Authentication2.OAuth
                 Context, Options,
                 properties, authorizationEndpoint);
             await Events.RedirectToAuthorizationEndpoint(redirectContext);
-            return true;
         }
 
         protected virtual string BuildChallengeUrl(AuthenticationProperties2 properties, string redirectUri)

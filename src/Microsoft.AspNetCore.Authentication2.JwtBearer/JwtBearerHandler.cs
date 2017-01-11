@@ -241,10 +241,9 @@ namespace Microsoft.AspNetCore.Authentication2.JwtBearer
             }
         }
 
-        protected override async Task<bool> HandleUnauthorizedAsync(ChallengeContext context)
+        protected override async Task HandleUnauthorizedAsync(ChallengeContext context)
         {
             var authResult = await HandleAuthenticateOnceSafeAsync();
-
             var eventContext = new JwtBearerChallengeContext(Context, Options, context.Properties)
             {
                 AuthenticateFailure = authResult?.Failure
@@ -258,13 +257,9 @@ namespace Microsoft.AspNetCore.Authentication2.JwtBearer
             }
 
             await Events.Challenge(eventContext);
-            if (eventContext.HandledResponse)
+            if (eventContext.HandledResponse || eventContext.Skipped)
             {
-                return true;
-            }
-            if (eventContext.Skipped)
-            {
-                return false;
+                return;
             }
 
             Response.StatusCode = 401;
@@ -317,8 +312,6 @@ namespace Microsoft.AspNetCore.Authentication2.JwtBearer
 
                 Response.Headers.Append(HeaderNames.WWWAuthenticate, builder.ToString());
             }
-
-            return false;
         }
 
         private static string CreateErrorDescription(Exception authFailure)

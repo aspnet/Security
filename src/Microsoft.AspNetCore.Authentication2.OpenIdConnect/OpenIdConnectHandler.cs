@@ -171,7 +171,7 @@ namespace Microsoft.AspNetCore.Authentication2.OpenIdConnect
             }
         }
 
-        public override async Task<AuthenticationRequestResult> HandleRequestAsync()
+        public override async Task<AuthenticationRequestStatus> HandleRequestAsync()
         {
             if (Options.RemoteSignOutPath.HasValue && Options.RemoteSignOutPath == Request.Path)
             {
@@ -185,7 +185,7 @@ namespace Microsoft.AspNetCore.Authentication2.OpenIdConnect
             return await base.HandleRequestAsync();
         }
 
-        protected virtual async Task<AuthenticationRequestResult> HandleRemoteSignOutAsync()
+        protected virtual async Task<AuthenticationRequestStatus> HandleRemoteSignOutAsync()
         {
             OpenIdConnectMessage message = null;
 
@@ -211,17 +211,17 @@ namespace Microsoft.AspNetCore.Authentication2.OpenIdConnect
             if (remoteSignOutContext.HandledResponse)
             {
                 Logger.RemoteSignOutHandledResponse();
-                return AuthenticationRequestResult.Handle;
+                return AuthenticationRequestStatus.Handle;
             }
             if (remoteSignOutContext.Skipped)
             {
                 Logger.RemoteSignOutSkipped();
-                return AuthenticationRequestResult.Skip;
+                return AuthenticationRequestStatus.Skip;
             }
 
             if (message == null)
             {
-                return AuthenticationRequestResult.Skip;
+                return AuthenticationRequestStatus.Skip;
             }
 
             // Try to extract the session identifier from the authentication ticket persisted by the sign-in handler.
@@ -237,13 +237,13 @@ namespace Microsoft.AspNetCore.Authentication2.OpenIdConnect
                 if (string.IsNullOrEmpty(message.Sid))
                 {
                     Logger.RemoteSignOutSessionIdMissing();
-                    return AuthenticationRequestResult.Handle;
+                    return AuthenticationRequestStatus.Handle;
                 }
                 // Ensure the 'sid' parameter corresponds to the 'sid' stored in the authentication ticket.
                 if (!string.Equals(sid, message.Sid, StringComparison.Ordinal))
                 {
                     Logger.RemoteSignOutSessionIdInvalid();
-                    return AuthenticationRequestResult.Handle;
+                    return AuthenticationRequestStatus.Handle;
                 }
             }
 
@@ -251,7 +251,7 @@ namespace Microsoft.AspNetCore.Authentication2.OpenIdConnect
 
             // We've received a remote sign-out request
             await Context.Authentication.SignOutAsync(Options.SignOutScheme);
-            return AuthenticationRequestResult.Handle;
+            return AuthenticationRequestStatus.Handle;
         }
 
         /// <summary>
@@ -369,7 +369,7 @@ namespace Microsoft.AspNetCore.Authentication2.OpenIdConnect
         /// Response to the callback from OpenId provider after session ended.
         /// </summary>
         /// <returns>A task executing the callback procedure</returns>
-        protected virtual Task<AuthenticationRequestResult> HandleSignOutCallbackAsync()
+        protected virtual Task<AuthenticationRequestStatus> HandleSignOutCallbackAsync()
         {
             StringValues protectedState;
             if (Request.Query.TryGetValue(OpenIdConnectParameterNames.State, out protectedState))
@@ -381,14 +381,14 @@ namespace Microsoft.AspNetCore.Authentication2.OpenIdConnect
                 }
             }
 
-            return Task.FromResult(AuthenticationRequestResult.Handle);
+            return Task.FromResult(AuthenticationRequestStatus.Handle);
         }
 
         /// <summary>
         /// Responds to a 401 Challenge. Sends an OpenIdConnect message to the 'identity authority' to obtain an identity.
         /// </summary>
         /// <returns></returns>
-        protected override async Task<bool> HandleUnauthorizedAsync(ChallengeContext context)
+        protected override async Task HandleUnauthorizedAsync(ChallengeContext context)
         {
             if (context == null)
             {
@@ -448,12 +448,12 @@ namespace Microsoft.AspNetCore.Authentication2.OpenIdConnect
             if (redirectContext.HandledResponse)
             {
                 Logger.RedirectToIdentityProviderHandledResponse();
-                return true;
+                return;
             }
             else if (redirectContext.Skipped)
             {
                 Logger.RedirectToIdentityProviderSkipped();
-                return false;
+                return;
             }
 
             message = redirectContext.ProtocolMessage;
@@ -483,7 +483,7 @@ namespace Microsoft.AspNetCore.Authentication2.OpenIdConnect
                 }
 
                 Response.Redirect(redirectUri);
-                return true;
+                return;
             }
             else if (Options.AuthenticationMethod == OpenIdConnectRedirectBehavior.FormPost)
             {
@@ -511,7 +511,7 @@ namespace Microsoft.AspNetCore.Authentication2.OpenIdConnect
                 Response.Headers[HeaderNames.Expires] = "-1";
 
                 await Response.Body.WriteAsync(buffer, 0, buffer.Length);
-                return true;
+                return;
             }
 
             throw new NotImplementedException($"An unsupported authentication method has been configured: {Options.AuthenticationMethod}");

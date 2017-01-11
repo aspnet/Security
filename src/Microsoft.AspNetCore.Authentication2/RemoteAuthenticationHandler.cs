@@ -43,17 +43,17 @@ namespace Microsoft.AspNetCore.Authentication2
             }
         }
 
-        public override async Task<AuthenticationRequestResult> HandleRequestAsync()
+        public override async Task<AuthenticationRequestStatus> HandleRequestAsync()
         {
             if (Options.CallbackPath == Request.Path)
             {
                 return await HandleRemoteCallbackAsync();
             }
 
-            return AuthenticationRequestResult.Skip;
+            return AuthenticationRequestStatus.Skip;
         }
 
-        protected virtual async Task<AuthenticationRequestResult> HandleRemoteCallbackAsync()
+        protected virtual async Task<AuthenticationRequestStatus> HandleRemoteCallbackAsync()
         {
             AuthenticationTicket2 ticket = null;
             Exception exception = null;
@@ -67,11 +67,11 @@ namespace Microsoft.AspNetCore.Authentication2
                 }
                 else if (authResult.Handled)
                 {
-                    return AuthenticationRequestResult.Handle;
+                    return AuthenticationRequestStatus.Handle;
                 }
                 else if (authResult.Skipped)
                 {
-                    return AuthenticationRequestResult.Skip;
+                    return AuthenticationRequestStatus.Skip;
                 }
                 else if (!authResult.Succeeded)
                 {
@@ -94,12 +94,12 @@ namespace Microsoft.AspNetCore.Authentication2
 
                 if (errorContext.HandledResponse)
                 {
-                    return AuthenticationRequestResult.Handle;
+                    return AuthenticationRequestStatus.Handle;
                 }
 
                 if (errorContext.Skipped)
                 {
-                    return AuthenticationRequestResult.Skip;
+                    return AuthenticationRequestStatus.Skip;
                 }
 
                 throw new AggregateException("Unhandled remote failure.", exception);
@@ -121,12 +121,12 @@ namespace Microsoft.AspNetCore.Authentication2
             if (context.HandledResponse)
             {
                 Logger.SigninHandled();
-                return AuthenticationRequestResult.Handle;
+                return AuthenticationRequestStatus.Handle;
             }
             else if (context.Skipped)
             {
                 Logger.SigninSkipped();
-                return AuthenticationRequestResult.Skip;
+                return AuthenticationRequestStatus.Skip;
             }
 
             await Context.SignInAsync(Options.SignInScheme, context.Principal, context.Properties);
@@ -138,7 +138,7 @@ namespace Microsoft.AspNetCore.Authentication2
             }
 
             Response.Redirect(context.ReturnUri);
-            return AuthenticationRequestResult.Handle;
+            return AuthenticationRequestStatus.Handle;
         }
 
         /// <summary>

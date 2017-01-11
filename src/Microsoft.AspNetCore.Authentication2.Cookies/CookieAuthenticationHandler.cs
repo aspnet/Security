@@ -428,7 +428,7 @@ namespace Microsoft.AspNetCore.Authentication2.Cookies
             return path[0] == '/' && path[1] != '/' && path[1] != '\\';
         }
 
-        protected override async Task<bool> HandleForbiddenAsync(ChallengeContext context)
+        protected override async Task HandleForbiddenAsync(ChallengeContext context)
         {
             var properties = context.Properties;
             var returnUrl = properties.RedirectUri;
@@ -439,10 +439,9 @@ namespace Microsoft.AspNetCore.Authentication2.Cookies
             var accessDeniedUri = Options.AccessDeniedPath + QueryString.Create(Options.ReturnUrlParameter, returnUrl);
             var redirectContext = new CookieRedirectContext(Context, Options, BuildRedirectUri(accessDeniedUri), properties);
             await Events.RedirectToAccessDenied(redirectContext);
-            return true;
         }
 
-        protected override async Task<bool> HandleUnauthorizedAsync(ChallengeContext context)
+        protected override async Task HandleUnauthorizedAsync(ChallengeContext context)
         {
             if (context == null)
             {
@@ -459,8 +458,6 @@ namespace Microsoft.AspNetCore.Authentication2.Cookies
             var loginUri = Options.LoginPath + QueryString.Create(Options.ReturnUrlParameter, redirectUri);
             var redirectContext = new CookieRedirectContext(Context, Options, BuildRedirectUri(loginUri), properties);
             await Events.RedirectToLogin(redirectContext);
-            return true;
-
         }
 
         private string GetTlsTokenBinding()

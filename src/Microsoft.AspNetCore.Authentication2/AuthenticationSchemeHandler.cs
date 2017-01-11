@@ -183,11 +183,11 @@ namespace Microsoft.AspNetCore.Authentication2{
         /// Override this method to deal with a challenge that is forbidden.
         /// </summary>
         /// <param name="context"></param>
-        /// <returns>The returned boolean is ignored.</returns>
-        protected virtual Task<bool> HandleForbiddenAsync(ChallengeContext context)
+        /// <returns>A Task.</returns>
+        protected virtual Task HandleForbiddenAsync(ChallengeContext context)
         {
             Response.StatusCode = 403;
-            return Task.FromResult(true);
+            return TaskCache.CompletedTask;
         }
 
         /// <summary>
@@ -196,11 +196,11 @@ namespace Microsoft.AspNetCore.Authentication2{
         /// changing the 401 result to 302 of a login page or external sign-in location.)
         /// </summary>
         /// <param name="context"></param>
-        /// <returns>The returned boolean is no longer used.</returns>
-        protected virtual Task<bool> HandleUnauthorizedAsync(ChallengeContext context)
+        /// <returns>A Task.</returns>
+        protected virtual Task HandleUnauthorizedAsync(ChallengeContext context)
         {
             Response.StatusCode = 401;
-            return Task.FromResult(false);
+            return TaskCache.CompletedTask;
         }
 
         public async Task ChallengeAsync(ChallengeContext context)
@@ -234,14 +234,14 @@ namespace Microsoft.AspNetCore.Authentication2{
         /// <returns>Returning Continue will cause the common code to call the next middleware in line. Returning Handled will
         /// cause the common code to begin the async completion journey without calling the rest of the middleware
         /// pipeline.</returns>
-        public virtual Task<AuthenticationRequestResult> HandleRequestAsync()
+        public virtual Task<AuthenticationRequestStatus> HandleRequestAsync()
         {
             // TODO: review
             //if (InitializeResult?.Handled == true)
             //{
             //    return Task.FromResult(true);
             //}
-            return Task.FromResult(AuthenticationRequestResult.Skip);
+            return Task.FromResult(AuthenticationRequestStatus.Skip);
         }
     }
 }

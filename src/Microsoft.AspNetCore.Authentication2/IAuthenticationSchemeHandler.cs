@@ -17,11 +17,11 @@ namespace Microsoft.AspNetCore.Authentication2
         Task SignInAsync(SignInContext context);
         Task SignOutAsync(SignOutContext context);
 
-        Task<AuthenticationRequestResult> HandleRequestAsync();
+        Task<AuthenticationRequestStatus> HandleRequestAsync();
     }
 
     // REVIEW: Name?  Or just return to a bool for Skip/Handled
-    public class AuthenticationRequestResult
+    public class AuthenticationRequestStatus
     {
         /// <summary>
         /// If true the request is handled and middleware execution should stop.
@@ -33,7 +33,7 @@ namespace Microsoft.AspNetCore.Authentication2
         /// </summary>
         public bool Skipped { get; private set; }
 
-        public static AuthenticationRequestResult Skip = new AuthenticationRequestResult { Skipped = true };
-        public static AuthenticationRequestResult Handle = new AuthenticationRequestResult { Handled = true };
+        public static AuthenticationRequestStatus Skip = new AuthenticationRequestStatus { Skipped = true };
+        public static AuthenticationRequestStatus Handle = new AuthenticationRequestStatus { Handled = true };
     }
 }
