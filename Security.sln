@@ -6,9 +6,11 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{4D2B6A51-2F9
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "samples", "samples", "{F8C0AA27-F3FB-4286-8E4C-47EF86B539FF}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CookieSample", "samples\CookieSample\CookieSample.csproj", "{558C2C2A-AED8-49DE-BB60-D5F8AE06C714}"
-EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "test", "test", "{7BF11F3A-60B6-4796-B504-579C67FFBA34}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Auth1", "Auth1", "{DAE25A66-8CD2-4821-A502-8BF5B4FFB7C4}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CookieSample", "samples\CookieSample\CookieSample.csproj", "{558C2C2A-AED8-49DE-BB60-D5F8AE06C714}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SocialSample", "samples\SocialSample\SocialSample.csproj", "{8C73D216-332D-41D8-BFD0-45BC4BC36552}"
 EndProject
@@ -54,31 +56,29 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "OpenIdConnect.AzureAdSample
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Microsoft.AspNetCore.ChunkingCookieManager.Sources.Test", "test\Microsoft.AspNetCore.ChunkingCookieManager.Sources.Test\Microsoft.AspNetCore.ChunkingCookieManager.Sources.Test.csproj", "{51563775-C659-4907-9BAF-9995BAB87D01}"
 EndProject
-Project("{8BB2217D-0F2D-49D1-97BC-3654ED321F3B}") = "Microsoft.AspNetCore.Authentication2", "src\Microsoft.AspNetCore.Authentication2\Microsoft.AspNetCore.Authentication2.xproj", "{32468832-12A1-4C5F-8B47-46B99DF05924}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Microsoft.AspNetCore.Authentication2", "src\Microsoft.AspNetCore.Authentication2\Microsoft.AspNetCore.Authentication2.csproj", "{32468832-12A1-4C5F-8B47-46B99DF05924}"
 EndProject
-Project("{8BB2217D-0F2D-49D1-97BC-3654ED321F3B}") = "Microsoft.AspNetCore.Authentication2.Cookies", "src\Microsoft.AspNetCore.Authentication2.Cookies\Microsoft.AspNetCore.Authentication2.Cookies.xproj", "{0113C7D3-3F9A-4635-9214-56993DAD6926}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Microsoft.AspNetCore.Authentication2.Cookies", "src\Microsoft.AspNetCore.Authentication2.Cookies\Microsoft.AspNetCore.Authentication2.Cookies.csproj", "{0113C7D3-3F9A-4635-9214-56993DAD6926}"
 EndProject
-Project("{8BB2217D-0F2D-49D1-97BC-3654ED321F3B}") = "Cookie2Sample", "samples\Cookie2Sample\Cookie2Sample.xproj", "{DA61495D-457B-4944-80C0-8EA7FB05ADFE}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Cookie2Sample", "samples\Cookie2Sample\Cookie2Sample.xproj", "{DA61495D-457B-4944-80C0-8EA7FB05ADFE}"
 EndProject
-Project("{8BB2217D-0F2D-49D1-97BC-3654ED321F3B}") = "Microsoft.AspNetCore.Authentication2.OAuth", "src\Microsoft.AspNetCore.Authentication2.OAuth\Microsoft.AspNetCore.Authentication2.OAuth.xproj", "{64BE6B7E-525F-4919-B55B-D47A28A03C3F}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Microsoft.AspNetCore.Authentication2.OAuth", "src\Microsoft.AspNetCore.Authentication2.OAuth\Microsoft.AspNetCore.Authentication2.OAuth.csproj", "{64BE6B7E-525F-4919-B55B-D47A28A03C3F}"
 EndProject
-Project("{8BB2217D-0F2D-49D1-97BC-3654ED321F3B}") = "Microsoft.AspNetCore.Authentication2.Twitter", "src\Microsoft.AspNetCore.Authentication2.Twitter\Microsoft.AspNetCore.Authentication2.Twitter.xproj", "{BF0B53FE-85E5-4AC5-86EE-92D873F47036}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Microsoft.AspNetCore.Authentication2.Twitter", "src\Microsoft.AspNetCore.Authentication2.Twitter\Microsoft.AspNetCore.Authentication2.Twitter.csproj", "{BF0B53FE-85E5-4AC5-86EE-92D873F47036}"
 EndProject
-Project("{8BB2217D-0F2D-49D1-97BC-3654ED321F3B}") = "SocialSample2", "samples\SocialSample2\SocialSample2.xproj", "{5ED02D1D-57B0-4210-ABEE-245766BD84C0}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SocialSample2", "samples\SocialSample2\SocialSample2.xproj", "{5ED02D1D-57B0-4210-ABEE-245766BD84C0}"
 EndProject
-Project("{8BB2217D-0F2D-49D1-97BC-3654ED321F3B}") = "Microsoft.AspNetCore.Authentication2.Google", "src\Microsoft.AspNetCore.Authentication2.Google\Microsoft.AspNetCore.Authentication2.Google.xproj", "{4094C501-7C83-43F4-BD40-27E3C736AE67}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Microsoft.AspNetCore.Authentication2.Google", "src\Microsoft.AspNetCore.Authentication2.Google\Microsoft.AspNetCore.Authentication2.Google.csproj", "{4094C501-7C83-43F4-BD40-27E3C736AE67}"
 EndProject
-Project("{8BB2217D-0F2D-49D1-97BC-3654ED321F3B}") = "Microsoft.AspNetCore.Authentication2.JwtBearer", "src\Microsoft.AspNetCore.Authentication2.JwtBearer\Microsoft.AspNetCore.Authentication2.JwtBearer.xproj", "{91443835-5965-465E-99B8-F44E50B2B161}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Microsoft.AspNetCore.Authentication2.JwtBearer", "src\Microsoft.AspNetCore.Authentication2.JwtBearer\Microsoft.AspNetCore.Authentication2.JwtBearer.csproj", "{91443835-5965-465E-99B8-F44E50B2B161}"
 EndProject
-Project("{8BB2217D-0F2D-49D1-97BC-3654ED321F3B}") = "Microsoft.AspNetCore.Authentication2.Test", "test\Microsoft.AspNetCore.Authentication2.Test\Microsoft.AspNetCore.Authentication2.Test.xproj", "{1103FA98-E21F-4520-9A50-B62073A8EBE7}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Microsoft.AspNetCore.Authentication2.Test", "test\Microsoft.AspNetCore.Authentication2.Test\Microsoft.AspNetCore.Authentication2.Test.csproj", "{1103FA98-E21F-4520-9A50-B62073A8EBE7}"
 EndProject
-Project("{8BB2217D-0F2D-49D1-97BC-3654ED321F3B}") = "Microsoft.AspNetCore.Authentication2.OpenIdConnect", "src\Microsoft.AspNetCore.Authentication2.OpenIdConnect\Microsoft.AspNetCore.Authentication2.OpenIdConnect.xproj", "{FAE352FF-8728-4FD4-8588-13EF2E7763BC}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Microsoft.AspNetCore.Authentication2.OpenIdConnect", "src\Microsoft.AspNetCore.Authentication2.OpenIdConnect\Microsoft.AspNetCore.Authentication2.OpenIdConnect.csproj", "{FAE352FF-8728-4FD4-8588-13EF2E7763BC}"
 EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Auth1", "Auth1", "{DAE25A66-8CD2-4821-A502-8BF5B4FFB7C4}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Microsoft.AspNetCore.Authentication2.Facebook", "src\Microsoft.AspNetCore.Authentication2.Facebook\Microsoft.AspNetCore.Authentication2.Facebook.csproj", "{B37DFE7F-B06F-4221-B043-B1BEE592D6D6}"
 EndProject
-Project("{8BB2217D-0F2D-49D1-97BC-3654ED321F3B}") = "Microsoft.AspNetCore.Authentication2.Facebook", "src\Microsoft.AspNetCore.Authentication2.Facebook\Microsoft.AspNetCore.Authentication2.Facebook.xproj", "{B37DFE7F-B06F-4221-B043-B1BEE592D6D6}"
-EndProject
-Project("{8BB2217D-0F2D-49D1-97BC-3654ED321F3B}") = "Microsoft.AspNetCore.Authentication2.MicrosoftAccount", "src\Microsoft.AspNetCore.Authentication2.MicrosoftAccount\Microsoft.AspNetCore.Authentication2.MicrosoftAccount.xproj", "{1031FE59-6429-47BF-B26A-9507484C8A3A}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Microsoft.AspNetCore.Authentication2.MicrosoftAccount", "src\Microsoft.AspNetCore.Authentication2.MicrosoftAccount\Microsoft.AspNetCore.Authentication2.MicrosoftAccount.csproj", "{1031FE59-6429-47BF-B26A-9507484C8A3A}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -509,6 +509,7 @@ Global
 		HideSolutionNode = FALSE
 	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
+		{DAE25A66-8CD2-4821-A502-8BF5B4FFB7C4} = {4D2B6A51-2F9F-44F5-8131-EA5CAC053652}
 		{558C2C2A-AED8-49DE-BB60-D5F8AE06C714} = {F8C0AA27-F3FB-4286-8E4C-47EF86B539FF}
 		{8C73D216-332D-41D8-BFD0-45BC4BC36552} = {F8C0AA27-F3FB-4286-8E4C-47EF86B539FF}
 		{19711880-46DA-4A26-9E0F-9B2E41D27651} = {F8C0AA27-F3FB-4286-8E4C-47EF86B539FF}
@@ -542,7 +543,6 @@ Global
 		{91443835-5965-465E-99B8-F44E50B2B161} = {4D2B6A51-2F9F-44F5-8131-EA5CAC053652}
 		{1103FA98-E21F-4520-9A50-B62073A8EBE7} = {7BF11F3A-60B6-4796-B504-579C67FFBA34}
 		{FAE352FF-8728-4FD4-8588-13EF2E7763BC} = {4D2B6A51-2F9F-44F5-8131-EA5CAC053652}
-		{DAE25A66-8CD2-4821-A502-8BF5B4FFB7C4} = {4D2B6A51-2F9F-44F5-8131-EA5CAC053652}
 		{B37DFE7F-B06F-4221-B043-B1BEE592D6D6} = {4D2B6A51-2F9F-44F5-8131-EA5CAC053652}
 		{1031FE59-6429-47BF-B26A-9507484C8A3A} = {4D2B6A51-2F9F-44F5-8131-EA5CAC053652}
 	EndGlobalSection
