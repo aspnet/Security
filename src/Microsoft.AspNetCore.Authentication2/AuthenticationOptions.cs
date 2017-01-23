@@ -65,10 +65,8 @@ namespace Microsoft.AspNetCore.Authentication2
         }
 
         public string DefaultAuthenticationScheme { get; set; }
-
         public string DefaultSignInScheme { get; set; }
-
-        //public string DefaultChallengeScheme { get; set; }
+        public string DefaultChallengeScheme { get; set; }
 
         /// <summary>
         /// Will be called after a successful authentication.

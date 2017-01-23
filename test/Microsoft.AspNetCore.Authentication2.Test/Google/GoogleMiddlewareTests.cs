@@ -115,14 +115,13 @@ namespace Microsoft.AspNetCore.Authentication2.Google
             Assert.Contains(transaction.SetCookie, cookie => cookie.StartsWith(".AspNetCore.Correlation.Google."));
         }
 
-        [ConditionalFact(Skip = "challenge 401 is gone")]
+        [Fact]
         public async Task Challenge401WillSetCorrelationCookie()
         {
             var server = CreateServer(o =>
             {
                 o.ClientId = "Test Id";
                 o.ClientSecret = "Test Secret";
-                //AutomaticChallenge = true
             });
             var transaction = await server.SendAsync("https://example.com/401");
             Assert.Contains(transaction.SetCookie, cookie => cookie.StartsWith(".AspNetCore.Correlation.Google."));
@@ -142,14 +141,13 @@ namespace Microsoft.AspNetCore.Authentication2.Google
             Assert.Contains("&scope=" + UrlEncoder.Default.Encode("openid profile email"), query);
         }
 
-        [ConditionalFact(Skip = "challenge 401 is gone")]
+        [Fact]
         public async Task Challenge401WillSetDefaultScope()
         {
             var server = CreateServer(o =>
             {
                 o.ClientId = "Test Id";
                 o.ClientSecret = "Test Secret";
-                //AutomaticChallenge = true
             });
             var transaction = await server.SendAsync("https://example.com/401");
             Assert.Equal(HttpStatusCode.Redirect, transaction.Response.StatusCode);
@@ -366,7 +364,7 @@ namespace Microsoft.AspNetCore.Authentication2.Google
             Assert.Equal("Test email", transaction.FindClaimValue(ClaimTypes.Email, expectedIssuer));
 
             // Ensure claims transformation 
-            //Assert.Equal("yup", transaction.FindClaimValue("xform"));
+            Assert.Equal("yup", transaction.FindClaimValue("xform"));
 
             transaction = await server.SendAsync("https://example.com/tokens", authCookie);
             Assert.Equal(HttpStatusCode.OK, transaction.Response.StatusCode);
@@ -799,7 +797,7 @@ namespace Microsoft.AspNetCore.Authentication2.Google
             Assert.Equal("Test email", transaction.FindClaimValue(ClaimTypes.Email));
 
             // Ensure claims transformation
-            //Assert.Equal("yup", transaction.FindClaimValue("xform"));
+            Assert.Equal("yup", transaction.FindClaimValue("xform"));
         }
 
         [Fact]
@@ -842,7 +840,7 @@ namespace Microsoft.AspNetCore.Authentication2.Google
             Assert.Equal("Test email", transaction.FindClaimValue(ClaimTypes.Email));
 
             // Ensure claims transformation
-            //Assert.Equal("yup", transaction.FindClaimValue("xform"));
+            Assert.Equal("yup", transaction.FindClaimValue("xform"));
         }
 
         [ConditionalFact(Skip = "Revisit, cookies no longer automatically redirects the 403")]
@@ -1010,13 +1008,6 @@ namespace Microsoft.AspNetCore.Authentication2.Google
                 .Configure(app =>
                 {
                     app.UseAuthentication();
-                    //app.UseClaimsTransformation(context =>
-                    //{
-                    //    var id = new ClaimsIdentity("xform");
-                    //    id.AddClaim(new Claim("xform", "yup"));
-                    //    context.Principal.AddIdentity(id);
-                    //    return Task.FromResult(context.Principal);
-                    //});
                     app.Use(async (context, next) =>
                     {
                         var req = context.Request;
@@ -1097,8 +1088,19 @@ namespace Microsoft.AspNetCore.Authentication2.Google
                     {
                         o.DefaultAuthenticationScheme = TestExtensions.CookieAuthenticationScheme;
                         o.DefaultSignInScheme = TestExtensions.CookieAuthenticationScheme;
+                        o.DefaultChallengeScheme = GoogleDefaults.AuthenticationScheme;
+                        o.ClaimsTransform = p =>
+                        {
+                            if (!p.Identities.Any(i => i.AuthenticationType == "xform"))
+                            {
+                                var id = new ClaimsIdentity("xform");
+                                id.AddClaim(new Claim("xform", "yup"));
+                                p.AddIdentity(id);
+                            }
+                            return Task.FromResult(p);
+                        };
                     });
-                    services.AddCookieAuthentication(TestExtensions.CookieAuthenticationScheme, _ => { });
+                    services.AddCookieAuthentication(TestExtensions.CookieAuthenticationScheme);
                     services.AddGoogleAuthentication(configureOptions);
                 });
             return new TestServer(builder);

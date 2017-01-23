@@ -176,23 +176,23 @@ namespace Microsoft.AspNetCore.Authentication2
             return AuthenticateResult.Fail("Remote authentication does not directly support authenticate");
         }
 
+        // REVIEW: should this forward to sign in scheme as well?
         protected override Task HandleSignOutAsync(SignOutContext context)
         {
             throw new NotSupportedException();
         }
 
+        // REVIEW: should this forward to sign in scheme as well?
         protected override Task HandleSignInAsync(SignInContext context)
         {
             throw new NotSupportedException();
         }
 
-        //protected override Task<bool> HandleForbiddenAsync(ChallengeContext context)
-        //{
-        //    //var challengeContext = new ChallengeContext(Options.SignInScheme, context.Properties, ChallengeBehavior.Forbidden);
-        //    //await PriorHandler.ChallengeAsync(challengeContext);
-        //    //return challengeContext.Accepted;
-        //    return false;
-        //}
+        // REVIEW: This behaviour needs a test (forwarding of forbidden to sign in scheme)
+        protected override Task HandleForbiddenAsync(ChallengeContext context)
+        {
+            return Context.ForbidAsync(Options.SignInScheme);
+        }
 
         protected virtual void GenerateCorrelationId(AuthenticationProperties2 properties)
         {

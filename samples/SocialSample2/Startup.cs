@@ -48,7 +48,6 @@ namespace SocialSample
             {
                 options.ConsumerKey = "BSdJJ0CrDuvEhpkchnukXZBUv";
                 options.ConsumerSecret = "xKUNuKhsRdHD03eLn67xhPAyE1wFFEndFo1X2UJaK2m1jdAxf4";
-                //options.SignInScheme = CookieAuthenticationDefaults.AuthenticationScheme;
                 options.RetrieveUserDetails = true;
                 options.SaveTokens = true;
                 options.Events = new TwitterEvents()
@@ -71,7 +70,6 @@ namespace SocialSample
             {
                 options.ClientId = "667949426586-0bor1qj05d9fjqkvhil6tvoupjfv46fr.apps.googleusercontent.com";
                 options.ClientSecret = "tPycZp08PGQBNDz2XycEB145";
-                options.SignInScheme = CookieAuthenticationDefaults.AuthenticationScheme;
                 options.SaveTokens = true;
                 options.Events = new OAuthEvents()
                 {
@@ -88,6 +86,7 @@ namespace SocialSample
             services.AddAuthentication(options =>
             {
                 options.DefaultAuthenticationScheme = CookieAuthenticationDefaults.AuthenticationScheme;
+                options.DefaultSignInScheme = CookieAuthenticationDefaults.AuthenticationScheme;
                 //options.DefaultChallengeScheme = CookieAuthenticationDefaults.AuthenticationScheme;
             });
         }

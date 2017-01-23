@@ -32,7 +32,6 @@ namespace Microsoft.AspNetCore.Authentication2
 
         public async Task Invoke(HttpContext context)
         {
-            // Only is responsible for automatic authentication now
             var defaultAuthenticate = await Schemes.GetDefaultAuthenticateSchemeAsync();
             if (defaultAuthenticate != null)
             {
@@ -54,6 +53,18 @@ namespace Microsoft.AspNetCore.Authentication2
                     return;
                 }
             }
+
+            // Handle automatic challenge
+            if (context.Response.StatusCode == 401)
+            {
+                var defaultChallenge = await Schemes.GetDefaultChallengeSchemeAsync();
+                if (defaultChallenge != null)
+                {
+                    await context.ChallengeAsync(defaultChallenge.Name);
+                    // REVIEW: should we have some way to terminate the request here?
+                }
+            }
+
             await _next(context);
         }
     }
