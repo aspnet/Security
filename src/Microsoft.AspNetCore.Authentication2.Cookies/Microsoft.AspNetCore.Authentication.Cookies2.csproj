@@ -12,10 +12,6 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Compile Include="..\..\shared\Microsoft.AspNetCore.ChunkingCookieManager.Sources\**\*.cs" />
-  </ItemGroup>
-
-  <ItemGroup>
     <ProjectReference Include="..\Microsoft.AspNetCore.Authentication2\Microsoft.AspNetCore.Authentication2.csproj" />
     <PackageReference Include="Microsoft.Extensions.Options" Version="1.2.0-*" />
     <PackageReference Include="Microsoft.Extensions.TaskCache.Sources" Version="1.2.0-*" PrivateAssets="All" />
