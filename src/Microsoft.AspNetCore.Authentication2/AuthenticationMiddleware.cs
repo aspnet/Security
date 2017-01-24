@@ -54,18 +54,18 @@ namespace Microsoft.AspNetCore.Authentication2
                 }
             }
 
-            // Handle automatic challenge
+            await _next(context);
+
+            // Handle automatic challenge on the way out
             if (context.Response.StatusCode == 401)
             {
                 var defaultChallenge = await Schemes.GetDefaultChallengeSchemeAsync();
                 if (defaultChallenge != null)
                 {
                     await context.ChallengeAsync(defaultChallenge.Name);
-                    // REVIEW: should we have some way to terminate the request here?
                 }
             }
 
-            await _next(context);
         }
     }
 }
