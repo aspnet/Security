@@ -878,7 +878,7 @@ namespace Microsoft.AspNetCore.Authentication2.Google
             Assert.StartsWith("https://example.com/Account/AccessDenied?", transaction.Response.Headers.Location.OriginalString);
         }
 
-        [ConditionalFact(Skip = "Revisit, can't auth handlers that aren't registered")]
+        [Fact]
         public async Task AuthenticateFacebookWhenAlreadySignedWithGoogleReturnsNull()
         {
             var stateFormat = new PropertiesDataFormat(new EphemeralDataProtectionProvider().CreateProtector("GoogleTest"));
@@ -1037,12 +1037,12 @@ namespace Microsoft.AspNetCore.Authentication2.Google
                         else if (req.Path == new PathString("/authenticateGoogle"))
                         {
                             var result = await context.AuthenticateAsync("Google");
-                            res.Describe(result.Ticket.Principal);
+                            res.Describe(result?.Ticket?.Principal);
                         }
                         else if (req.Path == new PathString("/authenticateFacebook"))
                         {
                             var result = await context.AuthenticateAsync("Facebook");
-                            res.Describe(result.Ticket.Principal);
+                            res.Describe(result?.Ticket?.Principal);
                         }
                         else if (req.Path == new PathString("/unauthorized"))
                         {
@@ -1101,6 +1101,11 @@ namespace Microsoft.AspNetCore.Authentication2.Google
                     });
                     services.AddCookieAuthentication(TestExtensions.CookieAuthenticationScheme);
                     services.AddGoogleAuthentication(configureOptions);
+                    services.AddFacebookAuthentication(o =>
+                    {
+                        o.AppId = "Test AppId";
+                        o.AppSecret = "Test AppSecrent";
+                    });
                 });
             return new TestServer(builder);
         }
