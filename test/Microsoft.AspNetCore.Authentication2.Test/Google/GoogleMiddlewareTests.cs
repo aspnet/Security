@@ -84,14 +84,13 @@ namespace Microsoft.AspNetCore.Authentication2.Google
             Assert.Equal(HttpStatusCode.OK, transaction.Response.StatusCode);
         }
 
-        [ConditionalFact(Skip = "challenge 401 is gone")]
+        [Fact]
         public async Task Challenge401WillTriggerRedirection()
         {
             var server = CreateServer(o =>
             {
                 o.ClientId = "Test Id";
                 o.ClientSecret = "Test Secret";
-                //AutomaticChallenge = true
             });
             var transaction = await server.SendAsync("https://example.com/401");
             Assert.Equal(HttpStatusCode.Redirect, transaction.Response.StatusCode);
@@ -843,7 +842,7 @@ namespace Microsoft.AspNetCore.Authentication2.Google
             Assert.Equal("yup", transaction.FindClaimValue("xform"));
         }
 
-        [ConditionalFact(Skip = "Revisit, cookies no longer automatically redirects the 403")]
+        [Fact]
         public async Task ChallengeGoogleWhenAlreadySignedInReturnsForbidden()
         {
             var stateFormat = new PropertiesDataFormat(new EphemeralDataProtectionProvider().CreateProtector("GoogleTest"));
