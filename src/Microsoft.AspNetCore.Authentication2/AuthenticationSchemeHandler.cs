@@ -75,7 +75,7 @@ namespace Microsoft.AspNetCore.Authentication2{
             Context = context;
             OriginalPathBase = Request.PathBase;
             OriginalPath = Request.Path;
-            Options = scheme.Settings["Options"] as TOptions;
+            Options = scheme.Settings["Options"] as TOptions ?? new TOptions();
             await InitializeOptionsAsync();
         }
 

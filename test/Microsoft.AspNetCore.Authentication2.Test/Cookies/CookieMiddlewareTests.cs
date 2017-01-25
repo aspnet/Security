@@ -26,7 +26,7 @@ namespace Microsoft.AspNetCore.Authentication2.Cookies
         [Fact]
         public async Task NormalRequestPassesThrough()
         {
-            var server = CreateServer(o => { });
+            var server = CreateServer(s => { });
             var response = await server.CreateClient().GetAsync("http://example.com/normal");
             Assert.Equal(HttpStatusCode.OK, response.StatusCode);
         }
@@ -34,11 +34,7 @@ namespace Microsoft.AspNetCore.Authentication2.Cookies
         [Fact]
         public async Task AjaxLoginRedirectToReturnUrlTurnsInto200WithLocationHeader()
         {
-            var server = CreateServer(o =>
-            {
-                o.LoginPath = "/login";
-            });
-
+            var server = CreateServer(o => o.LoginPath = "/login");
             var transaction = await SendAsync(server, "http://example.com/challenge?X-Requested-With=XMLHttpRequest");
             Assert.Equal(HttpStatusCode.Unauthorized, transaction.Response.StatusCode);
             var responded = transaction.Response.Headers.GetValues("Location");
@@ -49,11 +45,7 @@ namespace Microsoft.AspNetCore.Authentication2.Cookies
         [Fact]
         public async Task AjaxForbidTurnsInto403WithLocationHeader()
         {
-            var server = CreateServer(o =>
-            {
-                o.AccessDeniedPath = "/denied";
-            });
-
+            var server = CreateServer(o => o.AccessDeniedPath = "/denied");
             var transaction = await SendAsync(server, "http://example.com/forbid?X-Requested-With=XMLHttpRequest");
             Assert.Equal(HttpStatusCode.Forbidden, transaction.Response.StatusCode);
             var responded = transaction.Response.Headers.GetValues("Location");
@@ -64,11 +56,7 @@ namespace Microsoft.AspNetCore.Authentication2.Cookies
         [Fact]
         public async Task AjaxLogoutRedirectToReturnUrlTurnsInto200WithLocationHeader()
         {
-            var server = CreateServer(o =>
-            {
-                o.LogoutPath = "/signout";
-            });
-
+            var server = CreateServer(o => o.LogoutPath = "/signout");
             var transaction = await SendAsync(server, "http://example.com/signout?X-Requested-With=XMLHttpRequest&ReturnUrl=/");
             Assert.Equal(HttpStatusCode.OK, transaction.Response.StatusCode);
             var responded = transaction.Response.Headers.GetValues("Location");
@@ -79,8 +67,7 @@ namespace Microsoft.AspNetCore.Authentication2.Cookies
         [Fact]
         public async Task AjaxChallengeRedirectTurnsInto200WithLocationHeader()
         {
-            var server = CreateServer(o => { });
-
+            var server = CreateServer(s => { });
             var transaction = await SendAsync(server, "http://example.com/challenge?X-Requested-With=XMLHttpRequest&ReturnUrl=/");
             Assert.Equal(HttpStatusCode.Unauthorized, transaction.Response.StatusCode);
             var responded = transaction.Response.Headers.GetValues("Location");
@@ -88,15 +75,31 @@ namespace Microsoft.AspNetCore.Authentication2.Cookies
             Assert.True(responded.Single().StartsWith("http://example.com/Account/Login"));
         }
 
-        [ConditionalFact(Skip = "Auto challenge is gone")]
+        [Fact]
+        public async Task ProtectedRequestShouldRedirectToLoginOnlyWithDefaultSingleCookies()
+        {
+            var server = CreateServer(o => o.LoginPath = "/login");
+            var transaction = await SendAsync(server, "http://example.com/protected");
+
+            Assert.Equal(HttpStatusCode.Redirect, transaction.Response.StatusCode);
+            var location = transaction.Response.Headers.Location;
+            Assert.Equal("/login", location.LocalPath);
+            Assert.Equal("?ReturnUrl=%2Fprotected", location.Query);
+        }
+
+        [Theory]
         [InlineData(true)]
         [InlineData(false)]
-        public async Task ProtectedRequestShouldRedirectToLoginOnlyWhenAutomatic(bool auto)
+        public async Task ProtectedRequestShouldRedirectToLoginOnlyWhenDefaultChallenge(bool auto)
         {
-            var server = CreateServer(o =>
+            var server = CreateServerWithServices(s =>
             {
-                o.LoginPath = new PathString("/login");
-                //AutomaticChallenge = auto
+                s.AddCookieAuthentication(o => o.LoginPath = "/login");
+                s.AddCookieAuthentication("cookie2", o => o.LoginPath = "/login2");
+                if (auto)
+                {
+                    s.AddAuthentication(o => o.DefaultChallengeScheme = CookieAuthenticationDefaults.AuthenticationScheme);
+                }
             });
 
             var transaction = await SendAsync(server, "http://example.com/protected");
@@ -113,10 +116,7 @@ namespace Microsoft.AspNetCore.Authentication2.Cookies
         [Fact]
         public async Task ProtectedCustomRequestShouldRedirectToCustomRedirectUri()
         {
-            var server = CreateServer(o =>
-            {
-                //AutomaticChallenge = true
-            });
+            var server = CreateServer(s => { });
 
             var transaction = await SendAsync(server, "http://example.com/protected/CustomRedirect");
 
@@ -147,11 +147,11 @@ namespace Microsoft.AspNetCore.Authentication2.Cookies
         [Fact]
         public async Task SignInCausesDefaultCookieToBeCreated()
         {
-            var server = CreateServer(o =>
+            var server = CreateServerWithServices(s => s.AddCookieAuthentication(o =>
             {
                 o.LoginPath = new PathString("/login");
                 o.CookieName = "TestCookie";
-            }, SignInAsAlice);
+            }), SignInAsAlice);
 
             var transaction = await SendAsync(server, "http://example.com/testpath");
 
@@ -955,7 +955,7 @@ namespace Microsoft.AspNetCore.Authentication2.Cookies
                     app.Map("/login", signoutApp => signoutApp.Run(context => context.SignInAsync("Cookies", new ClaimsPrincipal())));
                 })
                 .ConfigureServices(services => services.AddCookieAuthentication(o => o.LoginPath = new PathString("/login")));
-                
+
             var server = new TestServer(builder);
 
             var transaction = await server.SendAsync("http://example.com/login?ReturnUrl=%2Fpage");
@@ -1119,7 +1119,7 @@ namespace Microsoft.AspNetCore.Authentication2.Cookies
                 o.LoginPath = "/testpath";
                 o.ReturnUrlParameter = "return";
                 o.CookieName = "TestCookie";
-            }, 
+            },
             async context =>
             {
                 await context.SignInAsync(
@@ -1283,6 +1283,12 @@ namespace Microsoft.AspNetCore.Authentication2.Cookies
         }
 
         private static TestServer CreateServer(Action<CookieAuthenticationOptions> configureOptions, Func<HttpContext, Task> testpath = null, Uri baseAddress = null, Func<ClaimsPrincipal, Task<ClaimsPrincipal>> claimsTransform = null)
+            => CreateServerWithServices(s =>
+            {
+                s.AddCookieAuthentication(configureOptions);
+                s.AddAuthentication(o => o.ClaimsTransform = claimsTransform);
+
+        private static TestServer CreateServerWithServices(Action<IServiceCollection> configureServices, Func<HttpContext, Task> testpath = null, Uri baseAddress = null, Func<ClaimsPrincipal, Task<ClaimsPrincipal>> claimsTransform = null)
         {
             var builder = new WebHostBuilder()
                 .Configure(app =>
@@ -1340,11 +1346,7 @@ namespace Microsoft.AspNetCore.Authentication2.Cookies
                         }
                     });
                 })
-                .ConfigureServices(services =>
-                {
-                    services.AddCookieAuthentication(configureOptions);
-                    services.AddAuthentication(o => o.ClaimsTransform = claimsTransform);
-                });
+                .ConfigureServices(configureServices);
             var server = new TestServer(builder);
             server.BaseAddress = baseAddress;
             return server;

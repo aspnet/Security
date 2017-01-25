@@ -52,6 +52,22 @@ namespace Microsoft.Extensions.DependencyInjection
             return services;
         }
 
+        public static IServiceCollection AddSchemeHandler<TOptions, THandler>(this IServiceCollection services, string authenticationScheme, TOptions options)
+            where TOptions : AuthenticationSchemeOptions, new()
+            where THandler : AuthenticationSchemeHandler<TOptions>
+        {
+            services.AddAuthentication(o =>
+            {
+                o.AddScheme(authenticationScheme, b =>
+                {
+                    b.HandlerType = typeof(THandler);
+                    b.Settings["Options"] = options;
+                });
+            });
+            services.AddTransient<THandler>();
+            return services;
+        }
+
         // REVIEW: rename to just ConfigureScheme?
         /// <summary>
         /// 
