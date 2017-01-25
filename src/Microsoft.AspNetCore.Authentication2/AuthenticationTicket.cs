@@ -19,12 +19,8 @@ namespace Microsoft.AspNetCore.Authentication2
         /// <param name="authenticationScheme">the authentication middleware that was responsible for this ticket.</param>
         public AuthenticationTicket2(ClaimsPrincipal principal, AuthenticationProperties2 properties, string authenticationScheme)
         {
-            if (principal == null)
-            {
-                throw new ArgumentNullException(nameof(principal));
-            }
             AuthenticationScheme = authenticationScheme;
-            Principal = principal;
+            Principal = principal ?? throw new ArgumentNullException(nameof(principal));
             Properties = properties ?? new AuthenticationProperties2();
         }
 

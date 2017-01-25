@@ -8,9 +8,9 @@ using Microsoft.AspNetCore.Http;
 
 namespace Microsoft.AspNetCore.Authentication2
 {
-    public class DefaultAuthenticationManager : IAuthenticationManager2
+    public class DefaultAuthenticationService : IAuthenticationService
     {
-        public DefaultAuthenticationManager(SchemeHandlerCache cache, IClaimsTransformation transform)
+        public DefaultAuthenticationService(SchemeHandlerCache cache, IClaimsTransformation transform)
         {
             Handlers = cache;
             Transform = transform;

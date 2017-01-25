@@ -111,7 +111,7 @@ namespace Microsoft.AspNetCore.Authentication2
         //    return manager.GetTokenAsync(AuthenticationManager.AutomaticScheme, tokenName);
         //}
 
-        public static async Task<string> GetTokenAsync(this IAuthenticationManager2 manager, HttpContext context, string signInScheme, string tokenName)
+        public static async Task<string> GetTokenAsync(this IAuthenticationService manager, HttpContext context, string signInScheme, string tokenName)
         {
             if (manager == null)
             {

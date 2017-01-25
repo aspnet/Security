@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 namespace Microsoft.AspNetCore.Authentication2
 {
     /// <summary>
-    /// Used by the <see cref="IAuthenticationManager2"/> for claims transformation.
+    /// Used by the <see cref="IAuthenticationService"/> for claims transformation.
     /// </summary>
     public interface IClaimsTransformation
     {

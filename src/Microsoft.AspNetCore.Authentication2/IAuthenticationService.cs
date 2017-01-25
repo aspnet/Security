@@ -7,7 +7,7 @@ using Microsoft.AspNetCore.Http;
 
 namespace Microsoft.AspNetCore.Authentication2
 {
-    public interface IAuthenticationManager2
+    public interface IAuthenticationService
     {
         Task<AuthenticateResult> AuthenticateAsync(HttpContext context, string scheme);
         Task ChallengeAsync(HttpContext context, string scheme, AuthenticationProperties2 properties, ChallengeBehavior behavior);

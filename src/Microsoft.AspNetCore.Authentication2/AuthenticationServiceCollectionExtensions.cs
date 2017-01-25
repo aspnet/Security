@@ -25,7 +25,7 @@ namespace Microsoft.Extensions.DependencyInjection
 
             services.AddDataProtection();
             services.AddWebEncoders();
-            services.TryAddScoped<IAuthenticationManager2, DefaultAuthenticationManager>();
+            services.TryAddScoped<IAuthenticationService, DefaultAuthenticationService>();
             services.TryAddSingleton<IClaimsTransformation, DefaultClaimsTransformation>(); // Can be replaced with scoped ones that use DbContext
             services.TryAddScoped<SchemeHandlerCache>(); // Add interface for the shared instance cache?
             services.TryAddSingleton<IAuthenticationSchemeProvider, DefaultAuthenticationSchemeProvider>();
