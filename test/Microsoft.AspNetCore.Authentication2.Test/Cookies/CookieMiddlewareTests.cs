@@ -915,7 +915,7 @@ namespace Microsoft.AspNetCore.Authentication2.Cookies
                 })
                 .ConfigureServices(services =>
                 {
-                    services.AddCookieAuthentication("Cookie1");
+                    services.AddCookieAuthentication("Cookie1", new CookieAuthenticationOptions());
                     services.ConfigureSchemeHandler<CookieAuthenticationOptions>("Cookie1",
                         o => o.CookieName = "One");
                 });
@@ -1287,6 +1287,7 @@ namespace Microsoft.AspNetCore.Authentication2.Cookies
             {
                 s.AddCookieAuthentication(configureOptions);
                 s.AddAuthentication(o => o.ClaimsTransform = claimsTransform);
+            }, testpath, baseAddress, claimsTransform);
 
         private static TestServer CreateServerWithServices(Action<IServiceCollection> configureServices, Func<HttpContext, Task> testpath = null, Uri baseAddress = null, Func<ClaimsPrincipal, Task<ClaimsPrincipal>> claimsTransform = null)
         {
