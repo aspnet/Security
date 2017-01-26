@@ -1006,7 +1006,10 @@ namespace Microsoft.AspNetCore.Authentication2.Google
             var builder = new WebHostBuilder()
                 .Configure(app =>
                 {
-                    app.UseAuthentication();
+                    var options = new GoogleOptions();
+                    configureOptions(options);
+                    app.UseGoogleAuthentication(options);
+                    //app.UseAuthentication();
                     app.Use(async (context, next) =>
                     {
                         var req = context.Request;
@@ -1100,7 +1103,7 @@ namespace Microsoft.AspNetCore.Authentication2.Google
                         };
                     });
                     services.AddCookieAuthentication(TestExtensions.CookieAuthenticationScheme);
-                    services.AddGoogleAuthentication(configureOptions);
+                    //services.AddGoogleAuthentication(configureOptions);
                     services.AddFacebookAuthentication(o =>
                     {
                         o.AppId = "Test AppId";
