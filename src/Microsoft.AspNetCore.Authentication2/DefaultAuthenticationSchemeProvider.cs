@@ -1,8 +1,10 @@
 // Copyright (c) .NET Foundation. All rights reserved.
 // Licensed under the Apache License, Version 2.0. See License.txt in the project root for license information.
 
+using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using Microsoft.Extensions.Internal;
 using Microsoft.Extensions.Options;
 
 namespace Microsoft.AspNetCore.Authentication2
@@ -19,8 +21,7 @@ namespace Microsoft.AspNetCore.Authentication2
             foreach (var builder in _options.Schemes)
             {
                 var scheme = builder.Build(_options);
-                _schemes.Add(scheme);
-                _map[scheme.Name] = scheme;
+                AddScheme(scheme);
             }
         }
 
@@ -68,6 +69,17 @@ namespace Microsoft.AspNetCore.Authentication2
         public Task<IEnumerable<AuthenticationScheme>> GetPriorityOrderedSchemes()
         {
             return Task.FromResult<IEnumerable<AuthenticationScheme>>(_schemes);
+        }
+
+        public Task AddScheme(AuthenticationScheme scheme)
+        {
+            if (_map.ContainsKey(scheme.Name))
+            {
+                throw new InvalidOperationException("Scheme already exists: " + scheme.Name);
+            }
+            _schemes.Add(scheme);
+            _map[scheme.Name] = scheme;
+            return TaskCache.CompletedTask;
         }
     }
 }

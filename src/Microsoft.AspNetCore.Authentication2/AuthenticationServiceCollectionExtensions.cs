@@ -12,6 +12,23 @@ namespace Microsoft.Extensions.DependencyInjection
     /// </summary>
     public static class AuthenticationServiceCollectionExtensions
     {
+        public static IServiceCollection AddAuthentication(this IServiceCollection services)
+        {
+            if (services == null)
+            {
+                throw new ArgumentNullException(nameof(services));
+            }
+
+            services.AddDataProtection();
+            services.AddWebEncoders();
+            services.TryAddScoped<IAuthenticationService, DefaultAuthenticationService>();
+            services.TryAddSingleton<IClaimsTransformation, DefaultClaimsTransformation>(); // Can be replaced with scoped ones that use DbContext
+            services.TryAddScoped<SchemeHandlerCache>(); // Add interface for the shared instance cache?
+            services.TryAddSingleton<IAuthenticationSchemeProvider, DefaultAuthenticationSchemeProvider>();
+            return services;
+        }
+
+
         public static IServiceCollection AddAuthentication(this IServiceCollection services, Action<AuthenticationOptions2> configureOptions) {
             if (services == null)
             {
@@ -23,12 +40,7 @@ namespace Microsoft.Extensions.DependencyInjection
                 throw new ArgumentNullException(nameof(configureOptions));
             }
 
-            services.AddDataProtection();
-            services.AddWebEncoders();
-            services.TryAddScoped<IAuthenticationService, DefaultAuthenticationService>();
-            services.TryAddSingleton<IClaimsTransformation, DefaultClaimsTransformation>(); // Can be replaced with scoped ones that use DbContext
-            services.TryAddScoped<SchemeHandlerCache>(); // Add interface for the shared instance cache?
-            services.TryAddSingleton<IAuthenticationSchemeProvider, DefaultAuthenticationSchemeProvider>();
+            services.AddAuthentication();
             services.Configure(configureOptions);
             return services;
         }

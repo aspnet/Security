@@ -23,7 +23,14 @@ namespace Microsoft.AspNetCore.Builder
                 throw new ArgumentNullException(nameof(app));
             }
             
-            return app.UseMiddleware<AuthenticationMiddleware>();
+            // We only every want one instance of this middleware in the app
+            if (!app.Properties.ContainsKey(".AspNetCore.AuthenticationMiddleware"))
+            {
+                app.Properties[".AspNetCore.AuthenticationMiddleware"] = true;
+                return app.UseMiddleware<AuthenticationMiddleware>();
+            }
+
+            return app;
         }
     }
 }

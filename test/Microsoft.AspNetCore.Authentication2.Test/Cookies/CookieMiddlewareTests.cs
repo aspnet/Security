@@ -847,10 +847,13 @@ namespace Microsoft.AspNetCore.Authentication2.Cookies
             var builder = new WebHostBuilder()
                 .Configure(app =>
                 {
-                    app.UseAuthentication();
+                    app.UseCookieAuthentication(new CookieAuthenticationOptions()
+                    {
+                        LoginPath = new PathString("/page")
+                    });
                     app.Map("/login", signoutApp => signoutApp.Run(context => context.ChallengeAsync("Cookies", new AuthenticationProperties2() { RedirectUri = "/" })));
                 })
-                .ConfigureServices(services => services.AddCookieAuthentication(o => o.LoginPath = new PathString("/page")));
+                .ConfigureServices(s => s.AddAuthentication());
             var server = new TestServer(builder);
 
             var transaction = await server.SendAsync("http://example.com/login");

@@ -6,7 +6,7 @@ using Microsoft.AspNetCore.Authentication2.Cookies;
 
 namespace Microsoft.Extensions.DependencyInjection
 {
-    public static class CookieAuthenticationOptionsExtensions
+    public static class CookieExtensions
     {
         public static IServiceCollection AddCookieAuthentication(this IServiceCollection services) => services.AddCookieAuthentication(CookieAuthenticationDefaults.AuthenticationScheme);
 

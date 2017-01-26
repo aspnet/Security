@@ -21,15 +21,18 @@ namespace Microsoft.AspNetCore.Authentication2
         public string Name { get; }
         public Type HandlerType { get; }
 
+        public Func<HttpContext, IAuthenticationSchemeHandler> ResolveHandlerFunc { get; set; }
+
         // Holds things like the configured options instances for the handler
         // Also replacement for AuthenticationDescription
         public IReadOnlyDictionary<string, object> Settings { get; }
 
         public AuthenticationOptions2 SharedOptions { get; }
 
-        public IAuthenticationSchemeHandler ResolveHandler(HttpContext context)
+        public virtual IAuthenticationSchemeHandler ResolveHandler(HttpContext context)
         {
-            return context.RequestServices.GetService(HandlerType) as IAuthenticationSchemeHandler;
+            return ResolveHandlerFunc?.Invoke(context) ?? 
+                context.RequestServices.GetService(HandlerType) as IAuthenticationSchemeHandler;
         }
     }
 }
