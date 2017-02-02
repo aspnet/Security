@@ -2,6 +2,7 @@
 // Licensed under the Apache License, Version 2.0. See License.txt in the project root for license information.
 
 using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Internal;
@@ -26,6 +27,7 @@ namespace Microsoft.AspNetCore.Authentication2
         }
 
         private readonly AuthenticationOptions2 _options;
+        private readonly object _lock = new object();
 
         private readonly List<AuthenticationScheme> _schemes = new List<AuthenticationScheme>();
 
@@ -77,8 +79,15 @@ namespace Microsoft.AspNetCore.Authentication2
             {
                 throw new InvalidOperationException("Scheme already exists: " + scheme.Name);
             }
-            _schemes.Add(scheme);
-            _map[scheme.Name] = scheme;
+            lock (_lock)
+            {
+                if (_map.ContainsKey(scheme.Name))
+                {
+                    throw new InvalidOperationException("Scheme already exists: " + scheme.Name);
+                }
+                _schemes.Add(scheme);
+                _map[scheme.Name] = scheme;
+            }
             return TaskCache.CompletedTask;
         }
     }
