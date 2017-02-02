@@ -49,7 +49,7 @@ namespace Microsoft.AspNetCore.Authorization.Test
         }
 
         [Fact]
-        public async Task CanAuthorizeAllSuperuserOperations()
+        public async Task OnlyOwnerCanEditDelete()
         {
             // Arrange
             var authorizationService = BuildAuthorizationService(services =>
@@ -72,6 +72,7 @@ namespace Microsoft.AspNetCore.Authorization.Test
             Assert.False(await authorizationService.AuthorizeAsync(user, null, new AuthorizationPermissionsRequirement(MyPermissions.Delete)));
             Assert.True(await authorizationService.AuthorizeAsync(user, new ExpenseReport { Owner = "user" }, new AuthorizationPermissionsRequirement(MyPermissions.Delete, MyPermissions.Edit)));
             Assert.False(await authorizationService.AuthorizeAsync(user, null, new AuthorizationPermissionsRequirement(MyPermissions.Read, MyPermissions.Edit)));
+            Assert.True(await authorizationService.AuthorizeAsync(user, new ExpenseReport { Owner = "user" }, new AuthorizationPermissionsRequirement(MyPermissions.Delete, MyPermissions.Edit, MyPermissions.Create, MyPermissions.Read)));
         }
 
         private IAuthorizationService BuildAuthorizationService(Action<IServiceCollection> setupServices = null)
