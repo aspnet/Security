@@ -14,18 +14,8 @@ namespace Microsoft.AspNetCore.Authentication2
 
         public AuthenticationMiddleware(RequestDelegate next, IAuthenticationSchemeProvider schemes)
         {
-            if (next == null)
-            {
-                throw new ArgumentNullException(nameof(next));
-            }
-
-            if (schemes == null)
-            {
-                throw new ArgumentNullException(nameof(schemes));
-            }
-
-            _next = next;
-            Schemes = schemes;
+            _next = next ?? throw new ArgumentNullException(nameof(next));
+            Schemes = schemes ?? throw new ArgumentNullException(nameof(schemes));
         }
 
         public IAuthenticationSchemeProvider Schemes { get; set; }
@@ -42,6 +32,8 @@ namespace Microsoft.AspNetCore.Authentication2
                 }
             }
 
+            // TODO: revisit this, is registration order the best way?, should we force schemes to register unique
+            // handled paths instead to have better routing?
             // Give each scheme a chance to handle the request
             var handlers = context.RequestServices.GetRequiredService<SchemeHandlerCache>();
             foreach (var scheme in await Schemes.GetPriorityOrderedSchemes())

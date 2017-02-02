@@ -23,6 +23,8 @@ namespace Microsoft.AspNetCore.Authentication2.Cookies
 {
     public class CookieMiddlewareTests
     {
+        private TestClock _clock = new TestClock();
+
         [Fact]
         public async Task NormalRequestPassesThrough()
         {
@@ -230,7 +232,7 @@ namespace Microsoft.AspNetCore.Authentication2.Cookies
                 o.CookieDomain = "another.com";
                 o.CookieSecure = CookieSecurePolicy.Always;
                 o.CookieHttpOnly = true;
-            }, SignInAsAlice, new Uri("http://example.com/base"));
+            }, SignInAsAlice, baseAddress: new Uri("http://example.com/base"));
 
             var transaction1 = await SendAsync(server1, "http://example.com/base/testpath");
 
@@ -247,7 +249,7 @@ namespace Microsoft.AspNetCore.Authentication2.Cookies
                 o.CookieName = "SecondCookie";
                 o.CookieSecure = CookieSecurePolicy.None;
                 o.CookieHttpOnly = false;
-            }, SignInAsAlice, new Uri("http://example.com/base"));
+            }, SignInAsAlice, baseAddress: new Uri("http://example.com/base"));
 
             var transaction2 = await SendAsync(server2, "http://example.com/base/testpath");
 
@@ -263,11 +265,7 @@ namespace Microsoft.AspNetCore.Authentication2.Cookies
         [Fact]
         public async Task CookieContainsIdentity()
         {
-            var clock = new TestClock();
-            var server = CreateServer(o =>
-            {
-                o.SystemClock = clock;
-            }, SignInAsAlice);
+            var server = CreateServer(o => { }, SignInAsAlice);
 
             var transaction1 = await SendAsync(server, "http://example.com/testpath");
 
@@ -279,8 +277,7 @@ namespace Microsoft.AspNetCore.Authentication2.Cookies
         [Fact]
         public async Task CookieAppliesClaimsTransform()
         {
-            var clock = new TestClock();
-            var server = CreateServer(o => o.SystemClock = clock,
+            var server = CreateServer(o => { },
             SignInAsAlice,
             baseAddress: null,
             claimsTransform: p =>
@@ -306,10 +303,8 @@ namespace Microsoft.AspNetCore.Authentication2.Cookies
         [Fact]
         public async Task CookieStopsWorkingAfterExpiration()
         {
-            var clock = new TestClock();
             var server = CreateServer(o =>
             {
-                o.SystemClock = clock;
                 o.ExpireTimeSpan = TimeSpan.FromMinutes(10);
                 o.SlidingExpiration = false;
             }, SignInAsAlice);
@@ -318,11 +313,11 @@ namespace Microsoft.AspNetCore.Authentication2.Cookies
 
             var transaction2 = await SendAsync(server, "http://example.com/me/Cookies", transaction1.CookieNameValue);
 
-            clock.Add(TimeSpan.FromMinutes(7));
+            _clock.Add(TimeSpan.FromMinutes(7));
 
             var transaction3 = await SendAsync(server, "http://example.com/me/Cookies", transaction1.CookieNameValue);
 
-            clock.Add(TimeSpan.FromMinutes(7));
+            _clock.Add(TimeSpan.FromMinutes(7));
 
             var transaction4 = await SendAsync(server, "http://example.com/me/Cookies", transaction1.CookieNameValue);
 
@@ -337,27 +332,25 @@ namespace Microsoft.AspNetCore.Authentication2.Cookies
         [Fact]
         public async Task CookieExpirationCanBeOverridenInSignin()
         {
-            var clock = new TestClock();
             var server = CreateServer(o =>
             {
-                o.SystemClock = clock;
                 o.ExpireTimeSpan = TimeSpan.FromMinutes(10);
                 o.SlidingExpiration = false;
             },
             context =>
                 context.SignInAsync("Cookies",
                     new ClaimsPrincipal(new ClaimsIdentity(new GenericIdentity("Alice", "Cookies"))),
-                    new AuthenticationProperties2() { ExpiresUtc = clock.UtcNow.Add(TimeSpan.FromMinutes(5)) }));
+                    new AuthenticationProperties2() { ExpiresUtc = _clock.UtcNow.Add(TimeSpan.FromMinutes(5)) }));
 
             var transaction1 = await SendAsync(server, "http://example.com/testpath");
 
             var transaction2 = await SendAsync(server, "http://example.com/me/Cookies", transaction1.CookieNameValue);
 
-            clock.Add(TimeSpan.FromMinutes(3));
+            _clock.Add(TimeSpan.FromMinutes(3));
 
             var transaction3 = await SendAsync(server, "http://example.com/me/Cookies", transaction1.CookieNameValue);
 
-            clock.Add(TimeSpan.FromMinutes(3));
+            _clock.Add(TimeSpan.FromMinutes(3));
 
             var transaction4 = await SendAsync(server, "http://example.com/me/Cookies", transaction1.CookieNameValue);
 
@@ -372,10 +365,8 @@ namespace Microsoft.AspNetCore.Authentication2.Cookies
         [Fact]
         public async Task ExpiredCookieWithValidatorStillExpired()
         {
-            var clock = new TestClock();
             var server = CreateServer(o =>
             {
-                o.SystemClock = clock;
                 o.ExpireTimeSpan = TimeSpan.FromMinutes(10);
                 o.Events = new CookieAuthenticationEvents
                 {
@@ -392,7 +383,7 @@ namespace Microsoft.AspNetCore.Authentication2.Cookies
 
             var transaction1 = await SendAsync(server, "http://example.com/testpath");
 
-            clock.Add(TimeSpan.FromMinutes(11));
+            _clock.Add(TimeSpan.FromMinutes(11));
 
             var transaction2 = await SendAsync(server, "http://example.com/me/Cookies", transaction1.CookieNameValue);
             Assert.Null(transaction2.SetCookie);
@@ -402,10 +393,8 @@ namespace Microsoft.AspNetCore.Authentication2.Cookies
         [Fact]
         public async Task CookieCanBeRejectedAndSignedOutByValidator()
         {
-            var clock = new TestClock();
             var server = CreateServer(o =>
             {
-                o.SystemClock = clock;
                 o.ExpireTimeSpan = TimeSpan.FromMinutes(10);
                 o.SlidingExpiration = false;
                 o.Events = new CookieAuthenticationEvents
@@ -432,10 +421,8 @@ namespace Microsoft.AspNetCore.Authentication2.Cookies
         [Fact]
         public async Task CookieCanBeRenewedByValidator()
         {
-            var clock = new TestClock();
             var server = CreateServer(o =>
             {
-                o.SystemClock = clock;
                 o.ExpireTimeSpan = TimeSpan.FromMinutes(10);
                 o.SlidingExpiration = false;
                 o.Events = new CookieAuthenticationEvents
@@ -457,19 +444,19 @@ namespace Microsoft.AspNetCore.Authentication2.Cookies
             Assert.NotNull(transaction2.SetCookie);
             Assert.Equal("Alice", FindClaimValue(transaction2, ClaimTypes.Name));
 
-            clock.Add(TimeSpan.FromMinutes(5));
+            _clock.Add(TimeSpan.FromMinutes(5));
 
             var transaction3 = await SendAsync(server, "http://example.com/me/Cookies", transaction2.CookieNameValue);
             Assert.NotNull(transaction3.SetCookie);
             Assert.Equal("Alice", FindClaimValue(transaction3, ClaimTypes.Name));
 
-            clock.Add(TimeSpan.FromMinutes(6));
+            _clock.Add(TimeSpan.FromMinutes(6));
 
             var transaction4 = await SendAsync(server, "http://example.com/me/Cookies", transaction1.CookieNameValue);
             Assert.Null(transaction4.SetCookie);
             Assert.Null(FindClaimValue(transaction4, ClaimTypes.Name));
 
-            clock.Add(TimeSpan.FromMinutes(5));
+            _clock.Add(TimeSpan.FromMinutes(5));
 
             var transaction5 = await SendAsync(server, "http://example.com/me/Cookies", transaction2.CookieNameValue);
             Assert.Null(transaction5.SetCookie);
@@ -479,10 +466,8 @@ namespace Microsoft.AspNetCore.Authentication2.Cookies
         [Fact]
         public async Task CookieCanBeRenewedByValidatorWithSlidingExpiry()
         {
-            var clock = new TestClock();
             var server = CreateServer(o =>
             {
-                o.SystemClock = clock;
                 o.ExpireTimeSpan = TimeSpan.FromMinutes(10);
                 o.Events = new CookieAuthenticationEvents
                 {
@@ -503,19 +488,19 @@ namespace Microsoft.AspNetCore.Authentication2.Cookies
             Assert.NotNull(transaction2.SetCookie);
             Assert.Equal("Alice", FindClaimValue(transaction2, ClaimTypes.Name));
 
-            clock.Add(TimeSpan.FromMinutes(5));
+            _clock.Add(TimeSpan.FromMinutes(5));
 
             var transaction3 = await SendAsync(server, "http://example.com/me/Cookies", transaction2.CookieNameValue);
             Assert.NotNull(transaction3.SetCookie);
             Assert.Equal("Alice", FindClaimValue(transaction3, ClaimTypes.Name));
 
-            clock.Add(TimeSpan.FromMinutes(6));
+            _clock.Add(TimeSpan.FromMinutes(6));
 
             var transaction4 = await SendAsync(server, "http://example.com/me/Cookies", transaction3.CookieNameValue);
             Assert.NotNull(transaction4.SetCookie);
             Assert.Equal("Alice", FindClaimValue(transaction4, ClaimTypes.Name));
 
-            clock.Add(TimeSpan.FromMinutes(11));
+            _clock.Add(TimeSpan.FromMinutes(11));
 
             var transaction5 = await SendAsync(server, "http://example.com/me/Cookies", transaction4.CookieNameValue);
             Assert.Null(transaction5.SetCookie);
@@ -525,10 +510,8 @@ namespace Microsoft.AspNetCore.Authentication2.Cookies
         [Fact]
         public async Task CookieValidatorOnlyCalledOnce()
         {
-            var clock = new TestClock();
             var server = CreateServer(o =>
             {
-                o.SystemClock = clock;
                 o.ExpireTimeSpan = TimeSpan.FromMinutes(10);
                 o.SlidingExpiration = false;
                 o.Events = new CookieAuthenticationEvents
@@ -550,19 +533,19 @@ namespace Microsoft.AspNetCore.Authentication2.Cookies
             Assert.NotNull(transaction2.SetCookie);
             Assert.Equal("Alice", FindClaimValue(transaction2, ClaimTypes.Name));
 
-            clock.Add(TimeSpan.FromMinutes(5));
+            _clock.Add(TimeSpan.FromMinutes(5));
 
             var transaction3 = await SendAsync(server, "http://example.com/me/Cookies", transaction2.CookieNameValue);
             Assert.NotNull(transaction3.SetCookie);
             Assert.Equal("Alice", FindClaimValue(transaction3, ClaimTypes.Name));
 
-            clock.Add(TimeSpan.FromMinutes(6));
+            _clock.Add(TimeSpan.FromMinutes(6));
 
             var transaction4 = await SendAsync(server, "http://example.com/me/Cookies", transaction1.CookieNameValue);
             Assert.Null(transaction4.SetCookie);
             Assert.Null(FindClaimValue(transaction4, ClaimTypes.Name));
 
-            clock.Add(TimeSpan.FromMinutes(5));
+            _clock.Add(TimeSpan.FromMinutes(5));
 
             var transaction5 = await SendAsync(server, "http://example.com/me/Cookies", transaction2.CookieNameValue);
             Assert.Null(transaction5.SetCookie);
@@ -574,12 +557,10 @@ namespace Microsoft.AspNetCore.Authentication2.Cookies
         [InlineData(false)]
         public async Task ShouldRenewUpdatesIssuedExpiredUtc(bool sliding)
         {
-            var clock = new TestClock();
             DateTimeOffset? lastValidateIssuedDate = null;
             DateTimeOffset? lastExpiresDate = null;
             var server = CreateServer(o =>
             {
-                o.SystemClock = clock;
                 o.ExpireTimeSpan = TimeSpan.FromMinutes(10);
                 o.SlidingExpiration = sliding;
                 o.Events = new CookieAuthenticationEvents
@@ -609,13 +590,13 @@ namespace Microsoft.AspNetCore.Authentication2.Cookies
             var firstIssueDate = lastValidateIssuedDate;
             var firstExpiresDate = lastExpiresDate;
 
-            clock.Add(TimeSpan.FromMinutes(1));
+            _clock.Add(TimeSpan.FromMinutes(1));
 
             var transaction3 = await SendAsync(server, "http://example.com/me/Cookies", transaction2.CookieNameValue);
             Assert.NotNull(transaction3.SetCookie);
             Assert.Equal("Alice", FindClaimValue(transaction3, ClaimTypes.Name));
 
-            clock.Add(TimeSpan.FromMinutes(2));
+            _clock.Add(TimeSpan.FromMinutes(2));
 
             var transaction4 = await SendAsync(server, "http://example.com/me/Cookies", transaction3.CookieNameValue);
             Assert.NotNull(transaction4.SetCookie);
@@ -628,17 +609,15 @@ namespace Microsoft.AspNetCore.Authentication2.Cookies
         [Fact]
         public async Task CookieExpirationCanBeOverridenInEvent()
         {
-            var clock = new TestClock();
             var server = CreateServer(o =>
             {
-                o.SystemClock = clock;
                 o.ExpireTimeSpan = TimeSpan.FromMinutes(10);
                 o.SlidingExpiration = false;
                 o.Events = new CookieAuthenticationEvents()
                 {
                     OnSigningIn = context =>
                     {
-                        context.Properties.ExpiresUtc = clock.UtcNow.Add(TimeSpan.FromMinutes(5));
+                        context.Properties.ExpiresUtc = _clock.UtcNow.Add(TimeSpan.FromMinutes(5));
                         return Task.FromResult(0);
                     }
                 };
@@ -651,13 +630,13 @@ namespace Microsoft.AspNetCore.Authentication2.Cookies
             Assert.Null(transaction2.SetCookie);
             Assert.Equal("Alice", FindClaimValue(transaction2, ClaimTypes.Name));
 
-            clock.Add(TimeSpan.FromMinutes(3));
+            _clock.Add(TimeSpan.FromMinutes(3));
 
             var transaction3 = await SendAsync(server, "http://example.com/me/Cookies", transaction1.CookieNameValue);
             Assert.Null(transaction3.SetCookie);
             Assert.Equal("Alice", FindClaimValue(transaction3, ClaimTypes.Name));
 
-            clock.Add(TimeSpan.FromMinutes(3));
+            _clock.Add(TimeSpan.FromMinutes(3));
 
             var transaction4 = await SendAsync(server, "http://example.com/me/Cookies", transaction1.CookieNameValue);
             Assert.Null(transaction4.SetCookie);
@@ -667,10 +646,8 @@ namespace Microsoft.AspNetCore.Authentication2.Cookies
         [Fact]
         public async Task CookieIsRenewedWithSlidingExpiration()
         {
-            var clock = new TestClock();
             var server = CreateServer(o =>
             {
-                o.SystemClock = clock;
                 o.ExpireTimeSpan = TimeSpan.FromMinutes(10);
                 o.SlidingExpiration = true;
             },
@@ -682,20 +659,20 @@ namespace Microsoft.AspNetCore.Authentication2.Cookies
             Assert.Null(transaction2.SetCookie);
             Assert.Equal("Alice", FindClaimValue(transaction2, ClaimTypes.Name));
 
-            clock.Add(TimeSpan.FromMinutes(4));
+            _clock.Add(TimeSpan.FromMinutes(4));
 
             var transaction3 = await SendAsync(server, "http://example.com/me/Cookies", transaction1.CookieNameValue);
             Assert.Null(transaction3.SetCookie);
             Assert.Equal("Alice", FindClaimValue(transaction3, ClaimTypes.Name));
 
-            clock.Add(TimeSpan.FromMinutes(4));
+            _clock.Add(TimeSpan.FromMinutes(4));
 
             // transaction4 should arrive with a new SetCookie value
             var transaction4 = await SendAsync(server, "http://example.com/me/Cookies", transaction1.CookieNameValue);
             Assert.NotNull(transaction4.SetCookie);
             Assert.Equal("Alice", FindClaimValue(transaction4, ClaimTypes.Name));
 
-            clock.Add(TimeSpan.FromMinutes(4));
+            _clock.Add(TimeSpan.FromMinutes(4));
 
             var transaction5 = await SendAsync(server, "http://example.com/me/Cookies", transaction4.CookieNameValue);
             Assert.Null(transaction5.SetCookie);
@@ -705,7 +682,6 @@ namespace Microsoft.AspNetCore.Authentication2.Cookies
         [Fact]
         public async Task CookieUsesPathBaseByDefault()
         {
-            var clock = new TestClock();
             var server = CreateServer(o => { },
             context =>
             {
@@ -724,13 +700,7 @@ namespace Microsoft.AspNetCore.Authentication2.Cookies
         [InlineData(false)]
         public async Task CookieTurnsChallengeIntoForbidWithCookie(bool automatic)
         {
-            var clock = new TestClock();
-            var server = CreateServer(o =>
-            {
-                o.SystemClock = clock;
-                //AutomaticAuthenticate = automatic,
-            },
-            SignInAsAlice);
+            var server = CreateServer(o => { }, SignInAsAlice);
 
             var transaction1 = await SendAsync(server, "http://example.com/testpath");
 
@@ -743,18 +713,10 @@ namespace Microsoft.AspNetCore.Authentication2.Cookies
             Assert.Equal("?ReturnUrl=%2Fchallenge", location.Query);
         }
 
-        [Theory]
-        [InlineData(true)]
-        [InlineData(false)]
+        [Fact]
         public async Task CookieChallengeRedirectsToLoginWithoutCookie(bool automatic)
         {
-            var clock = new TestClock();
-            var server = CreateServer(o =>
-            {
-                o.SystemClock = clock;
-                //AutomaticAuthenticate = automatic,
-            },
-            SignInAsAlice);
+            var server = CreateServer(o => { }, SignInAsAlice);
 
             var url = "http://example.com/challenge";
             var transaction = await SendAsync(server, url);
@@ -769,13 +731,7 @@ namespace Microsoft.AspNetCore.Authentication2.Cookies
         [InlineData(false)]
         public async Task CookieForbidRedirectsWithoutCookie(bool automatic)
         {
-            var clock = new TestClock();
-            var server = CreateServer(o =>
-            {
-                o.SystemClock = clock;
-                //AutomaticAuthenticate = automatic,
-            },
-            SignInAsAlice);
+            var server = CreateServer(o => { }, SignInAsAlice);
 
             var url = "http://example.com/forbid";
             var transaction = await SendAsync(server, url);
@@ -788,10 +744,8 @@ namespace Microsoft.AspNetCore.Authentication2.Cookies
         [Fact]
         public async Task CookieTurns401ToAccessDeniedWhenSetWithCookie()
         {
-            var clock = new TestClock();
             var server = CreateServer(o =>
             {
-                o.SystemClock = clock;
                 o.AccessDeniedPath = new PathString("/accessdenied");
             },
             SignInAsAlice);
@@ -809,13 +763,10 @@ namespace Microsoft.AspNetCore.Authentication2.Cookies
         [Fact]
         public async Task CookieChallengeRedirectsWithLoginPath()
         {
-            var clock = new TestClock();
             var server = CreateServer(o =>
             {
-                o.SystemClock = clock;
                 o.LoginPath = new PathString("/page");
             });
-
 
             var transaction1 = await SendAsync(server, "http://example.com/testpath");
 
@@ -827,10 +778,8 @@ namespace Microsoft.AspNetCore.Authentication2.Cookies
         [Fact]
         public async Task CookieChallengeWithUnauthorizedRedirectsToLoginIfNotAuthenticated()
         {
-            var clock = new TestClock();
             var server = CreateServer(o =>
             {
-                o.SystemClock = clock;
                 o.LoginPath = new PathString("/page");
             });
 
@@ -1285,9 +1234,10 @@ namespace Microsoft.AspNetCore.Authentication2.Cookies
             return me;
         }
 
-        private static TestServer CreateServer(Action<CookieAuthenticationOptions> configureOptions, Func<HttpContext, Task> testpath = null, Uri baseAddress = null, Func<ClaimsPrincipal, Task<ClaimsPrincipal>> claimsTransform = null)
+        private TestServer CreateServer(Action<CookieAuthenticationOptions> configureOptions, Func<HttpContext, Task> testpath = null, Uri baseAddress = null, Func<ClaimsPrincipal, Task<ClaimsPrincipal>> claimsTransform = null)
             => CreateServerWithServices(s =>
             {
+                s.AddSingleton<ISystemClock>(_clock);
                 s.AddCookieAuthentication(configureOptions);
                 s.AddAuthentication(o => o.ClaimsTransform = claimsTransform);
             }, testpath, baseAddress, claimsTransform);

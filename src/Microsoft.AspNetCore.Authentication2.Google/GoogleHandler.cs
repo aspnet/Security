@@ -18,8 +18,8 @@ namespace Microsoft.AspNetCore.Authentication2.Google
 {
     internal class GoogleHandler : OAuthHandler<GoogleOptions>
     {
-        public GoogleHandler(ILoggerFactory logger, UrlEncoder encoder, IDataProtectionProvider dataProtection)
-            : base(logger, encoder, dataProtection)
+        public GoogleHandler(ILoggerFactory logger, UrlEncoder encoder, IDataProtectionProvider dataProtection, ISystemClock clock)
+            : base(logger, encoder, dataProtection, clock)
         { }
 
         protected override async Task<AuthenticationTicket2> CreateTicketAsync(

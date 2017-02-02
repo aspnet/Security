@@ -29,8 +29,8 @@ namespace Microsoft.AspNetCore.Authentication2.Cookies
         private string _sessionKey;
         private Task<AuthenticateResult> _readCookieTask;
 
-        public CookieAuthenticationHandler(ILoggerFactory logger, UrlEncoder encoder)
-            : base(logger, encoder)
+        public CookieAuthenticationHandler(ILoggerFactory logger, UrlEncoder encoder, ISystemClock clock)
+            : base(logger, encoder, clock)
         { }
 
         /// <summary>
@@ -96,7 +96,7 @@ namespace Microsoft.AspNetCore.Authentication2.Cookies
 
         private void CheckForRefresh(AuthenticationTicket2 ticket)
         {
-            var currentUtc = Options.SystemClock.UtcNow;
+            var currentUtc = Clock.UtcNow;
             var issuedUtc = ticket.Properties.IssuedUtc;
             var expiresUtc = ticket.Properties.ExpiresUtc;
             var allowRefresh = ticket.Properties.AllowRefresh ?? true;
@@ -120,7 +120,7 @@ namespace Microsoft.AspNetCore.Authentication2.Cookies
             if (issuedUtc != null && expiresUtc != null)
             {
                 _shouldRefresh = true;
-                var currentUtc = Options.SystemClock.UtcNow;
+                var currentUtc = Clock.UtcNow;
                 _refreshIssuedUtc = currentUtc;
                 var timeSpan = expiresUtc.Value.Subtract(issuedUtc.Value);
                 _refreshExpiresUtc = currentUtc.Add(timeSpan);
@@ -156,7 +156,7 @@ namespace Microsoft.AspNetCore.Authentication2.Cookies
                 }
             }
 
-            var currentUtc = Options.SystemClock.UtcNow;
+            var currentUtc = Clock.UtcNow;
             var issuedUtc = ticket.Properties.IssuedUtc;
             var expiresUtc = ticket.Properties.ExpiresUtc;
 
@@ -301,7 +301,7 @@ namespace Microsoft.AspNetCore.Authentication2.Cookies
             }
             else
             {
-                issuedUtc = Options.SystemClock.UtcNow;
+                issuedUtc = Clock.UtcNow;
                 signInContext.Properties.IssuedUtc = issuedUtc;
             }
 

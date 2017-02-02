@@ -52,7 +52,8 @@ namespace Microsoft.AspNetCore.Builder
             // Switch to ActivatorUtilities.CreateInstance if we follow this route
             return app.UseLegacyAuthentication(options, context => new CookieAuthenticationHandler(
                 context.RequestServices.GetRequiredService<ILoggerFactory>(),
-                context.RequestServices.GetRequiredService<UrlEncoder>()));
+                context.RequestServices.GetRequiredService<UrlEncoder>(),
+                context.RequestServices.GetRequiredService<ISystemClock>()));
         }
     }
 }

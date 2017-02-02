@@ -3,6 +3,7 @@
 
 using System;
 using System.Text.Encodings.Web;
+using Microsoft.AspNetCore.Authentication2;
 using Microsoft.AspNetCore.Authentication2.Google;
 using Microsoft.AspNetCore.DataProtection;
 using Microsoft.Extensions.DependencyInjection;
@@ -56,7 +57,8 @@ namespace Microsoft.AspNetCore.Builder
             return app.UseLegacyAuthentication(options, context => new GoogleHandler(
                 context.RequestServices.GetRequiredService<ILoggerFactory>(),
                 context.RequestServices.GetRequiredService<UrlEncoder>(),
-                context.RequestServices.GetRequiredService<IDataProtectionProvider>()));
+                context.RequestServices.GetRequiredService<IDataProtectionProvider>(),
+                context.RequestServices.GetRequiredService<ISystemClock>()));
         }
     }
 }

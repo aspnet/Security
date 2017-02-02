@@ -34,8 +34,8 @@ namespace Microsoft.AspNetCore.Authentication2.OAuth
             set { base.Events = value; }
         }
 
-        public OAuthHandler(ILoggerFactory logger, UrlEncoder encoder, IDataProtectionProvider dataProtection)
-            : base(logger, encoder)
+        public OAuthHandler(ILoggerFactory logger, UrlEncoder encoder, IDataProtectionProvider dataProtection, ISystemClock clock)
+            : base(logger, encoder, clock)
         {
             DataProtection = dataProtection;
         }
@@ -144,7 +144,7 @@ namespace Microsoft.AspNetCore.Authentication2.OAuth
                     {
                         // https://www.w3.org/TR/xmlschema-2/#dateTime
                         // https://msdn.microsoft.com/en-us/library/az4se3k1(v=vs.110).aspx
-                        var expiresAt = Options.SystemClock.UtcNow + TimeSpan.FromSeconds(value);
+                        var expiresAt = Clock.UtcNow + TimeSpan.FromSeconds(value);
                         authTokens.Add(new AuthenticationToken
                         {
                             Name = "expires_at",

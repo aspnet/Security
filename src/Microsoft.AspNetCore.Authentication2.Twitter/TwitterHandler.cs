@@ -41,8 +41,8 @@ namespace Microsoft.AspNetCore.Authentication2.Twitter
             set { base.Events = value; }
         }
 
-        public TwitterHandler(ILoggerFactory logger, UrlEncoder encoder, IDataProtectionProvider dataProtection)
-            : base(logger, encoder)
+        public TwitterHandler(ILoggerFactory logger, UrlEncoder encoder, IDataProtectionProvider dataProtection, ISystemClock clock)
+            : base(logger, encoder, clock)
         {
             DataProtection = dataProtection;
         }
@@ -180,7 +180,7 @@ namespace Microsoft.AspNetCore.Authentication2.Twitter
             {
                 HttpOnly = true,
                 Secure = Request.IsHttps,
-                Expires = Options.SystemClock.UtcNow.Add(Options.RemoteAuthenticationTimeout),
+                Expires = Clock.UtcNow.Add(Options.RemoteAuthenticationTimeout),
             };
 
             Response.Cookies.Append(StateCookie, Options.StateDataFormat.Protect(requestToken), cookieOptions);

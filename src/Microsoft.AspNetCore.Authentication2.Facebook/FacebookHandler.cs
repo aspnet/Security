@@ -19,8 +19,8 @@ namespace Microsoft.AspNetCore.Authentication2.Facebook
 {
     internal class FacebookHandler : OAuthHandler<FacebookOptions>
     {
-        public FacebookHandler(ILoggerFactory logger, UrlEncoder encoder, IDataProtectionProvider dataProtection)
-            : base(logger, encoder, dataProtection)
+        public FacebookHandler(ILoggerFactory logger, UrlEncoder encoder, IDataProtectionProvider dataProtection, ISystemClock clock)
+            : base(logger, encoder, dataProtection, clock)
         { }
 
         protected override async Task<AuthenticationTicket2> CreateTicketAsync(ClaimsIdentity identity, AuthenticationProperties2 properties, OAuthTokenResponse tokens)

@@ -25,7 +25,6 @@ namespace Microsoft.AspNetCore.Authentication2.Cookies
             SlidingExpiration = true;
             CookieHttpOnly = true;
             CookieSecure = CookieSecurePolicy.SameAsRequest;
-            SystemClock = new SystemClock();
             Events = new CookieAuthenticationEvents();
         }
 

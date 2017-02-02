@@ -22,9 +22,11 @@ namespace Microsoft.AspNetCore.Authentication2{
 
         protected PathString OriginalPath { get; private set; }
 
-        protected ILogger Logger { get; private set; }
+        protected ILogger Logger { get; }
 
-        protected UrlEncoder UrlEncoder { get; private set; }
+        protected UrlEncoder UrlEncoder { get; }
+
+        protected ISystemClock Clock { get; }
 
         /// <summary>
         /// The handler calls methods on the events which give the application control at certain points where processing is occurring. 
@@ -54,25 +56,17 @@ namespace Microsoft.AspNetCore.Authentication2{
         protected bool SignInAccepted { get; set; }
         protected bool SignOutAccepted { get; set; }
 
-        protected AuthenticationSchemeHandler(ILoggerFactory logger, UrlEncoder encoder)
+        protected AuthenticationSchemeHandler(ILoggerFactory logger, UrlEncoder encoder, ISystemClock clock)
         {
             Logger = logger.CreateLogger(this.GetType().FullName);
             UrlEncoder = encoder;
+            Clock = clock;
         }
 
         public virtual async Task InitializeAsync(AuthenticationScheme scheme, HttpContext context)
         {
-            if (scheme == null)
-            {
-                throw new ArgumentNullException(nameof(scheme));
-            }
-            if (context == null)
-            {
-                throw new ArgumentNullException(nameof(context));
-            }
-
-            Scheme = scheme;
-            Context = context;
+            Scheme = scheme ?? throw new ArgumentNullException(nameof(scheme));
+            Context = context ?? throw new ArgumentNullException(nameof(context));
             OriginalPathBase = Request.PathBase;
             OriginalPath = Request.Path;
             if (scheme.Settings.ContainsKey("Options"))

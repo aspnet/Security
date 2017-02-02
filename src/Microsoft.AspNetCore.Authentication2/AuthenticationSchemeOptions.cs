@@ -22,9 +22,6 @@ namespace Microsoft.AspNetCore.Authentication2
         /// </summary>
         public string DisplayName { get; set; }
 
-        [EditorBrowsable(EditorBrowsableState.Never)]
-        public ISystemClock SystemClock { get; set; } = new SystemClock();
-
         /// <summary>
         /// Gets or sets the issuer that should be used for any claims that are created
         /// </summary>

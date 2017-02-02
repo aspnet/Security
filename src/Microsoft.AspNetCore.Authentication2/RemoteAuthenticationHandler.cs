@@ -19,8 +19,8 @@ namespace Microsoft.AspNetCore.Authentication2
 
         private static readonly RandomNumberGenerator CryptoRandom = RandomNumberGenerator.Create();
 
-        protected RemoteAuthenticationHandler(ILoggerFactory logger, UrlEncoder encoder)
-            : base(logger, encoder)
+        protected RemoteAuthenticationHandler(ILoggerFactory logger, UrlEncoder encoder, ISystemClock clock)
+            : base(logger, encoder, clock)
         { }
 
         protected override async Task InitializeOptionsAsync()
@@ -209,7 +209,7 @@ namespace Microsoft.AspNetCore.Authentication2
             {
                 HttpOnly = true,
                 Secure = Request.IsHttps,
-                Expires = Options.SystemClock.UtcNow.Add(Options.RemoteAuthenticationTimeout),
+                Expires = Clock.UtcNow.Add(Options.RemoteAuthenticationTimeout),
             };
 
             properties.Items[CorrelationProperty] = correlationId;

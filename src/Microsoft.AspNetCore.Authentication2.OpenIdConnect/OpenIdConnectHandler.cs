@@ -58,8 +58,8 @@ namespace Microsoft.AspNetCore.Authentication2.OpenIdConnect
 
         protected IDataProtectionProvider DataProtection { get; }
 
-        public OpenIdConnectHandler(ILoggerFactory logger, UrlEncoder encoder, HtmlEncoder htmlEncoder, IDataProtectionProvider dataProtection)
-            : base(logger, encoder)
+        public OpenIdConnectHandler(ILoggerFactory logger, UrlEncoder encoder, HtmlEncoder htmlEncoder, IDataProtectionProvider dataProtection, ISystemClock clock)
+            : base(logger, encoder, clock)
         {
             HtmlEncoder = htmlEncoder;
             DataProtection = dataProtection;
@@ -975,7 +975,7 @@ namespace Microsoft.AspNetCore.Authentication2.OpenIdConnect
                 int value;
                 if (int.TryParse(message.ExpiresIn, NumberStyles.Integer, CultureInfo.InvariantCulture, out value))
                 {
-                    var expiresAt = Options.SystemClock.UtcNow + TimeSpan.FromSeconds(value);
+                    var expiresAt = Clock.UtcNow + TimeSpan.FromSeconds(value);
                     // https://www.w3.org/TR/xmlschema-2/#dateTime
                     // https://msdn.microsoft.com/en-us/library/az4se3k1(v=vs.110).aspx
                     tokens.Add(new AuthenticationToken { Name = "expires_at", Value = expiresAt.ToString("o", CultureInfo.InvariantCulture) });
@@ -1005,7 +1005,7 @@ namespace Microsoft.AspNetCore.Authentication2.OpenIdConnect
                 {
                     HttpOnly = true,
                     Secure = Request.IsHttps,
-                    Expires = Options.SystemClock.UtcNow.Add(Options.ProtocolValidator.NonceLifetime)
+                    Expires = Clock.UtcNow.Add(Options.ProtocolValidator.NonceLifetime)
                 });
         }
 

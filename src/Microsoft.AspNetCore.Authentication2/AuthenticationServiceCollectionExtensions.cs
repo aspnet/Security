@@ -19,6 +19,7 @@ namespace Microsoft.Extensions.DependencyInjection
                 throw new ArgumentNullException(nameof(services));
             }
 
+            services.AddSingleton<ISystemClock, SystemClock>();
             services.AddDataProtection();
             services.AddWebEncoders();
             services.TryAddScoped<IAuthenticationService, DefaultAuthenticationService>();

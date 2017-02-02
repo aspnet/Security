@@ -22,8 +22,8 @@ namespace Microsoft.AspNetCore.Authentication2.JwtBearer
     {
         private OpenIdConnectConfiguration _configuration;
 
-        public JwtBearerHandler(ILoggerFactory logger, UrlEncoder encoder)
-            : base(logger, encoder)
+        public JwtBearerHandler(ILoggerFactory logger, UrlEncoder encoder, ISystemClock clock)
+            : base(logger, encoder, clock)
         { }
 
         /// <summary>

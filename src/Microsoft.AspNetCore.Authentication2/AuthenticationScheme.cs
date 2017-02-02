@@ -3,6 +3,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Reflection;
 using Microsoft.AspNetCore.Http;
 
 namespace Microsoft.AspNetCore.Authentication2
@@ -11,11 +12,14 @@ namespace Microsoft.AspNetCore.Authentication2
     {
         public AuthenticationScheme(string name, Type handlerType, Dictionary<string, object> settings, AuthenticationOptions2 sharedOptions)
         {
-            // todo: throw for null/empty name, handlerType null or not IAuthenticationSchemeHandler
-            Name = name;
-            HandlerType = handlerType;
-            Settings = settings;
-            SharedOptions = sharedOptions;
+            Name = name ?? throw new ArgumentNullException(nameof(name));
+            if (!typeof(IAuthenticationSchemeHandler).IsAssignableFrom(handlerType))
+            {
+                throw new ArgumentException("handlerType must implement IAuthenticationSchemeHandler.");
+            }
+            HandlerType = handlerType ?? throw new ArgumentNullException(nameof(handlerType));
+            Settings = settings ?? throw new ArgumentNullException(nameof(settings));
+            SharedOptions = sharedOptions ?? throw new ArgumentNullException(nameof(sharedOptions));
         }
 
         public string Name { get; }
