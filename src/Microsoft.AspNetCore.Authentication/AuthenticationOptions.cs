@@ -54,6 +54,6 @@ namespace Microsoft.AspNetCore.Builder
         /// For testing purposes only.
         /// </summary>
         [EditorBrowsable(EditorBrowsableState.Never)]
-        public ISystemClock SystemClock { get; set; } = new SystemClock();
+        public ISystemClock SystemClock { get; set; } = new SystemSecondsClock();
     }
 }
