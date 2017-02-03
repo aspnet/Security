@@ -76,6 +76,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Microsoft.AspNetCore.Authen
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Old", "Old", "{68BA0350-CB6D-41DF-AAA9-146C0A2C914F}"
 EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Microsoft.AspNetCore.Authentication.Abstractions", "src\Microsoft.AspNetCore.Authentication.Abstractions\Microsoft.AspNetCore.Authentication.Abstractions.csproj", "{91912AB3-15BC-430E-A938-F74A732FF780}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -610,6 +612,22 @@ Global
 		{6553457F-0A5C-48C2-AA59-AB769339C586}.Release|x64.Build.0 = Release|x64
 		{6553457F-0A5C-48C2-AA59-AB769339C586}.Release|x86.ActiveCfg = Release|x86
 		{6553457F-0A5C-48C2-AA59-AB769339C586}.Release|x86.Build.0 = Release|x86
+		{91912AB3-15BC-430E-A938-F74A732FF780}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{91912AB3-15BC-430E-A938-F74A732FF780}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{91912AB3-15BC-430E-A938-F74A732FF780}.Debug|Mixed Platforms.ActiveCfg = Debug|x86
+		{91912AB3-15BC-430E-A938-F74A732FF780}.Debug|Mixed Platforms.Build.0 = Debug|x86
+		{91912AB3-15BC-430E-A938-F74A732FF780}.Debug|x64.ActiveCfg = Debug|x64
+		{91912AB3-15BC-430E-A938-F74A732FF780}.Debug|x64.Build.0 = Debug|x64
+		{91912AB3-15BC-430E-A938-F74A732FF780}.Debug|x86.ActiveCfg = Debug|x86
+		{91912AB3-15BC-430E-A938-F74A732FF780}.Debug|x86.Build.0 = Debug|x86
+		{91912AB3-15BC-430E-A938-F74A732FF780}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{91912AB3-15BC-430E-A938-F74A732FF780}.Release|Any CPU.Build.0 = Release|Any CPU
+		{91912AB3-15BC-430E-A938-F74A732FF780}.Release|Mixed Platforms.ActiveCfg = Release|x86
+		{91912AB3-15BC-430E-A938-F74A732FF780}.Release|Mixed Platforms.Build.0 = Release|x86
+		{91912AB3-15BC-430E-A938-F74A732FF780}.Release|x64.ActiveCfg = Release|x64
+		{91912AB3-15BC-430E-A938-F74A732FF780}.Release|x64.Build.0 = Release|x64
+		{91912AB3-15BC-430E-A938-F74A732FF780}.Release|x86.ActiveCfg = Release|x86
+		{91912AB3-15BC-430E-A938-F74A732FF780}.Release|x86.Build.0 = Release|x86
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -649,5 +667,6 @@ Global
 		{BE3C6F68-0DBF-4BE1-8141-A28F60377B75} = {4D2B6A51-2F9F-44F5-8131-EA5CAC053652}
 		{6553457F-0A5C-48C2-AA59-AB769339C586} = {7BF11F3A-60B6-4796-B504-579C67FFBA34}
 		{68BA0350-CB6D-41DF-AAA9-146C0A2C914F} = {4D2B6A51-2F9F-44F5-8131-EA5CAC053652}
+		{91912AB3-15BC-430E-A938-F74A732FF780} = {4D2B6A51-2F9F-44F5-8131-EA5CAC053652}
 	EndGlobalSection
 EndGlobal

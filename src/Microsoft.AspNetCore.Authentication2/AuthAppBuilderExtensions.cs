@@ -22,7 +22,8 @@ namespace Microsoft.AspNetCore.Builder
             {
                 throw new ArgumentNullException(nameof(app));
             }
-            
+
+            //return app.UseMiddleware<AuthenticationMiddleware>();
             return app;
         }
     }
