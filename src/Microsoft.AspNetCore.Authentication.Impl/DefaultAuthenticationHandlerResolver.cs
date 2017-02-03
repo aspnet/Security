@@ -27,7 +27,8 @@ namespace Microsoft.AspNetCore.Authentication
             }
 
             var scheme = await Schemes.GetSchemeAsync(authenticationScheme);
-            var handler = scheme?.ResolveHandler(context);
+            var handler = scheme?.ResolveHandlerFunc?.Invoke(context) ??
+                context.RequestServices.GetService(scheme?.HandlerType) as IAuthenticationHandler;
             if (handler != null)
             {
                 await handler.InitializeAsync(scheme, context);
