@@ -107,27 +107,22 @@ namespace Microsoft.AspNetCore.Authentication
             return tokens;
         }
 
-        //public static Task<string> GetTokenAsync(this IAuthenticationManager2 manager, string tokenName)
-        //{
-        //    return manager.GetTokenAsync(AuthenticationManager.AutomaticScheme, tokenName);
-        //}
-
-        public static async Task<string> GetTokenAsync(this IAuthenticationService manager, HttpContext context, string signInScheme, string tokenName)
+        public static async Task<string> GetTokenAsync(this IAuthenticationService auth, HttpContext context, string scheme, string tokenName)
         {
-            if (manager == null)
+            if (auth == null)
             {
-                throw new ArgumentNullException(nameof(manager));
+                throw new ArgumentNullException(nameof(auth));
             }
-            if (signInScheme == null)
+            if (scheme == null)
             {
-                throw new ArgumentNullException(nameof(signInScheme));
+                throw new ArgumentNullException(nameof(scheme));
             }
             if (tokenName == null)
             {
                 throw new ArgumentNullException(nameof(tokenName));
             }
 
-            var result = await manager.AuthenticateAsync(context, signInScheme);
+            var result = await auth.AuthenticateAsync(context, scheme);
             return result?.Ticket?.Properties.GetTokenValue(tokenName);
         }
     }
