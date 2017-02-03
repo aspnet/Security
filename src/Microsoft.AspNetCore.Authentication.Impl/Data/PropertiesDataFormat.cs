@@ -1,15 +1,15 @@
 // Copyright (c) .NET Foundation. All rights reserved.
 // Licensed under the Apache License, Version 2.0. See License.txt in the project root for license information.
 
-using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.DataProtection;
 using Microsoft.AspNetCore.Http.Authentication;
 
 namespace Microsoft.AspNetCore.Authentication
 {
-    public class SignOutContext : BaseAuthenticationContext
+    public class PropertiesDataFormat : SecureDataFormat<AuthenticationProperties>
     {
-        public SignOutContext(HttpContext context, string authenticationScheme, AuthenticationProperties properties)
-            : base(context, authenticationScheme, properties)
+        public PropertiesDataFormat(IDataProtector protector)
+            : base(new PropertiesSerializer(), protector)
         {
         }
     }

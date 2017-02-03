@@ -13,7 +13,7 @@ namespace Microsoft.AspNetCore.Authentication
         public AuthenticationScheme(string name, Type handlerType, Dictionary<string, object> settings)
         {
             Name = name ?? throw new ArgumentNullException(nameof(name));
-            if (!typeof(IAuthenticationSchemeHandler).IsAssignableFrom(handlerType))
+            if (!typeof(IAuthenticationHandler).IsAssignableFrom(handlerType))
             {
                 throw new ArgumentException("handlerType must implement IAuthenticationSchemeHandler.");
             }
@@ -25,16 +25,16 @@ namespace Microsoft.AspNetCore.Authentication
         public Type HandlerType { get; }
 
         // Go away if UseLegacy
-        public Func<HttpContext, IAuthenticationSchemeHandler> ResolveHandlerFunc { get; set; }
+        public Func<HttpContext, IAuthenticationHandler> ResolveHandlerFunc { get; set; }
 
         // Holds things like the configured options instances for the handler
         // Also replacement for AuthenticationDescription
         public IReadOnlyDictionary<string, object> Settings { get; }
 
-        public virtual IAuthenticationSchemeHandler ResolveHandler(HttpContext context)
+        public virtual IAuthenticationHandler ResolveHandler(HttpContext context)
         {
             return ResolveHandlerFunc?.Invoke(context) ?? 
-                context.RequestServices.GetService(HandlerType) as IAuthenticationSchemeHandler;
+                context.RequestServices.GetService(HandlerType) as IAuthenticationHandler;
         }
     }
 }
