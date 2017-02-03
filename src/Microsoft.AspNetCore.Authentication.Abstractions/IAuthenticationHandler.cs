@@ -7,7 +7,7 @@ using Microsoft.AspNetCore.Http;
 namespace Microsoft.AspNetCore.Authentication
 {
     // Created on a per request basis to handle one particular scheme.
-    public interface IAuthenticationSchemeHandler
+    public interface IAuthenticationHandler
     {
         // Gives the handler access to the configuration data
         Task InitializeAsync(AuthenticationScheme scheme, HttpContext context);
