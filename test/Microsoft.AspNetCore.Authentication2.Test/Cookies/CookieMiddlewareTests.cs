@@ -280,16 +280,7 @@ namespace Microsoft.AspNetCore.Authentication2.Cookies
             var server = CreateServer(o => { },
             SignInAsAlice,
             baseAddress: null,
-            claimsTransform: p =>
-            {
-                if (!p.Identities.Any(i => i.AuthenticationType == "xform"))
-                {
-                    var id = new ClaimsIdentity("xform");
-                    id.AddClaim(new Claim("xform", "yup"));
-                    p.AddIdentity(id);
-                }
-                return Task.FromResult(p);
-            });
+            claimsTransform: true);
 
             var transaction1 = await SendAsync(server, "http://example.com/testpath");
 
@@ -794,15 +785,8 @@ namespace Microsoft.AspNetCore.Authentication2.Cookies
         public async Task MapWillNotAffectChallenge()
         {
             var builder = new WebHostBuilder()
-                .Configure(app =>
-                {
-                    app.UseCookieAuthentication(new CookieAuthenticationOptions()
-                    {
-                        LoginPath = new PathString("/page")
-                    });
-                    app.Map("/login", signoutApp => signoutApp.Run(context => context.ChallengeAsync("Cookies", new AuthenticationProperties2() { RedirectUri = "/" })));
-                })
-                .ConfigureServices(s => s.AddAuthentication());
+                .Configure(app => app.Map("/login", signoutApp => signoutApp.Run(context => context.ChallengeAsync("Cookies", new AuthenticationProperties2() { RedirectUri = "/" }))))
+                .ConfigureServices(s => s.AddCookieAuthentication(o => o.LoginPath = new PathString("/page")));
             var server = new TestServer(builder);
 
             var transaction = await server.SendAsync("http://example.com/login");
@@ -1234,15 +1218,29 @@ namespace Microsoft.AspNetCore.Authentication2.Cookies
             return me;
         }
 
-        private TestServer CreateServer(Action<CookieAuthenticationOptions> configureOptions, Func<HttpContext, Task> testpath = null, Uri baseAddress = null, Func<ClaimsPrincipal, Task<ClaimsPrincipal>> claimsTransform = null)
+        private class ClaimsTransformer : IClaimsTransformation
+        {
+            public Task<ClaimsPrincipal> TransformAsync(ClaimsPrincipal p)
+            {
+                if (!p.Identities.Any(i => i.AuthenticationType == "xform"))
+                {
+                    var id = new ClaimsIdentity("xform");
+                    id.AddClaim(new Claim("xform", "yup"));
+                    p.AddIdentity(id);
+                }
+                return Task.FromResult(p);
+            }
+        }
+
+        private TestServer CreateServer(Action<CookieAuthenticationOptions> configureOptions, Func<HttpContext, Task> testpath = null, Uri baseAddress = null, bool claimsTransform = false)
             => CreateServerWithServices(s =>
             {
                 s.AddSingleton<ISystemClock>(_clock);
                 s.AddCookieAuthentication(configureOptions);
-                s.AddAuthentication(o => o.ClaimsTransform = claimsTransform);
-            }, testpath, baseAddress, claimsTransform);
+                s.AddSingleton<IClaimsTransformation, ClaimsTransformer>();
+            }, testpath, baseAddress);
 
-        private static TestServer CreateServerWithServices(Action<IServiceCollection> configureServices, Func<HttpContext, Task> testpath = null, Uri baseAddress = null, Func<ClaimsPrincipal, Task<ClaimsPrincipal>> claimsTransform = null)
+        private static TestServer CreateServerWithServices(Action<IServiceCollection> configureServices, Func<HttpContext, Task> testpath = null, Uri baseAddress = null)
         {
             var builder = new WebHostBuilder()
                 .Configure(app =>

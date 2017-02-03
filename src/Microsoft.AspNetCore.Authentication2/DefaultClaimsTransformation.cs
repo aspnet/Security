@@ -7,6 +7,9 @@ using Microsoft.Extensions.Options;
 
 namespace Microsoft.AspNetCore.Authentication2
 {
+    /// <summary>
+    /// Default claims transformation is a no-op.
+    /// </summary>
     public class DefaultClaimsTransformation : IClaimsTransformation
     {
         private readonly AuthenticationOptions2 _options;
@@ -18,10 +21,6 @@ namespace Microsoft.AspNetCore.Authentication2
 
         public virtual Task<ClaimsPrincipal> TransformAsync(ClaimsPrincipal principal)
         {
-            if (_options.ClaimsTransform != null)
-            {
-                return _options.ClaimsTransform(principal);
-            }
             return Task.FromResult(principal);
         }
     }

@@ -7,7 +7,7 @@ using Microsoft.AspNetCore.Http;
 
 namespace Microsoft.AspNetCore.Authentication2
 {
-    public class SchemeHandlerCache
+    public class SchemeHandlerCache // IAuthenticationSchemeHandlerResolver
     {
         public SchemeHandlerCache(IAuthenticationSchemeProvider schemes)
         {

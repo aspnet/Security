@@ -6,6 +6,7 @@ using System.Security.Cryptography;
 using System.Text.Encodings.Web;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
+using Microsoft.Extensions.Internal;
 using Microsoft.Extensions.Logging;
 
 namespace Microsoft.AspNetCore.Authentication2
@@ -23,23 +24,15 @@ namespace Microsoft.AspNetCore.Authentication2
             : base(logger, encoder, clock)
         { }
 
-        protected override async Task InitializeOptionsAsync()
+        public override async Task InitializeAsync(AuthenticationScheme scheme, HttpContext context)
         {
-            await base.InitializeOptionsAsync();
+            await base.InitializeAsync(scheme, context);
             Events = Events ?? new RemoteAuthenticationEvents();
-            if (Options.SignInScheme == null && Scheme.SharedOptions.DefaultSignInScheme != null)
-            {
-                Options.SignInScheme = Scheme.SharedOptions.DefaultSignInScheme;
-            }
 
-            if (Options.CallbackPath == null || !Options.CallbackPath.HasValue)
+            // TODO: this needs to be done once (but we don't have access to scheme data in ext method)
+            if (Options.SignInScheme == null && scheme.SharedOptions.DefaultSignInScheme != null)
             {
-                throw new ArgumentException(Resources.FormatException_OptionMustBeProvided(nameof(Options.CallbackPath)), nameof(Options.CallbackPath));
-            }
-
-            if (string.IsNullOrEmpty(Options.SignInScheme))
-            {
-                throw new ArgumentException(Resources.FormatException_OptionMustBeProvided(nameof(Options.SignInScheme)), nameof(Options.SignInScheme));
+                Options.SignInScheme = scheme.SharedOptions.DefaultSignInScheme;
             }
         }
 

@@ -75,9 +75,9 @@ namespace Microsoft.AspNetCore.Authentication2.OpenIdConnect
             set { base.Events = value; }
         }
 
-        protected override async Task InitializeOptionsAsync()
+        public override async Task InitializeAsync(AuthenticationScheme scheme, HttpContext context)
         {
-            await base.InitializeOptionsAsync();
+            await base.InitializeAsync(scheme, context);
             Events = Events ?? new OpenIdConnectEvents();
 
             if (string.IsNullOrEmpty(Options.SignOutScheme))
@@ -147,16 +147,6 @@ namespace Microsoft.AspNetCore.Authentication2.OpenIdConnect
                     Options.ConfigurationManager = new ConfigurationManager<OpenIdConnectConfiguration>(Options.MetadataAddress, new OpenIdConnectConfigurationRetriever(),
                         new HttpDocumentRetriever(Backchannel) { RequireHttps = Options.RequireHttpsMetadata });
                 }
-            }
-
-            if (string.IsNullOrEmpty(Options.ClientId))
-            {
-                throw new ArgumentException("Options.ClientId must be provided", nameof(Options.ClientId));
-            }
-
-            if (!Options.CallbackPath.HasValue)
-            {
-                throw new ArgumentException("Options.CallbackPath must be provided.", nameof(Options.CallbackPath));
             }
 
             if (string.IsNullOrEmpty(Options.SignInScheme))

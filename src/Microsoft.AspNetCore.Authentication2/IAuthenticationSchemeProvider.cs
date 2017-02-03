@@ -11,12 +11,12 @@ namespace Microsoft.AspNetCore.Authentication2
         Task<AuthenticationScheme> GetSchemeAsync(string name);
         Task<AuthenticationScheme> GetDefaultAuthenticateSchemeAsync();
         Task<AuthenticationScheme> GetDefaultChallengeSchemeAsync();
-        Task AddScheme(AuthenticationScheme scheme);
+        void AddScheme(AuthenticationScheme scheme);
 
         /// <summary>
         /// Returns the schemes in priority order for request handling.
         /// </summary>
         /// <returns></returns>
-        Task<IEnumerable<AuthenticationScheme>> GetPriorityOrderedSchemes();
+        Task<IEnumerable<AuthenticationScheme>> GetPriorityOrderedSchemesAsync();
     }
 }

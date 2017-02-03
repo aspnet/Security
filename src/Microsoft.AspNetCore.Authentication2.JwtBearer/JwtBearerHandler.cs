@@ -36,9 +36,9 @@ namespace Microsoft.AspNetCore.Authentication2.JwtBearer
             set { base.Events = value; }
         }
 
-        protected override async Task InitializeOptionsAsync()
+        public override async Task InitializeAsync(AuthenticationScheme scheme, HttpContext context)
         {
-            await base.InitializeOptionsAsync();
+            await base.InitializeAsync(scheme, context);
             Events = Events ?? new JwtBearerEvents();
 
             if (string.IsNullOrEmpty(Options.TokenValidationParameters.ValidAudience) && !string.IsNullOrEmpty(Options.Audience))

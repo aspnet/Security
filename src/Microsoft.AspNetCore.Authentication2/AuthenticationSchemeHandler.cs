@@ -63,7 +63,7 @@ namespace Microsoft.AspNetCore.Authentication2{
             Clock = clock;
         }
 
-        public virtual async Task InitializeAsync(AuthenticationScheme scheme, HttpContext context)
+        public virtual Task InitializeAsync(AuthenticationScheme scheme, HttpContext context)
         {
             Scheme = scheme ?? throw new ArgumentNullException(nameof(scheme));
             Context = context ?? throw new ArgumentNullException(nameof(context));
@@ -74,13 +74,7 @@ namespace Microsoft.AspNetCore.Authentication2{
                 Options = scheme.Settings["Options"] as TOptions;
             }
             Options = Options ?? new TOptions();
-            await InitializeOptionsAsync();
-        }
-
-        protected virtual Task InitializeOptionsAsync()
-        {
             Events = Options.Events;
-            Options.AuthenticationScheme = Scheme.Name; // REVIEW: should consider removing?
             if (Options.EventsType != null)
             {
                 Events = Context.RequestServices.GetRequiredService(Options.EventsType);
@@ -88,8 +82,9 @@ namespace Microsoft.AspNetCore.Authentication2{
             if (string.IsNullOrEmpty(Options.ClaimsIssuer))
             {
                 // Default to something reasonable
-                Options.ClaimsIssuer = Scheme.Name;
+                Options.ClaimsIssuer = scheme.Name;
             }
+
             return TaskCache.CompletedTask;
         }
 

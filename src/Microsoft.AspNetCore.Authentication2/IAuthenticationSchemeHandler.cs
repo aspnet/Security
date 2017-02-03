@@ -17,6 +17,7 @@ namespace Microsoft.AspNetCore.Authentication2
         Task SignInAsync(SignInContext context);
         Task SignOutAsync(SignOutContext context);
 
+        // Task<bool>
         Task<AuthenticationRequestStatus> HandleRequestAsync();
     }
 

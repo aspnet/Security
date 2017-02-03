@@ -85,7 +85,7 @@ namespace Microsoft.AspNetCore.Authentication2.Google
         }
 
         [Fact]
-        public async Task Challenge401WillTriggerRedirection()
+        public async Task Challenge401WillTriggerNotRedirection()
         {
             var server = CreateServer(o =>
             {
@@ -93,13 +93,7 @@ namespace Microsoft.AspNetCore.Authentication2.Google
                 o.ClientSecret = "Test Secret";
             });
             var transaction = await server.SendAsync("https://example.com/401");
-            Assert.Equal(HttpStatusCode.Redirect, transaction.Response.StatusCode);
-            var location = transaction.Response.Headers.Location.ToString();
-            Assert.Contains("https://accounts.google.com/o/oauth2/auth?response_type=code", location);
-            Assert.Contains("&client_id=", location);
-            Assert.Contains("&redirect_uri=", location);
-            Assert.Contains("&scope=", location);
-            Assert.Contains("&state=", location);
+            Assert.Equal(HttpStatusCode.Unauthorized, transaction.Response.StatusCode);
         }
 
         [Fact]
@@ -1001,14 +995,25 @@ namespace Microsoft.AspNetCore.Authentication2.Google
             return res;
         }
 
+        private class ClaimsTransformer : IClaimsTransformation
+        {
+            public Task<ClaimsPrincipal> TransformAsync(ClaimsPrincipal p)
+            {
+                if (!p.Identities.Any(i => i.AuthenticationType == "xform"))
+                {
+                    var id = new ClaimsIdentity("xform");
+                    id.AddClaim(new Claim("xform", "yup"));
+                    p.AddIdentity(id);
+                }
+                return Task.FromResult(p);
+            }
+        }
+
         private static TestServer CreateServer(Action<GoogleOptions> configureOptions, Func<HttpContext, Task> testpath = null)
         {
             var builder = new WebHostBuilder()
                 .Configure(app =>
                 {
-                    var options = new GoogleOptions();
-                    configureOptions(options);
-                    app.UseGoogleAuthentication(options);
                     //app.UseAuthentication();
                     app.Use(async (context, next) =>
                     {
@@ -1086,24 +1091,15 @@ namespace Microsoft.AspNetCore.Authentication2.Google
                 })
                 .ConfigureServices(services =>
                 {
+                    services.AddTransient<IClaimsTransformation, ClaimsTransformer>();
                     services.AddAuthentication(o =>
                     {
                         o.DefaultAuthenticationScheme = TestExtensions.CookieAuthenticationScheme;
                         o.DefaultSignInScheme = TestExtensions.CookieAuthenticationScheme;
                         o.DefaultChallengeScheme = GoogleDefaults.AuthenticationScheme;
-                        o.ClaimsTransform = p =>
-                        {
-                            if (!p.Identities.Any(i => i.AuthenticationType == "xform"))
-                            {
-                                var id = new ClaimsIdentity("xform");
-                                id.AddClaim(new Claim("xform", "yup"));
-                                p.AddIdentity(id);
-                            }
-                            return Task.FromResult(p);
-                        };
                     });
                     services.AddCookieAuthentication(TestExtensions.CookieAuthenticationScheme);
-                    //services.AddGoogleAuthentication(configureOptions);
+                    services.AddGoogleAuthentication(configureOptions);
                     services.AddFacebookAuthentication(o =>
                     {
                         o.AppId = "Test AppId";

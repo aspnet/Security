@@ -47,9 +47,9 @@ namespace Microsoft.AspNetCore.Authentication2.Twitter
             DataProtection = dataProtection;
         }
 
-        protected override async Task InitializeOptionsAsync()
+        public override async Task InitializeAsync(AuthenticationScheme scheme, HttpContext context)
         {
-            await base.InitializeOptionsAsync();
+            await base.InitializeAsync(scheme, context);
             Events = Events ?? new TwitterEvents();
 
             if (Options.StateDataFormat == null)

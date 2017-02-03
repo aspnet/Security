@@ -15,6 +15,7 @@ using Microsoft.AspNetCore.WebUtilities;
 using Microsoft.AspNetCore.DataProtection;
 using Microsoft.Extensions.Logging;
 using System.Text.Encodings.Web;
+using Microsoft.AspNetCore.Http;
 
 namespace Microsoft.AspNetCore.Authentication2.OAuth
 {
@@ -40,20 +41,15 @@ namespace Microsoft.AspNetCore.Authentication2.OAuth
             DataProtection = dataProtection;
         }
 
-        protected override async Task InitializeOptionsAsync()
+        public override async Task InitializeAsync(AuthenticationScheme scheme, HttpContext context)
         {
-            await base.InitializeOptionsAsync();
+            await base.InitializeAsync(scheme, context);
             Events = Events ?? new OAuthEvents();
 
             Backchannel = new HttpClient(Options.BackchannelHttpHandler ?? new HttpClientHandler());
             Backchannel.DefaultRequestHeaders.UserAgent.ParseAdd("Microsoft ASP.NET Core OAuth middleware");
             Backchannel.Timeout = Options.BackchannelTimeout;
             Backchannel.MaxResponseContentBufferSize = 1024 * 1024 * 10; // 10 MB
-
-            if (!Options.CallbackPath.HasValue)
-            {
-                throw new ArgumentException(string.Format(CultureInfo.CurrentCulture, Resources.Exception_OptionMustBeProvided, nameof(Options.CallbackPath)));
-            }
 
             if (Options.StateDataFormat == null)
             {

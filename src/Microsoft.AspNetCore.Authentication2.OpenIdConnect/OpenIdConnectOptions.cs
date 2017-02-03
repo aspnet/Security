@@ -44,7 +44,6 @@ namespace Microsoft.AspNetCore.Authentication2.OpenIdConnect
         public OpenIdConnectOptions(string authenticationScheme)
         {
             AuthenticationScheme = authenticationScheme;
-            //AutomaticChallenge = true;
             DisplayName = OpenIdConnectDefaults.Caption;
             CallbackPath = new PathString("/signin-oidc");
             SignedOutCallbackPath = new PathString("/signout-callback-oidc");
@@ -53,6 +52,24 @@ namespace Microsoft.AspNetCore.Authentication2.OpenIdConnect
             Events = new OpenIdConnectEvents();
             Scope.Add("openid");
             Scope.Add("profile");
+        }
+
+        /// <summary>
+        /// Check that the options are valid.  Should throw an exception if things are not ok.
+        /// </summary>
+        public override void Validate()
+        {
+            base.Validate();
+
+            if (string.IsNullOrEmpty(ClientId))
+            {
+                throw new ArgumentException("Options.ClientId must be provided", nameof(ClientId));
+            }
+
+            if (!CallbackPath.HasValue)
+            {
+                throw new ArgumentException("Options.CallbackPath must be provided.", nameof(CallbackPath));
+            }
         }
 
         /// <summary>

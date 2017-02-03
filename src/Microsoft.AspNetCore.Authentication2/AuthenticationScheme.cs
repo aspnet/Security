@@ -25,6 +25,7 @@ namespace Microsoft.AspNetCore.Authentication2
         public string Name { get; }
         public Type HandlerType { get; }
 
+        // Go away if UseLegacy
         public Func<HttpContext, IAuthenticationSchemeHandler> ResolveHandlerFunc { get; set; }
 
         // Holds things like the configured options instances for the handler

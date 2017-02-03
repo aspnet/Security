@@ -1,7 +1,9 @@
 // Copyright (c) .NET Foundation. All rights reserved.
 // Licensed under the Apache License, Version 2.0. See License.txt in the project root for license information.
 
+using System;
 using System.Collections.Generic;
+using System.Globalization;
 using Microsoft.AspNetCore.DataProtection;
 
 namespace Microsoft.AspNetCore.Authentication2.OAuth
@@ -14,6 +16,19 @@ namespace Microsoft.AspNetCore.Authentication2.OAuth
         public OAuthOptions()
         {
             Events = new OAuthEvents();
+        }
+
+        /// <summary>
+        /// Check that the options are valid.  Should throw an exception if things are not ok.
+        /// </summary>
+        public override void Validate()
+        {
+            base.Validate();
+
+            if (!CallbackPath.HasValue)
+            {
+                throw new ArgumentException(string.Format(CultureInfo.CurrentCulture, Resources.Exception_OptionMustBeProvided, nameof(CallbackPath)));
+            }
         }
 
         /// <summary>

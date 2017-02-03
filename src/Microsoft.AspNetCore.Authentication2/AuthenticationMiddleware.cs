@@ -36,7 +36,10 @@ namespace Microsoft.AspNetCore.Authentication2
             // handled paths instead to have better routing?
             // Give each scheme a chance to handle the request
             var handlers = context.RequestServices.GetRequiredService<SchemeHandlerCache>();
-            foreach (var scheme in await Schemes.GetPriorityOrderedSchemes())
+
+            //authy.GetHandlerScheme()
+
+            foreach (var scheme in await Schemes.GetPriorityOrderedSchemesAsync())
             {
                 var handler = await handlers.GetHandlerAsync(context, scheme.Name);
                 var result = await handler.HandleRequestAsync();
@@ -47,17 +50,6 @@ namespace Microsoft.AspNetCore.Authentication2
             }
 
             await _next(context);
-
-            // Handle automatic challenge on the way out
-            if (context.Response.StatusCode == 401)
-            {
-                var defaultChallenge = await Schemes.GetDefaultChallengeSchemeAsync();
-                if (defaultChallenge != null)
-                {
-                    await context.ChallengeAsync(defaultChallenge.Name);
-                }
-            }
-
         }
     }
 }

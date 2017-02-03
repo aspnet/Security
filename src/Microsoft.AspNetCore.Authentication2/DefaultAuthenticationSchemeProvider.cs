@@ -2,7 +2,6 @@
 // Licensed under the Apache License, Version 2.0. See License.txt in the project root for license information.
 
 using System;
-using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Internal;
@@ -68,12 +67,12 @@ namespace Microsoft.AspNetCore.Authentication2
             return Task.FromResult<AuthenticationScheme>(null);
         }
 
-        public Task<IEnumerable<AuthenticationScheme>> GetPriorityOrderedSchemes()
+        public Task<IEnumerable<AuthenticationScheme>> GetPriorityOrderedSchemesAsync()
         {
             return Task.FromResult<IEnumerable<AuthenticationScheme>>(_schemes);
         }
 
-        public Task AddScheme(AuthenticationScheme scheme)
+        public void AddScheme(AuthenticationScheme scheme)
         {
             if (_map.ContainsKey(scheme.Name))
             {
@@ -88,7 +87,6 @@ namespace Microsoft.AspNetCore.Authentication2
                 _schemes.Add(scheme);
                 _map[scheme.Name] = scheme;
             }
-            return TaskCache.CompletedTask;
         }
     }
 }

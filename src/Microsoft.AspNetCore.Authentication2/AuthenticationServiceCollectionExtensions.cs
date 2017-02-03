@@ -58,6 +58,10 @@ namespace Microsoft.Extensions.DependencyInjection
                     b.HandlerType = typeof(THandler);
                     var options = new TOptions();
                     configureOptions?.Invoke(options);
+                    // revisit the settings typing
+
+                    options.Validate();
+
                     b.Settings["Options"] = options;
                 });
             });

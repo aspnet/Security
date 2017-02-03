@@ -49,11 +49,7 @@ namespace Microsoft.AspNetCore.Authentication2.Cookies
 
             // Cookies needs to finish the response
             Context.Response.OnStarting(FinishResponseOnce);
-        }
 
-        protected override async Task InitializeOptionsAsync()
-        {
-            await base.InitializeOptionsAsync();
             Events = Events ?? new CookieAuthenticationEvents();
 
             if (String.IsNullOrEmpty(Options.CookieName))

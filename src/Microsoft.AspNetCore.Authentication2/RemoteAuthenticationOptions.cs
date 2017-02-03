@@ -13,6 +13,23 @@ namespace Microsoft.AspNetCore.Authentication2
     public class RemoteAuthenticationOptions : AuthenticationSchemeOptions
     {
         /// <summary>
+        /// Check that the options are valid.  Should throw an exception if things are not ok.
+        /// </summary>
+        public override void Validate()
+        {
+            base.Validate();
+            if (CallbackPath == null || !CallbackPath.HasValue)
+            {
+                throw new ArgumentException(Resources.FormatException_OptionMustBeProvided(nameof(CallbackPath)), nameof(CallbackPath));
+            }
+
+            if (string.IsNullOrEmpty(SignInScheme))
+            {
+                throw new ArgumentException(Resources.FormatException_OptionMustBeProvided(nameof(SignInScheme)), nameof(SignInScheme));
+            }
+        }
+
+        /// <summary>
         /// Gets or sets timeout value in milliseconds for back channel communications with the remote identity provider.
         /// </summary>
         /// <value>

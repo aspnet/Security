@@ -2,7 +2,8 @@
 // Licensed under the Apache License, Version 2.0. See License.txt in the project root for license information.
 
 using System;
-using System.ComponentModel;
+using System.Threading.Tasks;
+using Microsoft.Extensions.Internal;
 
 namespace Microsoft.AspNetCore.Authentication2
 {
@@ -11,6 +12,13 @@ namespace Microsoft.AspNetCore.Authentication2
     /// </summary>
     public abstract class AuthenticationSchemeOptions
     {
+        /// <summary>
+        /// Check that the options are valid.  Should throw an exception if things are not ok.
+        /// </summary>
+        public virtual void Validate()
+        {
+        }
+
         /// <summary>
         /// The AuthenticationScheme in the options corresponds to the logical name for a particular authentication scheme. A different
         /// value may be assigned in order to use the same authentication middleware type more than once in a pipeline.
