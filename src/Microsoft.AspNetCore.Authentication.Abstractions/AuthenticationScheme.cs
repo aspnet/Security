@@ -24,17 +24,11 @@ namespace Microsoft.AspNetCore.Authentication
         public string Name { get; }
         public Type HandlerType { get; }
 
-        // Go away if UseLegacy
+        // Needed to enable Adding schemes after services have been built (AddScheme outside of startup)
         public Func<HttpContext, IAuthenticationHandler> ResolveHandlerFunc { get; set; }
 
         // Holds things like the configured options instances for the handler
         // Also replacement for AuthenticationDescription
         public IReadOnlyDictionary<string, object> Settings { get; }
-
-        public virtual IAuthenticationHandler ResolveHandler(HttpContext context)
-        {
-            return ResolveHandlerFunc?.Invoke(context) ?? 
-                context.RequestServices.GetService(HandlerType) as IAuthenticationHandler;
-        }
     }
 }
