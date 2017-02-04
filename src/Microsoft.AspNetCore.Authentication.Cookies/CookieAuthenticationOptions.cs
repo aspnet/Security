@@ -30,7 +30,7 @@ namespace Microsoft.AspNetCore.Builder
             SlidingExpiration = true;
             CookieHttpOnly = true;
             CookieSecure = CookieSecurePolicy.SameAsRequest;
-            SystemClock = new SystemSecondsClock();
+            SystemClock = new SystemClock();
             Events = new CookieAuthenticationEvents();
         }
 
