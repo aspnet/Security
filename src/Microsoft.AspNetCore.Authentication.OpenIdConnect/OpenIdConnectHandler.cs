@@ -662,7 +662,7 @@ namespace Microsoft.AspNetCore.Authentication.OpenIdConnect
                     return await GetUserInformationAsync(tokenEndpointResponse ?? authorizationResponse, jwt, ticket);
                 }
 
-                return AuthenticateResult.Success(ticket);
+                return AuthenticateResult.Succeed(ticket);
             }
             catch (Exception exception)
             {
@@ -762,12 +762,12 @@ namespace Microsoft.AspNetCore.Authentication.OpenIdConnect
             if (string.IsNullOrEmpty(userInfoEndpoint))
             {
                 Logger.UserInfoEndpointNotSet();
-                return AuthenticateResult.Success(ticket);
+                return AuthenticateResult.Succeed(ticket);
             }
             if (string.IsNullOrEmpty(message.AccessToken))
             {
                 Logger.AccessTokenNotAvailable();
-                return AuthenticateResult.Success(ticket);
+                return AuthenticateResult.Succeed(ticket);
             }
             Logger.RetrievingClaims();
             var requestMessage = new HttpRequestMessage(HttpMethod.Get, userInfoEndpoint);
@@ -832,7 +832,7 @@ namespace Microsoft.AspNetCore.Authentication.OpenIdConnect
             // adding remaining unique claims from userinfo endpoint to the identity
             ClaimsHelper.AddClaimsToIdentity(user, identity, jwt.Issuer);
 
-            return AuthenticateResult.Success(ticket);
+            return AuthenticateResult.Succeed(ticket);
         }
 
         /// <summary>

@@ -142,7 +142,7 @@ namespace Microsoft.AspNetCore.Authentication.JwtBearer
                             });
                         }
 
-                        return AuthenticateResult.Success(ticket);
+                        return AuthenticateResult.Succeed(ticket);
                     }
                 }
 

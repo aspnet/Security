@@ -115,7 +115,7 @@ namespace Microsoft.AspNetCore.Authentication.Cookies
             CheckForRefresh(ticket);
 
             // Finally we have a valid ticket
-            return AuthenticateResult.Success(ticket);
+            return AuthenticateResult.Succeed(ticket);
         }
 
         protected override async Task<AuthenticateResult> HandleAuthenticateAsync()
@@ -139,7 +139,7 @@ namespace Microsoft.AspNetCore.Authentication.Cookies
                 RequestRefresh(result.Ticket);
             }
 
-            return AuthenticateResult.Success(new AuthenticationTicket(context.Principal, context.Properties, Options.AuthenticationScheme));
+            return AuthenticateResult.Succeed(new AuthenticationTicket(context.Principal, context.Properties, Options.AuthenticationScheme));
         }
 
         private CookieOptions BuildCookieOptions()

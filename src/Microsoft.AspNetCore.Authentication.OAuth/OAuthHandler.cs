@@ -123,7 +123,7 @@ namespace Microsoft.AspNetCore.Authentication.OAuth
             var ticket = await CreateTicketAsync(identity, properties, tokens);
             if (ticket != null)
             {
-                return AuthenticateResult.Success(ticket);
+                return AuthenticateResult.Succeed(ticket);
             }
             else
             {

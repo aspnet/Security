@@ -146,7 +146,7 @@ namespace Microsoft.AspNetCore.Authentication
                         && authenticateContext.Properties.TryGetValue(AuthSchemeKey, out authenticatedScheme)
                         && string.Equals(Options.AuthenticationScheme, authenticatedScheme, StringComparison.Ordinal))
                     {
-                        return AuthenticateResult.Success(new AuthenticationTicket(authenticateContext.Principal,
+                        return AuthenticateResult.Succeed(new AuthenticationTicket(authenticateContext.Principal,
                             new AuthenticationProperties(authenticateContext.Properties), Options.AuthenticationScheme));
                     }
 

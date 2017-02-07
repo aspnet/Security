@@ -44,7 +44,7 @@ namespace Microsoft.AspNetCore.Authentication
         /// </summary>
         public bool Skipped { get; private set; }
 
-        public static AuthenticateResult Success(AuthenticationTicket ticket)
+        public static AuthenticateResult Succeed(AuthenticationTicket ticket)
         {
             if (ticket == null)
             {
