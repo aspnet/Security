@@ -2,12 +2,10 @@
 // Licensed under the Apache License, Version 2.0. See License.txt in the project root for license information.
 
 using System;
-using System.ComponentModel;
-using Microsoft.AspNetCore.Authentication;
-using Microsoft.AspNetCore.Authentication.Twitter;
+using Microsoft.AspNetCore.DataProtection;
 using Microsoft.AspNetCore.Http;
 
-namespace Microsoft.AspNetCore.Builder
+namespace Microsoft.AspNetCore.Authentication.Twitter
 {
     /// <summary>
     /// Options for the Twitter authentication middleware.
@@ -19,8 +17,6 @@ namespace Microsoft.AspNetCore.Builder
         /// </summary>
         public TwitterOptions()
         {
-            AuthenticationScheme = TwitterDefaults.AuthenticationScheme;
-            DisplayName = AuthenticationScheme;
             CallbackPath = new PathString("/signin-twitter");
             BackchannelTimeout = TimeSpan.FromSeconds(60);
             Events = new TwitterEvents();
@@ -50,13 +46,14 @@ namespace Microsoft.AspNetCore.Builder
         /// Gets or sets the type used to secure data handled by the middleware.
         /// </summary>
         public ISecureDataFormat<RequestToken> StateDataFormat { get; set; }
+        public IDataProtectionProvider DataProtectionProvider { get; internal set; }
 
         /// <summary>
-        /// Gets or sets the <see cref="ITwitterEvents"/> used to handle authentication events.
+        /// Gets or sets the <see cref="TwitterEvents"/> used to handle authentication events.
         /// </summary>
-        public new ITwitterEvents Events
+        public new TwitterEvents Events
         {
-            get { return (ITwitterEvents)base.Events; }
+            get { return (TwitterEvents)base.Events; }
             set { base.Events = value; }
         }
     }

@@ -8,9 +8,9 @@ using Microsoft.Extensions.Internal;
 namespace Microsoft.AspNetCore.Authentication.Twitter
 {
     /// <summary>
-    /// Default <see cref="ITwitterEvents"/> implementation.
+    /// Default <see cref="TwitterEvents"/> implementation.
     /// </summary>
-    public class TwitterEvents : RemoteAuthenticationEvents, ITwitterEvents
+    public class TwitterEvents : RemoteAuthenticationEvents
     {
         /// <summary>
         /// Gets or sets the function that is invoked when the Authenticated method is invoked.
