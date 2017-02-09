@@ -16,7 +16,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\Microsoft.AspNetCore.Authentication\Microsoft.AspNetCore.Authentication.csproj" />
+    <ProjectReference Include="..\Microsoft.AspNetCore.Authentication.Impl\Microsoft.AspNetCore.Authentication.Impl.csproj" />
     <PackageReference Include="Microsoft.Extensions.Options" Version="1.2.0-*" />
     <PackageReference Include="Microsoft.Extensions.TaskCache.Sources" Version="1.2.0-*" PrivateAssets="All" />
     <PackageReference Include="Microsoft.Extensions.WebEncoders" Version="1.2.0-*" />

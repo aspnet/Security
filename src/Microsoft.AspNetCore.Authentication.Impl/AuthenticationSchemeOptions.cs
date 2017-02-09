@@ -8,7 +8,7 @@ using Microsoft.Extensions.Internal;
 namespace Microsoft.AspNetCore.Authentication
 {
     /// <summary>
-    /// Contains the options used by the <see cref="AuthenticationSchemeHandler{T}"/>.
+    /// Contains the options used by the <see cref="AuthenticationHandler{T}"/>.
     /// </summary>
     public abstract class AuthenticationSchemeOptions
     {
@@ -18,12 +18,6 @@ namespace Microsoft.AspNetCore.Authentication
         public virtual void Validate()
         {
         }
-
-        /// <summary>
-        /// The AuthenticationScheme in the options corresponds to the logical name for a particular authentication scheme. A different
-        /// value may be assigned in order to use the same authentication middleware type more than once in a pipeline.
-        /// </summary>
-        public string AuthenticationScheme { get; set; }
 
         /// <summary>
         /// Gets or sets the display name for the authentication provider.
