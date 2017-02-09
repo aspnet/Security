@@ -19,7 +19,7 @@ namespace Microsoft.Extensions.DependencyInjection
                 throw new ArgumentNullException(nameof(services));
             }
 
-            services.AddSingleton<ISystemClock, SystemClock>();
+            services.TryAddSingleton<ISystemClock, SystemClock>();
             services.AddDataProtection();
             services.AddWebEncoders();
             services.TryAddScoped<IAuthenticationService, DefaultAuthenticationService>();
@@ -49,7 +49,7 @@ namespace Microsoft.Extensions.DependencyInjection
         // REVIEW: rename to just AddScheme?
         public static IServiceCollection AddSchemeHandler<TOptions, THandler>(this IServiceCollection services, string authenticationScheme, Action<TOptions> configureOptions)
             where TOptions : AuthenticationSchemeOptions, new()
-            where THandler : AuthenticationSchemeHandler<TOptions>
+            where THandler : AuthenticationHandler<TOptions>
         {
             services.AddAuthentication(o =>
             {
@@ -71,7 +71,7 @@ namespace Microsoft.Extensions.DependencyInjection
 
         public static IServiceCollection AddSchemeHandler<TOptions, THandler>(this IServiceCollection services, string authenticationScheme, TOptions options)
             where TOptions : AuthenticationSchemeOptions, new()
-            where THandler : AuthenticationSchemeHandler<TOptions>
+            where THandler : AuthenticationHandler<TOptions>
         {
             services.AddAuthentication(o =>
             {

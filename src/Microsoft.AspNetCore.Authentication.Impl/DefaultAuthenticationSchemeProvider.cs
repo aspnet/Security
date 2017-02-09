@@ -4,7 +4,6 @@
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
-using Microsoft.Extensions.Internal;
 using Microsoft.Extensions.Options;
 
 namespace Microsoft.AspNetCore.Authentication

@@ -5,7 +5,6 @@ using System;
 using System.Text.Encodings.Web;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Http.Features.Authentication;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Internal;
 using Microsoft.Extensions.Logging;
@@ -13,7 +12,7 @@ using Microsoft.Extensions.Options;
 
 namespace Microsoft.AspNetCore.Authentication{
 
-    public abstract class AuthenticationSchemeHandler<TOptions> : IAuthenticationHandler where TOptions : AuthenticationSchemeOptions, new()
+    public abstract class AuthenticationHandler<TOptions> : IAuthenticationHandler where TOptions : AuthenticationSchemeOptions, new()
     {
         private Task<AuthenticateResult> _authenticateTask;
 
@@ -60,7 +59,7 @@ namespace Microsoft.AspNetCore.Authentication{
         protected bool SignInAccepted { get; set; }
         protected bool SignOutAccepted { get; set; }
 
-        protected AuthenticationSchemeHandler(IOptions<AuthenticationOptions> options, ILoggerFactory logger, UrlEncoder encoder, ISystemClock clock)
+        protected AuthenticationHandler(IOptions<AuthenticationOptions> options, ILoggerFactory logger, UrlEncoder encoder, ISystemClock clock)
         {
             Logger = logger.CreateLogger(this.GetType().FullName);
             UrlEncoder = encoder;
@@ -107,11 +106,11 @@ namespace Microsoft.AspNetCore.Authentication{
                 var ticket = result?.Ticket;
                 if (ticket?.Principal != null)
                 {
-                    Logger.AuthenticationSchemeAuthenticated(Options.AuthenticationScheme);
+                    Logger.AuthenticationSchemeAuthenticated(Scheme.Name);
                 }
                 else
                 {
-                    Logger.AuthenticationSchemeNotAuthenticated(Options.AuthenticationScheme);
+                    Logger.AuthenticationSchemeNotAuthenticated(Scheme.Name);
                 }
             }
             return result;
@@ -153,7 +152,7 @@ namespace Microsoft.AspNetCore.Authentication{
         public async Task SignInAsync(SignInContext context)
         {
             await HandleSignInAsync(context);
-            Logger.AuthenticationSchemeSignedIn(Options.AuthenticationScheme);
+            Logger.AuthenticationSchemeSignedIn(Scheme.Name);
         }
 
         protected virtual Task HandleSignInAsync(SignInContext context)
@@ -169,7 +168,7 @@ namespace Microsoft.AspNetCore.Authentication{
             }
 
             await HandleSignOutAsync(context);
-            Logger.AuthenticationSchemeSignedOut(Options.AuthenticationScheme);
+            Logger.AuthenticationSchemeSignedOut(Scheme.Name);
         }
 
         protected virtual Task HandleSignOutAsync(SignOutContext context)
@@ -215,11 +214,11 @@ namespace Microsoft.AspNetCore.Authentication{
                     goto case ChallengeBehavior.Unauthorized;
                 case ChallengeBehavior.Unauthorized:
                     await HandleUnauthorizedAsync(context);
-                    Logger.AuthenticationSchemeChallenged(Options.AuthenticationScheme);
+                    Logger.AuthenticationSchemeChallenged(Scheme.Name);
                     break;
                 case ChallengeBehavior.Forbidden:
                     await HandleForbiddenAsync(context);
-                    Logger.AuthenticationSchemeForbidden(Options.AuthenticationScheme);
+                    Logger.AuthenticationSchemeForbidden(Scheme.Name);
                     break;
             }
         }
