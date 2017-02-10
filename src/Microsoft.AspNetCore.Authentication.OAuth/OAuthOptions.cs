@@ -1,22 +1,38 @@
 // Copyright (c) .NET Foundation. All rights reserved.
 // Licensed under the Apache License, Version 2.0. See License.txt in the project root for license information.
 
+using System;
 using System.Collections.Generic;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.OAuth;
 using Microsoft.AspNetCore.Authentication.OAuth.Claims;
 using Microsoft.AspNetCore.Http.Authentication;
+using System.Globalization;
+using Microsoft.AspNetCore.DataProtection;
 
-namespace Microsoft.AspNetCore.Builder
+namespace Microsoft.AspNetCore.Authentication.OAuth
 {
     /// <summary>
-    /// Configuration options for <see cref="OAuthMiddleware{T}"/>.
+    /// Configuration options OAuth.
     /// </summary>
     public class OAuthOptions : RemoteAuthenticationOptions
     {
         public OAuthOptions()
         {
             Events = new OAuthEvents();
+        }
+
+        /// <summary>
+        /// Check that the options are valid.  Should throw an exception if things are not ok.
+        /// </summary>
+        public override void Validate()
+        {
+            base.Validate();
+
+            if (!CallbackPath.HasValue)
+            {
+                throw new ArgumentException(string.Format(CultureInfo.CurrentCulture, Resources.Exception_OptionMustBeProvided, nameof(CallbackPath)));
+            }
         }
 
         /// <summary>
@@ -47,11 +63,11 @@ namespace Microsoft.AspNetCore.Builder
         public string UserInformationEndpoint { get; set; }
 
         /// <summary>
-        /// Gets or sets the <see cref="IOAuthEvents"/> used to handle authentication events.
+        /// Gets or sets the <see cref="OAuthEvents"/> used to handle authentication events.
         /// </summary>
-        public new IOAuthEvents Events
+        public new OAuthEvents Events
         {
-            get { return (IOAuthEvents)base.Events; }
+            get { return (OAuthEvents)base.Events; }
             set { base.Events = value; }
         }
 
@@ -69,5 +85,6 @@ namespace Microsoft.AspNetCore.Builder
         /// Gets or sets the type used to secure data handled by the middleware.
         /// </summary>
         public ISecureDataFormat<AuthenticationProperties> StateDataFormat { get; set; }
+        public IDataProtectionProvider DataProtectionProvider { get; internal set; }
     }
 }
