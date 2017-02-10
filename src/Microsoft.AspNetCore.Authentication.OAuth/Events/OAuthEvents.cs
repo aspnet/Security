@@ -8,9 +8,9 @@ using Microsoft.Extensions.Internal;
 namespace Microsoft.AspNetCore.Authentication.OAuth
 {
     /// <summary>
-    /// Default <see cref="IOAuthEvents"/> implementation.
+    /// Default implementation.
     /// </summary>
-    public class OAuthEvents : RemoteAuthenticationEvents, IOAuthEvents
+    public class OAuthEvents : RemoteAuthenticationEvents
     {
         /// <summary>
         /// Gets or sets the function that is invoked when the CreatingTicket method is invoked.

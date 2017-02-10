@@ -5,7 +5,6 @@ using System;
 using System.Globalization;
 using System.Net.Http;
 using System.Security.Claims;
-using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
 using Newtonsoft.Json.Linq;
 
@@ -14,23 +13,25 @@ namespace Microsoft.AspNetCore.Authentication.OAuth
     /// <summary>
     /// Contains information about the login session as well as the user <see cref="System.Security.Claims.ClaimsIdentity"/>.
     /// </summary>
-    public class OAuthCreatingTicketContext : BaseContext
+    public class OAuthCreatingTicketContext : BaseAuthenticationContext
     {
         /// <summary>
         /// Initializes a new <see cref="OAuthCreatingTicketContext"/>.
         /// </summary>
         /// <param name="ticket">The <see cref="AuthenticationTicket"/>.</param>
         /// <param name="context">The HTTP environment.</param>
+        /// <param name="scheme">The authentication scheme.</param>
         /// <param name="options">The options used by the authentication middleware.</param>
         /// <param name="backchannel">The HTTP client used by the authentication middleware</param>
         /// <param name="tokens">The tokens returned from the token endpoint.</param>
         public OAuthCreatingTicketContext(
             AuthenticationTicket ticket,
             HttpContext context,
+            AuthenticationScheme scheme,
             OAuthOptions options,
             HttpClient backchannel,
             OAuthTokenResponse tokens)
-            : this(ticket, context, options, backchannel, tokens, user: new JObject())
+            : this(ticket, context, scheme, options, backchannel, tokens, user: new JObject())
         {
         }
 
@@ -39,6 +40,7 @@ namespace Microsoft.AspNetCore.Authentication.OAuth
         /// </summary>
         /// <param name="ticket">The <see cref="AuthenticationTicket"/>.</param>
         /// <param name="context">The HTTP environment.</param>
+        /// <param name="scheme">The authentication scheme.</param>
         /// <param name="options">The options used by the authentication middleware.</param>
         /// <param name="backchannel">The HTTP client used by the authentication middleware</param>
         /// <param name="tokens">The tokens returned from the token endpoint.</param>
@@ -46,45 +48,24 @@ namespace Microsoft.AspNetCore.Authentication.OAuth
         public OAuthCreatingTicketContext(
             AuthenticationTicket ticket,
             HttpContext context,
+            AuthenticationScheme scheme,
             OAuthOptions options,
             HttpClient backchannel,
             OAuthTokenResponse tokens,
             JObject user)
-            : base(context)
+            : base(context, scheme.Name, ticket.Properties)
         {
-            if (context == null)
-            {
-                throw new ArgumentNullException(nameof(context));
-            }
-
-            if (options == null)
-            {
-                throw new ArgumentNullException(nameof(options));
-            }
-
-            if (backchannel == null)
-            {
-                throw new ArgumentNullException(nameof(backchannel));
-            }
-
-            if (tokens == null)
-            {
-                throw new ArgumentNullException(nameof(tokens));
-            }
-
-            if (user == null)
-            {
-                throw new ArgumentNullException(nameof(user));
-            }
-
-            TokenResponse = tokens;
-            Backchannel = backchannel;
-            User = user;
-            Options = options;
+            TokenResponse = tokens ?? throw new ArgumentNullException(nameof(tokens));
+            Backchannel = backchannel ?? throw new ArgumentNullException(nameof(backchannel));
+            User = user ?? throw new ArgumentNullException(nameof(user));
+            Options = options ?? throw new ArgumentNullException(nameof(options));
+            Scheme = scheme ?? throw new ArgumentNullException(nameof(scheme));
             Ticket = ticket;
         }
 
         public OAuthOptions Options { get; }
+
+        public AuthenticationScheme Scheme { get; }
 
         /// <summary>
         /// Gets the JSON-serialized user or an empty
