@@ -16,6 +16,7 @@ namespace Microsoft.AspNetCore.Authentication.Cookies
         /// Creates a new instance of the context object.
         /// </summary>
         /// <param name="context"></param>
+        /// <param name="scheme"></param>
         /// <param name="ticket">Contains the initial values for identity and extra data</param>
         /// <param name="options"></param>
         public CookieValidatePrincipalContext(HttpContext context, AuthenticationScheme scheme, AuthenticationTicket ticket, CookieAuthenticationOptions options)

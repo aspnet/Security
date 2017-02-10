@@ -71,7 +71,7 @@ namespace Microsoft.AspNetCore.Authentication.Facebook
             var server = CreateServer(app => app.Map("/base", map =>
             {
                 map.UseAuthentication();
-                map.Map("/login", signoutApp => signoutApp.Run(context => context.ChallengeAsync("Facebook", new AuthenticationProperties2() { RedirectUri = "/" })));
+                map.Map("/login", signoutApp => signoutApp.Run(context => context.ChallengeAsync("Facebook", new AuthenticationProperties() { RedirectUri = "/" })));
             }),
             services =>
             {
@@ -103,7 +103,7 @@ namespace Microsoft.AspNetCore.Authentication.Facebook
                 app =>
                 {
                     app.UseAuthentication();
-                    app.Map("/login", signoutApp => signoutApp.Run(context => context.ChallengeAsync("Facebook", new AuthenticationProperties2() { RedirectUri = "/" })));
+                    app.Map("/login", signoutApp => signoutApp.Run(context => context.ChallengeAsync("Facebook", new AuthenticationProperties() { RedirectUri = "/" })));
                 },
                 services =>
                 {
@@ -221,7 +221,7 @@ namespace Microsoft.AspNetCore.Authentication.Facebook
 
                 }, handler: null);
 
-            var properties = new AuthenticationProperties2();
+            var properties = new AuthenticationProperties();
             var correlationKey = ".xsrf";
             var correlationValue = "TestCorrelationId";
             properties.Items.Add(correlationKey, correlationValue);
