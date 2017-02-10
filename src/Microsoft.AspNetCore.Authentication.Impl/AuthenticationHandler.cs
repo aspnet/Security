@@ -83,11 +83,6 @@ namespace Microsoft.AspNetCore.Authentication{
             {
                 Events = Context.RequestServices.GetRequiredService(Options.EventsType);
             }
-            if (string.IsNullOrEmpty(Options.ClaimsIssuer))
-            {
-                // Default to something reasonable
-                Options.ClaimsIssuer = scheme.Name;
-            }
 
             return TaskCache.CompletedTask;
         }

@@ -2,13 +2,13 @@
 // Licensed under the Apache License, Version 2.0. See License.txt in the project root for license information.
 
 using System.Collections.Generic;
-using Microsoft.AspNetCore.Authentication.Facebook;
+using Microsoft.AspNetCore.Authentication.OAuth;
 using Microsoft.AspNetCore.Http;
 
-namespace Microsoft.AspNetCore.Builder
+namespace Microsoft.AspNetCore.Authentication.Facebook
 {
     /// <summary>
-    /// Configuration options for <see cref="FacebookMiddleware"/>.
+    /// Configuration options for <see cref="FacebookHandler"/>.
     /// </summary>
     public class FacebookOptions : OAuthOptions
     {
@@ -17,8 +17,6 @@ namespace Microsoft.AspNetCore.Builder
         /// </summary>
         public FacebookOptions()
         {
-            AuthenticationScheme = FacebookDefaults.AuthenticationScheme;
-            DisplayName = AuthenticationScheme;
             CallbackPath = new PathString("/signin-facebook");
             SendAppSecretProof = true;
             AuthorizationEndpoint = FacebookDefaults.AuthorizationEndpoint;
