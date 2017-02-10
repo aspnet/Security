@@ -8,7 +8,7 @@ namespace Microsoft.AspNetCore.Authentication
     internal static class Resources
     {
         private static readonly ResourceManager _resourceManager
-            = new ResourceManager("Microsoft.AspNetCore.Authentication.Resources", typeof(Resources).GetTypeInfo().Assembly);
+            = new ResourceManager("Microsoft.AspNetCore.Authentication.Impl.Resources", typeof(Resources).GetTypeInfo().Assembly);
 
         /// <summary>
         /// The default data protection provider may only be used when the IApplicationBuilder.Properties contains an appropriate 'host.AppName' key.

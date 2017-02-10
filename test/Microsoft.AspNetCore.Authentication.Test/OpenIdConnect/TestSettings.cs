@@ -4,8 +4,7 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
-using System.Linq;
-using System.Reflection;
+using System.Linq;using System.Reflection;
 using System.Text;
 using System.Text.Encodings.Web;
 using System.Xml.Linq;
@@ -21,7 +20,7 @@ namespace Microsoft.AspNetCore.Authentication.Tests.OpenIdConnect
     /// </summary>
     internal class TestSettings
     {
-        private readonly OpenIdConnectOptions _options;
+        private readonly Action<OpenIdConnectOptions> _configureOptions;
 
         public TestSettings() : this(configure: null)
         {
@@ -39,11 +38,18 @@ namespace Microsoft.AspNetCore.Authentication.Tests.OpenIdConnect
 
         public OpenIdConnectOptions Options => _options;
 
+            _configureOptions = o =>
+            {
+                configure?.Invoke(o);
+                _options = o;
+            };
+        }
+
         public UrlEncoder Encoder => UrlEncoder.Default;
 
         public string ExpectedState { get; set; }
 
-        public TestServer CreateTestServer() => TestServerBuilder.CreateServer(Options);
+        public TestServer CreateTestServer(AuthenticationProperties properties = null) => TestServerBuilder.CreateServer(_configureOptions, handler: null, properties: properties);
 
         public IDictionary<string, string> ValidateChallengeFormPost(string responseBody, params string[] parametersToValidate)
         {
@@ -164,6 +170,8 @@ namespace Microsoft.AspNetCore.Authentication.Tests.OpenIdConnect
                 }
             }
         }
+
+        OpenIdConnectOptions _options = null;
 
         private void ValidateExpectedAuthority(string absoluteUri, ICollection<string> errors, OpenIdConnectRequestType requestType)
         {

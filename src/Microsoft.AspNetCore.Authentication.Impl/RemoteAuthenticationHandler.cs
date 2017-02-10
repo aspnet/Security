@@ -34,6 +34,11 @@ namespace Microsoft.AspNetCore.Authentication
             {
                 Options.SignInScheme = SharedOptions.DefaultSignInScheme;
             }
+
+            if (string.IsNullOrEmpty(Options.SignInScheme))
+            {
+                throw new ArgumentException(Resources.FormatException_OptionMustBeProvided(nameof(Options.SignInScheme)), nameof(Options.SignInScheme));
+            }
         }
 
         public override async Task<AuthenticationRequestStatus> HandleRequestAsync()
