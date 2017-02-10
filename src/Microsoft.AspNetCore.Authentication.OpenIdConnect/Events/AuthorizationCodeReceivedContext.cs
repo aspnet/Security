@@ -18,8 +18,8 @@ namespace Microsoft.AspNetCore.Authentication.OpenIdConnect
         /// <summary>
         /// Creates a <see cref="AuthorizationCodeReceivedContext"/>
         /// </summary>
-        public AuthorizationCodeReceivedContext(HttpContext context, OpenIdConnectOptions options)
-            : base(context, options)
+        public AuthorizationCodeReceivedContext(HttpContext context, AuthenticationScheme scheme, OpenIdConnectOptions options)
+            : base(context, scheme, options)
         {
         }
 
