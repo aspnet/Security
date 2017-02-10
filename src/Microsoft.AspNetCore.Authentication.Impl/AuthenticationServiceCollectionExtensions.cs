@@ -57,11 +57,15 @@ namespace Microsoft.Extensions.DependencyInjection
                 {
                     b.HandlerType = typeof(THandler);
                     var options = new TOptions();
-                    configureOptions?.Invoke(options);
-                    // revisit the settings typing
 
+                    // REVIEW: is there a better place for this default?
+                    options.DisplayName = authenticationScheme;
+                    options.ClaimsIssuer = authenticationScheme;
+
+                    configureOptions?.Invoke(options);
                     options.Validate();
 
+                    // revisit the settings typing
                     b.Settings["Options"] = options;
                 });
             });
