@@ -22,6 +22,15 @@
       "environmentVariables": {
         "ASPNETCORE_ENVIRONMENT": "Development"
       }
+    },
+    "CookieSample": {
+      "commandName": "Project",
+      "launchBrowser": true,
+      "launchUrl": "http://localhost:12345",
+      "environmentVariables": {
+        "ASPNETCORE_ENVIRONMENT": "Development",
+        "ASPNETCORE_URLS": "http://localhost:12345"
+      }
     }
   }
 }

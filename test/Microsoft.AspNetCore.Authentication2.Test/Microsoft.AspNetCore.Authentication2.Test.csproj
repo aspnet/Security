@@ -1,0 +1,23 @@
+﻿<Project Sdk="Microsoft.NET.Sdk" ToolsVersion="15.0">
+  <Import Project="..\..\build\common.props" />
+  <PropertyGroup>
+    <TargetFrameworks>netcoreapp1.1;net451</TargetFrameworks>
+  </PropertyGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\..\src\Microsoft.AspNetCore.Authentication2.Cookies\Microsoft.AspNetCore.Authentication2.Cookies.csproj" />
+    <ProjectReference Include="..\..\src\Microsoft.AspNetCore.Authentication2.Facebook\Microsoft.AspNetCore.Authentication2.Facebook.csproj" />
+    <ProjectReference Include="..\..\src\Microsoft.AspNetCore.Authentication2.Google\Microsoft.AspNetCore.Authentication2.Google.csproj" />
+    <ProjectReference Include="..\..\src\Microsoft.AspNetCore.Authentication2.JwtBearer\Microsoft.AspNetCore.Authentication2.JwtBearer.csproj" />
+    <ProjectReference Include="..\..\src\Microsoft.AspNetCore.Authentication2.MicrosoftAccount\Microsoft.AspNetCore.Authentication2.MicrosoftAccount.csproj" />
+    <ProjectReference Include="..\..\src\Microsoft.AspNetCore.Authentication2.OpenIdConnect\Microsoft.AspNetCore.Authentication2.OpenIdConnect.csproj" />
+    <ProjectReference Include="..\..\src\Microsoft.AspNetCore.Authentication2.Twitter\Microsoft.AspNetCore.Authentication2.Twitter.csproj" />
+    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="15.0.0-*" />
+    <PackageReference Include="xunit.runner.visualstudio" Version="2.2.0-*" />
+    <PackageReference Include="Microsoft.AspNetCore.TestHost" Version="1.2.0-*" />
+    <PackageReference Include="Microsoft.AspNetCore.Testing" Version="1.2.0-*" />
+    <PackageReference Include="xunit" Version="2.2.0-*" />
+  </ItemGroup>
+  <ItemGroup>
+    <Service Include="{82a7f48d-3b50-4b1e-b82e-3ada8210c358}" />
+  </ItemGroup>
+</Project>

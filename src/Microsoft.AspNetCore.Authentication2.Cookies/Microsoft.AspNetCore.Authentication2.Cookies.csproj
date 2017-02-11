@@ -1,0 +1,21 @@
+﻿<Project Sdk="Microsoft.NET.Sdk" ToolsVersion="15.0">
+
+  <Import Project="..\..\build\common.props" />
+
+  <PropertyGroup>
+    <Description>ASP.NET Core middleware that enables an application to use cookie based authentication.</Description>
+    <TargetFrameworks>net451;netstandard1.3</TargetFrameworks>
+    <DefineConstants>$(DefineConstants);SECURITY</DefineConstants>
+    <NoWarn>$(NoWarn);CS1591</NoWarn>
+    <GenerateDocumentationFile>true</GenerateDocumentationFile>
+    <PackageTags>aspnetcore;authentication;security</PackageTags>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Microsoft.AspNetCore.Authentication2\Microsoft.AspNetCore.Authentication2.csproj" />
+    <PackageReference Include="Microsoft.Extensions.Options" Version="1.2.0-*" />
+    <PackageReference Include="Microsoft.Extensions.TaskCache.Sources" Version="1.2.0-*" PrivateAssets="All" />
+    <PackageReference Include="Microsoft.Extensions.WebEncoders" Version="1.2.0-*" />
+  </ItemGroup>
+
+</Project>
