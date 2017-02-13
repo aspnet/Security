@@ -22,34 +22,48 @@ namespace Microsoft.AspNetCore.Authentication
 
         public async Task Invoke(HttpContext context)
         {
-            var defaultAuthenticate = await Schemes.GetDefaultAuthenticateSchemeAsync();
-            if (defaultAuthenticate != null)
+            var oldFeature = context.Features.Get<IAuthenticationFeature>();
+            try
             {
-                var result = await context.AuthenticateAsync(defaultAuthenticate.Name);
-                if (result?.Ticket?.Principal != null)
+                context.Features.Set<IAuthenticationFeature>(new AuthenticationFeature
                 {
-                    context.User = result.Ticket.Principal;
+                    OriginalPath = context.Request.Path,
+                    OriginalPathBase = context.Request.PathBase
+                });
+
+                var defaultAuthenticate = await Schemes.GetDefaultAuthenticateSchemeAsync();
+                if (defaultAuthenticate != null)
+                {
+                    var result = await context.AuthenticateAsync(defaultAuthenticate.Name);
+                    if (result?.Ticket?.Principal != null)
+                    {
+                        context.User = result.Ticket.Principal;
+                    }
                 }
+
+                // TODO: revisit this, is registration order the best way?, should we force schemes to register unique
+                // handled paths instead to have better routing?
+                // Give each scheme a chance to handle the request
+                var handlers = context.RequestServices.GetRequiredService<IAuthenticationHandlerResolver>();
+
+                //authy.GetHandlerScheme()
+
+                foreach (var scheme in await Schemes.GetPriorityOrderedSchemesAsync())
+                {
+                    var handler = await handlers.ResolveHandlerAsync(context, scheme.Name);
+                    var result = await handler.HandleRequestAsync();
+                    if (result.Handled)
+                    {
+                        return;
+                    }
+                }
+
+                await _next(context);
             }
-
-            // TODO: revisit this, is registration order the best way?, should we force schemes to register unique
-            // handled paths instead to have better routing?
-            // Give each scheme a chance to handle the request
-            var handlers = context.RequestServices.GetRequiredService<IAuthenticationHandlerResolver>();
-
-            //authy.GetHandlerScheme()
-
-            foreach (var scheme in await Schemes.GetPriorityOrderedSchemesAsync())
+            finally
             {
-                var handler = await handlers.ResolveHandlerAsync(context, scheme.Name);
-                var result = await handler.HandleRequestAsync();
-                if (result.Handled)
-                {
-                    return;
-                }
+                context.Features.Set<IAuthenticationFeature>(oldFeature);
             }
-
-            await _next(context);
         }
     }
 }

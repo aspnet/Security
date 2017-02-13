@@ -21,9 +21,9 @@ namespace Microsoft.AspNetCore.Authentication{
         protected AuthenticationScheme Scheme { get; private set; }
         protected TOptions Options { get; private set; }
         protected HttpContext Context { get; private set; }
-        protected PathString OriginalPathBase { get; private set; }
+        protected PathString OriginalPathBase => Context.Features.Get<IAuthenticationFeature>()?.OriginalPathBase ?? Request.PathBase;
 
-        protected PathString OriginalPath { get; private set; }
+        protected PathString OriginalPath => Context.Features.Get<IAuthenticationFeature>()?.OriginalPath ?? Request.Path;
 
         protected ILogger Logger { get; }
 
@@ -71,8 +71,6 @@ namespace Microsoft.AspNetCore.Authentication{
         {
             Scheme = scheme ?? throw new ArgumentNullException(nameof(scheme));
             Context = context ?? throw new ArgumentNullException(nameof(context));
-            OriginalPathBase = Request.PathBase;
-            OriginalPath = Request.Path;
             if (scheme.Settings.ContainsKey("Options"))
             {
                 Options = scheme.Settings["Options"] as TOptions;
