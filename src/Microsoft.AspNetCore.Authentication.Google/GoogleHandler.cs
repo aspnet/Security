@@ -6,21 +6,22 @@ using System.Collections.Generic;
 using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Security.Claims;
+using System.Text.Encodings.Web;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authentication.OAuth;
-using Microsoft.AspNetCore.Builder;
-using Microsoft.AspNetCore.Http.Authentication;
+using Microsoft.AspNetCore.DataProtection;
 using Microsoft.AspNetCore.WebUtilities;
+using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 using Newtonsoft.Json.Linq;
 
 namespace Microsoft.AspNetCore.Authentication.Google
 {
     internal class GoogleHandler : OAuthHandler<GoogleOptions>
     {
-        public GoogleHandler(HttpClient httpClient)
-            : base(httpClient)
-        {
-        }
+        public GoogleHandler(IOptions<AuthenticationOptions> options, ILoggerFactory logger, UrlEncoder encoder, IDataProtectionProvider dataProtection, ISystemClock clock)
+            : base(options, logger, encoder, dataProtection, clock)
+        { }
 
         protected override async Task<AuthenticationTicket> CreateTicketAsync(
             ClaimsIdentity identity,
