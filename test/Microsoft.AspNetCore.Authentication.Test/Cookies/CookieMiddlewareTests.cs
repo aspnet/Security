@@ -739,11 +739,19 @@ namespace Microsoft.AspNetCore.Authentication.Cookies
             Assert.Equal(HttpStatusCode.Redirect, transaction2.Response.StatusCode);
         }
 
-        [Fact]
-        public async Task MapWillAffectChallenge()
+        [Theory]
+        [InlineData(true)]
+        [InlineData(false)]
+        public async Task MapWillAffectChallengeOnlyWithUseAuth(bool useAuth)
         {
             var builder = new WebHostBuilder()
-                .Configure(app => app.Map("/login", signoutApp => signoutApp.Run(context => context.ChallengeAsync("Cookies", new AuthenticationProperties() { RedirectUri = "/" }))))
+                .Configure(app => {
+                    if (useAuth)
+                    {
+                        app.UseAuthentication();
+                    }
+                    app.Map("/login", signoutApp => signoutApp.Run(context => context.ChallengeAsync("Cookies", new AuthenticationProperties() { RedirectUri = "/" })));
+                })
                 .ConfigureServices(s => s.AddCookieAuthentication(o => o.LoginPath = new PathString("/page")));
             var server = new TestServer(builder);
 
@@ -752,7 +760,14 @@ namespace Microsoft.AspNetCore.Authentication.Cookies
             Assert.Equal(HttpStatusCode.Redirect, transaction.Response.StatusCode);
 
             var location = transaction.Response.Headers.Location;
-            Assert.Equal("/login/page", location.LocalPath);
+            if (useAuth)
+            {
+                Assert.Equal("/page", location.LocalPath);
+            }
+            else
+            {
+                Assert.Equal("/login/page", location.LocalPath);
+            }
             Assert.Equal("?ReturnUrl=%2F", location.Query);
         }
 
