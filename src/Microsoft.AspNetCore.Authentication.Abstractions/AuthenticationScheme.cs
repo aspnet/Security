@@ -10,7 +10,7 @@ namespace Microsoft.AspNetCore.Authentication
 {
     public class AuthenticationScheme
     {
-        public AuthenticationScheme(string name, Type handlerType, Dictionary<string, object> settings)
+        public AuthenticationScheme(string name, Type handlerType, IReadOnlyDictionary<string, object> settings)
         {
             Name = name ?? throw new ArgumentNullException(nameof(name));
             if (!typeof(IAuthenticationHandler).IsAssignableFrom(handlerType))
