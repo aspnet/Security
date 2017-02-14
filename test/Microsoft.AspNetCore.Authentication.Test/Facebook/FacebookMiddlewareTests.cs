@@ -24,6 +24,24 @@ namespace Microsoft.AspNetCore.Authentication.Facebook
     public class FacebookMiddlewareTests
     {
         [Fact]
+        public async Task ThrowsIfAppIdMissing()
+        {
+            var server = CreateServer(
+                app => { },
+                services => services.AddFacebookAuthentication(o => { }),
+                context =>
+                {
+                    // REVIEW: Gross.
+                    context.ChallengeAsync("Facebook").GetAwaiter().GetResult();
+                    return true;
+                });
+            var transaction = await server.SendAsync("http://example.com/challenge");
+            Assert.Equal(HttpStatusCode.Redirect, transaction.Response.StatusCode);
+            var query = transaction.Response.Headers.Location.Query;
+            Assert.Contains("custom=test", query);
+        }
+
+        [Fact]
         public async Task ChallengeWillTriggerApplyRedirectEvent()
         {
             var server = CreateServer(
