@@ -48,7 +48,7 @@ namespace Microsoft.AspNetCore.Authentication.Cookies
             await base.InitializeAsync(scheme, context);
 
             // Cookies needs to finish the response
-            Context.Response.OnStarting(FinishResponseOnce);
+            Context.Response.OnStarting(FinishResponseAsync);
 
             Events = Events ?? new CookieAuthenticationEvents();
 
@@ -216,20 +216,10 @@ namespace Microsoft.AspNetCore.Authentication.Cookies
             return cookieOptions;
         }
 
-        private async Task FinishResponseOnce()
-        {
-            if (!_finishCalled)
-            {
-                _finishCalled = true;
-                await FinishResponseAsync();
-                //await HandleAutomaticChallengeIfNeeded();
-            }
-        }
-
         protected virtual async Task FinishResponseAsync()
         {
             // Only renew if requested, and neither sign in or sign out was called
-            if (!_shouldRefresh || SignInAccepted || SignOutAccepted)
+            if (!_shouldRefresh || SignInCalled || SignOutCalled)
             {
                 return;
             }
