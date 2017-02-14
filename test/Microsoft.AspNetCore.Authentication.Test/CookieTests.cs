@@ -21,7 +21,7 @@ using Xunit;
 
 namespace Microsoft.AspNetCore.Authentication.Cookies
 {
-    public class CookieMiddlewareTests
+    public class CookieTests
     {
         private TestClock _clock = new TestClock();
 
