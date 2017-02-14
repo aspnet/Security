@@ -35,13 +35,27 @@ namespace Microsoft.AspNetCore.Authentication.Facebook
                 context =>
                 {
                     // REVIEW: Gross.
-                    context.ChallengeAsync("Facebook").GetAwaiter().GetResult();
+                    Assert.Throws<ArgumentException>("AppId", () => context.ChallengeAsync("Facebook").GetAwaiter().GetResult());
                     return true;
                 });
             var transaction = await server.SendAsync("http://example.com/challenge");
-            Assert.Equal(HttpStatusCode.Redirect, transaction.Response.StatusCode);
-            var query = transaction.Response.Headers.Location.Query;
-            Assert.Contains("custom=test", query);
+            Assert.Equal(HttpStatusCode.OK, transaction.Response.StatusCode);
+        }
+
+        [Fact]
+        public async Task ThrowsIfAppSecretMissing()
+        {
+            var server = CreateServer(
+                app => { },
+                services => services.AddFacebookAuthentication(o => o.AppId = "Whatever"),
+                context =>
+                {
+                    // REVIEW: Gross.
+                    Assert.Throws<ArgumentException>("AppSecret", () => context.ChallengeAsync("Facebook").GetAwaiter().GetResult());
+                    return true;
+                });
+            var transaction = await server.SendAsync("http://example.com/challenge");
+            Assert.Equal(HttpStatusCode.OK, transaction.Response.StatusCode);
         }
 
         [Fact]
