@@ -55,9 +55,8 @@ namespace Microsoft.AspNetCore.Authentication{
             }
         }
 
-        // Can we get rid of this?? (Cookies.FinishResponse / renew uses 
-        protected bool SignInAccepted { get; set; }
-        protected bool SignOutAccepted { get; set; }
+        protected bool SignInCalled { get; set; }
+        protected bool SignOutCalled { get; set; }
 
         protected AuthenticationHandler(IOptions<AuthenticationOptions> options, ILoggerFactory logger, UrlEncoder encoder, ISystemClock clock)
         {
@@ -144,6 +143,12 @@ namespace Microsoft.AspNetCore.Authentication{
 
         public async Task SignInAsync(SignInContext context)
         {
+            if (context == null)
+            {
+                throw new ArgumentNullException(nameof(context));
+            }
+
+            SignInCalled = true;
             await HandleSignInAsync(context);
             Logger.AuthenticationSchemeSignedIn(Scheme.Name);
         }
@@ -160,6 +165,7 @@ namespace Microsoft.AspNetCore.Authentication{
                 throw new ArgumentNullException(nameof(context));
             }
 
+            SignOutCalled = true;
             await HandleSignOutAsync(context);
             Logger.AuthenticationSchemeSignedOut(Scheme.Name);
         }
