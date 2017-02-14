@@ -37,8 +37,6 @@ namespace Microsoft.AspNetCore.Authentication.Facebook
         /// </summary>
         public override void Validate()
         {
-            base.Validate();
-
             if (string.IsNullOrEmpty(AppId))
             {
                 throw new ArgumentException(string.Format(CultureInfo.CurrentCulture, Resources.Exception_OptionMustBeProvided, nameof(AppId)), nameof(AppId));
@@ -48,6 +46,8 @@ namespace Microsoft.AspNetCore.Authentication.Facebook
             {
                 throw new ArgumentException(string.Format(CultureInfo.CurrentCulture, Resources.Exception_OptionMustBeProvided, nameof(AppSecret)), nameof(AppSecret));
             }
+
+            base.Validate();
         }
 
         // Facebook uses a non-standard term for this field.

@@ -21,7 +21,7 @@ using Xunit;
 
 namespace Microsoft.AspNetCore.Authentication.JwtBearer
 {
-    public class JwtBearerMiddlewareTests
+    public class JwtBearerTests
     {
         [ConditionalFact(Skip = "Need to remove dependency on AAD since the generated tokens will expire")]
         [FrameworkSkipCondition(RuntimeFrameworks.Mono)]

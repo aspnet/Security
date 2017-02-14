@@ -22,7 +22,7 @@ using Xunit;
 
 namespace Microsoft.AspNetCore.Authentication.Google
 {
-    public class GoogleMiddlewareTests
+    public class GoogleTests
     {
         [Fact]
         public async Task ChallengeWillTriggerRedirection()

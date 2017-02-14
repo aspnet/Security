@@ -21,7 +21,7 @@ using Xunit;
 
 namespace Microsoft.AspNetCore.Authentication.Facebook
 {
-    public class FacebookMiddlewareTests
+    public class FacebookTests
     {
         [Fact]
         public async Task ThrowsIfAppIdMissing()
