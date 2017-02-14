@@ -4,12 +4,12 @@
     "emitEntryPoint": true
   },
   "dependencies": {
-    "Microsoft.AspNetCore.Authentication.JwtBearer": "1.1.0",
-    "Microsoft.AspNetCore.Server.IISIntegration": "1.1.0",
-    "Microsoft.AspNetCore.Server.Kestrel": "1.1.0",
-    "Microsoft.AspNetCore.StaticFiles": "1.1.0",
-    "Microsoft.Extensions.Configuration.EnvironmentVariables": "1.1.0",
-    "Microsoft.Extensions.Configuration.UserSecrets": "1.1.0"
+    "Microsoft.AspNetCore.Authentication.JwtBearer": "1.1.1",
+    "Microsoft.AspNetCore.Server.IISIntegration": "1.1.1",
+    "Microsoft.AspNetCore.Server.Kestrel": "1.1.1",
+    "Microsoft.AspNetCore.StaticFiles": "1.1.1",
+    "Microsoft.Extensions.Configuration.EnvironmentVariables": "1.1.1",
+    "Microsoft.Extensions.Configuration.UserSecrets": "1.1.1"
   },
   "frameworks": {
     "net451": {},
