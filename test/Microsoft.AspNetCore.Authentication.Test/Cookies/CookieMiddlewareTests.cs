@@ -372,6 +372,42 @@ namespace Microsoft.AspNetCore.Authentication.Cookies
         }
 
         [Fact]
+        public async Task CookieNotRenewedAfterSignOut()
+        {
+            var server = CreateServer(o =>
+            {
+                o.ExpireTimeSpan = TimeSpan.FromMinutes(10);
+                o.SlidingExpiration = false;
+                o.Events = new CookieAuthenticationEvents
+                {
+                    OnValidatePrincipal = ctx =>
+                    {
+                        ctx.ShouldRenew = true;
+                        return Task.FromResult(0);
+                    }
+                };
+            },
+            context =>
+                context.SignInAsync("Cookies",
+                    new ClaimsPrincipal(new ClaimsIdentity(new GenericIdentity("Alice", "Cookies")))));
+
+            var transaction1 = await SendAsync(server, "http://example.com/testpath");
+
+            // renews on every request
+            var transaction2 = await SendAsync(server, "http://example.com/me/Cookies", transaction1.CookieNameValue);
+            Assert.NotNull(transaction2.SetCookie);
+            Assert.Equal("Alice", FindClaimValue(transaction2, ClaimTypes.Name));
+
+            var transaction3 = await server.SendAsync("http://example.com/normal", transaction1.CookieNameValue);
+            Assert.NotNull(transaction3.SetCookie[0]);
+
+            // signout wins over renew
+            var transaction4 = await server.SendAsync("http://example.com/signout", transaction3.SetCookie[0]);
+            Assert.Equal(1, transaction4.SetCookie.Count());
+            Assert.Contains(".AspNetCore.Cookies=; expires=", transaction4.SetCookie[0]);
+        }
+
+        [Fact]
         public async Task CookieCanBeRenewedByValidator()
         {
             var server = CreateServer(o =>

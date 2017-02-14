@@ -22,8 +22,10 @@ namespace Microsoft.AspNetCore.Authentication.Cookies
         private const string HeaderValueMinusOne = "-1";
         private const string SessionIdClaim = "Microsoft.AspNetCore.Authentication.Cookies-SessionId";
 
-        private bool _finishCalled;
         private bool _shouldRefresh;
+        private bool _signInCalled;
+        private bool _signOutCalled;
+
         private DateTimeOffset? _refreshIssuedUtc;
         private DateTimeOffset? _refreshExpiresUtc;
         private string _sessionKey;
@@ -219,7 +221,7 @@ namespace Microsoft.AspNetCore.Authentication.Cookies
         protected virtual async Task FinishResponseAsync()
         {
             // Only renew if requested, and neither sign in or sign out was called
-            if (!_shouldRefresh || SignInCalled || SignOutCalled)
+            if (!_shouldRefresh || _signInCalled || _signOutCalled)
             {
                 return;
             }
@@ -269,6 +271,8 @@ namespace Microsoft.AspNetCore.Authentication.Cookies
 
         protected override async Task HandleSignInAsync(SignInContext signin)
         {
+            _signInCalled = true;
+
             // Process the request cookie to initialize members like _sessionKey.
             var result = await EnsureCookieTicket();
             var cookieOptions = BuildCookieOptions();
@@ -345,6 +349,8 @@ namespace Microsoft.AspNetCore.Authentication.Cookies
 
         protected override async Task HandleSignOutAsync(SignOutContext signOutContext)
         {
+            _signOutCalled = true;
+
             // Process the request cookie to initialize members like _sessionKey.
             var ticket = await EnsureCookieTicket();
             var cookieOptions = BuildCookieOptions();

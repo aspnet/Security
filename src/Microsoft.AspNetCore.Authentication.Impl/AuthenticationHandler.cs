@@ -55,9 +55,6 @@ namespace Microsoft.AspNetCore.Authentication{
             }
         }
 
-        protected bool SignInCalled { get; set; }
-        protected bool SignOutCalled { get; set; }
-
         protected AuthenticationHandler(IOptions<AuthenticationOptions> options, ILoggerFactory logger, UrlEncoder encoder, ISystemClock clock)
         {
             Logger = logger.CreateLogger(this.GetType().FullName);
@@ -148,7 +145,6 @@ namespace Microsoft.AspNetCore.Authentication{
                 throw new ArgumentNullException(nameof(context));
             }
 
-            SignInCalled = true;
             await HandleSignInAsync(context);
             Logger.AuthenticationSchemeSignedIn(Scheme.Name);
         }
@@ -165,7 +161,6 @@ namespace Microsoft.AspNetCore.Authentication{
                 throw new ArgumentNullException(nameof(context));
             }
 
-            SignOutCalled = true;
             await HandleSignOutAsync(context);
             Logger.AuthenticationSchemeSignedOut(Scheme.Name);
         }
