@@ -18,8 +18,8 @@ namespace Microsoft.AspNetCore.Authentication{
 
         protected AuthenticationOptions SharedOptions { get; }
 
-        protected AuthenticationScheme Scheme { get; private set; }
-        protected TOptions Options { get; private set; }
+        public AuthenticationScheme Scheme { get; private set; }
+        public TOptions Options { get; private set; }
         protected HttpContext Context { get; private set; }
         protected PathString OriginalPathBase => Context.Features.Get<IAuthenticationFeature>()?.OriginalPathBase ?? Request.PathBase;
 
