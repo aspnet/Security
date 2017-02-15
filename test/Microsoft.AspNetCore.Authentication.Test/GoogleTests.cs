@@ -886,7 +886,7 @@ namespace Microsoft.AspNetCore.Authentication.Google
             Assert.Equal(null, transaction.FindClaimValue(ClaimTypes.Name));
         }
 
-        [ConditionalFact(Skip = "Revisit, can't auth handlers that aren't registered")]
+        [Fact]
         public async Task ChallengeFacebookWhenAlreadySignedWithGoogleSucceeds()
         {
             var stateFormat = new PropertiesDataFormat(new EphemeralDataProtectionProvider(NullLoggerFactory.Instance).CreateProtector("GoogleTest"));
