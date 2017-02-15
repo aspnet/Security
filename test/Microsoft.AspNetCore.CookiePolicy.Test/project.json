@@ -7,7 +7,7 @@
     "Microsoft.AspNetCore.Authentication.Cookies": "1.0.2",
     "Microsoft.AspNetCore.CookiePolicy": "1.0.2",
     "Microsoft.AspNetCore.TestHost": "1.0.2",
-    "Microsoft.Extensions.DependencyInjection": "1.0.1",
+    "Microsoft.Extensions.DependencyInjection": "1.0.2",
     "xunit": "2.1.0"
   },
   "frameworks": {
