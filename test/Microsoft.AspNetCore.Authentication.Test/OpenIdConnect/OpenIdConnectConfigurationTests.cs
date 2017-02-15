@@ -2,6 +2,7 @@
 // Licensed under the Apache License, Version 2.0. See License.txt in the project root for license information.
 
 using System;
+using System.Net;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authentication.OpenIdConnect;
 using Microsoft.AspNetCore.Builder;
@@ -15,17 +16,33 @@ namespace Microsoft.AspNetCore.Authentication.Test.OpenIdConnect
 {
     public class OpenIdConnectConfigurationTests
     {
-        [ConditionalFact(Skip = "need way to restore access to options instance")]
-        public void MetadataAddressIsGeneratedFromAuthorityWhenMissing()
+        [Fact]
+        public async Task MetadataAddressIsGeneratedFromAuthorityWhenMissing()
         {
-            //BuildTestServer(o =>
-            //{
-            //    o.Authority = TestServerBuilder.DefaultAuthority;
-            //    o.ClientId = Guid.NewGuid().ToString();
-            //    o.SignInScheme = Guid.NewGuid().ToString()
-            //});
-
-            //Assert.Equal($"{TestServerBuilder.DefaultAuthority}/.well-known/openid-configuration", options.MetadataAddress);
+            var builder = new WebHostBuilder()
+                .ConfigureServices(services =>
+                {
+                    services.AddCookieAuthentication();
+                    services.AddOpenIdConnectAuthentication(o =>
+                    {
+                        o.Authority = TestServerBuilder.DefaultAuthority;
+                        o.ClientId = Guid.NewGuid().ToString();
+                        o.SignInScheme = Guid.NewGuid().ToString();
+                    });
+                })
+                .Configure(app =>
+                {
+                    app.UseAuthentication();
+                    app.Run(async context =>
+                    {
+                        var resolver = context.RequestServices.GetRequiredService<IAuthenticationHandlerResolver>();
+                        var handler = await resolver.ResolveHandlerAsync(context, OpenIdConnectDefaults.AuthenticationScheme) as OpenIdConnectHandler;
+                        Assert.Equal($"{TestServerBuilder.DefaultAuthority}/.well-known/openid-configuration", handler.Options.MetadataAddress);
+                    });
+                });
+            var server = new TestServer(builder);
+            var transaction = await server.SendAsync(@"https://example.com");
+            Assert.Equal(HttpStatusCode.OK, transaction.Response.StatusCode);
         }
 
         [Fact]
