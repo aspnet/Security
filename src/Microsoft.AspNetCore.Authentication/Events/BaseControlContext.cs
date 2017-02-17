@@ -57,7 +57,7 @@ namespace Microsoft.AspNetCore.Authentication
                 }
                 else
                 {
-                    result = AuthenticateResult.Success(Ticket);
+                    result = AuthenticateResult.Succeed(Ticket);
                 }
                 return true;
             }

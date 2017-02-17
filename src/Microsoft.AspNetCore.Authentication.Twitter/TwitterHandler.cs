@@ -102,7 +102,7 @@ namespace Microsoft.AspNetCore.Authentication.Twitter
                 });
             }
 
-            return AuthenticateResult.Success(await CreateTicketAsync(identity, properties, accessToken, user));
+            return AuthenticateResult.Succeed(await CreateTicketAsync(identity, properties, accessToken, user));
         }
 
         protected virtual async Task<AuthenticationTicket> CreateTicketAsync(

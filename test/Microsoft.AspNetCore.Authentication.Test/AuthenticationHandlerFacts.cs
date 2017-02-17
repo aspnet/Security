@@ -144,7 +144,7 @@ namespace Microsoft.AspNetCore.Authentication
             protected override Task<AuthenticateResult> HandleAuthenticateAsync()
             {
                 AuthCount++;
-                return Task.FromResult(AuthenticateResult.Success(new AuthenticationTicket(new ClaimsPrincipal(), new AuthenticationProperties(), "whatever")));
+                return Task.FromResult(AuthenticateResult.Succeed(new AuthenticationTicket(new ClaimsPrincipal(), new AuthenticationProperties(), "whatever")));
             }
 
         }
@@ -153,7 +153,7 @@ namespace Microsoft.AspNetCore.Authentication
         {
             private TestHandler() { }
 
-            public AuthenticateResult Result = AuthenticateResult.Success(new AuthenticationTicket(new ClaimsPrincipal(), new AuthenticationProperties(), "whatever"));
+            public AuthenticateResult Result = AuthenticateResult.Succeed(new AuthenticationTicket(new ClaimsPrincipal(), new AuthenticationProperties(), "whatever"));
 
             public static async Task<TestHandler> Create(string scheme)
             {
@@ -204,7 +204,7 @@ namespace Microsoft.AspNetCore.Authentication
 
             protected override Task<AuthenticateResult> HandleAuthenticateAsync()
             {
-                return Task.FromResult(AuthenticateResult.Success(new AuthenticationTicket(new ClaimsPrincipal(), new AuthenticationProperties(), "whatever")));
+                return Task.FromResult(AuthenticateResult.Succeed(new AuthenticationTicket(new ClaimsPrincipal(), new AuthenticationProperties(), "whatever")));
             }
         }
 
