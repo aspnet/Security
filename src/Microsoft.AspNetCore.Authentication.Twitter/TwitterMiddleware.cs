@@ -8,6 +8,7 @@ using System.Text.Encodings.Web;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.DataProtection;
 using Microsoft.AspNetCore.Http;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 
@@ -29,14 +30,16 @@ namespace Microsoft.AspNetCore.Authentication.Twitter
         /// <param name="encoder"></param>
         /// <param name="sharedOptions"></param>
         /// <param name="options">Configuration options for the middleware</param>
+        /// <param name="services"></param>
         public TwitterMiddleware(
             RequestDelegate next,
             IDataProtectionProvider dataProtectionProvider,
             ILoggerFactory loggerFactory,
             UrlEncoder encoder,
             IOptions<SharedAuthenticationOptions> sharedOptions,
-            IOptions<TwitterOptions> options)
-            : base(next, options, loggerFactory, encoder)
+            IOptions<TwitterOptions> options,
+            IServiceProvider services)
+            : base(next, options, loggerFactory, encoder, services)
         {
             if (next == null)
             {
@@ -85,6 +88,7 @@ namespace Microsoft.AspNetCore.Authentication.Twitter
             {
                 Options.Events = new TwitterEvents();
             }
+
             if (Options.StateDataFormat == null)
             {
                 var dataProtector = dataProtectionProvider.CreateProtector(

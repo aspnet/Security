@@ -8,6 +8,7 @@ using System.Text.Encodings.Web;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.DataProtection;
 using Microsoft.AspNetCore.Http;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 
@@ -27,14 +28,16 @@ namespace Microsoft.AspNetCore.Authentication.OAuth
         /// <param name="encoder">The <see cref="UrlEncoder"/>.</param>
         /// <param name="sharedOptions">The <see cref="SharedAuthenticationOptions"/> configuration options for this middleware.</param>
         /// <param name="options">Configuration options for the middleware.</param>
+        /// <param name="services"></param>
         public OAuthMiddleware(
             RequestDelegate next,
             IDataProtectionProvider dataProtectionProvider,
             ILoggerFactory loggerFactory,
             UrlEncoder encoder,
             IOptions<SharedAuthenticationOptions> sharedOptions,
-            IOptions<TOptions> options)
-            : base(next, options, loggerFactory, encoder)
+            IOptions<TOptions> options,
+            IServiceProvider services)
+            : base(next, options, loggerFactory, encoder, services)
         {
             if (next == null)
             {

@@ -27,6 +27,8 @@ namespace Microsoft.AspNetCore.Authentication.Cookies
         private string _sessionKey;
         private Task<AuthenticateResult> _readCookieTask;
 
+        private CookieAuthenticationEvents Events => Options.Events.ResolveEvents(Context.RequestServices);
+
         private Task<AuthenticateResult> EnsureCookieTicket()
         {
             // We only need to read the ticket once
@@ -127,7 +129,7 @@ namespace Microsoft.AspNetCore.Authentication.Cookies
             }
 
             var context = new CookieValidatePrincipalContext(Context, result.Ticket, Options);
-            await Options.Events.ValidatePrincipal(context);
+            await Events.ValidatePrincipal(context);
 
             if (context.Principal == null)
             {
@@ -244,7 +246,7 @@ namespace Microsoft.AspNetCore.Authentication.Cookies
                 signInContext.Properties.ExpiresUtc = issuedUtc.Add(Options.ExpireTimeSpan);
             }
 
-            await Options.Events.SigningIn(signInContext);
+            await Events.SigningIn(signInContext);
 
             if (signInContext.Properties.IsPersistent)
             {
@@ -282,7 +284,7 @@ namespace Microsoft.AspNetCore.Authentication.Cookies
                 signInContext.Principal,
                 signInContext.Properties);
 
-            await Options.Events.SignedIn(signedInContext);
+            await Events.SignedIn(signedInContext);
 
             // Only redirect on the login path
             var shouldRedirect = Options.LoginPath.HasValue && OriginalPath == Options.LoginPath;
@@ -305,7 +307,7 @@ namespace Microsoft.AspNetCore.Authentication.Cookies
                 new AuthenticationProperties(signOutContext.Properties),
                 cookieOptions);
 
-            await Options.Events.SigningOut(context);
+            await Events.SigningOut(context);
 
             Options.CookieManager.DeleteCookie(
                 Context,
@@ -343,7 +345,7 @@ namespace Microsoft.AspNetCore.Authentication.Cookies
 
                 if (redirectUri != null)
                 {
-                    await Options.Events.RedirectToReturnUrl(
+                    await Events.RedirectToReturnUrl(
                         new CookieRedirectContext(Context, Options, redirectUri, properties));
                 }
             }
@@ -372,7 +374,7 @@ namespace Microsoft.AspNetCore.Authentication.Cookies
             }
             var accessDeniedUri = Options.AccessDeniedPath + QueryString.Create(Options.ReturnUrlParameter, returnUrl);
             var redirectContext = new CookieRedirectContext(Context, Options, BuildRedirectUri(accessDeniedUri), properties);
-            await Options.Events.RedirectToAccessDenied(redirectContext);
+            await Events.RedirectToAccessDenied(redirectContext);
             return true;
         }
 
@@ -392,7 +394,7 @@ namespace Microsoft.AspNetCore.Authentication.Cookies
 
             var loginUri = Options.LoginPath + QueryString.Create(Options.ReturnUrlParameter, redirectUri);
             var redirectContext = new CookieRedirectContext(Context, Options, BuildRedirectUri(loginUri), properties);
-            await Options.Events.RedirectToLogin(redirectContext);
+            await Events.RedirectToLogin(redirectContext);
             return true;
 
         }

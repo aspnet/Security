@@ -55,5 +55,10 @@ namespace Microsoft.AspNetCore.Builder
         /// </summary>
         [EditorBrowsable(EditorBrowsableState.Never)]
         public ISystemClock SystemClock { get; set; } = new SystemClock();
+
+        /// <summary>
+        /// Gets or sets the instance used to handle events.
+        /// </summary>
+        public AuthenticationEvents Events { get; set; } = new AuthenticationEvents();
     }
 }

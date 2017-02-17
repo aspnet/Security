@@ -10,7 +10,7 @@ namespace Microsoft.AspNetCore.Authentication.OpenIdConnect
     /// <summary>
     /// Specifies events which the <see cref="OpenIdConnectMiddleware" />invokes to enable developer control over the authentication process.
     /// </summary>
-    public class OpenIdConnectEvents : RemoteAuthenticationEvents, IOpenIdConnectEvents
+    public class OpenIdConnectEvents : RemoteAuthenticationEvents
     {
         /// <summary>
         /// Invoked if exceptions are thrown during request processing. The exceptions will be re-thrown after this event unless suppressed.

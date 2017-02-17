@@ -3,10 +3,8 @@
 
 using System;
 using System.Collections.Generic;
-using System.ComponentModel;
 using System.IdentityModel.Tokens.Jwt;
 using System.Net.Http;
-using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Protocols;
 using Microsoft.IdentityModel.Protocols.OpenIdConnect;
@@ -63,7 +61,11 @@ namespace Microsoft.AspNetCore.Builder
         /// The application may implement the interface fully, or it may create an instance of JwtBearerAuthenticationEvents
         /// and assign delegates only to the events it wants to process.
         /// </summary>
-        public IJwtBearerEvents Events { get; set; } = new JwtBearerEvents();
+        public new JwtBearerEvents Events
+        {
+            get { return (JwtBearerEvents)base.Events; }
+            set { base.Events = value; }
+        }
 
         /// <summary>
         /// The HttpMessageHandler used to retrieve metadata.

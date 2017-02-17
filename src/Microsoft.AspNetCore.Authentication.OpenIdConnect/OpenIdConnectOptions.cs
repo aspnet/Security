@@ -102,11 +102,11 @@ namespace Microsoft.AspNetCore.Builder
         public string MetadataAddress { get; set; }
 
         /// <summary>
-        /// Gets or sets the <see cref="IOpenIdConnectEvents"/> to notify when processing OpenIdConnect messages.
+        /// Gets or sets the <see cref="OpenIdConnectEvents"/> to notify when processing OpenIdConnect messages.
         /// </summary>
-        public new IOpenIdConnectEvents Events
+        public new OpenIdConnectEvents Events
         {
-            get { return (IOpenIdConnectEvents)base.Events; }
+            get { return (OpenIdConnectEvents)base.Events; }
             set { base.Events = value; }
         }
 

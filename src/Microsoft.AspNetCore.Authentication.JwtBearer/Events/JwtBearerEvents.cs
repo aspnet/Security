@@ -10,7 +10,7 @@ namespace Microsoft.AspNetCore.Authentication.JwtBearer
     /// <summary>
     /// Specifies events which the <see cref="JwtBearerMiddleware"/> invokes to enable developer control over the authentication process.
     /// </summary>
-    public class JwtBearerEvents : IJwtBearerEvents
+    public class JwtBearerEvents : AuthenticationEvents
     {
         /// <summary>
         /// Invoked if exceptions are thrown during request processing. The exceptions will be re-thrown after this event unless suppressed.
@@ -39,5 +39,10 @@ namespace Microsoft.AspNetCore.Authentication.JwtBearer
         public virtual Task TokenValidated(TokenValidatedContext context) => OnTokenValidated(context);
 
         public virtual Task Challenge(JwtBearerChallengeContext context) => OnChallenge(context);
+
+        public new JwtBearerEvents ResolveEvents(IServiceProvider services)
+        {
+            return base.ResolveEvents(services) as JwtBearerEvents;
+        }
     }
 }

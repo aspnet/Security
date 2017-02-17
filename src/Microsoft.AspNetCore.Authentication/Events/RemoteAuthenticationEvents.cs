@@ -7,7 +7,7 @@ using Microsoft.Extensions.Internal;
 
 namespace Microsoft.AspNetCore.Authentication
 {
-    public class RemoteAuthenticationEvents : IRemoteAuthenticationEvents
+    public class RemoteAuthenticationEvents : AuthenticationEvents
     {
         public Func<FailureContext, Task> OnRemoteFailure { get; set; } = context => TaskCache.CompletedTask;
 
