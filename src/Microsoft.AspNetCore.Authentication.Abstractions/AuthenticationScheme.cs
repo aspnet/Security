@@ -4,7 +4,6 @@
 using System;
 using System.Collections.Generic;
 using System.Reflection;
-using Microsoft.AspNetCore.Http;
 
 namespace Microsoft.AspNetCore.Authentication
 {
@@ -23,9 +22,6 @@ namespace Microsoft.AspNetCore.Authentication
 
         public string Name { get; }
         public Type HandlerType { get; }
-
-        // Needed to enable Adding schemes after services have been built (AddScheme outside of startup)
-        public Func<HttpContext, IAuthenticationHandler> ResolveHandlerFunc { get; set; }
 
         // Holds things like the configured options instances for the handler
         // Also replacement for AuthenticationDescription

@@ -2,15 +2,13 @@
 // Licensed under the Apache License, Version 2.0. See License.txt in the project root for license information.
 
 using System;
-using System.Threading.Tasks;
-using Microsoft.Extensions.Internal;
 
 namespace Microsoft.AspNetCore.Authentication
 {
     /// <summary>
     /// Contains the options used by the <see cref="AuthenticationHandler{T}"/>.
     /// </summary>
-    public abstract class AuthenticationSchemeOptions
+    public class AuthenticationSchemeOptions
     {
         /// <summary>
         /// Check that the options are valid.  Should throw an exception if things are not ok.

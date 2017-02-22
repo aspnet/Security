@@ -12,6 +12,7 @@ namespace Microsoft.AspNetCore.Authentication
         Task<AuthenticationScheme> GetDefaultAuthenticateSchemeAsync();
         Task<AuthenticationScheme> GetDefaultChallengeSchemeAsync();
         void AddScheme(AuthenticationScheme scheme);
+        void RemoveScheme(string name);
 
         /// <summary>
         /// Returns the schemes in priority order for request handling.
