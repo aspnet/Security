@@ -4,6 +4,7 @@
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace Microsoft.AspNetCore.Authentication
 {
@@ -27,11 +28,13 @@ namespace Microsoft.AspNetCore.Authentication
             }
 
             var scheme = await Schemes.GetSchemeAsync(authenticationScheme);
-            var handler = scheme?.ResolveHandlerFunc?.Invoke(context);
-            if (handler == null && scheme?.HandlerType != null)
+            if (scheme == null)
             {
-                handler = context.RequestServices.GetService(scheme.HandlerType) as IAuthenticationHandler;
+                return null;
             }
+            var handler = (context.RequestServices.GetService(scheme.HandlerType) ??
+                ActivatorUtilities.CreateInstance(context.RequestServices, scheme.HandlerType))
+                as IAuthenticationHandler;
             if (handler != null)
             {
                 await handler.InitializeAsync(scheme, context);

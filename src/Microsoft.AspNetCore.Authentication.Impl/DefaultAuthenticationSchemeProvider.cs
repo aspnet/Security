@@ -3,13 +3,14 @@
 
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Options;
 
 namespace Microsoft.AspNetCore.Authentication
 {
     /// <summary>
-    /// Builds the actual AuthenticationScheme instances from the AuthenticationOptions2.
+    /// Builds the actual AuthenticationScheme instances from the AuthenticationOptions.
     /// </summary>
     public class DefaultAuthenticationSchemeProvider : IAuthenticationSchemeProvider
     {
@@ -85,6 +86,22 @@ namespace Microsoft.AspNetCore.Authentication
                 }
                 _schemes.Add(scheme);
                 _map[scheme.Name] = scheme;
+            }
+        }
+
+        public void RemoveScheme(string name)
+        {
+            if (!_map.ContainsKey(name))
+            {
+                return;
+            }
+            lock (_lock)
+            {
+                if (_map.ContainsKey(name))
+                {
+                    _schemes.Remove(_schemes.Find(s => s.Name == name));
+                    _map.Remove(name);
+                }
             }
         }
     }
