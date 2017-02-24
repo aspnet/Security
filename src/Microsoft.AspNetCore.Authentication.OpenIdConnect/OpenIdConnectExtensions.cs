@@ -12,6 +12,6 @@ namespace Microsoft.Extensions.DependencyInjection
             services.AddOpenIdConnectAuthentication(OpenIdConnectDefaults.AuthenticationScheme, configureOptions);
 
         public static IServiceCollection AddOpenIdConnectAuthentication(this IServiceCollection services, string authenticationScheme, Action<OpenIdConnectOptions> configureOptions) =>
-            services.AddSchemeHandler<OpenIdConnectOptions, OpenIdConnectHandler>(authenticationScheme, configureOptions);
+            services.AddScheme<OpenIdConnectOptions, OpenIdConnectHandler>(authenticationScheme, configureOptions, canHandleRequests: true);
     }
 }

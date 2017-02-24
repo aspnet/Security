@@ -28,7 +28,7 @@ namespace Microsoft.AspNetCore.Authentication
         private readonly AuthenticationOptions _options;
         private readonly object _lock = new object();
 
-        private readonly List<AuthenticationScheme> _schemes = new List<AuthenticationScheme>();
+        private readonly List<AuthenticationScheme> _requestHandlers = new List<AuthenticationScheme>();
 
         public IDictionary<string, AuthenticationScheme> _map = new Dictionary<string, AuthenticationScheme>(); // case sensitive?
 
@@ -38,9 +38,9 @@ namespace Microsoft.AspNetCore.Authentication
             {
                 return GetSchemeAsync(_options.DefaultAuthenticationScheme);
             }
-            if (_schemes.Count == 1)
+            if (_map.Count == 1)
             {
-                return Task.FromResult(_schemes[0]);
+                return Task.FromResult(_map.Values.First());
             }
             return Task.FromResult<AuthenticationScheme>(null);
         }
@@ -51,9 +51,9 @@ namespace Microsoft.AspNetCore.Authentication
             {
                 return GetSchemeAsync(_options.DefaultChallengeScheme);
             }
-            if (_schemes.Count == 1)
+            if (_map.Count == 1)
             {
-                return Task.FromResult(_schemes[0]);
+                return Task.FromResult(_map.Values.First());
             }
             return Task.FromResult<AuthenticationScheme>(null);
         }
@@ -67,9 +67,9 @@ namespace Microsoft.AspNetCore.Authentication
             return Task.FromResult<AuthenticationScheme>(null);
         }
 
-        public Task<IEnumerable<AuthenticationScheme>> GetPriorityOrderedSchemesAsync()
+        public Task<IEnumerable<AuthenticationScheme>> GetRequestHandlerSchemes()
         {
-            return Task.FromResult<IEnumerable<AuthenticationScheme>>(_schemes);
+            return Task.FromResult<IEnumerable<AuthenticationScheme>>(_requestHandlers);
         }
 
         public void AddScheme(AuthenticationScheme scheme)
@@ -84,7 +84,10 @@ namespace Microsoft.AspNetCore.Authentication
                 {
                     throw new InvalidOperationException("Scheme already exists: " + scheme.Name);
                 }
-                _schemes.Add(scheme);
+                if (scheme.CanHandleRequests)
+                {
+                    _requestHandlers.Add(scheme);
+                }
                 _map[scheme.Name] = scheme;
             }
         }
@@ -99,7 +102,7 @@ namespace Microsoft.AspNetCore.Authentication
             {
                 if (_map.ContainsKey(name))
                 {
-                    _schemes.Remove(_schemes.Find(s => s.Name == name));
+                    _requestHandlers.Remove(_requestHandlers.Find(s => s.Name == name));
                     _map.Remove(name);
                 }
             }

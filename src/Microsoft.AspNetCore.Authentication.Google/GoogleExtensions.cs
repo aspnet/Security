@@ -12,6 +12,6 @@ namespace Microsoft.Extensions.DependencyInjection
             services.AddGoogleAuthentication(GoogleDefaults.AuthenticationScheme, configureOptions);
 
         public static IServiceCollection AddGoogleAuthentication(this IServiceCollection services, string authenticationScheme, Action<GoogleOptions> configureOptions) =>
-            services.AddSchemeHandler<GoogleOptions, GoogleHandler>(authenticationScheme, configureOptions);
+            services.AddScheme<GoogleOptions, GoogleHandler>(authenticationScheme, configureOptions, canHandleRequests: true);
     }
 }
