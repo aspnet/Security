@@ -12,6 +12,6 @@ namespace Microsoft.Extensions.DependencyInjection
             services.AddMicrosoftAccountAuthentication(MicrosoftAccountDefaults.AuthenticationScheme, configureOptions);
 
         public static IServiceCollection AddMicrosoftAccountAuthentication(this IServiceCollection services, string authenticationScheme, Action<MicrosoftAccountOptions> configureOptions) =>
-            services.AddSchemeHandler<MicrosoftAccountOptions, MicrosoftAccountHandler>(authenticationScheme, configureOptions);
+            services.AddScheme<MicrosoftAccountOptions, MicrosoftAccountHandler>(authenticationScheme, configureOptions, canHandleRequests: true);
     }
 }
