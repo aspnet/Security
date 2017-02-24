@@ -29,7 +29,6 @@ namespace Microsoft.Extensions.DependencyInjection
             return services;
         }
 
-
         public static IServiceCollection AddAuthentication(this IServiceCollection services, Action<AuthenticationOptions> configureOptions) {
             if (services == null)
             {
@@ -46,8 +45,7 @@ namespace Microsoft.Extensions.DependencyInjection
             return services;
         }
 
-        // REVIEW: rename to just AddScheme?
-        public static IServiceCollection AddSchemeHandler<TOptions, THandler>(this IServiceCollection services, string authenticationScheme, Action<TOptions> configureOptions)
+        public static IServiceCollection AddScheme<TOptions, THandler>(this IServiceCollection services, string authenticationScheme, Action<TOptions> configureOptions, bool canHandleRequests)
             where TOptions : AuthenticationSchemeOptions, new()
             where THandler : AuthenticationHandler<TOptions>
         {
@@ -56,6 +54,7 @@ namespace Microsoft.Extensions.DependencyInjection
                 o.AddScheme(authenticationScheme, b =>
                 {
                     b.HandlerType = typeof(THandler);
+                    b.CanHandleRequests = canHandleRequests;
                     var options = new TOptions();
 
                     // REVIEW: is there a better place for this default?
@@ -73,7 +72,7 @@ namespace Microsoft.Extensions.DependencyInjection
             return services;
         }
 
-        public static IServiceCollection AddSchemeHandler<TOptions, THandler>(this IServiceCollection services, string authenticationScheme, TOptions options)
+        public static IServiceCollection AddScheme<TOptions, THandler>(this IServiceCollection services, string authenticationScheme, TOptions options, bool canHandleRequests)
             where TOptions : AuthenticationSchemeOptions, new()
             where THandler : AuthenticationHandler<TOptions>
         {
@@ -82,6 +81,7 @@ namespace Microsoft.Extensions.DependencyInjection
                 o.AddScheme(authenticationScheme, b =>
                 {
                     b.HandlerType = typeof(THandler);
+                    b.CanHandleRequests = canHandleRequests;
                     b.Settings["Options"] = options;
                 });
             });

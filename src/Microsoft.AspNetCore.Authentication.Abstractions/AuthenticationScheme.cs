@@ -9,7 +9,7 @@ namespace Microsoft.AspNetCore.Authentication
 {
     public class AuthenticationScheme
     {
-        public AuthenticationScheme(string name, Type handlerType, IReadOnlyDictionary<string, object> settings)
+        public AuthenticationScheme(string name, Type handlerType, bool canHandleRequests, IReadOnlyDictionary<string, object> settings)
         {
             Name = name ?? throw new ArgumentNullException(nameof(name));
             if (!typeof(IAuthenticationHandler).IsAssignableFrom(handlerType))
@@ -18,10 +18,16 @@ namespace Microsoft.AspNetCore.Authentication
             }
             HandlerType = handlerType ?? throw new ArgumentNullException(nameof(handlerType));
             Settings = settings ?? throw new ArgumentNullException(nameof(settings));
+            CanHandleRequests = canHandleRequests;
         }
 
         public string Name { get; }
         public Type HandlerType { get; }
+
+        /// <summary>
+        /// If true, the AuthenticationMiddleware will call the handler's HandleRequestAsync method.
+        /// </summary>
+        public bool CanHandleRequests { get; }
 
         // Holds things like the configured options instances for the handler
         // Also replacement for AuthenticationDescription

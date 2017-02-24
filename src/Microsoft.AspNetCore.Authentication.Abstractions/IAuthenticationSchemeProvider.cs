@@ -18,6 +18,6 @@ namespace Microsoft.AspNetCore.Authentication
         /// Returns the schemes in priority order for request handling.
         /// </summary>
         /// <returns></returns>
-        Task<IEnumerable<AuthenticationScheme>> GetPriorityOrderedSchemesAsync();
+        Task<IEnumerable<AuthenticationScheme>> GetRequestHandlerSchemes();
     }
 }

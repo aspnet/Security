@@ -2,23 +2,17 @@
 
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Net;
-using System.Net.Http;
 using System.Security.Claims;
-using System.Text;
 using System.Text.Encodings.Web;
 using System.Threading.Tasks;
-using Microsoft.AspNetCore.Authentication.OAuth;
 using Microsoft.AspNetCore.Builder;
-using Microsoft.AspNetCore.DataProtection;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.TestHost;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
-using Newtonsoft.Json;
 using Xunit;
 
 namespace Microsoft.AspNetCore.Authentication
@@ -89,7 +83,7 @@ namespace Microsoft.AspNetCore.Authentication
                         {
                             var name = remainder.Value.Substring(1);
                             var auth = context.RequestServices.GetRequiredService<IAuthenticationSchemeProvider>();
-                            var scheme = new AuthenticationScheme(name, typeof(TestHandler), new Dictionary<string, object>());
+                            var scheme = new AuthenticationScheme(name, typeof(TestHandler), /*CanHandleRequests:*/false, new Dictionary<string, object>());
                             auth.AddScheme(scheme);
                         }
                         else if (req.Path.StartsWithSegments(new PathString("/auth"), out remainder))
