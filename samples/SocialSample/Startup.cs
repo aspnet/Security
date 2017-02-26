@@ -271,9 +271,9 @@ namespace SocialSample
             });
 
             // Choose an authentication type
-            app.Map("/login", signoutApp =>
+            app.Use(next => async context =>
             {
-                signoutApp.Run(async context =>
+                if (context.Request.Path.StartsWithSegments(new PathString("/login")))
                 {
                     var authType = context.Request.Query["authscheme"];
                     if (!string.IsNullOrEmpty(authType))
@@ -292,13 +292,10 @@ namespace SocialSample
                         await context.Response.WriteAsync("<a href=\"?authscheme=" + type.AuthenticationScheme + "\">" + (type.DisplayName ?? "(suppressed)") + "</a><br>");
                     }
                     await context.Response.WriteAsync("</body></html>");
-                });
-            });
-
-            // Sign-out to remove the user cookie.
-            app.Map("/logout", signoutApp =>
-            {
-                signoutApp.Run(async context =>
+                    return;
+                }
+                // Sign-out to remove the user cookie.
+                else if (context.Request.Path.StartsWithSegments(new PathString("/logout")))
                 {
                     context.Response.ContentType = "text/html";
                     await context.Authentication.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
@@ -306,7 +303,10 @@ namespace SocialSample
                     await context.Response.WriteAsync("You have been logged out. Goodbye " + context.User.Identity.Name + "<br>");
                     await context.Response.WriteAsync("<a href=\"/\">Home</a>");
                     await context.Response.WriteAsync("</body></html>");
-                });
+                    return;
+                }
+
+                await next(context);
             });
 
             // Display the remote error
