@@ -46,8 +46,7 @@ namespace Microsoft.AspNetCore.Authentication
                 foreach (var scheme in await Schemes.GetRequestHandlerSchemes())
                 {
                     var handler = await handlers.ResolveHandlerAsync(context, scheme.Name);
-                    var result = await handler.HandleRequestAsync();
-                    if (result.Handled)
+                    if (await handler.HandleRequestAsync())
                     {
                         return;
                     }

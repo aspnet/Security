@@ -162,21 +162,21 @@ namespace Microsoft.AspNetCore.Authentication.OpenIdConnect
             }
         }
 
-        public override async Task<AuthenticationRequestStatus> HandleRequestAsync()
+        public override Task<bool> HandleRequestAsync()
         {
             if (Options.RemoteSignOutPath.HasValue && Options.RemoteSignOutPath == Request.Path)
             {
-                return await HandleRemoteSignOutAsync();
+                return HandleRemoteSignOutAsync();
             }
             else if (Options.SignedOutCallbackPath.HasValue && Options.SignedOutCallbackPath == Request.Path)
             {
-                return await HandleSignOutCallbackAsync();
+                return HandleSignOutCallbackAsync();
             }
 
-            return await base.HandleRequestAsync();
+            return base.HandleRequestAsync();
         }
 
-        protected virtual async Task<AuthenticationRequestStatus> HandleRemoteSignOutAsync()
+        protected virtual async Task<bool> HandleRemoteSignOutAsync()
         {
             OpenIdConnectMessage message = null;
 
@@ -202,17 +202,17 @@ namespace Microsoft.AspNetCore.Authentication.OpenIdConnect
             if (remoteSignOutContext.HandledResponse)
             {
                 Logger.RemoteSignOutHandledResponse();
-                return AuthenticationRequestStatus.Handle;
+                return true;
             }
             if (remoteSignOutContext.Skipped)
             {
                 Logger.RemoteSignOutSkipped();
-                return AuthenticationRequestStatus.Skip;
+                return false;
             }
 
             if (message == null)
             {
-                return AuthenticationRequestStatus.Skip;
+                return false;
             }
 
             // Try to extract the session identifier from the authentication ticket persisted by the sign-in handler.
@@ -228,13 +228,13 @@ namespace Microsoft.AspNetCore.Authentication.OpenIdConnect
                 if (string.IsNullOrEmpty(message.Sid))
                 {
                     Logger.RemoteSignOutSessionIdMissing();
-                    return AuthenticationRequestStatus.Handle;
+                    return true;
                 }
                 // Ensure the 'sid' parameter corresponds to the 'sid' stored in the authentication ticket.
                 if (!string.Equals(sid, message.Sid, StringComparison.Ordinal))
                 {
                     Logger.RemoteSignOutSessionIdInvalid();
-                    return AuthenticationRequestStatus.Handle;
+                    return true;
                 }
             }
 
@@ -242,7 +242,7 @@ namespace Microsoft.AspNetCore.Authentication.OpenIdConnect
 
             // We've received a remote sign-out request
             await Context.Authentication.SignOutAsync(Options.SignOutScheme);
-            return AuthenticationRequestStatus.Handle;
+            return true;
         }
 
         /// <summary>
@@ -360,7 +360,7 @@ namespace Microsoft.AspNetCore.Authentication.OpenIdConnect
         /// Response to the callback from OpenId provider after session ended.
         /// </summary>
         /// <returns>A task executing the callback procedure</returns>
-        protected virtual Task<AuthenticationRequestStatus> HandleSignOutCallbackAsync()
+        protected virtual Task<bool> HandleSignOutCallbackAsync()
         {
             StringValues protectedState;
             if (Request.Query.TryGetValue(OpenIdConnectParameterNames.State, out protectedState))
@@ -372,7 +372,7 @@ namespace Microsoft.AspNetCore.Authentication.OpenIdConnect
                 }
             }
 
-            return Task.FromResult(AuthenticationRequestStatus.Handle);
+            return Task.FromResult(true);
         }
 
         /// <summary>

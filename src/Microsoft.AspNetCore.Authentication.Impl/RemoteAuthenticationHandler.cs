@@ -41,17 +41,17 @@ namespace Microsoft.AspNetCore.Authentication
             }
         }
 
-        public override async Task<AuthenticationRequestStatus> HandleRequestAsync()
+        public override Task<bool> HandleRequestAsync()
         {
             if (Options.CallbackPath == Request.Path)
             {
-                return await HandleRemoteCallbackAsync();
+                return HandleRemoteCallbackAsync();
             }
 
-            return AuthenticationRequestStatus.Skip;
+            return Task.FromResult(false);
         }
 
-        protected virtual async Task<AuthenticationRequestStatus> HandleRemoteCallbackAsync()
+        protected virtual async Task<bool> HandleRemoteCallbackAsync()
         {
             AuthenticationTicket ticket = null;
             Exception exception = null;
@@ -65,11 +65,11 @@ namespace Microsoft.AspNetCore.Authentication
                 }
                 else if (authResult.Handled)
                 {
-                    return AuthenticationRequestStatus.Handle;
+                    return true;
                 }
                 else if (authResult.Skipped)
                 {
-                    return AuthenticationRequestStatus.Skip;
+                    return false;
                 }
                 else if (!authResult.Succeeded)
                 {
@@ -92,19 +92,18 @@ namespace Microsoft.AspNetCore.Authentication
 
                 if (errorContext.HandledResponse)
                 {
-                    return AuthenticationRequestStatus.Handle;
+                    return true;
                 }
-
-                if (errorContext.Skipped)
+                else if (errorContext.Skipped)
                 {
-                    return AuthenticationRequestStatus.Skip;
+                    return false;
                 }
 
                 throw new AggregateException("Unhandled remote failure.", exception);
             }
 
             // We have a ticket if we get here
-            var context = new TicketReceivedContext(Context, Options, ticket)
+            var ticketContext = new TicketReceivedContext(Context, Options, ticket)
             {
                 ReturnUri = ticket.Properties.RedirectUri,
             };
@@ -112,31 +111,31 @@ namespace Microsoft.AspNetCore.Authentication
             ticket.Properties.RedirectUri = null;
 
             // Mark which provider produced this identity so we can cross-check later in HandleAuthenticateAsync
-            context.Properties.Items[AuthSchemeKey] = Scheme.Name;
+            ticketContext.Properties.Items[AuthSchemeKey] = Scheme.Name;
 
-            await Options.Events.TicketReceived(context);
+            await Options.Events.TicketReceived(ticketContext);
 
-            if (context.HandledResponse)
+            if (ticketContext.HandledResponse)
             {
                 Logger.SigninHandled();
-                return AuthenticationRequestStatus.Handle;
+                return true;
             }
-            else if (context.Skipped)
+            else if (ticketContext.Skipped)
             {
                 Logger.SigninSkipped();
-                return AuthenticationRequestStatus.Skip;
-            }
+                return false;
+            };
 
-            await Context.SignInAsync(Options.SignInScheme, context.Principal, context.Properties);
+            await Context.SignInAsync(Options.SignInScheme, ticketContext.Principal, ticketContext.Properties);
 
             // Default redirect path is the base path
-            if (string.IsNullOrEmpty(context.ReturnUri))
+            if (string.IsNullOrEmpty(ticketContext.ReturnUri))
             {
-                context.ReturnUri = "/";
+                ticketContext.ReturnUri = "/";
             }
 
-            Response.Redirect(context.ReturnUri);
-            return AuthenticationRequestStatus.Handle;
+            Response.Redirect(ticketContext.ReturnUri);
+            return true;
         }
 
         /// <summary>
