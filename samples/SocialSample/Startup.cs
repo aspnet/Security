@@ -252,7 +252,8 @@ namespace SocialSample
                     await context.Response.WriteAsync("<html><body>");
                     await context.Response.WriteAsync("Choose an authentication scheme: <br>");
                     var schemeProvider = context.RequestServices.GetRequiredService<IAuthenticationSchemeProvider>();
-                    foreach (var provider in await schemeProvider.GetRequestHandlerSchemes())
+                    // TODO: add api to enumerate schemes
+                    foreach (var provider in await schemeProvider.GetRequestHandlerSchemes(context.Request.Path))
                     {
                         // REVIEW: we lost access to display name (which is buried in the handler options)
                         await context.Response.WriteAsync("<a href=\"?authscheme=" + provider.Name + "\">" + (provider.Name ?? "(suppressed)") + "</a><br>");

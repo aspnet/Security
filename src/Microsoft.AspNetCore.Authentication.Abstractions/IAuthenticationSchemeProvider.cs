@@ -3,6 +3,7 @@
 
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Http;
 
 namespace Microsoft.AspNetCore.Authentication
 {
@@ -18,6 +19,6 @@ namespace Microsoft.AspNetCore.Authentication
         /// Returns the schemes in priority order for request handling.
         /// </summary>
         /// <returns></returns>
-        Task<IEnumerable<AuthenticationScheme>> GetRequestHandlerSchemes();
+        Task<IEnumerable<AuthenticationScheme>> GetRequestHandlerSchemes(PathString requestPath);
     }
 }

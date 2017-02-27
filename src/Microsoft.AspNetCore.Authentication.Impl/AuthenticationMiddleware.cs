@@ -41,9 +41,9 @@ namespace Microsoft.AspNetCore.Authentication
                     }
                 }
 
-                // Give each scheme a chance to handle the request if it requested
+                // Give each scheme a chance to handle the request if it registered this path
                 var handlers = context.RequestServices.GetRequiredService<IAuthenticationHandlerResolver>();
-                foreach (var scheme in await Schemes.GetRequestHandlerSchemes())
+                foreach (var scheme in await Schemes.GetRequestHandlerSchemes(context.Request.Path))
                 {
                     var handler = await handlers.ResolveHandlerAsync(context, scheme.Name);
                     if (await handler.HandleRequestAsync())

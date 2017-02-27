@@ -53,6 +53,7 @@ namespace Microsoft.AspNetCore.Authentication.Test.OpenIdConnect
                 {
                     o.ClientId = "Test Id";
                     o.Authority = TestServerBuilder.DefaultAuthority;
+                    o.CallbackPath = "/";
                 },
                 ex => Assert.Equal("SignInScheme", ex.ParamName));
         }
@@ -77,6 +78,7 @@ namespace Microsoft.AspNetCore.Authentication.Test.OpenIdConnect
                 {
                     o.SignInScheme = "TestScheme";
                     o.ClientId = "Test Id";
+                    o.CallbackPath = "/";
                 },
                 ex => Assert.Equal("Provide Authority, MetadataAddress, Configuration, or ConfigurationManager to OpenIdConnectOptions", ex.Message)
             );
@@ -91,6 +93,7 @@ namespace Microsoft.AspNetCore.Authentication.Test.OpenIdConnect
                     o.SignInScheme = "TestScheme";
                     o.ClientId = "Test Id";
                     o.MetadataAddress = "http://example.com";
+                    o.CallbackPath = "/";
                 },
                 ex => Assert.Equal("The MetadataAddress or Authority must use HTTPS unless disabled for development by setting RequireHttpsMetadata=false.", ex.Message)
             );
@@ -105,6 +108,7 @@ namespace Microsoft.AspNetCore.Authentication.Test.OpenIdConnect
                     o.SignInScheme = "TestScheme";
                     o.ClientId = "Test Id";
                     o.MetadataAddress = "http://example.com";
+                    o.CallbackPath = "/";
                 },
                 ex => Assert.Equal("The MetadataAddress or Authority must use HTTPS unless disabled for development by setting RequireHttpsMetadata=false.", ex.Message)
             );
