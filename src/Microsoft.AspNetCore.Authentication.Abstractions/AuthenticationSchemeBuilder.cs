@@ -3,6 +3,7 @@
 
 using System;
 using System.Collections.Generic;
+using Microsoft.AspNetCore.Http;
 
 namespace Microsoft.AspNetCore.Authentication
 {
@@ -17,11 +18,11 @@ namespace Microsoft.AspNetCore.Authentication
 
         public Type HandlerType { get; set; }
 
-        public bool CanHandleRequests { get; set; }
+        public IEnumerable<PathString> CallbackPaths { get; set; }
 
         // Holds things like the configured options instances for the handler
         public Dictionary<string, object> Settings { get; set; } = new Dictionary<string, object>(); // casing?
 
-        public AuthenticationScheme Build() => new AuthenticationScheme(Name, HandlerType, CanHandleRequests, Settings);
+        public AuthenticationScheme Build() => new AuthenticationScheme(Name, HandlerType, CallbackPaths, Settings);
     }
 }

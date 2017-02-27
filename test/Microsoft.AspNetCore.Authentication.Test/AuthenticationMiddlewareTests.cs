@@ -27,28 +27,27 @@ namespace Microsoft.AspNetCore.Authentication
                     o.AddScheme("skipped", s =>
                     {
                         s.HandlerType = typeof(SkipHandler);
-                        s.CanHandleRequests = true;
+                        s.CallbackPaths = new PathString[] { "/" };
                     });
                     // Won't get hit since CanHandleRequests is false
                     o.AddScheme("throws", s =>
                     {
                         s.HandlerType = typeof(ThrowsHandler);
-                        s.CanHandleRequests = false;
                     });
                     o.AddScheme("607", s =>
                     {
                         s.HandlerType = typeof(SixOhSevenHandler);
-                        s.CanHandleRequests = true;
+                        s.CallbackPaths = new PathString[] { "/" };
                     });
                     // Won't get run since 607 will finish
                     o.AddScheme("305", s =>
                     {
                         s.HandlerType = typeof(ThreeOhFiveHandler);
-                        s.CanHandleRequests = true;
+                        s.CallbackPaths = new PathString[] { "/" };
                     });
                 }));
             var server = new TestServer(builder);
-            var response = await server.CreateClient().GetAsync("http://example.com/add/One");
+            var response = await server.CreateClient().GetAsync("http://example.com/");
             Assert.Equal(607, (int)response.StatusCode);
         }
 

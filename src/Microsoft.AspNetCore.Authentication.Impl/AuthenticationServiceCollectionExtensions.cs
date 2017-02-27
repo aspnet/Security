@@ -2,7 +2,9 @@
 // Licensed under the Apache License, Version 2.0. See License.txt in the project root for license information.
 
 using System;
+using System.Collections.Generic;
 using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 
 namespace Microsoft.Extensions.DependencyInjection
@@ -45,34 +47,54 @@ namespace Microsoft.Extensions.DependencyInjection
             return services;
         }
 
-        public static IServiceCollection AddScheme<TOptions, THandler>(this IServiceCollection services, string authenticationScheme, Action<TOptions> configureOptions, bool canHandleRequests)
+        public static IServiceCollection AddScheme<TOptions, THandler>(this IServiceCollection services, string authenticationScheme, Action<TOptions> configureOptions)
             where TOptions : AuthenticationSchemeOptions, new()
             where THandler : AuthenticationHandler<TOptions>
         {
             services.AddAuthentication(o =>
             {
-                o.AddScheme(authenticationScheme, b =>
-                {
-                    b.HandlerType = typeof(THandler);
-                    b.CanHandleRequests = canHandleRequests;
-                    var options = new TOptions();
-
-                    // REVIEW: is there a better place for this default?
-                    options.DisplayName = authenticationScheme;
-                    options.ClaimsIssuer = authenticationScheme;
-
-                    configureOptions?.Invoke(options);
-                    options.Validate();
-
-                    // revisit the settings typing
-                    b.Settings["Options"] = options;
-                });
+                o.AddScheme(authenticationScheme, 
+                    schemeBuilder => BuildScheme<TOptions, THandler>(authenticationScheme, schemeBuilder, configureOptions));
             });
             services.AddTransient<THandler>();
             return services;
         }
 
-        public static IServiceCollection AddScheme<TOptions, THandler>(this IServiceCollection services, string authenticationScheme, TOptions options, bool canHandleRequests)
+        private static TOptions BuildScheme<TOptions, THandler>(string authenticationScheme, AuthenticationSchemeBuilder builder, Action<TOptions> configureOptions)
+            where TOptions : AuthenticationSchemeOptions, new()
+            where THandler : AuthenticationHandler<TOptions>
+        {
+            builder.HandlerType = typeof(THandler);
+            var options = new TOptions();
+
+            // REVIEW: is there a better place for this default?
+            options.DisplayName = authenticationScheme;
+            options.ClaimsIssuer = authenticationScheme;
+
+            configureOptions?.Invoke(options);
+            options.Validate();
+
+            // revisit the settings typing
+            builder.Settings["Options"] = options;
+
+            return options;
+        }
+
+        public static IServiceCollection AddRemoteScheme<TOptions, THandler>(this IServiceCollection services, string authenticationScheme, Action<TOptions> configureOptions, Func<TOptions, IEnumerable<PathString>> getCallbackPaths)
+             where TOptions : RemoteAuthenticationOptions, new()
+             where THandler : AuthenticationHandler<TOptions>
+        {
+            services.AddAuthentication(o =>
+                o.AddScheme(authenticationScheme,
+                    schemeBuilder => {
+                        var options = BuildScheme<TOptions, THandler>(authenticationScheme, schemeBuilder, configureOptions);
+                        schemeBuilder.CallbackPaths = getCallbackPaths?.Invoke(options);
+                    }));
+            services.AddTransient<THandler>();
+            return services;
+        }
+
+        public static IServiceCollection AddScheme<TOptions, THandler>(this IServiceCollection services, string authenticationScheme, TOptions options)
             where TOptions : AuthenticationSchemeOptions, new()
             where THandler : AuthenticationHandler<TOptions>
         {
@@ -81,7 +103,6 @@ namespace Microsoft.Extensions.DependencyInjection
                 o.AddScheme(authenticationScheme, b =>
                 {
                     b.HandlerType = typeof(THandler);
-                    b.CanHandleRequests = canHandleRequests;
                     b.Settings["Options"] = options;
                 });
             });

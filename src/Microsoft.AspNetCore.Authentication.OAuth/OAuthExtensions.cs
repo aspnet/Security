@@ -3,6 +3,7 @@
 
 using System;
 using Microsoft.AspNetCore.Authentication.OAuth;
+using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace Microsoft.AspNetCore.Builder
@@ -10,6 +11,6 @@ namespace Microsoft.AspNetCore.Builder
     public static class OAuthExtensions
     {
         public static IServiceCollection AddOAuthAuthentication(this IServiceCollection services, string authenticationScheme, Action<OAuthOptions> configureOptions) =>
-            services.AddScheme<OAuthOptions, OAuthHandler<OAuthOptions>>(authenticationScheme, configureOptions, canHandleRequests: true);
+            services.AddRemoteScheme<OAuthOptions, OAuthHandler<OAuthOptions>>(authenticationScheme, configureOptions, o => new PathString[] { o.CallbackPath });
     }
 }

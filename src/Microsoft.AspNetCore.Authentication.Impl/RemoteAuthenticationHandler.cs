@@ -43,14 +43,10 @@ namespace Microsoft.AspNetCore.Authentication
 
         public override Task<bool> HandleRequestAsync()
         {
-            if (Options.CallbackPath == Request.Path)
-            {
-                return HandleRemoteCallbackAsync();
-            }
-
-            return Task.FromResult(false);
+            return HandleRemoteCallbackAsync();
         }
 
+        // REVIEW: can eliminate possibly
         protected virtual async Task<bool> HandleRemoteCallbackAsync()
         {
             AuthenticationTicket ticket = null;
