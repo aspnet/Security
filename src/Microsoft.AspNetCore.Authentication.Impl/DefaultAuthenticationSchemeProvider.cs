@@ -124,5 +124,10 @@ namespace Microsoft.AspNetCore.Authentication
                 }
             }
         }
+
+        public Task<IEnumerable<AuthenticationScheme>> GetAllSchemesAsync()
+        {
+            return Task.FromResult<IEnumerable<AuthenticationScheme>>(_map.Values);
+        }
     }
 }

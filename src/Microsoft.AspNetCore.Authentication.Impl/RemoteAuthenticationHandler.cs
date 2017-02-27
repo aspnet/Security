@@ -41,13 +41,7 @@ namespace Microsoft.AspNetCore.Authentication
             }
         }
 
-        public override Task<bool> HandleRequestAsync()
-        {
-            return HandleRemoteCallbackAsync();
-        }
-
-        // REVIEW: can eliminate possibly
-        protected virtual async Task<bool> HandleRemoteCallbackAsync()
+        public override async Task<bool> HandleRequestAsync()
         {
             AuthenticationTicket ticket = null;
             Exception exception = null;
