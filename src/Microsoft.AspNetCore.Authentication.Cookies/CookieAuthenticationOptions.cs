@@ -2,19 +2,15 @@
 // Licensed under the Apache License, Version 2.0. See License.txt in the project root for license information.
 
 using System;
-using System.ComponentModel;
-using Microsoft.AspNetCore.Authentication;
-using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.DataProtection;
 using Microsoft.AspNetCore.Http;
-using Microsoft.Extensions.Options;
 
-namespace Microsoft.AspNetCore.Builder
+namespace Microsoft.AspNetCore.Authentication.Cookies
 {
     /// <summary>
-    /// Configuration options for <see cref="CookieAuthenticationMiddleware"/>.
+    /// Configuration options for <see cref="CookieAuthenticationOptions"/>.
     /// </summary>
-    public class CookieAuthenticationOptions : AuthenticationOptions, IOptions<CookieAuthenticationOptions>
+    public class CookieAuthenticationOptions : AuthenticationSchemeOptions
     {
         private string _cookieName;
 
@@ -23,14 +19,11 @@ namespace Microsoft.AspNetCore.Builder
         /// </summary>
         public CookieAuthenticationOptions()
         {
-            AuthenticationScheme = CookieAuthenticationDefaults.AuthenticationScheme;
-            AutomaticAuthenticate = true;
             ReturnUrlParameter = CookieAuthenticationDefaults.ReturnUrlParameter;
             ExpireTimeSpan = TimeSpan.FromDays(14);
             SlidingExpiration = true;
             CookieHttpOnly = true;
             CookieSecure = CookieSecurePolicy.SameAsRequest;
-            SystemClock = new SystemClock();
             Events = new CookieAuthenticationEvents();
         }
 
@@ -128,7 +121,11 @@ namespace Microsoft.AspNetCore.Builder
         /// calls methods on the provider which give the application control at certain points where processing is occurring. 
         /// If it is not provided a default instance is supplied which does nothing when the methods are called.
         /// </summary>
-        public ICookieAuthenticationEvents Events { get; set; }
+        public new CookieAuthenticationEvents Events
+        {
+            get { return (CookieAuthenticationEvents)base.Events; }
+            set { base.Events = value; }
+        }
 
         /// <summary>
         /// The TicketDataFormat is used to protect and unprotect the identity and other properties which are stored in the
@@ -150,13 +147,5 @@ namespace Microsoft.AspNetCore.Builder
         /// to the client. This can be used to mitigate potential problems with very large identities.
         /// </summary>
         public ITicketStore SessionStore { get; set; }
-
-        CookieAuthenticationOptions IOptions<CookieAuthenticationOptions>.Value
-        {
-            get
-            {
-                return this;
-            }
-        }
     }
 }

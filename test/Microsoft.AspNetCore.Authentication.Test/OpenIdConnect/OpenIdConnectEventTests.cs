@@ -1093,8 +1093,8 @@ namespace Microsoft.AspNetCore.Authentication.Test.OpenIdConnect
                     };
 
                     context.Ticket = new AuthenticationTicket(
-                        new ClaimsPrincipal(new ClaimsIdentity(claims, context.Options.AuthenticationScheme)),
-                        new AuthenticationProperties(), context.Options.AuthenticationScheme);
+                        new ClaimsPrincipal(new ClaimsIdentity(claims, context.Scheme.Name)),
+                        new AuthenticationProperties(), context.Scheme.Name);
 
                     context.HandleResponse();
                     return Task.FromResult(0);
@@ -1408,27 +1408,27 @@ namespace Microsoft.AspNetCore.Authentication.Test.OpenIdConnect
             var builder = new WebHostBuilder()
                 .ConfigureServices(services =>
                 {
-                    services.AddAuthentication();
-                })
-                .Configure(app =>
-                {
-                    app.UseCookieAuthentication();
-                    app.UseOpenIdConnectAuthentication(new OpenIdConnectOptions()
+                    services.AddCookieAuthentication();
+                    services.AddOpenIdConnectAuthentication(o =>
                     {
-                        Events = events,
-                        SignInScheme = CookieAuthenticationDefaults.AuthenticationScheme,
-                        ClientId = "ClientId",
-                        GetClaimsFromUserInfoEndpoint = true,
-                        Configuration = new OpenIdConnectConfiguration()
+                        o.Events = events;
+                        o.SignInScheme = CookieAuthenticationDefaults.AuthenticationScheme;
+                        o.ClientId = "ClientId";
+                        o.GetClaimsFromUserInfoEndpoint = true;
+                        o.Configuration = new OpenIdConnectConfiguration()
                         {
                             TokenEndpoint = "http://testhost/tokens",
                             UserInfoEndpoint = "http://testhost/user",
-                        },
-                        StateDataFormat = new TestStateDataFormat(),
-                        SecurityTokenValidator = new TestTokenValidator(),
-                        ProtocolValidator = new TestProtocolValidator(),
-                        BackchannelHttpHandler = new TestBackchannel(),
+                        };
+                        o.StateDataFormat = new TestStateDataFormat();
+                        o.SecurityTokenValidator = new TestTokenValidator();
+                        o.ProtocolValidator = new TestProtocolValidator();
+                        o.BackchannelHttpHandler = new TestBackchannel();
                     });
+                })
+                .Configure(app =>
+                {
+                    app.UseAuthentication();
                     app.Run(appCode);
                 });
 

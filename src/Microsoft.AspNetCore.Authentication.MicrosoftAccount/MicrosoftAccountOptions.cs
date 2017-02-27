@@ -2,12 +2,12 @@
 // Licensed under the Apache License, Version 2.0. See License.txt in the project root for license information.
 
 using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Authentication.MicrosoftAccount;
+using Microsoft.AspNetCore.Authentication.OAuth;
 
-namespace Microsoft.AspNetCore.Builder
+namespace Microsoft.AspNetCore.Authentication.MicrosoftAccount
 {
     /// <summary>
-    /// Configuration options for <see cref="MicrosoftAccountMiddleware"/>.
+    /// Configuration options for <see cref="MicrosoftAccountHandler"/>.
     /// </summary>
     public class MicrosoftAccountOptions : OAuthOptions
     {
@@ -16,8 +16,6 @@ namespace Microsoft.AspNetCore.Builder
         /// </summary>
         public MicrosoftAccountOptions()
         {
-            AuthenticationScheme = MicrosoftAccountDefaults.AuthenticationScheme;
-            DisplayName = AuthenticationScheme;
             CallbackPath = new PathString("/signin-microsoft");
             AuthorizationEndpoint = MicrosoftAccountDefaults.AuthorizationEndpoint;
             TokenEndpoint = MicrosoftAccountDefaults.TokenEndpoint;

@@ -4,29 +4,19 @@
 using System;
 using System.Collections.Generic;
 using System.IdentityModel.Tokens.Jwt;
-using Microsoft.AspNetCore.Authentication;
-using Microsoft.AspNetCore.Authentication.OpenIdConnect;
+using Microsoft.AspNetCore.DataProtection;
 using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Http.Authentication;
 using Microsoft.IdentityModel.Protocols;
 using Microsoft.IdentityModel.Protocols.OpenIdConnect;
 using Microsoft.IdentityModel.Tokens;
 
-namespace Microsoft.AspNetCore.Builder
+namespace Microsoft.AspNetCore.Authentication.OpenIdConnect
 {
     /// <summary>
-    /// Configuration options for <see cref="OpenIdConnectMiddleware"/>
+    /// Configuration options for <see cref="OpenIdConnectHandler"/>
     /// </summary>
     public class OpenIdConnectOptions : RemoteAuthenticationOptions
     {
-        /// <summary>
-        /// Initializes a new <see cref="OpenIdConnectOptions"/>
-        /// </summary>
-        public OpenIdConnectOptions()
-            : this(OpenIdConnectDefaults.AuthenticationScheme)
-        {
-        }
-
         /// <summary>
         /// Initializes a new <see cref="OpenIdConnectOptions"/>
         /// </summary>
@@ -42,11 +32,8 @@ namespace Microsoft.AspNetCore.Builder
         /// <para>TokenValidationParameters: new <see cref="TokenValidationParameters"/> with AuthenticationScheme = authenticationScheme.</para>
         /// <para>UseTokenLifetime: false.</para>
         /// </remarks>
-        /// <param name="authenticationScheme"> will be used to when creating the <see cref="System.Security.Claims.ClaimsIdentity"/> for the AuthenticationScheme property.</param>
-        public OpenIdConnectOptions(string authenticationScheme)
+        public OpenIdConnectOptions()
         {
-            AuthenticationScheme = authenticationScheme;
-            AutomaticChallenge = true;
             DisplayName = OpenIdConnectDefaults.Caption;
             CallbackPath = new PathString("/signin-oidc");
             SignedOutCallbackPath = new PathString("/signout-callback-oidc");
@@ -55,6 +42,24 @@ namespace Microsoft.AspNetCore.Builder
             Events = new OpenIdConnectEvents();
             Scope.Add("openid");
             Scope.Add("profile");
+        }
+
+        /// <summary>
+        /// Check that the options are valid.  Should throw an exception if things are not ok.
+        /// </summary>
+        public override void Validate()
+        {
+            base.Validate();
+
+            if (string.IsNullOrEmpty(ClientId))
+            {
+                throw new ArgumentException("Options.ClientId must be provided", nameof(ClientId));
+            }
+
+            if (!CallbackPath.HasValue)
+            {
+                throw new ArgumentException("Options.CallbackPath must be provided.", nameof(CallbackPath));
+            }
         }
 
         /// <summary>
@@ -102,11 +107,11 @@ namespace Microsoft.AspNetCore.Builder
         public string MetadataAddress { get; set; }
 
         /// <summary>
-        /// Gets or sets the <see cref="IOpenIdConnectEvents"/> to notify when processing OpenIdConnect messages.
+        /// Gets or sets the <see cref="OpenIdConnectEvents"/> to notify when processing OpenIdConnect messages.
         /// </summary>
-        public new IOpenIdConnectEvents Events
+        public new OpenIdConnectEvents Events
         {
-            get { return (IOpenIdConnectEvents)base.Events; }
+            get { return (OpenIdConnectEvents)base.Events; }
             set { base.Events = value; }
         }
 
@@ -179,6 +184,7 @@ namespace Microsoft.AspNetCore.Builder
         /// Gets or sets the type used to secure data handled by the middleware.
         /// </summary>
         public ISecureDataFormat<AuthenticationProperties> StateDataFormat { get; set; }
+        public IDataProtectionProvider DataProtectionProvider { get; internal set; }
 
         /// <summary>
         /// Gets or sets the type used to secure strings used by the middleware.

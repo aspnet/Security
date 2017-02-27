@@ -2,9 +2,7 @@
 // Licensed under the Apache License, Version 2.0. See License.txt in the project root for license information.
 
 using System.Security.Claims;
-using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Http.Authentication;
 using Newtonsoft.Json.Linq;
 
 namespace Microsoft.AspNetCore.Authentication.Twitter
@@ -18,21 +16,25 @@ namespace Microsoft.AspNetCore.Authentication.Twitter
         /// Initializes a <see cref="TwitterCreatingTicketContext"/>
         /// </summary>
         /// <param name="context">The HTTP environment</param>
+        /// <param name="scheme">The scheme data</param>
         /// <param name="options">The options for Twitter</param>
         /// <param name="userId">Twitter user ID</param>
         /// <param name="screenName">Twitter screen name</param>
         /// <param name="accessToken">Twitter access token</param>
         /// <param name="accessTokenSecret">Twitter access token secret</param>
         /// <param name="user">User details</param>
+        /// <param name="properties">AuthenticationProperties.</param>
         public TwitterCreatingTicketContext(
             HttpContext context,
+            AuthenticationScheme scheme,
             TwitterOptions options,
+            AuthenticationProperties properties,
             string userId,
             string screenName,
             string accessToken,
             string accessTokenSecret,
             JObject user)
-            : base(context, options)
+            : base(context, scheme, options, properties)
         {
             UserId = userId;
             ScreenName = screenName;
@@ -71,10 +73,5 @@ namespace Microsoft.AspNetCore.Authentication.Twitter
         /// Gets the <see cref="ClaimsPrincipal"/> representing the user
         /// </summary>
         public ClaimsPrincipal Principal { get; set; }
-
-        /// <summary>
-        /// Gets or sets a property bag for common authentication properties
-        /// </summary>
-        public AuthenticationProperties Properties { get; set; }
     }
 }

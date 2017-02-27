@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
@@ -42,7 +43,28 @@ namespace JwtBearerSample
         // For more information on how to configure your application, visit http://go.microsoft.com/fwlink/?LinkID=398940
         public void ConfigureServices(IServiceCollection services)
         {
-            services.AddAuthentication();
+            services.AddJwtBearerAuthentication(o =>
+            {
+                // You also need to update /wwwroot/app/scripts/app.js
+                o.Authority = Configuration["jwt:authority"];
+                o.Audience = Configuration["jwt:audience"];
+                o.Events = new JwtBearerEvents()
+                {
+                    OnAuthenticationFailed = c =>
+                    {
+                        c.HandleResponse();
+
+                        c.Response.StatusCode = 500;
+                        c.Response.ContentType = "text/plain";
+                        if (Environment.IsDevelopment())
+                        {
+                            // Debug only, in production do not share exceptions with the remote host.
+                            return c.Response.WriteAsync(c.Exception.ToString());
+                        }
+                        return c.Response.WriteAsync("An error occurred processing your authentication.");
+                    }
+                };
+            });
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -69,44 +91,22 @@ namespace JwtBearerSample
             app.UseDefaultFiles();
             app.UseStaticFiles();
 
-            app.UseJwtBearerAuthentication(new JwtBearerOptions
-            {
-                // You also need to update /wwwroot/app/scripts/app.js
-                Authority = Configuration["jwt:authority"],
-                Audience = Configuration["jwt:audience"],
-                Events = new JwtBearerEvents()
-                {
-                    OnAuthenticationFailed = c =>
-                    {
-                        c.HandleResponse();
-
-                        c.Response.StatusCode = 500;
-                        c.Response.ContentType = "text/plain";
-                        if (Environment.IsDevelopment())
-                        {
-                            // Debug only, in production do not share exceptions with the remote host.
-                            return c.Response.WriteAsync(c.Exception.ToString());
-                        }
-                        return c.Response.WriteAsync("An error occurred processing your authentication.");
-                    }
-                }
-            });
+            app.UseAuthentication();
 
             // [Authorize] would usually handle this
             app.Use(async (context, next) =>
             {
-                // Use this if options.AutomaticAuthenticate = false
+                // Use this if there are multiple authentication schemes
                 // var user = await context.Authentication.AuthenticateAsync(JwtBearerDefaults.AuthenticationScheme);
 
-                var user = context.User; // We can do this because of  options.AutomaticAuthenticate = true;
+                var user = context.User; // We can do this because of there's only a single authentication scheme
                 if (user?.Identity?.IsAuthenticated ?? false)
                 {
                     await next();
                 }
                 else
                 {
-                    // We can do this because of options.AutomaticChallenge = true;
-                    await context.Authentication.ChallengeAsync();
+                    await context.ChallengeAsync(JwtBearerDefaults.AuthenticationScheme);
                 }
             });
 
