@@ -9,6 +9,7 @@ namespace Microsoft.AspNetCore.Authentication
 {
     public interface IAuthenticationSchemeProvider
     {
+        Task<IEnumerable<AuthenticationScheme>> GetAllSchemesAsync();
         Task<AuthenticationScheme> GetSchemeAsync(string name);
         Task<AuthenticationScheme> GetDefaultAuthenticateSchemeAsync();
         Task<AuthenticationScheme> GetDefaultChallengeSchemeAsync();
