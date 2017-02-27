@@ -222,17 +222,12 @@ namespace Microsoft.AspNetCore.Authentication{
         /// specifically known paths it must override this virtual, compare the request path to it's known paths,
         /// provide any response information as appropriate, and true to stop further processing.
         /// </summary>
-        /// <returns>Returning Continue will cause the common code to call the next middleware in line. Returning Handled will
+        /// <returns>Returning false will cause the common code to call the next middleware in line. Returning true will
         /// cause the common code to begin the async completion journey without calling the rest of the middleware
         /// pipeline.</returns>
-        public virtual Task<AuthenticationRequestStatus> HandleRequestAsync()
+        public virtual Task<bool> HandleRequestAsync()
         {
-            // TODO: review
-            //if (InitializeResult?.Handled == true)
-            //{
-            //    return Task.FromResult(true);
-            //}
-            return Task.FromResult(AuthenticationRequestStatus.Skip);
+            return Task.FromResult(false);
         }
     }
 }

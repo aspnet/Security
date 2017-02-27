@@ -86,10 +86,10 @@ namespace Microsoft.AspNetCore.Authentication
                 throw new NotImplementedException();
             }
 
-            public Task<AuthenticationRequestStatus> HandleRequestAsync()
+            public Task<bool> HandleRequestAsync()
             {
                 _context.Response.StatusCode = _code;
-                return Task.FromResult(AuthenticationRequestStatus.Handle);
+                return Task.FromResult(true);
             }
 
             public Task InitializeAsync(AuthenticationScheme scheme, HttpContext context)
@@ -123,7 +123,7 @@ namespace Microsoft.AspNetCore.Authentication
                 throw new NotImplementedException();
             }
 
-            public Task<AuthenticationRequestStatus> HandleRequestAsync()
+            public Task<bool> HandleRequestAsync()
             {
                 throw new NotImplementedException();
             }
@@ -159,9 +159,9 @@ namespace Microsoft.AspNetCore.Authentication
                 throw new NotImplementedException();
             }
 
-            public Task<AuthenticationRequestStatus> HandleRequestAsync()
+            public Task<bool> HandleRequestAsync()
             {
-                return Task.FromResult(AuthenticationRequestStatus.Skip);
+                return Task.FromResult(false);
             }
 
             public Task InitializeAsync(AuthenticationScheme scheme, HttpContext context)

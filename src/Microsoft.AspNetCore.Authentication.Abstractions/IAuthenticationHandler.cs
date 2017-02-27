@@ -9,6 +9,7 @@ namespace Microsoft.AspNetCore.Authentication
     // Created on a per request basis to handle one particular scheme.
     public interface IAuthenticationHandler
     {
+        // Review: we could consider removing context, since every method has a context object now
         // Gives the handler access to the configuration data
         Task InitializeAsync(AuthenticationScheme scheme, HttpContext context);
 
@@ -17,24 +18,10 @@ namespace Microsoft.AspNetCore.Authentication
         Task SignInAsync(SignInContext context);
         Task SignOutAsync(SignOutContext context);
 
-        // Task<bool>
-        Task<AuthenticationRequestStatus> HandleRequestAsync();
-    }
-
-    // REVIEW: Name?  Or just return to a bool for Skip/Handled
-    public class AuthenticationRequestStatus
-    {
         /// <summary>
-        /// If true the request is handled and middleware execution should stop.
+        /// Returns true if request processing should stop.
         /// </summary>
-        public bool Handled { get; private set; }
-
-        /// <summary>
-        /// If true, skip this handler, and go to the next
-        /// </summary>
-        public bool Skipped { get; private set; }
-
-        public static AuthenticationRequestStatus Skip = new AuthenticationRequestStatus { Skipped = true };
-        public static AuthenticationRequestStatus Handle = new AuthenticationRequestStatus { Handled = true };
+        /// <returns></returns>
+        Task<bool> HandleRequestAsync();
     }
 }
