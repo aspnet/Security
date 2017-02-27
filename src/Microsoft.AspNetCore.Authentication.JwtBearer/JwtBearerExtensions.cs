@@ -12,6 +12,6 @@ namespace Microsoft.Extensions.DependencyInjection
             services.AddJwtBearerAuthentication(JwtBearerDefaults.AuthenticationScheme, configureOptions);
 
         public static IServiceCollection AddJwtBearerAuthentication(this IServiceCollection services, string authenticationScheme, Action<JwtBearerOptions> configureOptions) =>
-            services.AddScheme<JwtBearerOptions, JwtBearerHandler>(authenticationScheme, configureOptions, canHandleRequests: false);
+            services.AddScheme<JwtBearerOptions, JwtBearerHandler>(authenticationScheme, configureOptions);
     }
 }

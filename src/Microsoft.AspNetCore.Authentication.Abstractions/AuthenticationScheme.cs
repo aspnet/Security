@@ -3,13 +3,15 @@
 
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Reflection;
+using Microsoft.AspNetCore.Http;
 
 namespace Microsoft.AspNetCore.Authentication
 {
     public class AuthenticationScheme
     {
-        public AuthenticationScheme(string name, Type handlerType, bool canHandleRequests, IReadOnlyDictionary<string, object> settings)
+        public AuthenticationScheme(string name, Type handlerType, IEnumerable<PathString> callbackPaths, IReadOnlyDictionary<string, object> settings)
         {
             Name = name ?? throw new ArgumentNullException(nameof(name));
             if (!typeof(IAuthenticationHandler).IsAssignableFrom(handlerType))
@@ -18,7 +20,7 @@ namespace Microsoft.AspNetCore.Authentication
             }
             HandlerType = handlerType ?? throw new ArgumentNullException(nameof(handlerType));
             Settings = settings ?? throw new ArgumentNullException(nameof(settings));
-            CanHandleRequests = canHandleRequests;
+            CallbackPaths = callbackPaths ?? Enumerable.Empty<PathString>();
         }
 
         public string Name { get; }
@@ -27,7 +29,7 @@ namespace Microsoft.AspNetCore.Authentication
         /// <summary>
         /// If true, the AuthenticationMiddleware will call the handler's HandleRequestAsync method.
         /// </summary>
-        public bool CanHandleRequests { get; }
+        public IEnumerable<PathString> CallbackPaths { get; }
 
         // Holds things like the configured options instances for the handler
         // Also replacement for AuthenticationDescription

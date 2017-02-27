@@ -3,6 +3,7 @@
 
 using System;
 using Microsoft.AspNetCore.Authentication.MicrosoftAccount;
+using Microsoft.AspNetCore.Http;
 
 namespace Microsoft.Extensions.DependencyInjection
 {
@@ -12,6 +13,6 @@ namespace Microsoft.Extensions.DependencyInjection
             services.AddMicrosoftAccountAuthentication(MicrosoftAccountDefaults.AuthenticationScheme, configureOptions);
 
         public static IServiceCollection AddMicrosoftAccountAuthentication(this IServiceCollection services, string authenticationScheme, Action<MicrosoftAccountOptions> configureOptions) =>
-            services.AddScheme<MicrosoftAccountOptions, MicrosoftAccountHandler>(authenticationScheme, configureOptions, canHandleRequests: true);
+            services.AddRemoteScheme<MicrosoftAccountOptions, MicrosoftAccountHandler>(authenticationScheme, configureOptions, o => new PathString[] { o.CallbackPath });
     }
 }
