@@ -218,16 +218,17 @@ namespace Microsoft.AspNetCore.Authentication{
         }
 
         /// <summary>
-        /// Called once by common code after initialization. If an authentication middleware responds directly to
-        /// specifically known paths it must override this virtual, compare the request path to it's known paths,
-        /// provide any response information as appropriate, and true to stop further processing.
+        /// If the request path matches one of the scheme's callback paths, this method
+        /// will be called to provide any response information as appropriate.
+        /// 
+        /// It should return true to stop further processing.
         /// </summary>
         /// <returns>Returning false will cause the common code to call the next middleware in line. Returning true will
         /// cause the common code to begin the async completion journey without calling the rest of the middleware
         /// pipeline.</returns>
         public virtual Task<bool> HandleRequestAsync()
         {
-            return Task.FromResult(false);
+            throw new NotImplementedException();
         }
     }
 }
