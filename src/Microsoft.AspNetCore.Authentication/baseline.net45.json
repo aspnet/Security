@@ -2474,7 +2474,7 @@
         },
         {
           "Kind": "Method",
-          "Name": "SkipToNextMiddleware",
+          "Name": "StopProcessing",
           "Parameters": [],
           "ReturnType": "System.Void",
           "Visibility": "Public",

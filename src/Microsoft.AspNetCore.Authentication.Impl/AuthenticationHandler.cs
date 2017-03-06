@@ -201,7 +201,7 @@ namespace Microsoft.AspNetCore.Authentication{
                 case ChallengeBehavior.Automatic:
                     // If there is a principal already, invoke the forbidden code path
                     var result = await HandleAuthenticateOnceSafeAsync();
-                    if (result?.Ticket?.Principal != null)
+                    if (result?.Principal != null)
                     {
                         goto case ChallengeBehavior.Forbidden;
                     }
