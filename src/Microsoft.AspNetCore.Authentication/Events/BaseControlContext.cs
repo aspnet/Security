@@ -37,7 +37,7 @@ namespace Microsoft.AspNetCore.Authentication
         /// Discontinue processing the request in the current middleware and pass control to the next one.
         /// SignIn will not be called.
         /// </summary>
-        public void SkipToNextMiddleware()
+        public void StopProcessing()
         {
             State = EventResultState.Skipped;
         }

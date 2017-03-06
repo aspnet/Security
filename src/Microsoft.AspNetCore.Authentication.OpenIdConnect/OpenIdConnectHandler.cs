@@ -204,7 +204,7 @@ namespace Microsoft.AspNetCore.Authentication.OpenIdConnect
                 Logger.RemoteSignOutHandledResponse();
                 return true;
             }
-            if (remoteSignOutContext.Skipped)
+            if (remoteSignOutContext.Stopped)
             {
                 Logger.RemoteSignOutSkipped();
                 return false;
@@ -293,7 +293,7 @@ namespace Microsoft.AspNetCore.Authentication.OpenIdConnect
                 Logger.RedirectToIdentityProviderForSignOutHandledResponse();
                 return;
             }
-            else if (redirectContext.Skipped)
+            else if (redirectContext.Stopped)
             {
                 Logger.RedirectToIdentityProviderForSignOutSkipped();
                 return;
@@ -443,7 +443,7 @@ namespace Microsoft.AspNetCore.Authentication.OpenIdConnect
                 Logger.RedirectToIdentityProviderHandledResponse();
                 return;
             }
-            else if (redirectContext.Skipped)
+            else if (redirectContext.Stopped)
             {
                 Logger.RedirectToIdentityProviderSkipped();
                 return;
@@ -532,7 +532,7 @@ namespace Microsoft.AspNetCore.Authentication.OpenIdConnect
                     if (Options.SkipUnrecognizedRequests)
                     {
                         // Not for us?
-                        return AuthenticateResult.Skip();
+                        return AuthenticateResult.None();
                     }
                     return AuthenticateResult.Fail("An OpenID Connect response cannot contain an " +
                             "identity token or an access token when using response_mode=query");
@@ -554,7 +554,7 @@ namespace Microsoft.AspNetCore.Authentication.OpenIdConnect
                 if (Options.SkipUnrecognizedRequests)
                 {
                     // Not for us?
-                    return AuthenticateResult.Skip();
+                    return AuthenticateResult.None();
                 }
                 return AuthenticateResult.Fail("No message.");
             }
@@ -570,7 +570,7 @@ namespace Microsoft.AspNetCore.Authentication.OpenIdConnect
                 }
 
                 var messageReceivedContext = await RunMessageReceivedEventAsync(authorizationResponse, properties);
-                if (messageReceivedContext.CheckEventResult(out result))
+                if (messageReceivedContext.ProcessingCompleted(out result))
                 {
                     return result;
                 }
@@ -586,7 +586,7 @@ namespace Microsoft.AspNetCore.Authentication.OpenIdConnect
                         Logger.NullOrEmptyAuthorizationResponseState();
                         if (Options.SkipUnrecognizedRequests)
                         {
-                            return AuthenticateResult.Skip();
+                            return AuthenticateResult.None();
                         }
                         return AuthenticateResult.Fail(Resources.MessageStateIsNullOrEmpty);
                     }
@@ -601,7 +601,7 @@ namespace Microsoft.AspNetCore.Authentication.OpenIdConnect
                     if (Options.SkipUnrecognizedRequests)
                     {
                         // Not for us?
-                        return AuthenticateResult.Skip();
+                        return AuthenticateResult.None();
                     }
                     return AuthenticateResult.Fail(Resources.MessageStateIsInvalid);
                 }
@@ -647,7 +647,7 @@ namespace Microsoft.AspNetCore.Authentication.OpenIdConnect
                     }
 
                     var tokenValidatedContext = await RunTokenValidatedEventAsync(authorizationResponse, null, properties, ticket, jwt, nonce);
-                    if (tokenValidatedContext.CheckEventResult(out result))
+                    if (tokenValidatedContext.ProcessingCompleted(out result))
                     {
                         return result;
                     }
@@ -672,7 +672,7 @@ namespace Microsoft.AspNetCore.Authentication.OpenIdConnect
                 if (!string.IsNullOrEmpty(authorizationResponse.Code))
                 {
                     var authorizationCodeReceivedContext = await RunAuthorizationCodeReceivedEventAsync(authorizationResponse, properties, ticket, jwt);
-                    if (authorizationCodeReceivedContext.CheckEventResult(out result))
+                    if (authorizationCodeReceivedContext.ProcessingCompleted(out result))
                     {
                         return result;
                     }
@@ -690,7 +690,7 @@ namespace Microsoft.AspNetCore.Authentication.OpenIdConnect
                     }
 
                     var tokenResponseReceivedContext = await RunTokenResponseReceivedEventAsync(authorizationResponse, tokenEndpointResponse, properties, ticket);
-                    if (tokenResponseReceivedContext.CheckEventResult(out result))
+                    if (tokenResponseReceivedContext.ProcessingCompleted(out result))
                     {
                         return result;
                     }
@@ -717,7 +717,7 @@ namespace Microsoft.AspNetCore.Authentication.OpenIdConnect
                         }
 
                         var tokenValidatedContext = await RunTokenValidatedEventAsync(authorizationResponse, tokenEndpointResponse, properties, tokenEndpointTicket, tokenEndpointJwt, nonce);
-                        if (tokenValidatedContext.CheckEventResult(out result))
+                        if (tokenValidatedContext.ProcessingCompleted(out result))
                         {
                             return result;
                         }
@@ -786,7 +786,7 @@ namespace Microsoft.AspNetCore.Authentication.OpenIdConnect
                 }
 
                 var authenticationFailedContext = await RunAuthenticationFailedEventAsync(authorizationResponse, exception);
-                if (authenticationFailedContext.CheckEventResult(out result))
+                if (authenticationFailedContext.ProcessingCompleted(out result))
                 {
                     return result;
                 }
@@ -901,7 +901,7 @@ namespace Microsoft.AspNetCore.Authentication.OpenIdConnect
 
             var userInformationReceivedContext = await RunUserInformationReceivedEventAsync(ticket, message, user);
             AuthenticateResult result;
-            if (userInformationReceivedContext.CheckEventResult(out result))
+            if (userInformationReceivedContext.ProcessingCompleted(out result))
             {
                 return result;
             }
@@ -1079,7 +1079,7 @@ namespace Microsoft.AspNetCore.Authentication.OpenIdConnect
             {
                 Logger.MessageReceivedContextHandledResponse();
             }
-            else if (messageReceivedContext.Skipped)
+            else if (messageReceivedContext.Stopped)
             {
                 Logger.MessageReceivedContextSkipped();
             }
@@ -1104,7 +1104,7 @@ namespace Microsoft.AspNetCore.Authentication.OpenIdConnect
             {
                 Logger.TokenValidatedHandledResponse();
             }
-            else if (tokenValidatedContext.Skipped)
+            else if (tokenValidatedContext.Stopped)
             {
                 Logger.TokenValidatedSkipped();
             }
@@ -1141,7 +1141,7 @@ namespace Microsoft.AspNetCore.Authentication.OpenIdConnect
             {
                 Logger.AuthorizationCodeReceivedContextHandledResponse();
             }
-            else if (authorizationCodeReceivedContext.Skipped)
+            else if (authorizationCodeReceivedContext.Stopped)
             {
                 Logger.AuthorizationCodeReceivedContextSkipped();
             }
@@ -1168,7 +1168,7 @@ namespace Microsoft.AspNetCore.Authentication.OpenIdConnect
             {
                 Logger.TokenResponseReceivedHandledResponse();
             }
-            else if (eventContext.Skipped)
+            else if (eventContext.Stopped)
             {
                 Logger.TokenResponseReceivedSkipped();
             }
@@ -1192,7 +1192,7 @@ namespace Microsoft.AspNetCore.Authentication.OpenIdConnect
             {
                 Logger.UserInformationReceivedHandledResponse();
             }
-            else if (userInformationReceivedContext.Skipped)
+            else if (userInformationReceivedContext.Stopped)
             {
                 Logger.UserInformationReceivedSkipped();
             }
@@ -1213,7 +1213,7 @@ namespace Microsoft.AspNetCore.Authentication.OpenIdConnect
             {
                 Logger.AuthenticationFailedContextHandledResponse();
             }
-            else if (authenticationFailedContext.Skipped)
+            else if (authenticationFailedContext.Stopped)
             {
                 Logger.AuthenticationFailedContextSkipped();
             }
