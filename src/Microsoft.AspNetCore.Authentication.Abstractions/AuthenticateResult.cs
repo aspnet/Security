@@ -53,9 +53,9 @@ namespace Microsoft.AspNetCore.Authentication
         public bool Handled { get; private set; }
 
         /// <summary>
-        /// Indicates that this stage of authentication was skipped by user intervention.
+        /// Indicates that there was no information returned for this authentication scheme.
         /// </summary>
-        public bool Skipped { get; private set; }
+        public bool Nothing { get; private set; }
 
         public static AuthenticateResult Success(AuthenticationTicket ticket)
         {
@@ -71,9 +71,9 @@ namespace Microsoft.AspNetCore.Authentication
             return new AuthenticateResult() { Handled = true };
         }
 
-        public static AuthenticateResult Skip()
+        public static AuthenticateResult None()
         {
-            return new AuthenticateResult() { Skipped = true };
+            return new AuthenticateResult() { Nothing = true };
         }
 
         public static AuthenticateResult Fail(Exception failure)
