@@ -18,9 +18,9 @@ namespace Microsoft.AspNetCore.Authentication
             get { return State == EventResultState.HandledResponse; }
         }
 
-        public bool Stopped
+        public bool Skipped
         {
-            get { return State == EventResultState.StopProcessing; }
+            get { return State == EventResultState.Skipped; }
         }
 
         /// <summary>
@@ -34,12 +34,12 @@ namespace Microsoft.AspNetCore.Authentication
         }
 
         /// <summary>
-        /// Discontinue processing the request in the current middleware and pass control to the next one.
+        /// Discontinue processing the request in the current handler.
         /// SignIn will not be called.
         /// </summary>
-        public void StopProcessing()
+        public void Skip()
         {
-            State = EventResultState.StopProcessing;
+            State = EventResultState.Skipped;
         }
 
         /// <summary>
@@ -47,6 +47,11 @@ namespace Microsoft.AspNetCore.Authentication
         /// </summary>
         public AuthenticationTicket Ticket { get; set; }
 
+        /// <summary>
+        /// Returns true if the handler should be done processing.
+        /// </summary>
+        /// <param name="result">The result.</param>
+        /// <returns>Whether the handler should be done processing.</returns>
         public bool ProcessingCompleted(out AuthenticateResult result)
         {
             if (HandledResponse)
@@ -61,7 +66,7 @@ namespace Microsoft.AspNetCore.Authentication
                 }
                 return true;
             }
-            else if (Stopped)
+            else if (Skipped)
             {
                 result = AuthenticateResult.None();
                 return true;
