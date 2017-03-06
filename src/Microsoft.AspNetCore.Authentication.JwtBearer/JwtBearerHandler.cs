@@ -259,7 +259,7 @@ namespace Microsoft.AspNetCore.Authentication.JwtBearer
             }
 
             await Events.Challenge(eventContext);
-            if (eventContext.HandledResponse || eventContext.Stopped)
+            if (eventContext.ProcessingCompleted(out var ignored))
             {
                 return;
             }

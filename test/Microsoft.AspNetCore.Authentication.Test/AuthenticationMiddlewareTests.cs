@@ -24,7 +24,7 @@ namespace Microsoft.AspNetCore.Authentication
                 })
                 .ConfigureServices(services => services.AddAuthentication(o =>
                 {
-                    o.AddScheme("skipped", s =>
+                    o.AddScheme("Skip", s =>
                     {
                         s.HandlerType = typeof(SkipHandler);
                         s.CallbackPaths = new PathString[] { "/" };

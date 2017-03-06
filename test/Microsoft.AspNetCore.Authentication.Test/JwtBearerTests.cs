@@ -394,7 +394,7 @@ namespace Microsoft.AspNetCore.Authentication.JwtBearer
         }
 
         [Fact]
-        public async Task EventOnMessageReceivedSkipped_NoMoreEventsExecuted()
+        public async Task EventOnMessageReceivedSkip_NoMoreEventsExecuted()
         {
             var server = CreateServer(options =>
             {
@@ -402,7 +402,7 @@ namespace Microsoft.AspNetCore.Authentication.JwtBearer
                 {
                     OnMessageReceived = context =>
                     {
-                        context.StopProcessing();
+                        context.Skip();
                         return Task.FromResult(0);
                     },
                     OnTokenValidated = context =>
@@ -459,7 +459,7 @@ namespace Microsoft.AspNetCore.Authentication.JwtBearer
         }
 
         [Fact]
-        public async Task EventOnTokenValidatedSkipped_NoMoreEventsExecuted()
+        public async Task EventOnTokenValidatedSkip_NoMoreEventsExecuted()
         {
             var server = CreateServer(options =>
             {
@@ -467,7 +467,7 @@ namespace Microsoft.AspNetCore.Authentication.JwtBearer
                 {
                     OnTokenValidated = context =>
                     {
-                        context.StopProcessing();
+                        context.Skip();
                         return Task.FromResult(0);
                     },
                     OnAuthenticationFailed = context =>
@@ -520,7 +520,7 @@ namespace Microsoft.AspNetCore.Authentication.JwtBearer
         }
 
         [Fact]
-        public async Task EventOnAuthenticationFailedSkipped_NoMoreEventsExecuted()
+        public async Task EventOnAuthenticationFailedSkip_NoMoreEventsExecuted()
         {
             var server = CreateServer(options =>
             {
@@ -532,7 +532,7 @@ namespace Microsoft.AspNetCore.Authentication.JwtBearer
                     },
                     OnAuthenticationFailed = context =>
                     {
-                        context.StopProcessing();
+                        context.Skip();
                         return Task.FromResult(0);
                     },
                     OnChallenge = context =>
@@ -581,7 +581,7 @@ namespace Microsoft.AspNetCore.Authentication.JwtBearer
         }
 
         [Fact]
-        public async Task EventOnChallengeSkipped_ResponseNotModified()
+        public async Task EventOnChallengeSkip_ResponseNotModified()
         {
             var server = CreateServer(o =>
             {
@@ -589,7 +589,7 @@ namespace Microsoft.AspNetCore.Authentication.JwtBearer
                 {
                     OnChallenge = context =>
                     {
-                        context.StopProcessing();
+                        context.Skip();
                         return Task.FromResult(0);
                     },
                 };

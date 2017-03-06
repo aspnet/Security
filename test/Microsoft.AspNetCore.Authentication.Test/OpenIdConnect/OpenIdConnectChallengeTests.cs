@@ -338,7 +338,7 @@ namespace Microsoft.AspNetCore.Authentication.Tests.OpenIdConnect
                     {
                         OnRedirectToIdentityProvider = context =>
                         {
-                            context.StopProcessing();
+                            context.Skip();
                             return Task.FromResult(0);
                         }
                     };
