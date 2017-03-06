@@ -57,7 +57,7 @@ namespace Microsoft.AspNetCore.Authentication
                 {
                     return true;
                 }
-                else if (authResult.Skipped)
+                else if (authResult.Nothing)
                 {
                     return false;
                 }
@@ -84,7 +84,7 @@ namespace Microsoft.AspNetCore.Authentication
                 {
                     return true;
                 }
-                else if (errorContext.Skipped)
+                else if (errorContext.Stopped)
                 {
                     return false;
                 }
@@ -110,7 +110,7 @@ namespace Microsoft.AspNetCore.Authentication
                 Logger.SigninHandled();
                 return true;
             }
-            else if (ticketContext.Skipped)
+            else if (ticketContext.Stopped)
             {
                 Logger.SigninSkipped();
                 return false;

@@ -37,8 +37,8 @@ namespace Microsoft.AspNetCore.Authentication
             var result = await handler.AuthenticateAsync(context);
             if (result.Succeeded)
             {
-                var transformed = await Transform.TransformAsync(result.Ticket.Principal);
-                return AuthenticateResult.Success(new AuthenticationTicket(transformed, result.Ticket.Properties, result.Ticket.AuthenticationScheme));
+                var transformed = await Transform.TransformAsync(result.Principal);
+                return AuthenticateResult.Success(new AuthenticationTicket(transformed, result.Properties, result.Ticket.AuthenticationScheme));
             }
             return result;
         }

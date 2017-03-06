@@ -2,6 +2,7 @@
 // Licensed under the Apache License, Version 2.0. See License.txt in the project root for license information.
 
 using System;
+using System.Security.Claims;
 
 namespace Microsoft.AspNetCore.Authentication
 {
@@ -27,6 +28,18 @@ namespace Microsoft.AspNetCore.Authentication
         /// The authentication ticket.
         /// </summary>
         public AuthenticationTicket Ticket { get; private set; }
+
+        // REVIEW: should we also remember AuthenticationScheme?
+
+        /// <summary>
+        /// Gets the claims-principal with authenticated user identities.
+        /// </summary>
+        public ClaimsPrincipal Principal => Ticket?.Principal;
+
+        /// <summary>
+        /// Additional state values for the authentication session.
+        /// </summary>
+        public AuthenticationProperties Properties => Ticket?.Properties;
 
         /// <summary>
         /// Holds failure information from the authentication.

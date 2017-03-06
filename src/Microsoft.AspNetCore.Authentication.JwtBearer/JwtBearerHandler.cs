@@ -97,7 +97,7 @@ namespace Microsoft.AspNetCore.Authentication.JwtBearer
 
                 // event can set the token
                 await Events.MessageReceived(messageReceivedContext);
-                if (messageReceivedContext.CheckEventResult(out result))
+                if (messageReceivedContext.ProcessingCompleted(out result))
                 {
                     return result;
                 }
@@ -112,7 +112,7 @@ namespace Microsoft.AspNetCore.Authentication.JwtBearer
                     // If no authorization header found, nothing to process further
                     if (string.IsNullOrEmpty(authorization))
                     {
-                        return AuthenticateResult.Skip();
+                        return AuthenticateResult.None();
                     }
 
                     if (authorization.StartsWith("Bearer ", StringComparison.OrdinalIgnoreCase))
@@ -123,7 +123,7 @@ namespace Microsoft.AspNetCore.Authentication.JwtBearer
                     // If no token found, no further work possible
                     if (string.IsNullOrEmpty(token))
                     {
-                        return AuthenticateResult.Skip();
+                        return AuthenticateResult.None();
                     }
                 }
 
@@ -188,7 +188,7 @@ namespace Microsoft.AspNetCore.Authentication.JwtBearer
                         };
 
                         await Events.TokenValidated(tokenValidatedContext);
-                        if (tokenValidatedContext.CheckEventResult(out result))
+                        if (tokenValidatedContext.ProcessingCompleted(out result))
                         {
                             return result;
                         }
@@ -214,7 +214,7 @@ namespace Microsoft.AspNetCore.Authentication.JwtBearer
                     };
 
                     await Events.AuthenticationFailed(authenticationFailedContext);
-                    if (authenticationFailedContext.CheckEventResult(out result))
+                    if (authenticationFailedContext.ProcessingCompleted(out result))
                     {
                         return result;
                     }
@@ -234,7 +234,7 @@ namespace Microsoft.AspNetCore.Authentication.JwtBearer
                 };
 
                 await Events.AuthenticationFailed(authenticationFailedContext);
-                if (authenticationFailedContext.CheckEventResult(out result))
+                if (authenticationFailedContext.ProcessingCompleted(out result))
                 {
                     return result;
                 }
@@ -259,7 +259,7 @@ namespace Microsoft.AspNetCore.Authentication.JwtBearer
             }
 
             await Events.Challenge(eventContext);
-            if (eventContext.HandledResponse || eventContext.Skipped)
+            if (eventContext.HandledResponse || eventContext.Stopped)
             {
                 return;
             }

@@ -122,7 +122,6 @@ namespace Microsoft.AspNetCore.Authentication
             }
 
             var result = await auth.AuthenticateAsync(context, scheme);
-            return result?.Ticket?.Properties.GetTokenValue(tokenName);
         }
     }
 }

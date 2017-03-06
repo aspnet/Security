@@ -35,9 +35,9 @@ namespace Microsoft.AspNetCore.Authentication
                 if (defaultAuthenticate != null)
                 {
                     var result = await context.AuthenticateAsync(defaultAuthenticate.Name);
-                    if (result?.Ticket?.Principal != null)
+                    if (result?.Principal != null)
                     {
-                        context.User = result.Ticket.Principal;
+                        context.User = result.Principal;
                     }
                 }
 
