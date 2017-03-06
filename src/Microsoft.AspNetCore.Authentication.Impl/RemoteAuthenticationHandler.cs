@@ -84,7 +84,7 @@ namespace Microsoft.AspNetCore.Authentication
                 {
                     return true;
                 }
-                else if (errorContext.Stopped)
+                else if (errorContext.Skipped)
                 {
                     return false;
                 }
@@ -110,7 +110,7 @@ namespace Microsoft.AspNetCore.Authentication
                 Logger.SigninHandled();
                 return true;
             }
-            else if (ticketContext.Stopped)
+            else if (ticketContext.Skipped)
             {
                 Logger.SigninSkipped();
                 return false;
@@ -146,7 +146,7 @@ namespace Microsoft.AspNetCore.Authentication
                     return AuthenticateResult.Fail(result.Failure);
                 }
 
-                // The SignInScheme may be shared with multiple providers, make sure this middleware issued the identity.
+                // The SignInScheme may be shared with multiple providers, make sure this provider issued the identity.
                 string authenticatedScheme;
                 var ticket = result.Ticket;
                 if (ticket != null && ticket.Principal != null && ticket.Properties != null

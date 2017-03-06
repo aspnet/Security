@@ -40,7 +40,7 @@ namespace Microsoft.AspNetCore.Authentication.Test.OpenIdConnect
         private readonly RequestDelegate AppNotImpl = context => { throw new NotImplementedException("App"); };
 
         [Fact]
-        public async Task OnMessageReceived_Skipped_NoMoreEventsRun()
+        public async Task OnMessageReceived_Skip_NoMoreEventsRun()
         {
             var messageReceived = false;
             var server = CreateServer(new OpenIdConnectEvents()
@@ -48,7 +48,7 @@ namespace Microsoft.AspNetCore.Authentication.Test.OpenIdConnect
                 OnMessageReceived = context =>
                 {
                     messageReceived = true;
-                    context.StopProcessing();
+                    context.Skip();
                     return Task.FromResult(0);
                 },
                 OnTokenValidated = TokenNotImpl,
@@ -110,7 +110,7 @@ namespace Microsoft.AspNetCore.Authentication.Test.OpenIdConnect
         }
 
         [Fact]
-        public async Task OnTokenValidated_Skipped_NoMoreEventsRun()
+        public async Task OnTokenValidated_Skip_NoMoreEventsRun()
         {
             var messageReceived = false;
             var tokenValidated = false;
@@ -124,7 +124,7 @@ namespace Microsoft.AspNetCore.Authentication.Test.OpenIdConnect
                 OnTokenValidated = context =>
                 {
                     tokenValidated = true;
-                    context.StopProcessing();
+                    context.Skip();
                     return Task.FromResult(0);
                 },
                 OnAuthorizationCodeReceived = CodeNotImpl,
@@ -242,7 +242,7 @@ namespace Microsoft.AspNetCore.Authentication.Test.OpenIdConnect
         }
 
         [Fact]
-        public async Task OnAuthorizationCodeReceived_Skipped_NoMoreEventsRun()
+        public async Task OnAuthorizationCodeReceived_Skip_NoMoreEventsRun()
         {
             var messageReceived = false;
             var tokenValidated = false;
@@ -262,7 +262,7 @@ namespace Microsoft.AspNetCore.Authentication.Test.OpenIdConnect
                 OnAuthorizationCodeReceived = context =>
                 {
                     codeReceived = true;
-                    context.StopProcessing();
+                    context.Skip();
                     return Task.FromResult(0);
                 },
                 OnTokenResponseReceived = TokenResponseNotImpl,
@@ -391,7 +391,7 @@ namespace Microsoft.AspNetCore.Authentication.Test.OpenIdConnect
         }
 
         [Fact]
-        public async Task OnTokenResponseReceived_Skipped_NoMoreEventsRun()
+        public async Task OnTokenResponseReceived_Skip_NoMoreEventsRun()
         {
             var messageReceived = false;
             var tokenValidated = false;
@@ -417,7 +417,7 @@ namespace Microsoft.AspNetCore.Authentication.Test.OpenIdConnect
                 OnTokenResponseReceived = context =>
                 {
                     tokenResponseReceived = true;
-                    context.StopProcessing();
+                    context.Skip();
                     return Task.FromResult(0);
                 },
                 OnUserInformationReceived = UserNotImpl,
@@ -558,7 +558,7 @@ namespace Microsoft.AspNetCore.Authentication.Test.OpenIdConnect
         }
 
         [Fact]
-        public async Task OnTokenValidatedBackchannel_Skipped_NoMoreEventsRun()
+        public async Task OnTokenValidatedBackchannel_Skip_NoMoreEventsRun()
         {
             var messageReceived = false;
             var codeReceived = false;
@@ -584,7 +584,7 @@ namespace Microsoft.AspNetCore.Authentication.Test.OpenIdConnect
                 OnTokenValidated = context =>
                 {
                     tokenValidated = true;
-                    context.StopProcessing();
+                    context.Skip();
                     return Task.FromResult(0);
                 },
                 OnUserInformationReceived = UserNotImpl,
@@ -725,7 +725,7 @@ namespace Microsoft.AspNetCore.Authentication.Test.OpenIdConnect
         }
 
         [Fact]
-        public async Task OnUserInformationReceived_Skipped_NoMoreEventsRun()
+        public async Task OnUserInformationReceived_Skip_NoMoreEventsRun()
         {
             var messageReceived = false;
             var tokenValidated = false;
@@ -757,7 +757,7 @@ namespace Microsoft.AspNetCore.Authentication.Test.OpenIdConnect
                 OnUserInformationReceived = context =>
                 {
                     userInfoReceived = true;
-                    context.StopProcessing();
+                    context.Skip();
                     return Task.FromResult(0);
                 },
                 OnAuthenticationFailed = FailedNotImpl,
@@ -910,7 +910,7 @@ namespace Microsoft.AspNetCore.Authentication.Test.OpenIdConnect
         }
 
         [Fact]
-        public async Task OnAuthenticationFailed_Skipped_NoMoreEventsRun()
+        public async Task OnAuthenticationFailed_Skip_NoMoreEventsRun()
         {
             var messageReceived = false;
             var tokenValidated = false;
@@ -949,7 +949,7 @@ namespace Microsoft.AspNetCore.Authentication.Test.OpenIdConnect
                 {
                     authFailed = true;
                     Assert.Equal("TestException", context.Exception.Message);
-                    context.StopProcessing();
+                    context.Skip();
                     return Task.FromResult(0);
                 },
                 OnRemoteFailure = FailureNotImpl,
@@ -1128,7 +1128,7 @@ namespace Microsoft.AspNetCore.Authentication.Test.OpenIdConnect
         }
 
         [Fact]
-        public async Task OnRemoteFailure_Skipped_NoMoreEventsRun()
+        public async Task OnRemoteFailure_Skip_NoMoreEventsRun()
         {
             var messageReceived = false;
             var tokenValidated = false;
@@ -1174,7 +1174,7 @@ namespace Microsoft.AspNetCore.Authentication.Test.OpenIdConnect
                 {
                     remoteFailure = true;
                     Assert.Equal("TestException", context.Failure.Message);
-                    context.StopProcessing();
+                    context.Skip();
                     return Task.FromResult(0);
                 },
                 OnTicketReceived = TicketNotImpl,
@@ -1274,7 +1274,7 @@ namespace Microsoft.AspNetCore.Authentication.Test.OpenIdConnect
         }
 
         [Fact]
-        public async Task OnTicketReceived_Skipped_NoMoreEventsRun()
+        public async Task OnTicketReceived_Skip_NoMoreEventsRun()
         {
             var messageReceived = false;
             var tokenValidated = false;
@@ -1314,7 +1314,7 @@ namespace Microsoft.AspNetCore.Authentication.Test.OpenIdConnect
                 OnTicketReceived = context =>
                 {
                     ticektReceived = true;
-                    context.StopProcessing();
+                    context.Skip();
                     return Task.FromResult(0);
                 },
 

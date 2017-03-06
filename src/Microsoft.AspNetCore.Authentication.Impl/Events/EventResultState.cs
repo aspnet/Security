@@ -13,7 +13,7 @@ namespace Microsoft.AspNetCore.Authentication
         /// <summary>
         /// Discontinue processing the request.
         /// </summary>
-        StopProcessing,
+        Skipped,
 
         /// <summary>
         /// Discontinue all processing for this request.
