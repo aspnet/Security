@@ -35,8 +35,8 @@ namespace Microsoft.AspNetCore.Authentication.Test.OpenIdConnect
                     app.UseAuthentication();
                     app.Run(async context =>
                     {
-                        var resolver = context.RequestServices.GetRequiredService<IAuthenticationHandlerResolver>();
-                        var handler = await resolver.ResolveHandlerAsync(context, OpenIdConnectDefaults.AuthenticationScheme) as OpenIdConnectHandler;
+                        var resolver = context.RequestServices.GetRequiredService<IAuthenticationHandlerProvider>();
+                        var handler = await resolver.GetHandlerAsync(context, OpenIdConnectDefaults.AuthenticationScheme) as OpenIdConnectHandler;
                         Assert.Equal($"{TestServerBuilder.DefaultAuthority}/.well-known/openid-configuration", handler.Options.MetadataAddress);
                     });
                 });

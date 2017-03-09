@@ -10,13 +10,13 @@ namespace Microsoft.AspNetCore.Authentication
 {
     public class DefaultAuthenticationService : IAuthenticationService
     {
-        public DefaultAuthenticationService(IAuthenticationHandlerResolver cache, IClaimsTransformation transform)
+        public DefaultAuthenticationService(IAuthenticationHandlerProvider cache, IClaimsTransformation transform)
         {
             Handlers = cache;
             Transform = transform;
         }
 
-        public IAuthenticationHandlerResolver Handlers { get; }
+        public IAuthenticationHandlerProvider Handlers { get; }
 
         public IClaimsTransformation Transform { get; }
 
@@ -27,7 +27,7 @@ namespace Microsoft.AspNetCore.Authentication
                 throw new ArgumentNullException(nameof(authenticationScheme));
             }
 
-            var handler = await Handlers.ResolveHandlerAsync(httpContext, authenticationScheme);
+            var handler = await Handlers.GetHandlerAsync(httpContext, authenticationScheme);
             if (handler == null)
             {
                 throw new InvalidOperationException($"No authentication handler is configured to authenticate for the scheme: {authenticationScheme}");
@@ -50,7 +50,7 @@ namespace Microsoft.AspNetCore.Authentication
                 throw new ArgumentException(nameof(authenticationScheme));
             }
 
-            var handler = await Handlers.ResolveHandlerAsync(httpContext, authenticationScheme);
+            var handler = await Handlers.GetHandlerAsync(httpContext, authenticationScheme);
             if (handler == null)
             {
                 throw new InvalidOperationException($"No authentication handler is configured to handle the scheme: {authenticationScheme}");
@@ -72,7 +72,7 @@ namespace Microsoft.AspNetCore.Authentication
                 throw new ArgumentNullException(nameof(principal));
             }
 
-            var handler = await Handlers.ResolveHandlerAsync(httpContext, authenticationScheme);
+            var handler = await Handlers.GetHandlerAsync(httpContext, authenticationScheme);
             if (handler == null)
             {
                 throw new InvalidOperationException($"No authentication handler is configured to handle the scheme: {authenticationScheme}");
@@ -89,7 +89,7 @@ namespace Microsoft.AspNetCore.Authentication
                 throw new ArgumentException(nameof(authenticationScheme));
             }
 
-            var handler = await Handlers.ResolveHandlerAsync(httpContext, authenticationScheme);
+            var handler = await Handlers.GetHandlerAsync(httpContext, authenticationScheme);
             if (handler == null)
             {
                 throw new InvalidOperationException($"No authentication handler is configured to handle the scheme: {authenticationScheme}");

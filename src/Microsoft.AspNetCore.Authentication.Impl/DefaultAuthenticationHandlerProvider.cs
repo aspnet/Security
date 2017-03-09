@@ -8,9 +8,9 @@ using Microsoft.Extensions.DependencyInjection;
 
 namespace Microsoft.AspNetCore.Authentication
 {
-    public class DefaultAuthenticationHandlerResolver : IAuthenticationHandlerResolver
+    public class DefaultAuthenticationHandlerProvider : IAuthenticationHandlerProvider
     {
-        public DefaultAuthenticationHandlerResolver(IAuthenticationSchemeProvider schemes)
+        public DefaultAuthenticationHandlerProvider(IAuthenticationSchemeProvider schemes)
         {
             Schemes = schemes;
         }
@@ -20,7 +20,7 @@ namespace Microsoft.AspNetCore.Authentication
         // handler instance cache, need to initialize once per request
         private Dictionary<string, IAuthenticationHandler> _handlerMap = new Dictionary<string, IAuthenticationHandler>();
 
-        public async Task<IAuthenticationHandler> ResolveHandlerAsync(HttpContext context, string authenticationScheme)
+        public async Task<IAuthenticationHandler> GetHandlerAsync(HttpContext context, string authenticationScheme)
         {
             if (_handlerMap.ContainsKey(authenticationScheme))
             {
