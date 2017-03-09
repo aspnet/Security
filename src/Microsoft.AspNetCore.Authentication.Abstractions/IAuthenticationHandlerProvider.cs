@@ -7,10 +7,10 @@ using Microsoft.AspNetCore.Http;
 namespace Microsoft.AspNetCore.Authentication
 {
     /// <summary>
-    /// Resolves the proper IAuthenticationHandler instance for the authenticationScheme and request.
+    /// Provides the appropriate IAuthenticationHandler instance for the authenticationScheme and request.
     /// </summary>
-    public interface IAuthenticationHandlerResolver
+    public interface IAuthenticationHandlerProvider
     {
-        Task<IAuthenticationHandler> ResolveHandlerAsync(HttpContext context, string authenticationScheme);
+        Task<IAuthenticationHandler> GetHandlerAsync(HttpContext context, string authenticationScheme);
     }
 }

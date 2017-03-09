@@ -41,11 +41,13 @@ namespace Microsoft.AspNetCore.Authentication
                     }
                 }
 
+                // REVIEW: alternatively could depend on a routing middleware to do this
+
                 // Give each scheme a chance to handle the request if it registered this path
-                var handlers = context.RequestServices.GetRequiredService<IAuthenticationHandlerResolver>();
+                var handlers = context.RequestServices.GetRequiredService<IAuthenticationHandlerProvider>();
                 foreach (var scheme in await Schemes.GetRequestHandlerSchemes(context.Request.Path))
                 {
-                    var handler = await handlers.ResolveHandlerAsync(context, scheme.Name);
+                    var handler = await handlers.GetHandlerAsync(context, scheme.Name);
                     if (await handler.HandleRequestAsync())
                     {
                         return;
