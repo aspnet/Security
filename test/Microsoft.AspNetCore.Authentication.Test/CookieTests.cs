@@ -838,7 +838,7 @@ namespace Microsoft.AspNetCore.Authentication.Cookies
                 .ConfigureServices(services =>
                 {
                     services.AddCookieAuthentication();
-                    services.ConfigureSchemeHandler<CookieAuthenticationOptions>(CookieAuthenticationDefaults.AuthenticationScheme,
+                    services.ConfigureScheme<CookieAuthenticationOptions>(CookieAuthenticationDefaults.AuthenticationScheme,
                         o => o.CookieName = "One");
                 });
             var server = new TestServer(builder);
@@ -861,7 +861,7 @@ namespace Microsoft.AspNetCore.Authentication.Cookies
                 .ConfigureServices(services =>
                 {
                     services.AddCookieAuthentication("Cookie1", new CookieAuthenticationOptions());
-                    services.ConfigureSchemeHandler<CookieAuthenticationOptions>("Cookie1",
+                    services.ConfigureScheme<CookieAuthenticationOptions>("Cookie1",
                         o => o.CookieName = "One");
                 });
             var server = new TestServer(builder);

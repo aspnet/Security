@@ -26,7 +26,7 @@ namespace Microsoft.Extensions.DependencyInjection
             services.AddWebEncoders();
             services.TryAddScoped<IAuthenticationService, DefaultAuthenticationService>();
             services.TryAddSingleton<IClaimsTransformation, DefaultClaimsTransformation>(); // Can be replaced with scoped ones that use DbContext
-            services.TryAddScoped<IAuthenticationHandlerResolver, DefaultAuthenticationHandlerResolver>();
+            services.TryAddScoped<IAuthenticationHandlerProvider, DefaultAuthenticationHandlerProvider>();
             services.TryAddSingleton<IAuthenticationSchemeProvider, DefaultAuthenticationSchemeProvider>();
             return services;
         }
@@ -110,16 +110,7 @@ namespace Microsoft.Extensions.DependencyInjection
             return services;
         }
 
-        // REVIEW: rename to just ConfigureScheme?
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <typeparam name="TOptions"></typeparam>
-        /// <param name="services"></param>
-        /// <param name="authenticationScheme"></param>
-        /// <param name="configureOptions"></param>
-        /// <returns></returns>
-        public static IServiceCollection ConfigureSchemeHandler<TOptions>(this IServiceCollection services, string authenticationScheme, Action<TOptions> configureOptions)
+        public static IServiceCollection ConfigureScheme<TOptions>(this IServiceCollection services, string authenticationScheme, Action<TOptions> configureOptions)
             where TOptions : AuthenticationSchemeOptions, new()
         {
             services.Configure<AuthenticationOptions>(o =>

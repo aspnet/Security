@@ -11,7 +11,7 @@ namespace Microsoft.AspNetCore.Authentication
     public class AuthenticationSchemeOptions
     {
         /// <summary>
-        /// Check that the options are valid.  Should throw an exception if things are not ok.
+        /// Check that the options are valid. Should throw an exception if things are not ok.
         /// </summary>
         public virtual void Validate()
         {
@@ -28,7 +28,7 @@ namespace Microsoft.AspNetCore.Authentication
         public string ClaimsIssuer { get; set; }
 
         /// <summary>
-        /// Instance used for events TODO
+        /// Instance used for events
         /// </summary>
         public object Events { get; set; }
 
