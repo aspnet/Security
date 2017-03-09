@@ -38,6 +38,20 @@ namespace Microsoft.AspNetCore.Authentication.Tests.OpenIdConnect
                 OpenIdConnectParameterNames.RedirectUri);
         }
 
+        [Fact]
+        public async Task AuthorizationRequestDoesNotIncludeTelemetryParametersWhenDisabled()
+        {
+            var settings = new TestSettings(opt => opt.DisableTelemetry = true);
+
+            var server = settings.CreateTestServer();
+            var transaction = await server.SendAsync(ChallengeEndpoint);
+
+            var res = transaction.Response;
+            Assert.Equal(HttpStatusCode.Redirect, res.StatusCode);
+            Assert.DoesNotContain(OpenIdConnectParameterNames.SkuTelemetry, res.Headers.Location.Query);
+            Assert.DoesNotContain(OpenIdConnectParameterNames.VersionTelemetry, res.Headers.Location.Query);
+        }
+
         /*
         Example of a form post
         <body>
@@ -58,7 +72,7 @@ namespace Microsoft.AspNetCore.Authentication.Tests.OpenIdConnect
         </body>
         */
         [Fact]
-        public async Task ChallengeIssueedCorrectlyForFormPost()
+        public async Task ChallengeIssuedCorrectlyForFormPost()
         {
             var settings = new TestSettings(
                 opt => opt.AuthenticationMethod = OpenIdConnectRedirectBehavior.FormPost);
