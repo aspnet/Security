@@ -42,8 +42,8 @@ namespace Microsoft.AspNetCore.Authentication.Twitter
             set { base.Events = value; }
         }
 
-        public TwitterHandler(IOptions<AuthenticationOptions> options, ILoggerFactory logger, UrlEncoder encoder, IDataProtectionProvider dataProtection, ISystemClock clock)
-            : base(options, logger, encoder, clock)
+        public TwitterHandler(IOptions<AuthenticationOptions> sharedOptions, IOptionsFactory<TwitterOptions> options, ILoggerFactory logger, UrlEncoder encoder, IDataProtectionProvider dataProtection, ISystemClock clock)
+            : base(sharedOptions, options, logger, encoder, clock)
         {
             DataProtection = dataProtection;
         }

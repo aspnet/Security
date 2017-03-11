@@ -22,6 +22,7 @@ namespace Microsoft.AspNetCore.Authentication.OAuth
                 app => { },
                 services => services.AddOAuthAuthentication("weeblie", o =>
                 {
+                    o.SignInScheme = "whatever";
                     o.CallbackPath = "/";
                     o.ClientSecret = "whatever";
                     o.TokenEndpoint = "/";
@@ -44,6 +45,7 @@ namespace Microsoft.AspNetCore.Authentication.OAuth
                 app => { },
                 services => services.AddOAuthAuthentication("weeblie", o =>
                 {
+                    o.SignInScheme = "whatever";
                     o.ClientId = "Whatever;";
                     o.CallbackPath = "/";
                     o.TokenEndpoint = "/";

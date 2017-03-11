@@ -26,6 +26,8 @@ namespace Microsoft.AspNetCore.Authentication.OAuth
 
         protected IDataProtectionProvider DataProtection { get; }
 
+        protected ISecureDataFormat<AuthenticationProperties> StateDataFormat { get; }
+
         /// <summary>
         /// The handler calls methods on the events which give the application control at certain points where processing is occurring. 
         /// If it is not provided a default instance is supplied which does nothing when the methods are called.
@@ -36,8 +38,8 @@ namespace Microsoft.AspNetCore.Authentication.OAuth
             set { base.Events = value; }
         }
 
-        public OAuthHandler(IOptions<AuthenticationOptions> options, ILoggerFactory logger, UrlEncoder encoder, IDataProtectionProvider dataProtection, ISystemClock clock)
-            : base(options, logger, encoder, clock)
+        public OAuthHandler(IOptions<AuthenticationOptions> sharedOptions, IOptionsFactory<TOptions> options, ILoggerFactory logger, UrlEncoder encoder, IDataProtectionProvider dataProtection, ISystemClock clock)
+            : base(sharedOptions, options, logger, encoder, clock)
         {
             DataProtection = dataProtection;
         }

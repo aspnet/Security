@@ -277,6 +277,8 @@ public interface IOptionsFactory<out TOptions> where TOptions : class, new()
     /// <typeparam name="TOptions"></typeparam>
     public class ValidateNamedOptions<TOptions> : IValidateNamedOptions<TOptions> where TOptions : class
     {
+        public ValidateNamedOptions() { }
+
         /// <summary>
         /// Constructor.
         /// </summary>
@@ -291,12 +293,12 @@ public interface IOptionsFactory<out TOptions> where TOptions : class, new()
         /// <summary>
         /// The options name.
         /// </summary>
-        public string Name { get; }
+        public string Name { get; set; }
 
         /// <summary>
         /// The configuration action.
         /// </summary>
-        public Action<TOptions> Action { get; }
+        public Action<TOptions> Action { get; set; }
 
         /// <summary>
         /// Invokes the registered validate Action if the name matches.

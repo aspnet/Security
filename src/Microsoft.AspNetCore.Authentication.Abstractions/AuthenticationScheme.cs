@@ -23,6 +23,7 @@ namespace Microsoft.AspNetCore.Authentication
             CallbackPaths = callbackPaths ?? Enumerable.Empty<PathString>();
         }
 
+        // TODO: add display name?
         public string Name { get; }
         public Type HandlerType { get; }
 
