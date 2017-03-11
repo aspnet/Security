@@ -17,8 +17,5 @@ namespace Microsoft.Extensions.DependencyInjection
 
         public static IServiceCollection AddCookieAuthentication(this IServiceCollection services, string authenticationScheme, Action<CookieAuthenticationOptions> configureOptions) =>
             services.AddScheme<CookieAuthenticationOptions, CookieAuthenticationHandler>(authenticationScheme, configureOptions);
-
-        public static IServiceCollection AddCookieAuthentication(this IServiceCollection services, string authenticationScheme, CookieAuthenticationOptions options) =>
-            services.AddScheme<CookieAuthenticationOptions, CookieAuthenticationHandler>(authenticationScheme, options);
     }
 }

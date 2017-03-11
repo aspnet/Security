@@ -16,8 +16,8 @@ namespace Microsoft.AspNetCore.Authentication.MicrosoftAccount
 {
     internal class MicrosoftAccountHandler : OAuthHandler<MicrosoftAccountOptions>
     {
-        public MicrosoftAccountHandler(IOptions<AuthenticationOptions> options, ILoggerFactory logger, UrlEncoder encoder, IDataProtectionProvider dataProtection, ISystemClock clock)
-            : base(options, logger, encoder, dataProtection, clock)
+        public MicrosoftAccountHandler(IOptions<AuthenticationOptions> sharedOptions, IOptionsFactory<MicrosoftAccountOptions> options, ILoggerFactory logger, UrlEncoder encoder, IDataProtectionProvider dataProtection, ISystemClock clock)
+            : base(sharedOptions, options, logger, encoder, dataProtection, clock)
         { }
 
         protected override async Task<AuthenticationTicket> CreateTicketAsync(ClaimsIdentity identity, AuthenticationProperties properties, OAuthTokenResponse tokens)

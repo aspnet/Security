@@ -4,6 +4,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Options;
@@ -31,7 +32,8 @@ namespace Microsoft.AspNetCore.Authentication
 
         private IDictionary<string, AuthenticationScheme> _map = new Dictionary<string, AuthenticationScheme>(); // case sensitive?
 
-        private IDictionary<PathString, List<AuthenticationScheme>> _handlerMap = new Dictionary<PathString, List<AuthenticationScheme>>(); // case sensitive?
+        //private IDictionary<PathString, List<AuthenticationScheme>> _handlerMap = new Dictionary<PathString, List<AuthenticationScheme>>(); // case sensitive?
+        private List<AuthenticationScheme> _requestHandlers = new List<AuthenticationScheme>();
 
         public Task<AuthenticationScheme> GetDefaultAuthenticateSchemeAsync()
         {
@@ -70,12 +72,13 @@ namespace Microsoft.AspNetCore.Authentication
 
         public Task<IEnumerable<AuthenticationScheme>> GetRequestHandlerSchemes(PathString requestPath)
         {
-            if (_handlerMap.ContainsKey(requestPath))
-            {
-                return Task.FromResult<IEnumerable<AuthenticationScheme>>(_handlerMap[requestPath]);
-            }
+            //if (_handlerMap.ContainsKey(requestPath))
+            //{
+            //    return Task.FromResult<IEnumerable<AuthenticationScheme>>(_handlerMap[requestPath]);
+            //}
 
-            return Task.FromResult(Enumerable.Empty<AuthenticationScheme>());
+            //return Task.FromResult(Enumerable.Empty<AuthenticationScheme>());
+            return Task.FromResult<IEnumerable<AuthenticationScheme>>(_requestHandlers);
         }
 
         public void AddScheme(AuthenticationScheme scheme)
@@ -90,17 +93,21 @@ namespace Microsoft.AspNetCore.Authentication
                 {
                     throw new InvalidOperationException("Scheme already exists: " + scheme.Name);
                 }
-                if (scheme.CallbackPaths.Count() > 0)
+                if (typeof(IAuthenticationRequestHandler).IsAssignableFrom(scheme.HandlerType))
                 {
-                    foreach (var path in scheme.CallbackPaths)
-                    {
-                        if (!_handlerMap.ContainsKey(path))
-                        {
-                            _handlerMap[path] = new List<AuthenticationScheme>();
-                        }
-                        _handlerMap[path].Add(scheme);
-                    }
+                    _requestHandlers.Add(scheme);
                 }
+                //if (scheme.CallbackPaths.Count() > 0)
+                //{
+                //    foreach (var path in scheme.CallbackPaths)
+                //    {
+                //        if (!_handlerMap.ContainsKey(path))
+                //        {
+                //            _handlerMap[path] = new List<AuthenticationScheme>();
+                //        }
+                //        _handlerMap[path].Add(scheme);
+                //    }
+                //}
                 _map[scheme.Name] = scheme;
             }
         }
@@ -116,10 +123,7 @@ namespace Microsoft.AspNetCore.Authentication
                 if (_map.ContainsKey(name))
                 {
                     var scheme = _map[name];
-                    foreach (var path in scheme.CallbackPaths)
-                    {
-                        _handlerMap[path].Remove(scheme);
-                    }
+                    _requestHandlers.Remove(_requestHandlers.Where(s => s.Name == name).FirstOrDefault());
                     _map.Remove(name);
                 }
             }

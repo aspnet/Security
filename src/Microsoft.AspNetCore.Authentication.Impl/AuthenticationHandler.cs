@@ -16,8 +16,6 @@ namespace Microsoft.AspNetCore.Authentication{
     {
         private Task<AuthenticateResult> _authenticateTask;
 
-        protected AuthenticationOptions SharedOptions { get; }
-
         public AuthenticationScheme Scheme { get; private set; }
         public TOptions Options { get; private set; }
         protected HttpContext Context { get; private set; }
@@ -30,6 +28,8 @@ namespace Microsoft.AspNetCore.Authentication{
         protected UrlEncoder UrlEncoder { get; }
 
         protected ISystemClock Clock { get; }
+
+        protected IOptionsFactory<TOptions> OptionsFactory { get; }
 
         /// <summary>
         /// The handler calls methods on the events which give the application control at certain points where processing is occurring. 
@@ -55,23 +55,26 @@ namespace Microsoft.AspNetCore.Authentication{
             }
         }
 
-        protected AuthenticationHandler(IOptions<AuthenticationOptions> options, ILoggerFactory logger, UrlEncoder encoder, ISystemClock clock)
+        protected AuthenticationHandler(IOptionsFactory<TOptions> optionsFactory, ILoggerFactory logger, UrlEncoder encoder, ISystemClock clock)
         {
             Logger = logger.CreateLogger(this.GetType().FullName);
             UrlEncoder = encoder;
             Clock = clock;
-            SharedOptions = options.Value;
+            OptionsFactory = optionsFactory;
         }
 
         public virtual Task InitializeAsync(AuthenticationScheme scheme, HttpContext context)
         {
             Scheme = scheme ?? throw new ArgumentNullException(nameof(scheme));
             Context = context ?? throw new ArgumentNullException(nameof(context));
-            if (scheme.Settings.ContainsKey("Options"))
-            {
-                Options = scheme.Settings["Options"] as TOptions;
-            }
-            Options = Options ?? new TOptions();
+
+            // Configures and Validates options
+            Options = OptionsFactory.Get(Scheme.Name) ?? new TOptions();
+
+            // REVIEW: is there a better place for this default?
+            Options.DisplayName = Options.DisplayName ?? scheme.Name;
+            Options.ClaimsIssuer = Options.ClaimsIssuer ?? scheme.Name;
+
             Events = Options.Events;
             if (Options.EventsType != null)
             {
@@ -215,20 +218,6 @@ namespace Microsoft.AspNetCore.Authentication{
                     Logger.AuthenticationSchemeForbidden(Scheme.Name);
                     break;
             }
-        }
-
-        /// <summary>
-        /// If the request path matches one of the scheme's callback paths, this method
-        /// will be called to provide any response information as appropriate.
-        /// 
-        /// It should return true to stop further processing.
-        /// </summary>
-        /// <returns>Returning false will cause the common code to call the next middleware in line. Returning true will
-        /// cause the common code to begin the async completion journey without calling the rest of the middleware
-        /// pipeline.</returns>
-        public virtual Task<bool> HandleRequestAsync()
-        {
-            throw new NotImplementedException();
         }
     }
 }
