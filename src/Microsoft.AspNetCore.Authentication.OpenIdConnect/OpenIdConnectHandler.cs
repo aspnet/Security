@@ -59,8 +59,10 @@ namespace Microsoft.AspNetCore.Authentication.OpenIdConnect
 
         protected IDataProtectionProvider DataProtection { get; }
 
-        public OpenIdConnectHandler(IOptions<AuthenticationOptions> options, ILoggerFactory logger, HtmlEncoder htmlEncoder, UrlEncoder encoder, IDataProtectionProvider dataProtection, ISystemClock clock)
-            : base(options, logger, encoder, clock)
+        protected string SignOutScheme { get; private set; }
+
+        public OpenIdConnectHandler(IOptions<AuthenticationOptions> sharedOptions, IOptionsFactory<OpenIdConnectOptions> options, ILoggerFactory logger, HtmlEncoder htmlEncoder, UrlEncoder encoder, IDataProtectionProvider dataProtection, ISystemClock clock)
+            : base(sharedOptions, options, logger, encoder, clock)
         {
             HtmlEncoder = htmlEncoder;
             DataProtection = dataProtection;
@@ -81,9 +83,10 @@ namespace Microsoft.AspNetCore.Authentication.OpenIdConnect
             await base.InitializeAsync(scheme, context);
             Events = Events ?? new OpenIdConnectEvents();
 
-            if (string.IsNullOrEmpty(Options.SignOutScheme))
+            SignOutScheme = Options.SignOutScheme;
+            if (string.IsNullOrEmpty(SignOutScheme))
             {
-                Options.SignOutScheme = Options.SignInScheme;
+                SignOutScheme = SignInScheme;
             }
 
             if (Options.StateDataFormat == null)
@@ -150,11 +153,6 @@ namespace Microsoft.AspNetCore.Authentication.OpenIdConnect
                 }
             }
 
-            if (string.IsNullOrEmpty(Options.SignInScheme))
-            {
-                throw new ArgumentException("Options.SignInScheme is required.", nameof(Options.SignInScheme));
-            }
-
             if (Options.ConfigurationManager == null)
             {
                 throw new InvalidOperationException($"Provide {nameof(Options.Authority)}, {nameof(Options.MetadataAddress)}, "
@@ -219,7 +217,7 @@ namespace Microsoft.AspNetCore.Authentication.OpenIdConnect
             // If the identifier cannot be found, bypass the session identifier checks: this may indicate that the
             // authentication cookie was already cleared, that the session identifier was lost because of a lossy
             // external/application cookie conversion or that the identity provider doesn't support sessions.
-            var sid = (await Context.Authentication.AuthenticateAsync(Options.SignOutScheme))
+            var sid = (await Context.Authentication.AuthenticateAsync(SignOutScheme))
                           ?.FindFirst(JwtRegisteredClaimNames.Sid)
                           ?.Value;
             if (!string.IsNullOrEmpty(sid))
@@ -241,7 +239,7 @@ namespace Microsoft.AspNetCore.Authentication.OpenIdConnect
             Logger.RemoteSignOut();
 
             // We've received a remote sign-out request
-            await Context.Authentication.SignOutAsync(Options.SignOutScheme);
+            await Context.Authentication.SignOutAsync(SignOutScheme);
             return true;
         }
 
@@ -280,7 +278,7 @@ namespace Microsoft.AspNetCore.Authentication.OpenIdConnect
             Logger.PostSignOutRedirect(properties.RedirectUri);
 
             // Attach the identity token to the logout request when possible.
-            message.IdTokenHint = await Context.GetTokenAsync(Options.SignOutScheme, OpenIdConnectParameterNames.IdToken);
+            message.IdTokenHint = await Context.GetTokenAsync(SignOutScheme, OpenIdConnectParameterNames.IdToken);
 
             var redirectContext = new RedirectContext(Context, Scheme, Options, properties)
             {
