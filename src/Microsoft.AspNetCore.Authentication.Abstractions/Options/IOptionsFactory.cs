@@ -56,7 +56,7 @@ namespace Microsoft.Extensions.Options
             return services;
         }
 
-        public static IServiceCollection ConfigureAllNamed<TOptions>(this IServiceCollection services, Action<TOptions> configureOptions)
+        public static IServiceCollection ConfigureAll<TOptions>(this IServiceCollection services, Action<TOptions> configureOptions)
             where TOptions : class
         {
             if (services == null)
@@ -103,7 +103,7 @@ namespace Microsoft.Extensions.Options
             return services;
         }
 
-        public static IServiceCollection ValidateAllNamed<TOptions>(this IServiceCollection services, Action<TOptions> validateOptions)
+        public static IServiceCollection ValidateAll<TOptions>(this IServiceCollection services, Action<TOptions> validateOptions)
             where TOptions : class
         {
             if (services == null)
@@ -192,7 +192,7 @@ public interface IOptionsFactory<out TOptions> where TOptions : class, new()
             }
 
             // Null name is used to configure all named options.
-            if (name == null || name == Name)
+            if (Name == null || name == Name)
             {
                 Action?.Invoke(options);
             }
@@ -313,7 +313,7 @@ public interface IOptionsFactory<out TOptions> where TOptions : class, new()
             }
 
             // Null name is used to configure all named options.
-            if (name == null || name == Name)
+            if (Name == null || name == Name)
             {
                 Action?.Invoke(options);
             }
