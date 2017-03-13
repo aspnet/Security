@@ -4,7 +4,6 @@
 using System;
 using System.Collections.Generic;
 using System.Globalization;
-using Microsoft.AspNetCore.DataProtection;
 
 namespace Microsoft.AspNetCore.Authentication.OAuth
 {
@@ -96,6 +95,5 @@ namespace Microsoft.AspNetCore.Authentication.OAuth
         /// Gets or sets the type used to secure data handled by the middleware.
         /// </summary>
         public ISecureDataFormat<AuthenticationProperties> StateDataFormat { get; set; }
-        public IDataProtectionProvider DataProtectionProvider { get; internal set; }
     }
 }

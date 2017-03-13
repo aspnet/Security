@@ -30,8 +30,6 @@ namespace Microsoft.AspNetCore.Authentication.Twitter
 
         private HttpClient _httpClient;
 
-        protected IDataProtectionProvider DataProtection { get; }
-
         /// <summary>
         /// The handler calls methods on the events which give the application control at certain points where processing is occurring. 
         /// If it is not provided a default instance is supplied which does nothing when the methods are called.
@@ -43,9 +41,8 @@ namespace Microsoft.AspNetCore.Authentication.Twitter
         }
 
         public TwitterHandler(IOptions<AuthenticationOptions> sharedOptions, IOptionsFactory<TwitterOptions> options, ILoggerFactory logger, UrlEncoder encoder, IDataProtectionProvider dataProtection, ISystemClock clock)
-            : base(sharedOptions, options, logger, encoder, clock)
+            : base(sharedOptions, options, dataProtection, logger, encoder, clock)
         {
-            DataProtection = dataProtection;
         }
 
         public override async Task InitializeAsync(AuthenticationScheme scheme, HttpContext context)
@@ -55,8 +52,7 @@ namespace Microsoft.AspNetCore.Authentication.Twitter
 
             if (Options.StateDataFormat == null)
             {
-                var provider = Options.DataProtectionProvider ?? DataProtection;
-                var dataProtector = provider.CreateProtector(
+                var dataProtector = DataProtection.CreateProtector(
                     GetType().FullName, Scheme.Name, "v1");
                 Options.StateDataFormat = new SecureDataFormat<RequestToken>(
                     new RequestTokenSerializer(),

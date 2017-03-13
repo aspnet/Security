@@ -185,7 +185,6 @@ namespace Microsoft.AspNetCore.Authentication.OpenIdConnect
         /// Gets or sets the type used to secure data handled by the middleware.
         /// </summary>
         public ISecureDataFormat<AuthenticationProperties> StateDataFormat { get; set; }
-        public IDataProtectionProvider DataProtectionProvider { get; internal set; }
 
         /// <summary>
         /// Gets or sets the type used to secure strings used by the middleware.
