@@ -3,7 +3,6 @@
 
 using System;
 using Microsoft.AspNetCore.Authentication.Twitter;
-using Microsoft.AspNetCore.Http;
 
 namespace Microsoft.Extensions.DependencyInjection
 {
@@ -13,6 +12,6 @@ namespace Microsoft.Extensions.DependencyInjection
             services.AddTwitterAuthentication(TwitterDefaults.AuthenticationScheme, configureOptions);
 
         public static IServiceCollection AddTwitterAuthentication(this IServiceCollection services, string authenticationScheme, Action<TwitterOptions> configureOptions) =>
-            services.AddRemoteScheme<TwitterOptions, TwitterHandler>(authenticationScheme, configureOptions, o => new PathString[] { o.CallbackPath });
+            services.AddScheme<TwitterOptions, TwitterHandler>(authenticationScheme, configureOptions);
     }
 }

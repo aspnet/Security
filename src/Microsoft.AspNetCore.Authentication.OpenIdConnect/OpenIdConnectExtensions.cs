@@ -3,8 +3,6 @@
 
 using System;
 using Microsoft.AspNetCore.Authentication.OpenIdConnect;
-using Microsoft.AspNetCore.Http;
-using Microsoft.Extensions.Options;
 
 namespace Microsoft.Extensions.DependencyInjection
 {
@@ -15,7 +13,8 @@ namespace Microsoft.Extensions.DependencyInjection
 
         public static IServiceCollection AddOpenIdConnectAuthentication(this IServiceCollection services, string authenticationScheme, Action<OpenIdConnectOptions> configureOptions)
         {
-            services.AddRemoteScheme<OpenIdConnectOptions, OpenIdConnectHandler>(authenticationScheme, configureOptions, o => new PathString[] { o.CallbackPath, o.SignedOutCallbackPath, o.RemoteSignOutPath });
+            //services.AddRemoteScheme<OpenIdConnectOptions, OpenIdConnectHandler>(authenticationScheme, configureOptions, o => new PathString[] { o.CallbackPath, o.SignedOutCallbackPath, o.RemoteSignOutPath });
+            services.AddScheme<OpenIdConnectOptions, OpenIdConnectHandler>(authenticationScheme, configureOptions);
             return services;
         }
     }
