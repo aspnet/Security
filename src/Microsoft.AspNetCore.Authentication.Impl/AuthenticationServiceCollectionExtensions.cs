@@ -49,34 +49,17 @@ namespace Microsoft.Extensions.DependencyInjection
             return services;
         }
 
-        public static IServiceCollection AddScheme<TOptions, THandler>(this IServiceCollection services, string authenticationScheme, Action<TOptions> configureOptions)
+        public static IServiceCollection AddScheme<TOptions, THandler>(this IServiceCollection services, string authenticationScheme, Action<AuthenticationSchemeBuilder> configureScheme, Action<TOptions> configureOptions)
             where TOptions : AuthenticationSchemeOptions, new()
             where THandler : AuthenticationHandler<TOptions>
         {
             services.AddAuthentication(o =>
             {
-                o.AddScheme(authenticationScheme,
-                    schemeBuilder => schemeBuilder.HandlerType = typeof(THandler));
+                o.AddScheme(authenticationScheme, scheme => {
+                    scheme.HandlerType = typeof(THandler);
+                    configureScheme?.Invoke(scheme);
+                });
             });
-            if (configureOptions != null)
-            {
-                services.Configure(authenticationScheme, configureOptions);
-            }
-            services.AddTransient<THandler>();
-            return services;
-        }
-
-        public static IServiceCollection AddRemoteScheme<TOptions, THandler>(this IServiceCollection services, string authenticationScheme, Action<TOptions> configureOptions, Func<TOptions, IEnumerable<PathString>> getCallbackPaths)
-             where TOptions : RemoteAuthenticationOptions, new()
-             where THandler : AuthenticationHandler<TOptions>
-        {
-            services.AddAuthentication(o =>
-                    o.AddScheme(authenticationScheme,
-                        schemeBuilder => {
-                            schemeBuilder.HandlerType = typeof(THandler);
-                            // TODO: MUST fix this to pickup option settings
-                            schemeBuilder.CallbackPaths = getCallbackPaths?.Invoke(new TOptions());
-                        }));
             if (configureOptions != null)
             {
                 services.Configure(authenticationScheme, configureOptions);
@@ -85,6 +68,31 @@ namespace Microsoft.Extensions.DependencyInjection
             services.Validate<TOptions>(authenticationScheme, o => o.Validate());
             return services;
         }
+
+        public static IServiceCollection AddScheme<TOptions, THandler>(this IServiceCollection services, string authenticationScheme, Action<TOptions> configureOptions)
+            where TOptions : AuthenticationSchemeOptions, new()
+            where THandler : AuthenticationHandler<TOptions>
+            => services.AddScheme<TOptions, THandler>(authenticationScheme, configureScheme: null, configureOptions: configureOptions);
+
+        //public static IServiceCollection AddRemoteScheme<TOptions, THandler>(this IServiceCollection services, string authenticationScheme, Action<TOptions> configureOptions, Func<TOptions, IEnumerable<PathString>> getCallbackPaths)
+        //     where TOptions : RemoteAuthenticationOptions, new()
+        //     where THandler : AuthenticationHandler<TOptions>
+        //{
+        //    services.AddAuthentication(o =>
+        //            o.AddScheme(authenticationScheme,
+        //                schemeBuilder => {
+        //                    schemeBuilder.HandlerType = typeof(THandler);
+        //                    // TODO: MUST fix this to pickup option settings
+        //                    schemeBuilder.CallbackPaths = getCallbackPaths?.Invoke(new TOptions());
+        //                }));
+        //    if (configureOptions != null)
+        //    {
+        //        services.Configure(authenticationScheme, configureOptions);
+        //    }
+        //    services.AddTransient<THandler>();
+        //    services.Validate<TOptions>(authenticationScheme, o => o.Validate());
+        //    return services;
+        //}
 
         //public static IServiceCollection AddScheme<TOptions, THandler>(this IServiceCollection services, string authenticationScheme, TOptions options)
         //    where TOptions : AuthenticationSchemeOptions, new()

@@ -13,6 +13,6 @@ namespace Microsoft.Extensions.DependencyInjection
             services.AddMicrosoftAccountAuthentication(MicrosoftAccountDefaults.AuthenticationScheme, configureOptions);
 
         public static IServiceCollection AddMicrosoftAccountAuthentication(this IServiceCollection services, string authenticationScheme, Action<MicrosoftAccountOptions> configureOptions) =>
-            services.AddRemoteScheme<MicrosoftAccountOptions, MicrosoftAccountHandler>(authenticationScheme, configureOptions, o => new PathString[] { o.CallbackPath });
+            services.AddScheme<MicrosoftAccountOptions, MicrosoftAccountHandler>(authenticationScheme, configureOptions);
     }
 }
