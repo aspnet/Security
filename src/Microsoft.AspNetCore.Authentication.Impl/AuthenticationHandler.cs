@@ -63,6 +63,12 @@ namespace Microsoft.AspNetCore.Authentication{
             OptionsFactory = optionsFactory;
         }
 
+        /// <summary>
+        /// Initialize the handler, resolve the options and validate them.
+        /// </summary>
+        /// <param name="scheme"></param>
+        /// <param name="context"></param>
+        /// <returns></returns>
         public virtual Task InitializeAsync(AuthenticationScheme scheme, HttpContext context)
         {
             Scheme = scheme ?? throw new ArgumentNullException(nameof(scheme));

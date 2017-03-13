@@ -3,6 +3,7 @@
 
 using System;
 using System.Net.Http;
+using Microsoft.AspNetCore.DataProtection;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Options;
 
@@ -39,6 +40,11 @@ namespace Microsoft.AspNetCore.Authentication
         /// can be downcast to a WebRequestHandler.
         /// </summary>
         public HttpMessageHandler BackchannelHttpHandler { get; set; }
+
+        /// <summary>
+        /// Gets or sets the type used to secure data.
+        /// </summary>
+        public IDataProtectionProvider DataProtectionProvider { get; internal set; }
 
         /// <summary>
         /// The request path within the application's base path where the user-agent will be returned.

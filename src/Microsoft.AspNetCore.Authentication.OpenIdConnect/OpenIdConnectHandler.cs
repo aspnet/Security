@@ -57,15 +57,12 @@ namespace Microsoft.AspNetCore.Authentication.OpenIdConnect
 
         protected HtmlEncoder HtmlEncoder { get; }
 
-        protected IDataProtectionProvider DataProtection { get; }
-
         protected string SignOutScheme { get; private set; }
 
         public OpenIdConnectHandler(IOptions<AuthenticationOptions> sharedOptions, IOptionsFactory<OpenIdConnectOptions> options, ILoggerFactory logger, HtmlEncoder htmlEncoder, UrlEncoder encoder, IDataProtectionProvider dataProtection, ISystemClock clock)
-            : base(sharedOptions, options, logger, encoder, clock)
+            : base(sharedOptions, options, dataProtection, logger, encoder, clock)
         {
             HtmlEncoder = htmlEncoder;
-            DataProtection = dataProtection;
         }
 
         /// <summary>
@@ -91,16 +88,14 @@ namespace Microsoft.AspNetCore.Authentication.OpenIdConnect
 
             if (Options.StateDataFormat == null)
             {
-                var provider = Options.DataProtectionProvider ?? DataProtection;
-                var dataProtector = provider.CreateProtector(
+                var dataProtector = DataProtection.CreateProtector(
                     GetType().FullName, scheme.Name, "v1");
                 Options.StateDataFormat = new PropertiesDataFormat(dataProtector);
             }
 
             if (Options.StringDataFormat == null)
             {
-                var provider = Options.DataProtectionProvider ?? DataProtection;
-                var dataProtector = provider.CreateProtector(
+                var dataProtector = DataProtection.CreateProtector(
                     GetType().FullName,
                     typeof(string).FullName,
                     scheme.Name,
