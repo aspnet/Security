@@ -17,6 +17,10 @@ namespace Microsoft.AspNetCore.Authentication
         Task ChallengeAsync(ChallengeContext context);
         Task SignInAsync(SignInContext context);
         Task SignOutAsync(SignOutContext context);
+    }
+
+    public interface IAuthenticationRequestHandler : IAuthenticationHandler
+    {
 
         /// <summary>
         /// Returns true if request processing should stop.
@@ -24,4 +28,5 @@ namespace Microsoft.AspNetCore.Authentication
         /// <returns></returns>
         Task<bool> HandleRequestAsync();
     }
+
 }

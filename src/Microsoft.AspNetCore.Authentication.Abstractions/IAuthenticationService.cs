@@ -12,9 +12,6 @@ namespace Microsoft.AspNetCore.Authentication
         Task<AuthenticateResult> AuthenticateAsync(HttpContext context, string scheme);
         Task ChallengeAsync(HttpContext context, string scheme, AuthenticationProperties properties, ChallengeBehavior behavior);
         Task ForbidAsync(HttpContext context, string scheme, AuthenticationProperties properties);
-
-        // Should SignIn/SignOut live in a separate service? If yes, we could have a parallel stack of
-        // SignInScheme/Builder/SignInHandler
         Task SignInAsync(HttpContext context, string scheme, ClaimsPrincipal principal, AuthenticationProperties properties);
         Task SignOutAsync(HttpContext context, string scheme, AuthenticationProperties properties);
     }

@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.DependencyInjection.Extensions;
+using Microsoft.Extensions.Options;
 
 namespace Microsoft.Extensions.DependencyInjection
 {
@@ -21,12 +22,13 @@ namespace Microsoft.Extensions.DependencyInjection
                 throw new ArgumentNullException(nameof(services));
             }
 
+            services.AddOptionsFactory();
             services.TryAddSingleton<ISystemClock, SystemClock>();
             services.AddDataProtection();
             services.AddWebEncoders();
             services.TryAddScoped<IAuthenticationService, DefaultAuthenticationService>();
             services.TryAddSingleton<IClaimsTransformation, DefaultClaimsTransformation>(); // Can be replaced with scoped ones that use DbContext
-            services.TryAddScoped<IAuthenticationHandlerResolver, DefaultAuthenticationHandlerResolver>();
+            services.TryAddScoped<IAuthenticationHandlerProvider, DefaultAuthenticationHandlerProvider>();
             services.TryAddSingleton<IAuthenticationSchemeProvider, DefaultAuthenticationSchemeProvider>();
             return services;
         }
@@ -47,99 +49,88 @@ namespace Microsoft.Extensions.DependencyInjection
             return services;
         }
 
+        public static IServiceCollection AddScheme<TOptions, THandler>(this IServiceCollection services, string authenticationScheme, Action<AuthenticationSchemeBuilder> configureScheme, Action<TOptions> configureOptions)
+            where TOptions : AuthenticationSchemeOptions, new()
+            where THandler : AuthenticationHandler<TOptions>
+        {
+            services.AddAuthentication(o =>
+            {
+                o.AddScheme(authenticationScheme, scheme => {
+                    scheme.HandlerType = typeof(THandler);
+                    configureScheme?.Invoke(scheme);
+                });
+            });
+            if (configureOptions != null)
+            {
+                services.Configure(authenticationScheme, configureOptions);
+            }
+            services.AddTransient<THandler>();
+            services.Validate<TOptions>(authenticationScheme, o => o.Validate());
+            return services;
+        }
+
         public static IServiceCollection AddScheme<TOptions, THandler>(this IServiceCollection services, string authenticationScheme, Action<TOptions> configureOptions)
             where TOptions : AuthenticationSchemeOptions, new()
             where THandler : AuthenticationHandler<TOptions>
-        {
-            services.AddAuthentication(o =>
-            {
-                o.AddScheme(authenticationScheme, 
-                    schemeBuilder => BuildScheme<TOptions, THandler>(authenticationScheme, schemeBuilder, configureOptions));
-            });
-            services.AddTransient<THandler>();
-            return services;
-        }
+            => services.AddScheme<TOptions, THandler>(authenticationScheme, configureScheme: null, configureOptions: configureOptions);
 
-        private static TOptions BuildScheme<TOptions, THandler>(string authenticationScheme, AuthenticationSchemeBuilder builder, Action<TOptions> configureOptions)
-            where TOptions : AuthenticationSchemeOptions, new()
-            where THandler : AuthenticationHandler<TOptions>
-        {
-            builder.HandlerType = typeof(THandler);
-            var options = new TOptions();
+        //public static IServiceCollection AddRemoteScheme<TOptions, THandler>(this IServiceCollection services, string authenticationScheme, Action<TOptions> configureOptions, Func<TOptions, IEnumerable<PathString>> getCallbackPaths)
+        //     where TOptions : RemoteAuthenticationOptions, new()
+        //     where THandler : AuthenticationHandler<TOptions>
+        //{
+        //    services.AddAuthentication(o =>
+        //            o.AddScheme(authenticationScheme,
+        //                schemeBuilder => {
+        //                    schemeBuilder.HandlerType = typeof(THandler);
+        //                    // TODO: MUST fix this to pickup option settings
+        //                    schemeBuilder.CallbackPaths = getCallbackPaths?.Invoke(new TOptions());
+        //                }));
+        //    if (configureOptions != null)
+        //    {
+        //        services.Configure(authenticationScheme, configureOptions);
+        //    }
+        //    services.AddTransient<THandler>();
+        //    services.Validate<TOptions>(authenticationScheme, o => o.Validate());
+        //    return services;
+        //}
 
-            // REVIEW: is there a better place for this default?
-            options.DisplayName = authenticationScheme;
-            options.ClaimsIssuer = authenticationScheme;
+        //public static IServiceCollection AddScheme<TOptions, THandler>(this IServiceCollection services, string authenticationScheme, TOptions options)
+        //    where TOptions : AuthenticationSchemeOptions, new()
+        //    where THandler : AuthenticationHandler<TOptions>
+        //{
+        //    services.AddAuthentication(o =>
+        //    {
+        //        o.AddScheme(authenticationScheme, b =>
+        //        {
+        //            b.HandlerType = typeof(THandler);
+        //            b.Settings["Options"] = options;
+        //        });
+        //    });
+        //    services.AddTransient<THandler>();
+        //    return services;
+        //}
 
-            configureOptions?.Invoke(options);
-            options.Validate();
+        //public static IServiceCollection ConfigureScheme<TOptions>(this IServiceCollection services, string authenticationScheme, Action<TOptions> configureOptions)
+        //    where TOptions : AuthenticationSchemeOptions, new()
+        //{
+        //    services.Configure<AuthenticationOptions>(o =>
+        //    {
+        //        if (o.SchemeMap.ContainsKey(authenticationScheme))
+        //        {
+        //            var options = o.SchemeMap[authenticationScheme].Settings["Options"] as TOptions;
+        //            if (options == null)
+        //            {
+        //                throw new InvalidOperationException("Unable to find options in authenticationScheme settings for: " + authenticationScheme);
+        //            }
+        //            configureOptions?.Invoke(options);
+        //        }
+        //        else
+        //        {
+        //            throw new InvalidOperationException("No scheme registered for " + authenticationScheme);
+        //        }
 
-            // revisit the settings typing
-            builder.Settings["Options"] = options;
-
-            return options;
-        }
-
-        public static IServiceCollection AddRemoteScheme<TOptions, THandler>(this IServiceCollection services, string authenticationScheme, Action<TOptions> configureOptions, Func<TOptions, IEnumerable<PathString>> getCallbackPaths)
-             where TOptions : RemoteAuthenticationOptions, new()
-             where THandler : AuthenticationHandler<TOptions>
-        {
-            services.AddAuthentication(o =>
-                o.AddScheme(authenticationScheme,
-                    schemeBuilder => {
-                        var options = BuildScheme<TOptions, THandler>(authenticationScheme, schemeBuilder, configureOptions);
-                        schemeBuilder.CallbackPaths = getCallbackPaths?.Invoke(options);
-                    }));
-            services.AddTransient<THandler>();
-            return services;
-        }
-
-        public static IServiceCollection AddScheme<TOptions, THandler>(this IServiceCollection services, string authenticationScheme, TOptions options)
-            where TOptions : AuthenticationSchemeOptions, new()
-            where THandler : AuthenticationHandler<TOptions>
-        {
-            services.AddAuthentication(o =>
-            {
-                o.AddScheme(authenticationScheme, b =>
-                {
-                    b.HandlerType = typeof(THandler);
-                    b.Settings["Options"] = options;
-                });
-            });
-            services.AddTransient<THandler>();
-            return services;
-        }
-
-        // REVIEW: rename to just ConfigureScheme?
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <typeparam name="TOptions"></typeparam>
-        /// <param name="services"></param>
-        /// <param name="authenticationScheme"></param>
-        /// <param name="configureOptions"></param>
-        /// <returns></returns>
-        public static IServiceCollection ConfigureSchemeHandler<TOptions>(this IServiceCollection services, string authenticationScheme, Action<TOptions> configureOptions)
-            where TOptions : AuthenticationSchemeOptions, new()
-        {
-            services.Configure<AuthenticationOptions>(o =>
-            {
-                if (o.SchemeMap.ContainsKey(authenticationScheme))
-                {
-                    var options = o.SchemeMap[authenticationScheme].Settings["Options"] as TOptions;
-                    if (options == null)
-                    {
-                        throw new InvalidOperationException("Unable to find options in authenticationScheme settings for: " + authenticationScheme);
-                    }
-                    configureOptions?.Invoke(options);
-                }
-                else
-                {
-                    throw new InvalidOperationException("No scheme registered for " + authenticationScheme);
-                }
-
-            });
-            return services;
-        }
+        //    });
+        //    return services;
+        //}
     }
 }

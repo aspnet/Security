@@ -17,6 +17,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.TestHost;
 using Microsoft.AspNetCore.Testing.xunit;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Options;
 using Xunit;
 
 namespace Microsoft.AspNetCore.Authentication.Cookies
@@ -838,7 +839,7 @@ namespace Microsoft.AspNetCore.Authentication.Cookies
                 .ConfigureServices(services =>
                 {
                     services.AddCookieAuthentication();
-                    services.ConfigureSchemeHandler<CookieAuthenticationOptions>(CookieAuthenticationDefaults.AuthenticationScheme,
+                    services.Configure<CookieAuthenticationOptions>(CookieAuthenticationDefaults.AuthenticationScheme,
                         o => o.CookieName = "One");
                 });
             var server = new TestServer(builder);
@@ -860,8 +861,8 @@ namespace Microsoft.AspNetCore.Authentication.Cookies
                 })
                 .ConfigureServices(services =>
                 {
-                    services.AddCookieAuthentication("Cookie1", new CookieAuthenticationOptions());
-                    services.ConfigureSchemeHandler<CookieAuthenticationOptions>("Cookie1",
+                    services.AddCookieAuthentication("Cookie1");
+                    services.Configure<CookieAuthenticationOptions>("Cookie1",
                         o => o.CookieName = "One");
                 });
             var server = new TestServer(builder);

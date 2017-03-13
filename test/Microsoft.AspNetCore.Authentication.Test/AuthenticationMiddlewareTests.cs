@@ -65,7 +65,7 @@ namespace Microsoft.AspNetCore.Authentication
             public SevenOhSevenHandler() : base(707) { }
         }
 
-        private class StatusCodeHandler : IAuthenticationHandler
+        private class StatusCodeHandler : IAuthenticationRequestHandler
         {
             private HttpContext _context;
             private int _code;
@@ -144,7 +144,7 @@ namespace Microsoft.AspNetCore.Authentication
             }
         }
 
-        private class SkipHandler : IAuthenticationHandler
+        private class SkipHandler : IAuthenticationRequestHandler
         {
             private HttpContext _context;
 

@@ -28,7 +28,7 @@ namespace Microsoft.AspNetCore.Authentication.Facebook
         {
             var server = CreateServer(
                 app => { },
-                services => services.AddFacebookAuthentication(o => { }),
+                services => services.AddFacebookAuthentication(o => o.SignInScheme = "Whatever"),
                 context =>
                 {
                     // REVIEW: Gross.

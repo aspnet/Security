@@ -5,13 +5,14 @@ using System;
 using System.Security.Cryptography;
 using System.Text.Encodings.Web;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.DataProtection;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 
 namespace Microsoft.AspNetCore.Authentication
 {
-    public abstract class RemoteAuthenticationHandler<TOptions> : AuthenticationHandler<TOptions> where TOptions : RemoteAuthenticationOptions, new()
+    public abstract class RemoteAuthenticationHandler<TOptions> : AuthenticationHandler<TOptions>, IAuthenticationRequestHandler where TOptions : RemoteAuthenticationOptions, new()
     {
         private const string CorrelationPrefix = ".AspNetCore.Correlation.";
         private const string CorrelationProperty = ".xsrf";
@@ -20,34 +21,52 @@ namespace Microsoft.AspNetCore.Authentication
 
         private static readonly RandomNumberGenerator CryptoRandom = RandomNumberGenerator.Create();
 
-        protected RemoteAuthenticationHandler(IOptions<AuthenticationOptions> options, ILoggerFactory logger, UrlEncoder encoder, ISystemClock clock)
-            : base(options, logger, encoder, clock)
-        { }
+        protected string SignInScheme { get; set; }
+
+        protected IDataProtectionProvider DataProtection { get; set; }
+
+        private readonly AuthenticationOptions _sharedOptions;
+
+        protected RemoteAuthenticationHandler(IOptions<AuthenticationOptions> sharedOptions, IOptionsFactory<TOptions> optionsFactory, IDataProtectionProvider dataProtection, ILoggerFactory logger, UrlEncoder encoder, ISystemClock clock)
+            : base(optionsFactory, logger, encoder, clock)
+        {
+            _sharedOptions = sharedOptions.Value;
+            DataProtection = dataProtection;
+        }
 
         public override async Task InitializeAsync(AuthenticationScheme scheme, HttpContext context)
         {
             await base.InitializeAsync(scheme, context);
             Events = Events ?? new RemoteAuthenticationEvents();
+            DataProtection = Options.DataProtectionProvider ?? DataProtection;
 
             // TODO: this needs to be done once (but we don't have access to scheme data in ext method)
-            if (Options.SignInScheme == null && SharedOptions.DefaultSignInScheme != null)
-            {
-                Options.SignInScheme = SharedOptions.DefaultSignInScheme;
-            }
+            SignInScheme = Options.SignInScheme ?? _sharedOptions.DefaultSignInScheme;
 
-            if (string.IsNullOrEmpty(Options.SignInScheme))
+            if (string.IsNullOrEmpty(SignInScheme))
             {
                 throw new ArgumentException(Resources.FormatException_OptionMustBeProvided(nameof(Options.SignInScheme)), nameof(Options.SignInScheme));
             }
         }
 
-        public override async Task<bool> HandleRequestAsync()
+        public virtual Task<bool> ShouldHandleRequestAsync()
         {
+            return Task.FromResult(Options.CallbackPath == Request.Path);
+        }
+
+        public virtual async Task<bool> HandleRequestAsync()
+        {
+            if (!await ShouldHandleRequestAsync())
+            {
+                return false;
+            }
+
             AuthenticationTicket ticket = null;
             Exception exception = null;
 
             try
             {
+
                 var authResult = await HandleRemoteAuthenticateAsync();
                 if (authResult == null)
                 {
@@ -116,7 +135,7 @@ namespace Microsoft.AspNetCore.Authentication
                 return false;
             };
 
-            await Context.SignInAsync(Options.SignInScheme, ticketContext.Principal, ticketContext.Properties);
+            await Context.SignInAsync(SignInScheme, ticketContext.Principal, ticketContext.Properties);
 
             // Default redirect path is the base path
             if (string.IsNullOrEmpty(ticketContext.ReturnUri))
@@ -137,7 +156,7 @@ namespace Microsoft.AspNetCore.Authentication
 
         protected override async Task<AuthenticateResult> HandleAuthenticateAsync()
         {
-            var result = await Context.AuthenticateAsync(Options.SignInScheme);
+            var result = await Context.AuthenticateAsync(SignInScheme);
             if (result != null)
             {
                 // todo error
@@ -178,7 +197,7 @@ namespace Microsoft.AspNetCore.Authentication
         // REVIEW: This behaviour needs a test (forwarding of forbidden to sign in scheme)
         protected override Task HandleForbiddenAsync(ChallengeContext context)
         {
-            return Context.ForbidAsync(Options.SignInScheme);
+            return Context.ForbidAsync(SignInScheme);
         }
 
         protected virtual void GenerateCorrelationId(AuthenticationProperties properties)
