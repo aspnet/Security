@@ -5,6 +5,7 @@ using System;
 using System.Security.Cryptography;
 using System.Text.Encodings.Web;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.DataProtection;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
@@ -22,18 +23,22 @@ namespace Microsoft.AspNetCore.Authentication
 
         protected string SignInScheme { get; set; }
 
+        protected IDataProtectionProvider DataProtection { get; set; }
+
         private readonly AuthenticationOptions _sharedOptions;
 
-        protected RemoteAuthenticationHandler(IOptions<AuthenticationOptions> sharedOptions, IOptionsFactory<TOptions> optionsFactory, ILoggerFactory logger, UrlEncoder encoder, ISystemClock clock)
+        protected RemoteAuthenticationHandler(IOptions<AuthenticationOptions> sharedOptions, IOptionsFactory<TOptions> optionsFactory, IDataProtectionProvider dataProtection, ILoggerFactory logger, UrlEncoder encoder, ISystemClock clock)
             : base(optionsFactory, logger, encoder, clock)
         {
             _sharedOptions = sharedOptions.Value;
+            DataProtection = dataProtection;
         }
 
         public override async Task InitializeAsync(AuthenticationScheme scheme, HttpContext context)
         {
             await base.InitializeAsync(scheme, context);
             Events = Events ?? new RemoteAuthenticationEvents();
+            DataProtection = Options.DataProtectionProvider ?? DataProtection;
 
             // TODO: this needs to be done once (but we don't have access to scheme data in ext method)
             SignInScheme = Options.SignInScheme ?? _sharedOptions.DefaultSignInScheme;
