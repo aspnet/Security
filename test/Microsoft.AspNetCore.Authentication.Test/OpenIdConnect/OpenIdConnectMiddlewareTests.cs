@@ -46,7 +46,10 @@ namespace Microsoft.AspNetCore.Authentication.Tests.OpenIdConnect
             Assert.Equal(HttpStatusCode.Redirect, res.StatusCode);
             Assert.NotNull(res.Headers.Location);
 
-            setting.ValidateSignoutRedirect(transaction.Response.Headers.Location);
+            setting.ValidateSignoutRedirect(
+                transaction.Response.Headers.Location,
+                OpenIdConnectParameterNames.SkuTelemetry,
+                OpenIdConnectParameterNames.VersionTelemetry);
         }
 
         [Fact]

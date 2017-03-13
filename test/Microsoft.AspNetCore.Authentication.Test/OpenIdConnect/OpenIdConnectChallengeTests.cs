@@ -35,7 +35,9 @@ namespace Microsoft.AspNetCore.Authentication.Tests.OpenIdConnect
                 OpenIdConnectParameterNames.ResponseType,
                 OpenIdConnectParameterNames.ResponseMode,
                 OpenIdConnectParameterNames.Scope,
-                OpenIdConnectParameterNames.RedirectUri);
+                OpenIdConnectParameterNames.RedirectUri,
+                OpenIdConnectParameterNames.SkuTelemetry,
+                OpenIdConnectParameterNames.VersionTelemetry);
         }
 
         [Fact]
