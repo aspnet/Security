@@ -43,7 +43,7 @@ namespace Microsoft.AspNetCore.Authentication
 
                 // REVIEW: alternatively could depend on a routing middleware to do this
 
-                // Give each scheme a chance to handle the request if it registered this path
+                // Give any IAuthenticationRequestHandler schemes a chance to handle the request
                 var handlers = context.RequestServices.GetRequiredService<IAuthenticationHandlerProvider>();
                 foreach (var scheme in await Schemes.GetRequestHandlerSchemes(context.Request.Path))
                 {
