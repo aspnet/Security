@@ -9,7 +9,7 @@ namespace Microsoft.AspNetCore.Authentication
     /// <summary>
     /// Default claims transformation is a no-op.
     /// </summary>
-    public class DefaultClaimsTransformation : IClaimsTransformation
+    public class NoopClaimsTransformation : IClaimsTransformation
     {
         public virtual Task<ClaimsPrincipal> TransformAsync(ClaimsPrincipal principal)
         {

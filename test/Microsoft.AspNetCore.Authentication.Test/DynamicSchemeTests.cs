@@ -63,6 +63,11 @@ namespace Microsoft.AspNetCore.Authentication
             Assert.Equal(HttpStatusCode.OK, response.StatusCode);
             var transaction = await server.SendAsync("http://example.com/auth");
             Assert.Equal("One", transaction.FindClaimValue(ClaimTypes.NameIdentifier, "One"));
+            response = await server.CreateClient().GetAsync("http://example.com/add/Two");
+            Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+
+            // Default will blow up since now there's two
+            await Assert.ThrowsAsync<InvalidOperationException>(() => server.SendAsync("http://example.com/auth"));
         }
 
         private class TestHandler : AuthenticationHandler<AuthenticationSchemeOptions>

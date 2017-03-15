@@ -14,9 +14,9 @@ namespace Microsoft.AspNetCore.Authentication
     /// <summary>
     /// Builds the actual AuthenticationScheme instances from the AuthenticationOptions.
     /// </summary>
-    public class DefaultAuthenticationSchemeProvider : IAuthenticationSchemeProvider
+    public class AuthenticationSchemeProvider : IAuthenticationSchemeProvider
     {
-        public DefaultAuthenticationSchemeProvider(IOptions<AuthenticationOptions> options)
+        public AuthenticationSchemeProvider(IOptions<AuthenticationOptions> options)
         {
             _options = options.Value;
 

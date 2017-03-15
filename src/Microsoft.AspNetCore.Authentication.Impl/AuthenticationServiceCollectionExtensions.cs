@@ -26,10 +26,10 @@ namespace Microsoft.Extensions.DependencyInjection
             services.TryAddSingleton<ISystemClock, SystemClock>();
             services.AddDataProtection();
             services.AddWebEncoders();
-            services.TryAddScoped<IAuthenticationService, DefaultAuthenticationService>();
-            services.TryAddSingleton<IClaimsTransformation, DefaultClaimsTransformation>(); // Can be replaced with scoped ones that use DbContext
-            services.TryAddScoped<IAuthenticationHandlerProvider, DefaultAuthenticationHandlerProvider>();
-            services.TryAddSingleton<IAuthenticationSchemeProvider, DefaultAuthenticationSchemeProvider>();
+            services.TryAddScoped<IAuthenticationService, AuthenticationService>();
+            services.TryAddSingleton<IClaimsTransformation, NoopClaimsTransformation>(); // Can be replaced with scoped ones that use DbContext
+            services.TryAddScoped<IAuthenticationHandlerProvider, AuthenticationHandlerProvider>();
+            services.TryAddSingleton<IAuthenticationSchemeProvider, AuthenticationSchemeProvider>();
             return services;
         }
 
