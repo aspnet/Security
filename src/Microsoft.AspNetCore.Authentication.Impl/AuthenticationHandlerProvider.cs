@@ -8,9 +8,9 @@ using Microsoft.Extensions.DependencyInjection;
 
 namespace Microsoft.AspNetCore.Authentication
 {
-    public class DefaultAuthenticationHandlerProvider : IAuthenticationHandlerProvider
+    public class AuthenticationHandlerProvider : IAuthenticationHandlerProvider
     {
-        public DefaultAuthenticationHandlerProvider(IAuthenticationSchemeProvider schemes)
+        public AuthenticationHandlerProvider(IAuthenticationSchemeProvider schemes)
         {
             Schemes = schemes;
         }
