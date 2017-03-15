@@ -69,6 +69,8 @@ namespace Microsoft.Extensions.Options
                 throw new ArgumentNullException(nameof(configureOptions));
             }
 
+            // REVIEW: should this ignore the non named options?  ConfigureAllNamed?
+            services.Configure(configureOptions);
             services.AddSingleton<IConfigureNamedOptions<TOptions>>(new ConfigureNamedOptions<TOptions>(name: null, action: configureOptions));
             return services;
         }
@@ -121,11 +123,11 @@ namespace Microsoft.Extensions.Options
         }
     }
 
-/// <summary>
-/// Used to retreive configured and validated TOptions instances.
-/// </summary>
-/// <typeparam name="TOptions">The type of options being requested.</typeparam>
-public interface IOptionsFactory<out TOptions> where TOptions : class, new()
+    /// <summary>
+    /// Used to retreive configured and validated TOptions instances.
+    /// </summary>
+    /// <typeparam name="TOptions">The type of options being requested.</typeparam>
+    public interface IOptionsFactory<out TOptions> where TOptions : class, new()
     {
         /// <summary>
         /// The configured TOptions instance with the given name.

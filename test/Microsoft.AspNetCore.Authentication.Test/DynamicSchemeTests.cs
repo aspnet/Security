@@ -52,6 +52,18 @@ namespace Microsoft.AspNetCore.Authentication
 
         }
 
+        [Fact]
+        public async Task VerifyDefaultBehavior()
+        {
+            var server = CreateServer();
+
+            await Assert.ThrowsAsync<InvalidOperationException>(() => server.SendAsync("http://example.com/auth"));
+
+            var response = await server.CreateClient().GetAsync("http://example.com/add/One");
+            Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+            var transaction = await server.SendAsync("http://example.com/auth");
+            Assert.Equal("One", transaction.FindClaimValue(ClaimTypes.NameIdentifier, "One"));
+        }
 
         private class TestHandler : AuthenticationHandler<AuthenticationSchemeOptions>
         {
@@ -69,7 +81,7 @@ namespace Microsoft.AspNetCore.Authentication
             }
         }
 
-        private static TestServer CreateServer()
+        private static TestServer CreateServer(Action<AuthenticationOptions> configureAuth = null)
         {
             var builder = new WebHostBuilder()
                 .Configure(app =>
@@ -83,12 +95,12 @@ namespace Microsoft.AspNetCore.Authentication
                         {
                             var name = remainder.Value.Substring(1);
                             var auth = context.RequestServices.GetRequiredService<IAuthenticationSchemeProvider>();
-                            var scheme = new AuthenticationScheme(name, typeof(TestHandler), /*callbackPaths*/null, new Dictionary<string, object>());
+                            var scheme = new AuthenticationScheme(name, typeof(TestHandler), new Dictionary<string, object>());
                             auth.AddScheme(scheme);
                         }
                         else if (req.Path.StartsWithSegments(new PathString("/auth"), out remainder))
                         {
-                            var name = remainder.Value.Substring(1);
+                            var name = (remainder.Value.Length > 0) ? remainder.Value.Substring(1) : null;
                             var result = await context.AuthenticateAsync(name);
                             res.Describe(result?.Ticket?.Principal);
                         }
@@ -106,9 +118,11 @@ namespace Microsoft.AspNetCore.Authentication
                 })
                 .ConfigureServices(services =>
                 {
-                    services.AddAuthentication(o =>
+                    if (configureAuth == null)
                     {
-                    });
+                        configureAuth = o => { };
+                    }
+                    services.AddAuthentication(configureAuth);
                 });
             return new TestServer(builder);
         }

@@ -70,7 +70,10 @@ namespace OpenIdConnectSample
 
 
             services.AddAuthentication(sharedOptions =>
-                sharedOptions.DefaultAuthenticationScheme = CookieAuthenticationDefaults.AuthenticationScheme);
+            {
+                sharedOptions.DefaultAuthenticationScheme = CookieAuthenticationDefaults.AuthenticationScheme;
+                sharedOptions.DefaultSignInScheme = CookieAuthenticationDefaults.AuthenticationScheme;
+            });
         }
 
         public void Configure(IApplicationBuilder app, ILoggerFactory loggerfactory)

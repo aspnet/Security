@@ -27,7 +27,6 @@ namespace Microsoft.AspNetCore.Authentication
                     o.AddScheme("Skip", s =>
                     {
                         s.HandlerType = typeof(SkipHandler);
-                        s.CallbackPaths = new PathString[] { "/" };
                     });
                     // Won't get hit since CanHandleRequests is false
                     o.AddScheme("throws", s =>
@@ -37,13 +36,11 @@ namespace Microsoft.AspNetCore.Authentication
                     o.AddScheme("607", s =>
                     {
                         s.HandlerType = typeof(SixOhSevenHandler);
-                        s.CallbackPaths = new PathString[] { "/" };
                     });
                     // Won't get run since 607 will finish
                     o.AddScheme("305", s =>
                     {
                         s.HandlerType = typeof(ThreeOhFiveHandler);
-                        s.CallbackPaths = new PathString[] { "/" };
                     });
                 }));
             var server = new TestServer(builder);

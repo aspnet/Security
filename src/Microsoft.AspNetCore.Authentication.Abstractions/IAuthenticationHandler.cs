@@ -9,7 +9,6 @@ namespace Microsoft.AspNetCore.Authentication
     // Created on a per request basis to handle one particular scheme.
     public interface IAuthenticationHandler
     {
-        // Review: we could consider removing context, since every method has a context object now
         // Gives the handler access to the configuration data
         Task InitializeAsync(AuthenticationScheme scheme, HttpContext context);
 

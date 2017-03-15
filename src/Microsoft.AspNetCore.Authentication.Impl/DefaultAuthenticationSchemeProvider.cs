@@ -32,7 +32,6 @@ namespace Microsoft.AspNetCore.Authentication
 
         private IDictionary<string, AuthenticationScheme> _map = new Dictionary<string, AuthenticationScheme>(); // case sensitive?
 
-        //private IDictionary<PathString, List<AuthenticationScheme>> _handlerMap = new Dictionary<PathString, List<AuthenticationScheme>>(); // case sensitive?
         private List<AuthenticationScheme> _requestHandlers = new List<AuthenticationScheme>();
 
         public Task<AuthenticationScheme> GetDefaultAuthenticateSchemeAsync()
@@ -61,6 +60,19 @@ namespace Microsoft.AspNetCore.Authentication
             return Task.FromResult<AuthenticationScheme>(null);
         }
 
+        public Task<AuthenticationScheme> GetDefaultSignInSchemeAsync()
+        {
+            if (_options.DefaultSignInScheme != null)
+            {
+                return GetSchemeAsync(_options.DefaultSignInScheme);
+            }
+            if (_map.Count == 1)
+            {
+                return Task.FromResult(_map.Values.First());
+            }
+            return Task.FromResult<AuthenticationScheme>(null);
+        }
+
         public Task<AuthenticationScheme> GetSchemeAsync(string name)
         {
             if (_map.ContainsKey(name))
@@ -70,14 +82,8 @@ namespace Microsoft.AspNetCore.Authentication
             return Task.FromResult<AuthenticationScheme>(null);
         }
 
-        public Task<IEnumerable<AuthenticationScheme>> GetRequestHandlerSchemes(PathString requestPath)
+        public Task<IEnumerable<AuthenticationScheme>> GetRequestHandlerSchemesAsync(PathString requestPath)
         {
-            //if (_handlerMap.ContainsKey(requestPath))
-            //{
-            //    return Task.FromResult<IEnumerable<AuthenticationScheme>>(_handlerMap[requestPath]);
-            //}
-
-            //return Task.FromResult(Enumerable.Empty<AuthenticationScheme>());
             return Task.FromResult<IEnumerable<AuthenticationScheme>>(_requestHandlers);
         }
 
@@ -97,17 +103,6 @@ namespace Microsoft.AspNetCore.Authentication
                 {
                     _requestHandlers.Add(scheme);
                 }
-                //if (scheme.CallbackPaths.Count() > 0)
-                //{
-                //    foreach (var path in scheme.CallbackPaths)
-                //    {
-                //        if (!_handlerMap.ContainsKey(path))
-                //        {
-                //            _handlerMap[path] = new List<AuthenticationScheme>();
-                //        }
-                //        _handlerMap[path].Add(scheme);
-                //    }
-                //}
                 _map[scheme.Name] = scheme;
             }
         }

@@ -13,6 +13,7 @@ namespace Microsoft.AspNetCore.Authentication
         Task<AuthenticationScheme> GetSchemeAsync(string name);
         Task<AuthenticationScheme> GetDefaultAuthenticateSchemeAsync();
         Task<AuthenticationScheme> GetDefaultChallengeSchemeAsync();
+        Task<AuthenticationScheme> GetDefaultSignInSchemeAsync();
         void AddScheme(AuthenticationScheme scheme);
         void RemoveScheme(string name);
 
@@ -20,6 +21,6 @@ namespace Microsoft.AspNetCore.Authentication
         /// Returns the schemes in priority order for request handling.
         /// </summary>
         /// <returns></returns>
-        Task<IEnumerable<AuthenticationScheme>> GetRequestHandlerSchemes(PathString requestPath);
+        Task<IEnumerable<AuthenticationScheme>> GetRequestHandlerSchemesAsync(PathString requestPath);
     }
 }
