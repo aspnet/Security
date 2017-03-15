@@ -4,16 +4,17 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
-using System.Linq;using System.Reflection;
+using System.Linq;
+using System.Reflection;
 using System.Text;
 using System.Text.Encodings.Web;
 using System.Xml.Linq;
-using Microsoft.AspNetCore.Builder;
+using Microsoft.AspNetCore.Authentication.OpenIdConnect;
 using Microsoft.AspNetCore.TestHost;
 using Microsoft.IdentityModel.Protocols.OpenIdConnect;
 using Xunit;
 
-namespace Microsoft.AspNetCore.Authentication.Tests.OpenIdConnect
+namespace Microsoft.AspNetCore.Authentication.Test.OpenIdConnect
 {
     /// <summary>
     /// This helper class is used to check that query string parameters are as expected.
@@ -28,16 +29,6 @@ namespace Microsoft.AspNetCore.Authentication.Tests.OpenIdConnect
 
         public TestSettings(Action<OpenIdConnectOptions> configure)
         {
-            _options = TestServerBuilder.CreateOpenIdConnectOptions(configure);
-        }
-
-        public TestSettings(OpenIdConnectOptions options)
-        {
-            _options = options;
-        }
-
-        public OpenIdConnectOptions Options => _options;
-
             _configureOptions = o =>
             {
                 configure?.Invoke(o);
@@ -220,8 +211,7 @@ namespace Microsoft.AspNetCore.Authentication.Tests.OpenIdConnect
             ValidateQueryParameter(OpenIdConnectParameterNames.SkuTelemetry, "ID_NET", actualQuery, errors, htmlEncoded);
 
         private void ValidateVersionTelemetry(IDictionary<string, string> actualQuery, ICollection<string> errors, bool htmlEncoded) =>
-            ValidateQueryParameter(OpenIdConnectParameterNames.VersionTelemetry,
-                typeof(OpenIdConnectMessage).GetTypeInfo().Assembly.GetName().Version.ToString(), actualQuery, errors, htmlEncoded);
+            ValidateQueryParameter(OpenIdConnectParameterNames.VersionTelemetry, typeof(OpenIdConnectMessage).GetTypeInfo().Assembly.GetName().Version.ToString(), actualQuery, errors, htmlEncoded);
 
         private void ValidateQueryParameter(
             string parameterName,

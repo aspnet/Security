@@ -16,8 +16,6 @@ using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.TestHost;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.AspNetCore.TestHost;
-using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging.Abstractions;
 using Newtonsoft.Json;
 using Xunit;
@@ -85,19 +83,7 @@ namespace Microsoft.AspNetCore.Authentication.Facebook
                                 context.Response.Redirect(context.RedirectUri + "&custom=test");
                                 return Task.FromResult(0);
                             }
-                        }
-                    });
-                    app.UseCookieAuthentication(new CookieAuthenticationOptions
-                    {
-                        AuthenticationScheme = "External",
-                        AutomaticAuthenticate = true
-                    });
-                },
-                services =>
-                {
-                    services.AddAuthentication(options =>
-                    {
-                        options.SignInScheme = "External";
+                        };
                     });
                 },
                 context =>
@@ -263,13 +249,10 @@ namespace Microsoft.AspNetCore.Authentication.Facebook
                                 }
                                 return null;
                             }
-                        }
+                        };
                     });
                 },
-                services =>
-                {
-                    services.AddAuthentication(options => options.SignInScheme = CookieAuthenticationDefaults.AuthenticationScheme);
-                }, handler: null);
+                handler: null);
 
             var properties = new AuthenticationProperties();
             var correlationKey = ".xsrf";

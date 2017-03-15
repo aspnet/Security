@@ -43,8 +43,8 @@ namespace Microsoft.AspNetCore.Authentication.Facebook
 
             var payload = JObject.Parse(await response.Content.ReadAsStringAsync());
 
-            var ticket = new AuthenticationTicket(new ClaimsPrincipal(identity), properties, Options.AuthenticationScheme);
-            var context = new OAuthCreatingTicketContext(ticket, Context, Options, Backchannel, tokens, payload);
+            var ticket = new AuthenticationTicket(new ClaimsPrincipal(identity), properties, Scheme.Name);
+            var context = new OAuthCreatingTicketContext(ticket, Context, Scheme, Options, Backchannel, tokens, payload);
             context.RunClaimActions();
 
             await Options.Events.CreatingTicket(context);

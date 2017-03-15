@@ -41,8 +41,8 @@ namespace Microsoft.AspNetCore.Authentication.Google
             var payload = JObject.Parse(await response.Content.ReadAsStringAsync());
 
             var principal = new ClaimsPrincipal(identity);
-            var ticket = new AuthenticationTicket(principal, properties, Options.AuthenticationScheme);
-            var context = new OAuthCreatingTicketContext(ticket, Context, Options, Backchannel, tokens, payload);
+            var ticket = new AuthenticationTicket(principal, properties, Scheme.Name);
+            var context = new OAuthCreatingTicketContext(ticket, Context, Scheme, Options, Backchannel, tokens, payload);
             context.RunClaimActions();
 
             await Options.Events.CreatingTicket(context);

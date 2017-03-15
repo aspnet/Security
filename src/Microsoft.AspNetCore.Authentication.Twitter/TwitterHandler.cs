@@ -145,7 +145,7 @@ namespace Microsoft.AspNetCore.Authentication.Twitter
                 action.Run(user, identity, Options.ClaimsIssuer);
             }
 
-            var context = new TwitterCreatingTicketContext(Context, Options, token.UserId, token.ScreenName, token.Token, token.TokenSecret, user)
+            var context = new TwitterCreatingTicketContext(Context, Scheme, Options, properties, token.UserId, token.ScreenName, token.Token, token.TokenSecret, user)
             {
                 Principal = new ClaimsPrincipal(identity)
             };

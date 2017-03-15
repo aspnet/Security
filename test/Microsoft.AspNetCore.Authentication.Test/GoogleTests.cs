@@ -626,7 +626,7 @@ namespace Microsoft.AspNetCore.Authentication.Google
                         Assert.Equal(context.Identity.FindFirst(ClaimTypes.GivenName)?.Value, "Test Given Name");
                         return Task.FromResult(0);
                     }
-                },
+                };
                 o.BackchannelHttpHandler = new TestHttpMessageHandler
                 {
                     Sender = req =>
