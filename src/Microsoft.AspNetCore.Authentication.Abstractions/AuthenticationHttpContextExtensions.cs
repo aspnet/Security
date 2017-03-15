@@ -10,11 +10,17 @@ namespace Microsoft.AspNetCore.Authentication
 {
     public static class AuthenticationHttpContextExtensions
     {
+        public static Task<AuthenticateResult> AuthenticateAsync(this HttpContext context) =>
+            context.AuthenticateAsync(scheme: null);
+
         public static Task<AuthenticateResult> AuthenticateAsync(this HttpContext context, string scheme) =>
             context.RequestServices.GetRequiredService<IAuthenticationService>().AuthenticateAsync(context, scheme);
 
         public static Task ChallengeAsync(this HttpContext context, string scheme) =>
             context.ChallengeAsync(scheme, properties: null);
+
+        public static Task ChallengeAsync(this HttpContext context) =>
+            context.ChallengeAsync(scheme: null, properties: null);
 
         public static Task ChallengeAsync(this HttpContext context, string scheme, AuthenticationProperties properties) =>
             context.ChallengeAsync(scheme, properties: properties, behavior: ChallengeBehavior.Automatic);
@@ -31,8 +37,15 @@ namespace Microsoft.AspNetCore.Authentication
         public static Task SignInAsync(this HttpContext context, string scheme, ClaimsPrincipal principal) =>
             context.SignInAsync(scheme, principal, properties: null);
 
+        public static Task SignInAsync(this HttpContext context, ClaimsPrincipal principal) =>
+            context.SignInAsync(scheme: null, principal: principal, properties: null);
+
+        public static Task SignInAsync(this HttpContext context, ClaimsPrincipal principal, AuthenticationProperties properties) =>
+            context.SignInAsync(scheme: null, principal: principal, properties: properties);
+
         public static Task SignInAsync(this HttpContext context, string scheme, ClaimsPrincipal principal, AuthenticationProperties properties) =>
             context.RequestServices.GetRequiredService<IAuthenticationService>().SignInAsync(context, scheme, principal, properties);
+
 
         public static Task SignOutAsync(this HttpContext context, string scheme) => context.SignOutAsync(scheme, properties: null);
 

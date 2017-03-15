@@ -10,11 +10,15 @@ namespace Microsoft.AspNetCore.Authentication
 {
     public class DefaultAuthenticationService : IAuthenticationService
     {
-        public DefaultAuthenticationService(IAuthenticationHandlerProvider cache, IClaimsTransformation transform)
+        public DefaultAuthenticationService(IAuthenticationSchemeProvider schemes, IAuthenticationHandlerProvider handlers, IClaimsTransformation transform)
         {
-            Handlers = cache;
+            Schemes = schemes;
+            Handlers = handlers;
             Transform = transform;
         }
+
+        public IAuthenticationSchemeProvider Schemes { get; }
+
 
         public IAuthenticationHandlerProvider Handlers { get; }
 
@@ -24,7 +28,12 @@ namespace Microsoft.AspNetCore.Authentication
         {
             if (authenticationScheme == null)
             {
-                throw new ArgumentNullException(nameof(authenticationScheme));
+                var defaultScheme = await Schemes.GetDefaultAuthenticateSchemeAsync();
+                authenticationScheme = defaultScheme?.Name;
+                if (authenticationScheme == null)
+                {
+                    throw new InvalidOperationException($"No authenticationScheme was specified, and there was no DefaultAuthenticateScheme found.");
+                }
             }
 
             var handler = await Handlers.GetHandlerAsync(httpContext, authenticationScheme);
@@ -45,9 +54,14 @@ namespace Microsoft.AspNetCore.Authentication
 
         public virtual async Task ChallengeAsync(HttpContext httpContext, string authenticationScheme, AuthenticationProperties properties, ChallengeBehavior behavior)
         {
-            if (string.IsNullOrEmpty(authenticationScheme))
+            if (authenticationScheme == null)
             {
-                throw new ArgumentException(nameof(authenticationScheme));
+                var defaultChallengeScheme = await Schemes.GetDefaultChallengeSchemeAsync();
+                authenticationScheme = defaultChallengeScheme?.Name;
+                if (authenticationScheme == null)
+                {
+                    throw new InvalidOperationException($"No authenticationScheme was specified, and there was no DefaultChallengeScheme found.");
+                }
             }
 
             var handler = await Handlers.GetHandlerAsync(httpContext, authenticationScheme);
@@ -62,14 +76,19 @@ namespace Microsoft.AspNetCore.Authentication
 
         public virtual async Task SignInAsync(HttpContext httpContext, string authenticationScheme, ClaimsPrincipal principal, AuthenticationProperties properties)
         {
-            if (string.IsNullOrEmpty(authenticationScheme))
-            {
-                throw new ArgumentException(nameof(authenticationScheme));
-            }
-
             if (principal == null)
             {
                 throw new ArgumentNullException(nameof(principal));
+            }
+
+            if (authenticationScheme == null)
+            {
+                var defaultScheme = await Schemes.GetDefaultSignInSchemeAsync();
+                authenticationScheme = defaultScheme?.Name;
+                if (authenticationScheme == null)
+                {
+                    throw new InvalidOperationException($"No authenticationScheme was specified, and there was no DefaultAuthenticateScheme found.");
+                }
             }
 
             var handler = await Handlers.GetHandlerAsync(httpContext, authenticationScheme);
