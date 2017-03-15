@@ -52,9 +52,7 @@ namespace SocialSample
             {
                 o.AppId = Configuration["facebook:appid"];
                 o.AppSecret = Configuration["facebook:appsecret"];
-                o.Scope.Clear();
                 o.Scope.Add("email");
-                o.Fields.Clear();
                 o.Fields.Add("name");
                 o.Fields.Add("email");
                 o.SaveTokens = true;
@@ -70,7 +68,6 @@ namespace SocialSample
                 o.CallbackPath = new PathString("/signin-google-token");
                 o.AuthorizationEndpoint = GoogleDefaults.AuthorizationEndpoint;
                 o.TokenEndpoint = GoogleDefaults.TokenEndpoint;
-                o.Scope.Clear();
                 o.Scope.Add("openid");
                 o.Scope.Add("profile");
                 o.Scope.Add("email");
@@ -133,7 +130,6 @@ namespace SocialSample
                 o.CallbackPath = new PathString("/signin-microsoft-token");
                 o.AuthorizationEndpoint = MicrosoftAccountDefaults.AuthorizationEndpoint;
                 o.TokenEndpoint = MicrosoftAccountDefaults.TokenEndpoint;
-                o.Scope.Clear();
                 o.Scope.Add("https://graph.microsoft.com/user.read");
                 o.SaveTokens = true;
             });
