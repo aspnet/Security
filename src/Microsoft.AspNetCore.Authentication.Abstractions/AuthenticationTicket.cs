@@ -32,7 +32,7 @@ namespace Microsoft.AspNetCore.Authentication
         /// <summary>
         /// Gets the claims-principal with authenticated user identities.
         /// </summary>
-        public ClaimsPrincipal Principal{ get; private set; }
+        public ClaimsPrincipal Principal { get; private set; }
 
         /// <summary>
         /// Additional state values for the authentication session.

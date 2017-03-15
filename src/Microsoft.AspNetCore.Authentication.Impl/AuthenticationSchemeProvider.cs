@@ -30,7 +30,7 @@ namespace Microsoft.AspNetCore.Authentication
         private readonly AuthenticationOptions _options;
         private readonly object _lock = new object();
 
-        private IDictionary<string, AuthenticationScheme> _map = new Dictionary<string, AuthenticationScheme>(); // case sensitive?
+        private IDictionary<string, AuthenticationScheme> _map = new Dictionary<string, AuthenticationScheme>(StringComparer.Ordinal); // case sensitive?
 
         private List<AuthenticationScheme> _requestHandlers = new List<AuthenticationScheme>();
 

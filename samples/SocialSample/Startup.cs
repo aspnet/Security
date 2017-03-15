@@ -142,7 +142,6 @@ namespace SocialSample
             // https://azure.microsoft.com/en-us/documentation/articles/active-directory-v2-app-registration/
             services.AddMicrosoftAccountAuthentication(o =>
             {
-                o.DisplayName = "MicrosoftAccount";
                 o.ClientId = Configuration["microsoftaccount:clientid"];
                 o.ClientSecret = Configuration["microsoftaccount:clientsecret"];
                 o.SaveTokens = true;
@@ -159,6 +158,11 @@ namespace SocialSample
                 o.AuthorizationEndpoint = "https://github.com/login/oauth/authorize";
                 o.TokenEndpoint = "https://github.com/login/oauth/access_token";
                 o.SaveTokens = true;
+                o.ClaimActions.MapJsonKey(ClaimTypes.NameIdentifier, "id");
+                o.ClaimActions.MapJsonKey(ClaimTypes.Name, "login");
+                o.ClaimActions.MapJsonKey("urn:github:name", "name");
+                o.ClaimActions.MapJsonKey(ClaimTypes.Email, "email", ClaimValueTypes.Email);
+                o.ClaimActions.MapJsonKey("urn:github:url", "url");
             });
 
             // You must first create an app with GitHub and add its ID and Secret to your user-secrets.
@@ -217,13 +221,7 @@ namespace SocialSample
                     context.Response.StatusCode = 500;
                     await context.Response.WriteAsync(ex.ToString());
                 }
-            };
-            githubOptions.ClaimActions.MapJsonKey(ClaimTypes.NameIdentifier, "id");
-            githubOptions.ClaimActions.MapJsonKey(ClaimTypes.Name, "login");
-            githubOptions.ClaimActions.MapJsonKey("urn:github:name", "name");
-            githubOptions.ClaimActions.MapJsonKey(ClaimTypes.Email, "email", ClaimValueTypes.Email);
-            githubOptions.ClaimActions.MapJsonKey("urn:github:url", "url");
-            app.UseOAuthAuthentication(githubOptions);
+            });
 
             app.UseAuthentication();
 
