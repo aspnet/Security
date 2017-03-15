@@ -5,11 +5,14 @@ using System;
 using System.Linq;
 using System.Net;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authentication.OpenIdConnect;
+using Microsoft.AspNetCore.DataProtection;
+using Microsoft.Extensions.Logging.Abstractions;
 using Microsoft.IdentityModel.Protocols.OpenIdConnect;
 using Xunit;
 
-namespace Microsoft.AspNetCore.Authentication.Tests.OpenIdConnect
+namespace Microsoft.AspNetCore.Authentication.Test.OpenIdConnect
 {
     public class OpenIdConnectChallengeTests
     {
@@ -47,9 +50,14 @@ namespace Microsoft.AspNetCore.Authentication.Tests.OpenIdConnect
         [Fact]
         public async Task AuthorizationRequestDoesNotIncludeTelemetryParametersWhenDisabled()
         {
-            var settings = new TestSettings(opt => opt.DisableTelemetry = true);
+            var setting = new TestSettings(opt =>
+            {
+                opt.ClientId = "Test Id";
+                opt.Authority = TestServerBuilder.DefaultAuthority;
+                opt.DisableTelemetry = true;
+            });
 
-            var server = settings.CreateTestServer();
+            var server = setting.CreateTestServer();
             var transaction = await server.SendAsync(ChallengeEndpoint);
 
             var res = transaction.Response;
@@ -110,7 +118,7 @@ namespace Microsoft.AspNetCore.Authentication.Tests.OpenIdConnect
         [InlineData(null)]
         public async Task ChallengeCanSetUserStateThroughProperties(string userState)
         {
-            var stateFormat = new PropertiesDataFormat(new EphemeralDataProtectionProvider().CreateProtector("OIDCTest"));
+            var stateFormat = new PropertiesDataFormat(new EphemeralDataProtectionProvider(NullLoggerFactory.Instance).CreateProtector("OIDCTest"));
             var settings = new TestSettings(o =>
             {
                 o.ClientId = "Test Id";
@@ -140,7 +148,7 @@ namespace Microsoft.AspNetCore.Authentication.Tests.OpenIdConnect
         [InlineData(null)]
         public async Task OnRedirectToIdentityProviderEventCanSetState(string userState)
         {
-            var stateFormat = new PropertiesDataFormat(new EphemeralDataProtectionProvider().CreateProtector("OIDCTest"));
+            var stateFormat = new PropertiesDataFormat(new EphemeralDataProtectionProvider(NullLoggerFactory.Instance).CreateProtector("OIDCTest"));
             var settings = new TestSettings(opt =>
             {
                 opt.StateDataFormat = stateFormat;
