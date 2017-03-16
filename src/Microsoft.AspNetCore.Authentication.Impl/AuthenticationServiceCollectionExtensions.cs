@@ -22,7 +22,6 @@ namespace Microsoft.Extensions.DependencyInjection
                 throw new ArgumentNullException(nameof(services));
             }
 
-            services.AddOptionsFactory();
             services.TryAddSingleton<ISystemClock, SystemClock>();
             services.AddDataProtection();
             services.AddWebEncoders();

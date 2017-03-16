@@ -118,31 +118,6 @@ namespace Microsoft.AspNetCore.Authentication
             await handler.SignOutAsync(signOutContext);
         }
 
-        public virtual Task SignInAsync(HttpContext httpContext, string authenticationScheme, ClaimsPrincipal principal)
-        {
-            if (string.IsNullOrEmpty(authenticationScheme))
-            {
-                throw new ArgumentException(nameof(authenticationScheme));
-            }
-
-            if (principal == null)
-            {
-                throw new ArgumentNullException(nameof(principal));
-            }
-
-            return SignInAsync(httpContext, authenticationScheme, principal, properties: null);
-        }
-
-        public virtual Task ForbidAsync(HttpContext httpContext, string authenticationScheme)
-        {
-            if (authenticationScheme == null)
-            {
-                throw new ArgumentNullException(nameof(authenticationScheme));
-            }
-
-            return ForbidAsync(httpContext, authenticationScheme, properties: null);
-        }
-
         // Deny access (typically a 403)
         public virtual Task ForbidAsync(HttpContext httpContext, string authenticationScheme, AuthenticationProperties properties)
         {
