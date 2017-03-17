@@ -19,7 +19,7 @@ namespace Microsoft.AspNetCore.Authentication.Facebook
 {
     internal class FacebookHandler : OAuthHandler<FacebookOptions>
     {
-        public FacebookHandler(IOptions<AuthenticationOptions> sharedOptions, IOptionsFactory<FacebookOptions> options, ILoggerFactory logger, UrlEncoder encoder, IDataProtectionProvider dataProtection, ISystemClock clock)
+        public FacebookHandler(IOptions<AuthenticationOptions> sharedOptions, IOptionsService<FacebookOptions> options, ILoggerFactory logger, UrlEncoder encoder, IDataProtectionProvider dataProtection, ISystemClock clock)
             : base(sharedOptions, options, logger, encoder, dataProtection, clock)
         { }
 

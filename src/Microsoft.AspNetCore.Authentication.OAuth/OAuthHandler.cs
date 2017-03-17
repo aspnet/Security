@@ -36,7 +36,7 @@ namespace Microsoft.AspNetCore.Authentication.OAuth
             set { base.Events = value; }
         }
 
-        public OAuthHandler(IOptions<AuthenticationOptions> sharedOptions, IOptionsFactory<TOptions> options, ILoggerFactory logger, UrlEncoder encoder, IDataProtectionProvider dataProtection, ISystemClock clock)
+        public OAuthHandler(IOptions<AuthenticationOptions> sharedOptions, IOptionsService<TOptions> options, ILoggerFactory logger, UrlEncoder encoder, IDataProtectionProvider dataProtection, ISystemClock clock)
             : base(sharedOptions, options, dataProtection, logger, encoder, clock)
         {
         }

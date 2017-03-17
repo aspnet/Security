@@ -59,7 +59,7 @@ namespace Microsoft.AspNetCore.Authentication.OpenIdConnect
 
         protected string SignOutScheme { get; private set; }
 
-        public OpenIdConnectHandler(IOptions<AuthenticationOptions> sharedOptions, IOptionsFactory<OpenIdConnectOptions> options, ILoggerFactory logger, HtmlEncoder htmlEncoder, UrlEncoder encoder, IDataProtectionProvider dataProtection, ISystemClock clock)
+        public OpenIdConnectHandler(IOptions<AuthenticationOptions> sharedOptions, IOptionsService<OpenIdConnectOptions> options, ILoggerFactory logger, HtmlEncoder htmlEncoder, UrlEncoder encoder, IDataProtectionProvider dataProtection, ISystemClock clock)
             : base(sharedOptions, options, dataProtection, logger, encoder, clock)
         {
             HtmlEncoder = htmlEncoder;

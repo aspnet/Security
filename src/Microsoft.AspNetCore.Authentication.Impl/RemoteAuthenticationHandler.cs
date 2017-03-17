@@ -27,7 +27,7 @@ namespace Microsoft.AspNetCore.Authentication
 
         private readonly AuthenticationOptions _sharedOptions;
 
-        protected RemoteAuthenticationHandler(IOptions<AuthenticationOptions> sharedOptions, IOptionsFactory<TOptions> optionsFactory, IDataProtectionProvider dataProtection, ILoggerFactory logger, UrlEncoder encoder, ISystemClock clock)
+        protected RemoteAuthenticationHandler(IOptions<AuthenticationOptions> sharedOptions, IOptionsService<TOptions> optionsFactory, IDataProtectionProvider dataProtection, ILoggerFactory logger, UrlEncoder encoder, ISystemClock clock)
             : base(optionsFactory, logger, encoder, clock)
         {
             _sharedOptions = sharedOptions.Value;

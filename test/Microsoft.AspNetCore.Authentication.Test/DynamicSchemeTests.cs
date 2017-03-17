@@ -72,7 +72,7 @@ namespace Microsoft.AspNetCore.Authentication
 
         private class TestHandler : AuthenticationHandler<AuthenticationSchemeOptions>
         {
-            public TestHandler(IOptionsFactory<AuthenticationSchemeOptions> options, ILoggerFactory logger, UrlEncoder encoder, ISystemClock clock) : base(options, logger, encoder, clock)
+            public TestHandler(IOptionsService<AuthenticationSchemeOptions> options, ILoggerFactory logger, UrlEncoder encoder, ISystemClock clock) : base(options, logger, encoder, clock)
             {
             }
 

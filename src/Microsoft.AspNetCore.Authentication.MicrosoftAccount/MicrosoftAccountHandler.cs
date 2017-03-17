@@ -16,7 +16,7 @@ namespace Microsoft.AspNetCore.Authentication.MicrosoftAccount
 {
     internal class MicrosoftAccountHandler : OAuthHandler<MicrosoftAccountOptions>
     {
-        public MicrosoftAccountHandler(IOptions<AuthenticationOptions> sharedOptions, IOptionsFactory<MicrosoftAccountOptions> options, ILoggerFactory logger, UrlEncoder encoder, IDataProtectionProvider dataProtection, ISystemClock clock)
+        public MicrosoftAccountHandler(IOptions<AuthenticationOptions> sharedOptions, IOptionsService<MicrosoftAccountOptions> options, ILoggerFactory logger, UrlEncoder encoder, IDataProtectionProvider dataProtection, ISystemClock clock)
             : base(sharedOptions, options, logger, encoder, dataProtection, clock)
         { }
 

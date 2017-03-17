@@ -31,7 +31,7 @@ namespace Microsoft.AspNetCore.Authentication.Cookies
         private string _sessionKey;
         private Task<AuthenticateResult> _readCookieTask;
 
-        public CookieAuthenticationHandler(IOptionsFactory<CookieAuthenticationOptions> options, ILoggerFactory logger, UrlEncoder encoder, ISystemClock clock)
+        public CookieAuthenticationHandler(IOptionsService<CookieAuthenticationOptions> options, ILoggerFactory logger, UrlEncoder encoder, ISystemClock clock)
             : base(options, logger, encoder, clock)
         { }
 

@@ -29,7 +29,7 @@ namespace Microsoft.AspNetCore.Authentication{
 
         protected ISystemClock Clock { get; }
 
-        protected IOptionsFactory<TOptions> OptionsFactory { get; }
+        protected IOptionsService<TOptions> OptionsService { get; }
 
         /// <summary>
         /// The handler calls methods on the events which give the application control at certain points where processing is occurring. 
@@ -55,12 +55,12 @@ namespace Microsoft.AspNetCore.Authentication{
             }
         }
 
-        protected AuthenticationHandler(IOptionsFactory<TOptions> optionsFactory, ILoggerFactory logger, UrlEncoder encoder, ISystemClock clock)
+        protected AuthenticationHandler(IOptionsService<TOptions> optionsFactory, ILoggerFactory logger, UrlEncoder encoder, ISystemClock clock)
         {
             Logger = logger.CreateLogger(this.GetType().FullName);
             UrlEncoder = encoder;
             Clock = clock;
-            OptionsFactory = optionsFactory;
+            OptionsService = optionsFactory;
         }
 
         /// <summary>
@@ -75,7 +75,7 @@ namespace Microsoft.AspNetCore.Authentication{
             Context = context ?? throw new ArgumentNullException(nameof(context));
 
             // Configures and Validates options
-            Options = OptionsFactory.Get(Scheme.Name) ?? new TOptions();
+            Options = OptionsService.Get(Scheme.Name) ?? new TOptions();
 
             // REVIEW: is there a better place for this default?
             Options.DisplayName = Options.DisplayName ?? scheme.Name;
