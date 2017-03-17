@@ -58,6 +58,22 @@ namespace Microsoft.AspNetCore.Authentication
             return GetString("Exception_AuthenticationTokenDoesNotProvideSyncMethods");
         }
 
+        /// <summary>
+        /// The '{0}' option must be provided.
+        /// </summary>
+        internal static string Exception_OptionMustBeProvided
+        {
+            get { return GetString("Exception_OptionMustBeProvided"); }
+        }
+
+        /// <summary>
+        /// The '{0}' option must be provided.
+        /// </summary>
+        internal static string FormatException_OptionMustBeProvided(object p0)
+        {
+            return string.Format(CultureInfo.CurrentCulture, GetString("Exception_OptionMustBeProvided"), p0);
+        }
+
         private static string GetString(string name, params string[] formatterNames)
         {
             var value = _resourceManager.GetString(name);
