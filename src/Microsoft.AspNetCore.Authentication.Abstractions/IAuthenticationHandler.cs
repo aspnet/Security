@@ -17,15 +17,4 @@ namespace Microsoft.AspNetCore.Authentication
         Task SignInAsync(SignInContext context);
         Task SignOutAsync(SignOutContext context);
     }
-
-    public interface IAuthenticationRequestHandler : IAuthenticationHandler
-    {
-
-        /// <summary>
-        /// Returns true if request processing should stop.
-        /// </summary>
-        /// <returns></returns>
-        Task<bool> HandleRequestAsync();
-    }
-
 }

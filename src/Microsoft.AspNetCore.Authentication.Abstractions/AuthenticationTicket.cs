@@ -19,10 +19,24 @@ namespace Microsoft.AspNetCore.Authentication
         /// <param name="authenticationScheme">the authentication middleware that was responsible for this ticket.</param>
         public AuthenticationTicket(ClaimsPrincipal principal, AuthenticationProperties properties, string authenticationScheme)
         {
+            if (principal == null)
+            {
+                throw new ArgumentNullException(nameof(principal));
+            }
+
             AuthenticationScheme = authenticationScheme;
-            Principal = principal ?? throw new ArgumentNullException(nameof(principal));
+            Principal = principal;
             Properties = properties ?? new AuthenticationProperties();
         }
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="AuthenticationTicket"/> class
+        /// </summary>
+        /// <param name="principal">the <see cref="ClaimsPrincipal"/> that represents the authenticated user.</param>
+        /// <param name="authenticationScheme">the authentication middleware that was responsible for this ticket.</param>
+        public AuthenticationTicket(ClaimsPrincipal principal, string authenticationScheme) 
+            : this(principal, properties: null, authenticationScheme: authenticationScheme)
+        { }
 
         /// <summary>
         /// Gets the authentication type.

@@ -71,8 +71,17 @@ namespace Microsoft.AspNetCore.Authentication{
         /// <returns></returns>
         public virtual Task InitializeAsync(AuthenticationScheme scheme, HttpContext context)
         {
-            Scheme = scheme ?? throw new ArgumentNullException(nameof(scheme));
-            Context = context ?? throw new ArgumentNullException(nameof(context));
+            if (scheme == null)
+            {
+                throw new ArgumentNullException(nameof(scheme));
+            }
+            if (context == null)
+            {
+                throw new ArgumentNullException(nameof(context));
+            }
+
+            Scheme = scheme;
+            Context = context;
 
             // Configures and Validates options
             Options = OptionsService.Get(Scheme.Name) ?? new TOptions();

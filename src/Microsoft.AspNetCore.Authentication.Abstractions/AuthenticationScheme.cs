@@ -2,32 +2,33 @@
 // Licensed under the Apache License, Version 2.0. See License.txt in the project root for license information.
 
 using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Reflection;
-using Microsoft.AspNetCore.Http;
 
 namespace Microsoft.AspNetCore.Authentication
 {
     public class AuthenticationScheme
     {
-        public AuthenticationScheme(string name, Type handlerType, IReadOnlyDictionary<string, object> settings)
+        public AuthenticationScheme(string name, Type handlerType)
         {
-            Name = name ?? throw new ArgumentNullException(nameof(name));
+            if (name == null)
+            {
+                throw new ArgumentNullException(nameof(name));
+            }
+            if (handlerType == null)
+            {
+                throw new ArgumentNullException(nameof(handlerType));
+            }
             if (!typeof(IAuthenticationHandler).IsAssignableFrom(handlerType))
             {
                 throw new ArgumentException("handlerType must implement IAuthenticationSchemeHandler.");
             }
-            HandlerType = handlerType ?? throw new ArgumentNullException(nameof(handlerType));
-            Settings = settings ?? throw new ArgumentNullException(nameof(settings));
+
+            Name = name;
+            HandlerType = handlerType;
         }
 
         // TODO: add display name?
         public string Name { get; }
         public Type HandlerType { get; }
-
-        // Holds things like the configured options instances for the handler
-        // Also replacement for AuthenticationDescription
-        public IReadOnlyDictionary<string, object> Settings { get; }
     }
 }
