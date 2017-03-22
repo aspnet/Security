@@ -1,7 +1,6 @@
 // Copyright (c) .NET Foundation. All rights reserved. See License.txt in the project root for license information.
 
 using System;
-using System.Collections.Generic;
 using System.Net;
 using System.Security.Claims;
 using System.Text.Encodings.Web;
@@ -72,7 +71,7 @@ namespace Microsoft.AspNetCore.Authentication
 
         private class TestHandler : AuthenticationHandler<AuthenticationSchemeOptions>
         {
-            public TestHandler(IOptionsService<AuthenticationSchemeOptions> options, ILoggerFactory logger, UrlEncoder encoder, ISystemClock clock) : base(options, logger, encoder, clock)
+            public TestHandler(IOptions<AuthenticationSchemeOptions> options, ILoggerFactory logger, UrlEncoder encoder, ISystemClock clock) : base(options, logger, encoder, clock)
             {
             }
 

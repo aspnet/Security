@@ -11,6 +11,7 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\..\..\HttpAbstractions\src\Microsoft.AspNetCore.Authentication.Core\Microsoft.AspNetCore.Authentication.Core.csproj" />
     <PackageReference Include="Microsoft.AspNetCore.DataProtection" Version="$(AspNetCoreVersion)" />
     <PackageReference Include="Microsoft.AspNetCore.Http" Version="$(AspNetCoreVersion)" />
     <PackageReference Include="Microsoft.AspNetCore.Http.Extensions" Version="$(AspNetCoreVersion)" />
