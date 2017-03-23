@@ -12,18 +12,18 @@ namespace Microsoft.AspNetCore.Builder
     public static class OAuthAppBuilderExtensions
     {
         /// <summary>
-        /// Obsolete, see TODO: fwdlink
+        /// Obsolete, see https://go.microsoft.com/fwlink/?linkid=845470
         /// </summary>
         /// <param name="app">The <see cref="IApplicationBuilder"/> to add the middleware to.</param>
         /// <returns>A reference to this instance after the operation has completed.</returns>
         [Obsolete]
         public static IApplicationBuilder UseOAuthAuthentication(this IApplicationBuilder app)
         {
-            throw new NotSupportedException("This method is no longer supported, see TODO:fwlink");
+            throw new NotSupportedException("This method is no longer supported, see https://go.microsoft.com/fwlink/?linkid=845470");
         }
 
         /// <summary>
-        /// Obsolete, see TODO: fwdlink
+        /// Obsolete, see https://go.microsoft.com/fwlink/?linkid=845470
         /// </summary>
         /// <param name="app">The <see cref="IApplicationBuilder"/> to add the middleware to.</param>
         /// <param name="options">A <see cref="OAuthOptions"/> that specifies options for the middleware.</param>
@@ -31,7 +31,7 @@ namespace Microsoft.AspNetCore.Builder
         [Obsolete]
         public static IApplicationBuilder UseOAuthAuthentication(this IApplicationBuilder app, OAuthOptions options)
         {
-            throw new NotSupportedException("This method is no longer supported, see TODO:fwlink");
+            throw new NotSupportedException("This method is no longer supported, see https://go.microsoft.com/fwlink/?linkid=845470");
         }
     }
 }
