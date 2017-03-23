@@ -16,7 +16,7 @@ namespace Microsoft.AspNetCore.Builder
         /// </summary>
         /// <param name="app">The <see cref="IApplicationBuilder"/> to add the middleware to.</param>
         /// <returns>A reference to this instance after the operation has completed.</returns>
-        [Obsolete]
+        [Obsolete("See https://go.microsoft.com/fwlink/?linkid=845470")]
         public static IApplicationBuilder UseMicrosoftAccountAuthentication(this IApplicationBuilder app)
         {
             throw new NotSupportedException("This method is no longer supported, see https://go.microsoft.com/fwlink/?linkid=845470");
@@ -28,7 +28,7 @@ namespace Microsoft.AspNetCore.Builder
         /// <param name="app">The <see cref="IApplicationBuilder"/> to add the middleware to.</param>
         /// <param name="options">A <see cref="MicrosoftAccountOptions"/> that specifies options for the middleware.</param>
         /// <returns>A reference to this instance after the operation has completed.</returns>
-        [Obsolete]
+        [Obsolete("See https://go.microsoft.com/fwlink/?linkid=845470")]
         public static IApplicationBuilder UseMicrosoftAccountAuthentication(this IApplicationBuilder app, MicrosoftAccountOptions options)
         {
             throw new NotSupportedException("This method is no longer supported, see https://go.microsoft.com/fwlink/?linkid=845470");
