@@ -15,6 +15,36 @@ namespace Microsoft.Extensions.DependencyInjection
     /// </summary>
     public static class AuthenticationServiceCollectionExtensions
     {
+        public static IServiceCollection AddAuthentication(this IServiceCollection services)
+        {
+            if (services == null)
+            {
+                throw new ArgumentNullException(nameof(services));
+            }
+
+            services.AddAuthenticationCore();
+            services.AddDataProtection();
+            services.AddWebEncoders();
+            services.TryAddSingleton<ISystemClock, SystemClock>();
+            return services;
+        }
+
+        public static IServiceCollection AddAuthentication(this IServiceCollection services, Action<AuthenticationOptions> configureOptions) {
+            if (services == null)
+            {
+                throw new ArgumentNullException(nameof(services));
+            }
+
+            if (configureOptions == null)
+            {
+                throw new ArgumentNullException(nameof(configureOptions));
+            }
+
+            services.AddAuthentication();
+            services.Configure(configureOptions);
+            return services;
+        }
+
         public static IServiceCollection AddScheme<TOptions, THandler>(this IServiceCollection services, string authenticationScheme, Action<AuthenticationSchemeBuilder> configureScheme, Action<TOptions> configureOptions)
             where TOptions : AuthenticationSchemeOptions, new()
             where THandler : AuthenticationHandler<TOptions>
