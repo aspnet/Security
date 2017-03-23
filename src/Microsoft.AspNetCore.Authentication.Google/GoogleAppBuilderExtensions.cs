@@ -11,11 +11,24 @@ namespace Microsoft.AspNetCore.Builder
     /// </summary>
     public static class GoogleAppBuilderExtensions
     {
+        /// <summary>
+        /// Obsolete, see TODO: fwdlink
+        /// </summary>
+        /// <param name="app">The <see cref="IApplicationBuilder"/> to add the middleware to.</param>
+        /// <returns>A reference to this instance after the operation has completed.</returns>
+        [Obsolete]
         public static IApplicationBuilder UseGoogleAuthentication(this IApplicationBuilder app)
         {
             throw new NotSupportedException("This method is no longer supported, see TODO:fwlink");
         }
 
+        /// <summary>
+        /// Obsolete, see TODO: fwdlink
+        /// </summary>
+        /// <param name="app">The <see cref="IApplicationBuilder"/> to add the middleware to.</param>
+        /// <param name="options">A <see cref="GoogleOptions"/> that specifies options for the middleware.</param>
+        /// <returns>A reference to this instance after the operation has completed.</returns>
+        [Obsolete]
         public static IApplicationBuilder UseGoogleAuthentication(this IApplicationBuilder app, GoogleOptions options)
         {
             throw new NotSupportedException("This method is no longer supported, see TODO:fwlink");
