@@ -11,6 +11,8 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\..\..\Options\src\Microsoft.Extensions.Options\Microsoft.Extensions.Options.csproj" />
+    <ProjectReference Include="..\..\..\HttpAbstractions\src\Microsoft.AspNetCore.Http.Features\Microsoft.AspNetCore.Http.Features.csproj" />
     <ProjectReference Include="..\..\..\HttpAbstractions\src\Microsoft.AspNetCore.Authentication.Core\Microsoft.AspNetCore.Authentication.Core.csproj" />
     <ProjectReference Include="..\..\..\HttpAbstractions\src\Microsoft.AspNetCore.Http\Microsoft.AspNetCore.Http.csproj" />
     <ProjectReference Include="..\..\..\HttpAbstractions\src\Microsoft.AspNetCore.Http.Extensions\Microsoft.AspNetCore.Http.Extensions.csproj" />

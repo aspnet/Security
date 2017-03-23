@@ -10,8 +10,6 @@ namespace Microsoft.AspNetCore.Builder
     public static class OAuthExtensions
     {
         public static IServiceCollection AddOAuthAuthentication(this IServiceCollection services, string authenticationScheme, Action<OAuthOptions> configureOptions) =>
-            //services.AddRemoteScheme<OAuthOptions, OAuthHandler<OAuthOptions>>(authenticationScheme, configureOptions, o => new PathString[] { o.CallbackPath });
-            //});
             services.AddScheme<OAuthOptions, OAuthHandler<OAuthOptions>>(authenticationScheme, configureOptions);
     }
 }

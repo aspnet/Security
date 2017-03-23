@@ -62,6 +62,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Microsoft.AspNetCore.Authen
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Microsoft.AspNetCore.DataProtection", "..\DataProtection\src\Microsoft.AspNetCore.DataProtection\Microsoft.AspNetCore.DataProtection.csproj", "{269FACA1-956D-4B32-9994-16F2C4CB364A}"
 EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Microsoft.AspNetCore.DataProtection.Abstractions", "..\DataProtection\src\Microsoft.AspNetCore.DataProtection.Abstractions\Microsoft.AspNetCore.DataProtection.Abstractions.csproj", "{A48DA86C-BD8E-4A99-95EC-7441232F0586}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -500,6 +502,22 @@ Global
 		{269FACA1-956D-4B32-9994-16F2C4CB364A}.Release|x64.Build.0 = Release|Any CPU
 		{269FACA1-956D-4B32-9994-16F2C4CB364A}.Release|x86.ActiveCfg = Release|Any CPU
 		{269FACA1-956D-4B32-9994-16F2C4CB364A}.Release|x86.Build.0 = Release|Any CPU
+		{A48DA86C-BD8E-4A99-95EC-7441232F0586}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{A48DA86C-BD8E-4A99-95EC-7441232F0586}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{A48DA86C-BD8E-4A99-95EC-7441232F0586}.Debug|Mixed Platforms.ActiveCfg = Debug|Any CPU
+		{A48DA86C-BD8E-4A99-95EC-7441232F0586}.Debug|Mixed Platforms.Build.0 = Debug|Any CPU
+		{A48DA86C-BD8E-4A99-95EC-7441232F0586}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{A48DA86C-BD8E-4A99-95EC-7441232F0586}.Debug|x64.Build.0 = Debug|Any CPU
+		{A48DA86C-BD8E-4A99-95EC-7441232F0586}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{A48DA86C-BD8E-4A99-95EC-7441232F0586}.Debug|x86.Build.0 = Debug|Any CPU
+		{A48DA86C-BD8E-4A99-95EC-7441232F0586}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{A48DA86C-BD8E-4A99-95EC-7441232F0586}.Release|Any CPU.Build.0 = Release|Any CPU
+		{A48DA86C-BD8E-4A99-95EC-7441232F0586}.Release|Mixed Platforms.ActiveCfg = Release|Any CPU
+		{A48DA86C-BD8E-4A99-95EC-7441232F0586}.Release|Mixed Platforms.Build.0 = Release|Any CPU
+		{A48DA86C-BD8E-4A99-95EC-7441232F0586}.Release|x64.ActiveCfg = Release|Any CPU
+		{A48DA86C-BD8E-4A99-95EC-7441232F0586}.Release|x64.Build.0 = Release|Any CPU
+		{A48DA86C-BD8E-4A99-95EC-7441232F0586}.Release|x86.ActiveCfg = Release|Any CPU
+		{A48DA86C-BD8E-4A99-95EC-7441232F0586}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -532,5 +550,6 @@ Global
 		{EB473BEB-9231-484E-BB66-05453ECC21DE} = {4D2B6A51-2F9F-44F5-8131-EA5CAC053652}
 		{95DE3093-35C9-4DA1-ADDD-DD1E980AC809} = {4D2B6A51-2F9F-44F5-8131-EA5CAC053652}
 		{269FACA1-956D-4B32-9994-16F2C4CB364A} = {4D2B6A51-2F9F-44F5-8131-EA5CAC053652}
+		{A48DA86C-BD8E-4A99-95EC-7441232F0586} = {4D2B6A51-2F9F-44F5-8131-EA5CAC053652}
 	EndGlobalSection
 EndGlobal
