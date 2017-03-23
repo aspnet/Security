@@ -44,6 +44,13 @@ namespace SocialSample
 
         public void ConfigureServices(IServiceCollection services)
         {
+            if (string.IsNullOrEmpty(Configuration["facebook:appid"]))
+            {
+                // User-Secrets: https://docs.asp.net/en/latest/security/app-secrets.html
+                // See below for registration instructions for each provider.
+                throw new InvalidOperationException("User secrets must be configured for each authentication provider.");
+            }
+
             services.AddCookieAuthentication(o => o.LoginPath = new PathString("/login"));
 
             // You must first create an app with Facebook and add its ID and Secret to your user-secrets.
@@ -201,32 +208,9 @@ namespace SocialSample
         {
             loggerfactory.AddConsole(LogLevel.Information);
 
-            // Simple error page to avoid a repo dependency.
-            app.Use(async (context, next) =>
-            {
-                try
-                {
-                    await next();
-                }
-                catch (Exception ex)
-                {
-                    if (context.Response.HasStarted)
-                    {
-                        throw;
-                    }
-                    context.Response.StatusCode = 500;
-                    await context.Response.WriteAsync(ex.ToString());
-                }
-            });
+            app.UseDeveloperExceptionPage();
 
             app.UseAuthentication();
-
-            if (string.IsNullOrEmpty(Configuration["facebook:appid"]))
-            {
-                // User-Secrets: https://docs.asp.net/en/latest/security/app-secrets.html
-                // See below for registration instructions for each provider.
-                throw new InvalidOperationException("User secrets must be configured for each authentication provider.");
-            }
 
             // Choose an authentication type
             app.Map("/login", signinApp =>
