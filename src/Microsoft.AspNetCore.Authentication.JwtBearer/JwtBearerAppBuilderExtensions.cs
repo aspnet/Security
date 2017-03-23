@@ -17,7 +17,7 @@ namespace Microsoft.AspNetCore.Builder
         /// </summary>
         /// <param name="app">The <see cref="IApplicationBuilder"/> to add the middleware to.</param>
         /// <returns>A reference to this instance after the operation has completed.</returns>
-        [Obsolete("See https://go.microsoft.com/fwlink/?linkid=845470")]
+                [Obsolete("See https://go.microsoft.com/fwlink/?linkid=845470", error: true)]
         public static IApplicationBuilder UseJwtBearerAuthentication(this IApplicationBuilder app)
         {
             throw new NotSupportedException("This method is no longer supported, see https://go.microsoft.com/fwlink/?linkid=845470");
@@ -29,7 +29,7 @@ namespace Microsoft.AspNetCore.Builder
         /// <param name="app">The <see cref="IApplicationBuilder"/> to add the middleware to.</param>
         /// <param name="options">A  <see cref="JwtBearerOptions"/> that specifies options for the middleware.</param>
         /// <returns>A reference to this instance after the operation has completed.</returns>
-        [Obsolete("See https://go.microsoft.com/fwlink/?linkid=845470")]
+                [Obsolete("See https://go.microsoft.com/fwlink/?linkid=845470", error: true)]
         public static IApplicationBuilder UseJwtBearerAuthentication(this IApplicationBuilder app, JwtBearerOptions options)
         {
             throw new NotSupportedException("This method is no longer supported, see https://go.microsoft.com/fwlink/?linkid=845470");
