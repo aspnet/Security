@@ -45,7 +45,7 @@ namespace Microsoft.AspNetCore.Authentication
 
                 // Give any IAuthenticationRequestHandler schemes a chance to handle the request
                 var handlers = context.RequestServices.GetRequiredService<IAuthenticationHandlerProvider>();
-                foreach (var scheme in await Schemes.GetRequestHandlerSchemesAsync(context.Request.Path))
+                foreach (var scheme in await Schemes.GetRequestHandlerSchemesAsync())
                 {
                     var handler = await handlers.GetHandlerAsync(context, scheme.Name) as IAuthenticationRequestHandler;
                     if (handler != null && await handler.HandleRequestAsync())
