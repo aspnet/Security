@@ -59,7 +59,7 @@ namespace Microsoft.AspNetCore.Authentication.OpenIdConnect
 
         protected string SignOutScheme { get; private set; }
 
-        public OpenIdConnectHandler(IOptions<AuthenticationOptions> sharedOptions, IOptionsManager<OpenIdConnectOptions> options, ILoggerFactory logger, HtmlEncoder htmlEncoder, UrlEncoder encoder, IDataProtectionProvider dataProtection, ISystemClock clock)
+        public OpenIdConnectHandler(IOptions<AuthenticationOptions> sharedOptions, IOptionsSnapshot<OpenIdConnectOptions> options, ILoggerFactory logger, HtmlEncoder htmlEncoder, UrlEncoder encoder, IDataProtectionProvider dataProtection, ISystemClock clock)
             : base(sharedOptions, options, dataProtection, logger, encoder, clock)
         {
             HtmlEncoder = htmlEncoder;
@@ -212,7 +212,8 @@ namespace Microsoft.AspNetCore.Authentication.OpenIdConnect
             // If the identifier cannot be found, bypass the session identifier checks: this may indicate that the
             // authentication cookie was already cleared, that the session identifier was lost because of a lossy
             // external/application cookie conversion or that the identity provider doesn't support sessions.
-            var sid = (await Context.Authentication.AuthenticateAsync(SignOutScheme))
+            var sid = (await Context.AuthenticateAsync(SignOutScheme))
+                          ?.Principal
                           ?.FindFirst(JwtRegisteredClaimNames.Sid)
                           ?.Value;
             if (!string.IsNullOrEmpty(sid))
@@ -234,7 +235,7 @@ namespace Microsoft.AspNetCore.Authentication.OpenIdConnect
             Logger.RemoteSignOut();
 
             // We've received a remote sign-out request
-            await Context.Authentication.SignOutAsync(SignOutScheme);
+            await Context.SignOutAsync(SignOutScheme);
             return true;
         }
 
