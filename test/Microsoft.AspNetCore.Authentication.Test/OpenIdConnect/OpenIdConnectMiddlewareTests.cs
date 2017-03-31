@@ -2,16 +2,18 @@
 // Licensed under the Apache License, Version 2.0. See License.txt in the project root for license information.
 
 using System;
-using System.Linq;
 using System.Globalization;
+using System.Linq;
 using System.Net;
 using System.Text.Encodings.Web;
 using System.Threading.Tasks;
-using Microsoft.AspNetCore.Builder;
+using Microsoft.AspNetCore.Authentication.Cookies;
+using Microsoft.AspNetCore.DataProtection;
+using Microsoft.Extensions.Logging.Abstractions;
 using Microsoft.IdentityModel.Protocols.OpenIdConnect;
 using Xunit;
 
-namespace Microsoft.AspNetCore.Authentication.Tests.OpenIdConnect
+namespace Microsoft.AspNetCore.Authentication.Test.OpenIdConnect
 {
     public class OpenIdConnectMiddlewareTests
     {
@@ -32,6 +34,8 @@ namespace Microsoft.AspNetCore.Authentication.Tests.OpenIdConnect
         {
             var setting = new TestSettings(opt =>
             {
+                opt.ClientId = "Test Id";
+                opt.SignInScheme = CookieAuthenticationDefaults.AuthenticationScheme;
                 opt.Configuration = new OpenIdConnectConfiguration
                 {
                     EndSessionEndpoint = "https://example.com/signout_test/signout_request"
@@ -55,7 +59,14 @@ namespace Microsoft.AspNetCore.Authentication.Tests.OpenIdConnect
         [Fact]
         public async Task EndSessionRequestDoesNotIncludeTelemetryParametersWhenDisabled()
         {
-            var setting = new TestSettings(opt => opt.DisableTelemetry = true);
+            var configuration = TestServerBuilder.CreateDefaultOpenIdConnectConfiguration();
+            var setting = new TestSettings(opt =>
+            {
+                opt.ClientId = "Test Id";
+                opt.Configuration = configuration;
+                opt.SignInScheme = CookieAuthenticationDefaults.AuthenticationScheme;
+                opt.DisableTelemetry = true;
+            });
 
             var server = setting.CreateTestServer();
 
@@ -65,19 +76,19 @@ namespace Microsoft.AspNetCore.Authentication.Tests.OpenIdConnect
             Assert.Equal(HttpStatusCode.Redirect, res.StatusCode);
             Assert.DoesNotContain(OpenIdConnectParameterNames.SkuTelemetry, res.Headers.Location.Query);
             Assert.DoesNotContain(OpenIdConnectParameterNames.VersionTelemetry, res.Headers.Location.Query);
+            setting.ValidateSignoutRedirect(transaction.Response.Headers.Location);
         }
 
         [Fact]
         public async Task SignOutWithDefaultRedirectUri()
         {
             var configuration = TestServerBuilder.CreateDefaultOpenIdConnectConfiguration();
-            var options = new OpenIdConnectOptions
+            var server = TestServerBuilder.CreateServer(o =>
             {
-                Authority = TestServerBuilder.DefaultAuthority,
-                ClientId = "Test Id",
-                Configuration = configuration
-            };
-            var server = TestServerBuilder.CreateServer(options);
+                o.Authority = TestServerBuilder.DefaultAuthority;
+                o.ClientId = "Test Id";
+                o.Configuration = configuration;
+            });
 
             var transaction = await server.SendAsync(DefaultHost + TestServerBuilder.Signout);
             Assert.Equal(HttpStatusCode.Redirect, transaction.Response.StatusCode);
@@ -89,22 +100,23 @@ namespace Microsoft.AspNetCore.Authentication.Tests.OpenIdConnect
 
             string redirectUri;
             Assert.True(query.TryGetValue("post_logout_redirect_uri", out redirectUri));
-            Assert.Equal(UrlEncoder.Default.Encode("https://example.com" + options.SignedOutCallbackPath), redirectUri, true);
+            Assert.Equal(UrlEncoder.Default.Encode("https://example.com/signout-callback-oidc"), redirectUri, true);
         }
 
         [Fact]
         public async Task SignOutWithCustomRedirectUri()
         {
             var configuration = TestServerBuilder.CreateDefaultOpenIdConnectConfiguration();
-            var options = new OpenIdConnectOptions
+            var stateFormat = new PropertiesDataFormat(new EphemeralDataProtectionProvider(NullLoggerFactory.Instance).CreateProtector("OIDCTest"));
+            var server = TestServerBuilder.CreateServer(o =>
             {
-                Authority = TestServerBuilder.DefaultAuthority,
-                ClientId = "Test Id",
-                Configuration = configuration,
-                SignedOutCallbackPath = "/thelogout",
-                PostLogoutRedirectUri = "https://example.com/postlogout"
-            };
-            var server = TestServerBuilder.CreateServer(options);
+                o.Authority = TestServerBuilder.DefaultAuthority;
+                o.ClientId = "Test Id";
+                o.Configuration = configuration;
+                o.StateDataFormat = stateFormat;
+                o.SignedOutCallbackPath = "/thelogout";
+                o.PostLogoutRedirectUri = "https://example.com/postlogout";
+            });
 
             var transaction = await server.SendAsync(DefaultHost + TestServerBuilder.Signout);
             Assert.Equal(HttpStatusCode.Redirect, transaction.Response.StatusCode);
@@ -115,11 +127,11 @@ namespace Microsoft.AspNetCore.Authentication.Tests.OpenIdConnect
 
             string redirectUri;
             Assert.True(query.TryGetValue("post_logout_redirect_uri", out redirectUri));
-            Assert.Equal(UrlEncoder.Default.Encode("https://example.com" + options.SignedOutCallbackPath), redirectUri, true);
+            Assert.Equal(UrlEncoder.Default.Encode("https://example.com/thelogout"), redirectUri, true);
 
             string state;
             Assert.True(query.TryGetValue("state", out state));
-            var properties = options.StateDataFormat.Unprotect(state);
+            var properties = stateFormat.Unprotect(state);
             Assert.Equal("https://example.com/postlogout", properties.RedirectUri, true);
         }
 
@@ -127,14 +139,15 @@ namespace Microsoft.AspNetCore.Authentication.Tests.OpenIdConnect
         public async Task SignOutWith_Specific_RedirectUri_From_Authentication_Properites()
         {
             var configuration = TestServerBuilder.CreateDefaultOpenIdConnectConfiguration();
-            var options = new OpenIdConnectOptions
+            var stateFormat = new PropertiesDataFormat(new EphemeralDataProtectionProvider(NullLoggerFactory.Instance).CreateProtector("OIDCTest"));
+            var server = TestServerBuilder.CreateServer(o =>
             {
-                Authority = TestServerBuilder.DefaultAuthority,
-                ClientId = "Test Id",
-                Configuration = configuration,
-                PostLogoutRedirectUri = "https://example.com/postlogout"
-            };
-            var server = TestServerBuilder.CreateServer(options);
+                o.Authority = TestServerBuilder.DefaultAuthority;
+                o.StateDataFormat = stateFormat;
+                o.ClientId = "Test Id";
+                o.Configuration = configuration;
+                o.PostLogoutRedirectUri = "https://example.com/postlogout";
+            });
 
             var transaction = await server.SendAsync("https://example.com/signout_with_specific_redirect_uri");
             Assert.Equal(HttpStatusCode.Redirect, transaction.Response.StatusCode);
@@ -145,19 +158,21 @@ namespace Microsoft.AspNetCore.Authentication.Tests.OpenIdConnect
 
             string redirectUri;
             Assert.True(query.TryGetValue("post_logout_redirect_uri", out redirectUri));
-            Assert.Equal(UrlEncoder.Default.Encode("https://example.com" + options.SignedOutCallbackPath), redirectUri, true);
+            Assert.Equal(UrlEncoder.Default.Encode("https://example.com/signout-callback-oidc"), redirectUri, true);
 
             string state;
             Assert.True(query.TryGetValue("state", out state));
-            var properties = options.StateDataFormat.Unprotect(state);
+            var properties = stateFormat.Unprotect(state);
             Assert.Equal("http://www.example.com/specific_redirect_uri", properties.RedirectUri, true);
         }
 
         [Fact]
         public async Task SignOut_WithMissingConfig_Throws()
         {
-            var setting = new TestSettings(opt => opt.Configuration = new OpenIdConnectConfiguration());
-
+            var setting = new TestSettings(opt => {
+                opt.ClientId = "Test Id";
+                opt.Configuration = new OpenIdConnectConfiguration();
+            });
             var server = setting.CreateTestServer();
 
             var exception = await Assert.ThrowsAsync<InvalidOperationException>(() => server.SendAsync(DefaultHost + TestServerBuilder.Signout));

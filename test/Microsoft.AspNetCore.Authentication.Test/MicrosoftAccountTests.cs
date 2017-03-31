@@ -8,12 +8,12 @@ using System.Security.Claims;
 using System.Text;
 using System.Text.Encodings.Web;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Authentication.MicrosoftAccount;
 using Microsoft.AspNetCore.Authentication.OAuth;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.DataProtection;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Http.Authentication;
 using Microsoft.AspNetCore.TestHost;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging.Abstractions;
@@ -22,24 +22,24 @@ using Xunit;
 
 namespace Microsoft.AspNetCore.Authentication.Tests.MicrosoftAccount
 {
-    public class MicrosoftAccountMiddlewareTests
+    public class MicrosoftAccountTests
     {
         [Fact]
         public async Task ChallengeWillTriggerApplyRedirectEvent()
         {
-            var server = CreateServer(new MicrosoftAccountOptions
+            var server = CreateServer(o =>
+            {
+                o.ClientId = "Test Client Id";
+                o.ClientSecret = "Test Client Secret";
+                o.Events = new OAuthEvents
                 {
-                    ClientId = "Test Client Id",
-                    ClientSecret = "Test Client Secret",
-                    Events = new OAuthEvents
+                    OnRedirectToAuthorizationEndpoint = context =>
                     {
-                        OnRedirectToAuthorizationEndpoint = context =>
-                        {
-                            context.Response.Redirect(context.RedirectUri + "&custom=test");
-                            return Task.FromResult(0);
-                        }
+                        context.Response.Redirect(context.RedirectUri + "&custom=test");
+                        return Task.FromResult(0);
                     }
-                });
+                };
+            });
             var transaction = await server.SendAsync("http://example.com/challenge");
             Assert.Equal(HttpStatusCode.Redirect, transaction.Response.StatusCode);
             var query = transaction.Response.Headers.Location.Query;
@@ -49,10 +49,10 @@ namespace Microsoft.AspNetCore.Authentication.Tests.MicrosoftAccount
         [Fact]
         public async Task SignInThrows()
         {
-            var server = CreateServer(new MicrosoftAccountOptions
+            var server = CreateServer(o =>
             {
-                ClientId = "Test Id",
-                ClientSecret = "Test Secret"
+                o.ClientId = "Test Id";
+                o.ClientSecret = "Test Secret";
             });
             var transaction = await server.SendAsync("https://example.com/signIn");
             Assert.Equal(HttpStatusCode.OK, transaction.Response.StatusCode);
@@ -61,10 +61,10 @@ namespace Microsoft.AspNetCore.Authentication.Tests.MicrosoftAccount
         [Fact]
         public async Task SignOutThrows()
         {
-            var server = CreateServer(new MicrosoftAccountOptions
+            var server = CreateServer(o =>
             {
-                ClientId = "Test Id",
-                ClientSecret = "Test Secret"
+                o.ClientId = "Test Id";
+                o.ClientSecret = "Test Secret";
             });
             var transaction = await server.SendAsync("https://example.com/signOut");
             Assert.Equal(HttpStatusCode.OK, transaction.Response.StatusCode);
@@ -73,10 +73,10 @@ namespace Microsoft.AspNetCore.Authentication.Tests.MicrosoftAccount
         [Fact]
         public async Task ForbidThrows()
         {
-            var server = CreateServer(new MicrosoftAccountOptions
+            var server = CreateServer(o =>
             {
-                ClientId = "Test Id",
-                ClientSecret = "Test Secret"
+                o.ClientId = "Test Id";
+                o.ClientSecret = "Test Secret";
             });
             var transaction = await server.SendAsync("https://example.com/signOut");
             Assert.Equal(HttpStatusCode.OK, transaction.Response.StatusCode);
@@ -85,11 +85,11 @@ namespace Microsoft.AspNetCore.Authentication.Tests.MicrosoftAccount
         [Fact]
         public async Task ChallengeWillTriggerRedirection()
         {
-            var server = CreateServer(new MicrosoftAccountOptions
+            var server = CreateServer(o =>
             {
-                    ClientId = "Test Client Id",
-                    ClientSecret = "Test Client Secret"
-                });
+                o.ClientId = "Test Id";
+                o.ClientSecret = "Test Secret";
+            });
             var transaction = await server.SendAsync("http://example.com/challenge");
             Assert.Equal(HttpStatusCode.Redirect, transaction.Response.StatusCode);
             var location = transaction.Response.Headers.Location.AbsoluteUri;
@@ -105,50 +105,50 @@ namespace Microsoft.AspNetCore.Authentication.Tests.MicrosoftAccount
         public async Task AuthenticatedEventCanGetRefreshToken()
         {
             var stateFormat = new PropertiesDataFormat(new EphemeralDataProtectionProvider(NullLoggerFactory.Instance).CreateProtector("MsftTest"));
-            var server = CreateServer(new MicrosoftAccountOptions
+            var server = CreateServer(o =>
             {
-                    ClientId = "Test Client Id",
-                    ClientSecret = "Test Client Secret",
-                    StateDataFormat = stateFormat,
-                    BackchannelHttpHandler = new TestHttpMessageHandler
+                o.ClientId = "Test Client Id";
+                o.ClientSecret = "Test Client Secret";
+                o.StateDataFormat = stateFormat;
+                o.BackchannelHttpHandler = new TestHttpMessageHandler
+                {
+                    Sender = req =>
                     {
-                        Sender = req =>
+                        if (req.RequestUri.AbsoluteUri == "https://login.microsoftonline.com/common/oauth2/v2.0/token")
                         {
-                            if (req.RequestUri.AbsoluteUri == "https://login.microsoftonline.com/common/oauth2/v2.0/token")
+                            return ReturnJsonResponse(new
                             {
-                                return ReturnJsonResponse(new
-                                {
-                                    access_token = "Test Access Token",
-                                    expire_in = 3600,
-                                    token_type = "Bearer",
-                                    refresh_token = "Test Refresh Token"
-                                });
-                            }
-                            else if (req.RequestUri.GetComponents(UriComponents.SchemeAndServer | UriComponents.Path, UriFormat.UriEscaped) == "https://graph.microsoft.com/v1.0/me")
+                                access_token = "Test Access Token",
+                                expire_in = 3600,
+                                token_type = "Bearer",
+                                refresh_token = "Test Refresh Token"
+                            });
+                        }
+                        else if (req.RequestUri.GetComponents(UriComponents.SchemeAndServer | UriComponents.Path, UriFormat.UriEscaped) == "https://graph.microsoft.com/v1.0/me")
+                        {
+                            return ReturnJsonResponse(new
                             {
-                                return ReturnJsonResponse(new
-                                {
-                                    id = "Test User ID",
-                                    displayName = "Test Name",
-                                    givenName = "Test Given Name",
-                                    surname = "Test Family Name",
-                                    mail =  "Test email"
-                                });
-                            }
+                                id = "Test User ID",
+                                displayName = "Test Name",
+                                givenName = "Test Given Name",
+                                surname = "Test Family Name",
+                                mail = "Test email"
+                            });
+                        }
 
-                            return null;
-                        }
-                    },
-                    Events = new OAuthEvents
-                    {
-                        OnCreatingTicket = context =>
-                        {
-                            var refreshToken = context.RefreshToken;
-                            context.Ticket.Principal.AddIdentity(new ClaimsIdentity(new Claim[] { new Claim("RefreshToken", refreshToken, ClaimValueTypes.String, "Microsoft") }, "Microsoft"));
-                            return Task.FromResult<object>(null);
-                        }
+                        return null;
                     }
-                });
+                };
+                o.Events = new OAuthEvents
+                {
+                    OnCreatingTicket = context =>
+                    {
+                        var refreshToken = context.RefreshToken;
+                        context.Ticket.Principal.AddIdentity(new ClaimsIdentity(new Claim[] { new Claim("RefreshToken", refreshToken, ClaimValueTypes.String, "Microsoft") }, "Microsoft"));
+                        return Task.FromResult<object>(null);
+                    }
+                };
+            });
             var properties = new AuthenticationProperties();
             var correlationKey = ".xsrf";
             var correlationValue = "TestCorrelationId";
@@ -170,25 +170,19 @@ namespace Microsoft.AspNetCore.Authentication.Tests.MicrosoftAccount
             Assert.Equal("Test Refresh Token", transaction.FindClaimValue("RefreshToken"));
         }
 
-        private static TestServer CreateServer(MicrosoftAccountOptions options)
+        private static TestServer CreateServer(Action<MicrosoftAccountOptions> configureOptions)
         {
             var builder = new WebHostBuilder()
                 .Configure(app =>
                 {
-                    app.UseCookieAuthentication(new CookieAuthenticationOptions
-                    {
-                        AuthenticationScheme = TestExtensions.CookieAuthenticationScheme,
-                        AutomaticAuthenticate = true
-                    });
-                    app.UseMicrosoftAccountAuthentication(options);
-
+                    app.UseAuthentication();
                     app.Use(async (context, next) =>
                     {
                         var req = context.Request;
                         var res = context.Response;
                         if (req.Path == new PathString("/challenge"))
                         {
-                            await context.Authentication.ChallengeAsync("Microsoft");
+                            await context.ChallengeAsync("Microsoft");
                         }
                         else if (req.Path == new PathString("/me"))
                         {
@@ -196,15 +190,15 @@ namespace Microsoft.AspNetCore.Authentication.Tests.MicrosoftAccount
                         }
                         else if (req.Path == new PathString("/signIn"))
                         {
-                            await Assert.ThrowsAsync<NotSupportedException>(() => context.Authentication.SignInAsync("Microsoft", new ClaimsPrincipal()));
+                            await Assert.ThrowsAsync<NotSupportedException>(() => context.SignInAsync("Microsoft", new ClaimsPrincipal()));
                         }
                         else if (req.Path == new PathString("/signOut"))
                         {
-                            await Assert.ThrowsAsync<NotSupportedException>(() => context.Authentication.SignOutAsync("Microsoft"));
+                            await Assert.ThrowsAsync<NotSupportedException>(() => context.SignOutAsync("Microsoft"));
                         }
                         else if (req.Path == new PathString("/forbid"))
                         {
-                            await Assert.ThrowsAsync<NotSupportedException>(() => context.Authentication.ForbidAsync("Microsoft"));
+                            await Assert.ThrowsAsync<NotSupportedException>(() => context.ForbidAsync("Microsoft"));
                         }
                         else
                         {
@@ -214,11 +208,13 @@ namespace Microsoft.AspNetCore.Authentication.Tests.MicrosoftAccount
                 })
                 .ConfigureServices(services =>
                 {
-                    services.AddAuthentication();
-                    services.Configure<SharedAuthenticationOptions>(authOptions =>
+                    services.AddAuthentication(o =>
                     {
-                        authOptions.SignInScheme = TestExtensions.CookieAuthenticationScheme;
+                        o.DefaultAuthenticationScheme = TestExtensions.CookieAuthenticationScheme;
+                        o.DefaultSignInScheme = TestExtensions.CookieAuthenticationScheme;
                     });
+                    services.AddCookieAuthentication(TestExtensions.CookieAuthenticationScheme, o => { });
+                    services.AddMicrosoftAccountAuthentication(configureOptions);
                 });
             return new TestServer(builder);
         }
