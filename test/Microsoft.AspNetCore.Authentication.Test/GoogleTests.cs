@@ -15,8 +15,10 @@ using Microsoft.AspNetCore.DataProtection;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.TestHost;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging.Abstractions;
+using Microsoft.Extensions.Options;
 using Newtonsoft.Json;
 using Xunit;
 
@@ -24,6 +26,25 @@ namespace Microsoft.AspNetCore.Authentication.Google
 {
     public class GoogleTests
     {
+        [Fact]
+        public void AddGoogleCanBindAgainstDefaultConfig()
+        {
+            var dic = new Dictionary<string, string>
+            {
+                {"Google:ClientId", "<id>"},
+                {"Google:ClientSecret", "<secret>"}
+            };
+            var configurationBuilder = new ConfigurationBuilder();
+            configurationBuilder.AddInMemoryCollection(dic);
+            var config = configurationBuilder.Build();
+            var services = new ServiceCollection().AddGoogleAuthentication().AddSingleton<IConfiguration>(config);
+            var sp = services.BuildServiceProvider();
+
+            var options = sp.GetRequiredService<IOptionsSnapshot<GoogleOptions>>().Get("Google");
+            Assert.Equal("<id>", options.ClientId);
+            Assert.Equal("<secret>", options.ClientSecret);
+        }
+
         [Fact]
         public async Task ChallengeWillTriggerRedirection()
         {
