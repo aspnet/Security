@@ -51,8 +51,17 @@ namespace Microsoft.AspNetCore.Authentication.Cookies
 
             // Cookies needs to finish the response
             Context.Response.OnStarting(FinishResponseAsync);
+        }
 
-            Events = Events ?? new CookieAuthenticationEvents();
+        /// <summary>
+        /// Creates a new instance of the events instance.
+        /// </summary>
+        /// <returns>A new instance of the events instance.</returns>
+        protected override Task<object> CreateEventsAsync() => Task.FromResult<object>(new CookieAuthenticationEvents());
+
+        protected override void InitializeOptions()
+        {
+            base.InitializeOptions();
 
             if (String.IsNullOrEmpty(Options.CookieName))
             {
