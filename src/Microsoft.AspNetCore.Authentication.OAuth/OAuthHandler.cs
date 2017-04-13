@@ -11,7 +11,6 @@ using System.Text;
 using System.Text.Encodings.Web;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.DataProtection;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.WebUtilities;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
@@ -22,9 +21,7 @@ namespace Microsoft.AspNetCore.Authentication.OAuth
 {
     public class OAuthHandler<TOptions> : RemoteAuthenticationHandler<TOptions> where TOptions : OAuthOptions, new()
     {
-        protected HttpClient Backchannel { get; private set; }
-
-        protected ISecureDataFormat<AuthenticationProperties> StateDataFormat { get; private set; }
+        protected HttpClient Backchannel => Options.Backchannel;
 
         /// <summary>
         /// The handler calls methods on the events which give the application control at certain points where processing is occurring. 
@@ -38,20 +35,20 @@ namespace Microsoft.AspNetCore.Authentication.OAuth
 
         public OAuthHandler(IOptions<AuthenticationOptions> sharedOptions, IOptionsSnapshot<TOptions> options, ILoggerFactory logger, UrlEncoder encoder, IDataProtectionProvider dataProtection, ISystemClock clock)
             : base(sharedOptions, options, dataProtection, logger, encoder, clock)
+        { }
+
+        protected override void InitializeOptions()
         {
-        }
+            base.InitializeOptions();
 
-        public override async Task InitializeAsync(AuthenticationScheme scheme, HttpContext context)
-        {
-            await base.InitializeAsync(scheme, context);
-            Events = Events ?? new OAuthEvents();
+            if (Options.Backchannel == null)
+            {
+                Options.Backchannel = new HttpClient(Options.BackchannelHttpHandler ?? new HttpClientHandler());
+                Options.Backchannel.DefaultRequestHeaders.UserAgent.ParseAdd("Microsoft ASP.NET Core OAuth middleware");
+                Options.Backchannel.Timeout = Options.BackchannelTimeout;
+                Options.Backchannel.MaxResponseContentBufferSize = 1024 * 1024 * 10; // 10 MB
+            }
 
-            Backchannel = new HttpClient(Options.BackchannelHttpHandler ?? new HttpClientHandler());
-            Backchannel.DefaultRequestHeaders.UserAgent.ParseAdd("Microsoft ASP.NET Core OAuth middleware");
-            Backchannel.Timeout = Options.BackchannelTimeout;
-            Backchannel.MaxResponseContentBufferSize = 1024 * 1024 * 10; // 10 MB
-
-            StateDataFormat = Options.StateDataFormat;
             if (Options.StateDataFormat == null)
             {
                 var dataProtector = DataProtection.CreateProtector(
@@ -59,6 +56,12 @@ namespace Microsoft.AspNetCore.Authentication.OAuth
                 Options.StateDataFormat = new PropertiesDataFormat(dataProtector);
             }
         }
+
+        /// <summary>
+        /// Creates a new instance of the events instance.
+        /// </summary>
+        /// <returns>A new instance of the events instance.</returns>
+        protected override Task<object> CreateEventsAsync() => Task.FromResult<object>(new OAuthEvents());
 
         protected override async Task<AuthenticateResult> HandleRemoteAuthenticateAsync()
         {

@@ -10,9 +10,9 @@ using Microsoft.Extensions.Internal;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 
-namespace Microsoft.AspNetCore.Authentication{
-
-    public abstract class AuthenticationHandler<TOptions> : IAuthenticationHandler where TOptions : AuthenticationSchemeOptions, new()
+namespace Microsoft.AspNetCore.Authentication {
+    public abstract class AuthenticationHandler<TOptions> : IAuthenticationHandler 
+        where TOptions : AuthenticationSchemeOptions, new()
     {
         private Task<AuthenticateResult> _authenticateTask;
 
@@ -29,7 +29,7 @@ namespace Microsoft.AspNetCore.Authentication{
 
         protected ISystemClock Clock { get; }
 
-        protected IOptionsSnapshot<TOptions> OptionsManager { get; }
+        protected IOptionsSnapshot<TOptions> OptionsSnapshot { get; }
 
         /// <summary>
         /// The handler calls methods on the events which give the application control at certain points where processing is occurring. 
@@ -60,7 +60,7 @@ namespace Microsoft.AspNetCore.Authentication{
             Logger = logger.CreateLogger(this.GetType().FullName);
             UrlEncoder = encoder;
             Clock = clock;
-            OptionsManager = options;
+            OptionsSnapshot = options;
         }
 
         /// <summary>
@@ -83,20 +83,52 @@ namespace Microsoft.AspNetCore.Authentication{
             Scheme = scheme;
             Context = context;
 
-            Options = OptionsManager.Get(Scheme.Name) ?? new TOptions();
+            Options = OptionsSnapshot.Get(Scheme.Name) ?? new TOptions();
+            if (!Options.Initialized)
+            {
+                lock (Options.InitalizeLock)
+                {
+                    if (!Options.Initialized)
+                    {
+                        InitializeOptions();
+                        Options.Initialized = true;
+                    }
+                }
+            }
+
+            // REVIEW: should we validate options only once inside of the lock?
             Options.Validate();
 
-            // REVIEW: is there a better place for this default?
-            Options.DisplayName = Options.DisplayName ?? scheme.Name;
-            Options.ClaimsIssuer = Options.ClaimsIssuer ?? scheme.Name;
+            return InitializeEventsAsync();
+        }
 
+        /// <summary>
+        /// Initializes the events object, called once per request by <see cref="InitializeAsync(AuthenticationScheme, HttpContext)"/>.
+        /// </summary>
+        protected virtual async Task InitializeEventsAsync()
+        {
             Events = Options.Events;
             if (Options.EventsType != null)
             {
                 Events = Context.RequestServices.GetRequiredService(Options.EventsType);
             }
+            Events = Events ?? await CreateEventsAsync();
+        }
 
-            return TaskCache.CompletedTask;
+        /// <summary>
+        /// Creates a new instance of the events instance, or null if events are not used.
+        /// </summary>
+        /// <returns>A new instance of the events instance.</returns>
+        protected virtual Task<object> CreateEventsAsync() => Task.FromResult<object>(null);
+
+        /// <summary>
+        /// Initializes the options, will be called only once by <see cref="InitializeAsync(AuthenticationScheme, HttpContext)"/>.
+        /// </summary>
+        protected virtual void InitializeOptions()
+        {
+            // REVIEW: is there a better place for this default?
+            Options.DisplayName = Options.DisplayName ?? Scheme.Name;
+            Options.ClaimsIssuer = Options.ClaimsIssuer ?? Scheme.Name;
         }
 
         protected string BuildRedirectUri(string targetPath)

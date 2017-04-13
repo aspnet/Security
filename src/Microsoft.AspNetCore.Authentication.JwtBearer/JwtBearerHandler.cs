@@ -38,10 +38,11 @@ namespace Microsoft.AspNetCore.Authentication.JwtBearer
             set { base.Events = value; }
         }
 
-        public override async Task InitializeAsync(AuthenticationScheme scheme, HttpContext context)
+        protected override Task<object> CreateEventsAsync() => Task.FromResult<object>(new JwtBearerEvents());
+
+        protected override void InitializeOptions()
         {
-            await base.InitializeAsync(scheme, context);
-            Events = Events ?? new JwtBearerEvents();
+            base.InitializeOptions();
 
             if (string.IsNullOrEmpty(Options.TokenValidationParameters.ValidAudience) && !string.IsNullOrEmpty(Options.Audience))
             {

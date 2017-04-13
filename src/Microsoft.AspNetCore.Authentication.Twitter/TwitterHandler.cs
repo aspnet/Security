@@ -28,7 +28,7 @@ namespace Microsoft.AspNetCore.Authentication.Twitter
         private const string AuthenticationEndpoint = "https://api.twitter.com/oauth/authenticate?oauth_token=";
         private const string AccessTokenEndpoint = "https://api.twitter.com/oauth/access_token";
 
-        private HttpClient _httpClient;
+        private HttpClient Backchannel => Options.Backchannel;
 
         /// <summary>
         /// The handler calls methods on the events which give the application control at certain points where processing is occurring. 
@@ -42,13 +42,18 @@ namespace Microsoft.AspNetCore.Authentication.Twitter
 
         public TwitterHandler(IOptions<AuthenticationOptions> sharedOptions, IOptionsSnapshot<TwitterOptions> options, ILoggerFactory logger, UrlEncoder encoder, IDataProtectionProvider dataProtection, ISystemClock clock)
             : base(sharedOptions, options, dataProtection, logger, encoder, clock)
-        {
-        }
+        { }
+
+        protected override Task<object> CreateEventsAsync() => Task.FromResult<object>(new TwitterEvents());
 
         public override async Task InitializeAsync(AuthenticationScheme scheme, HttpContext context)
         {
             await base.InitializeAsync(scheme, context);
-            Events = Events ?? new TwitterEvents();
+        }
+
+        protected override void InitializeOptions()
+        {
+            base.InitializeOptions();
 
             if (Options.StateDataFormat == null)
             {
@@ -59,12 +64,15 @@ namespace Microsoft.AspNetCore.Authentication.Twitter
                     dataProtector);
             }
 
-            _httpClient = new HttpClient(Options.BackchannelHttpHandler ?? new HttpClientHandler());
-            _httpClient.Timeout = Options.BackchannelTimeout;
-            _httpClient.MaxResponseContentBufferSize = 1024 * 1024 * 10; // 10 MB
-            _httpClient.DefaultRequestHeaders.Accept.ParseAdd("*/*");
-            _httpClient.DefaultRequestHeaders.UserAgent.ParseAdd("Microsoft ASP.NET Core Twitter middleware");
-            _httpClient.DefaultRequestHeaders.ExpectContinue = false;
+            if (Options.Backchannel == null)
+            {
+                Options.Backchannel = new HttpClient(Options.BackchannelHttpHandler ?? new HttpClientHandler());
+                Options.Backchannel.Timeout = Options.BackchannelTimeout;
+                Options.Backchannel.MaxResponseContentBufferSize = 1024 * 1024 * 10; // 10 MB
+                Options.Backchannel.DefaultRequestHeaders.Accept.ParseAdd("*/*");
+                Options.Backchannel.DefaultRequestHeaders.UserAgent.ParseAdd("Microsoft ASP.NET Core Twitter middleware");
+                Options.Backchannel.DefaultRequestHeaders.ExpectContinue = false;
+            }
         }
 
         protected override async Task<AuthenticateResult> HandleRemoteAuthenticateAsync()
@@ -237,7 +245,7 @@ namespace Microsoft.AspNetCore.Authentication.Twitter
             var request = new HttpRequestMessage(HttpMethod.Post, RequestTokenEndpoint);
             request.Headers.Add("Authorization", authorizationHeaderBuilder.ToString());
 
-            var response = await _httpClient.SendAsync(request, Context.RequestAborted);
+            var response = await Backchannel.SendAsync(request, Context.RequestAborted);
             response.EnsureSuccessStatusCode();
             var responseText = await response.Content.ReadAsStringAsync();
 
@@ -307,7 +315,7 @@ namespace Microsoft.AspNetCore.Authentication.Twitter
 
             request.Content = new FormUrlEncodedContent(formPairs);
 
-            var response = await _httpClient.SendAsync(request, Context.RequestAborted);
+            var response = await Backchannel.SendAsync(request, Context.RequestAborted);
 
             if (!response.IsSuccessStatusCode)
             {
@@ -378,7 +386,7 @@ namespace Microsoft.AspNetCore.Authentication.Twitter
             var request = new HttpRequestMessage(HttpMethod.Get, resource_url + "?include_email=true");
             request.Headers.Add("Authorization", authorizationHeaderBuilder.ToString());
 
-            var response = await _httpClient.SendAsync(request, Context.RequestAborted);
+            var response = await Backchannel.SendAsync(request, Context.RequestAborted);
             if (!response.IsSuccessStatusCode)
             {
                 Logger.LogError("Email request failed with a status code of " + response.StatusCode);

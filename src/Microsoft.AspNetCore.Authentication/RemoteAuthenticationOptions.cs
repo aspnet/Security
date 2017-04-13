@@ -5,7 +5,6 @@ using System;
 using System.Net.Http;
 using Microsoft.AspNetCore.DataProtection;
 using Microsoft.AspNetCore.Http;
-using Microsoft.Extensions.Options;
 
 namespace Microsoft.AspNetCore.Authentication
 {
@@ -24,6 +23,11 @@ namespace Microsoft.AspNetCore.Authentication
             {
                 throw new ArgumentException(Resources.FormatException_OptionMustBeProvided(nameof(CallbackPath)), nameof(CallbackPath));
             }
+
+            if (string.IsNullOrEmpty(SignInScheme))
+            {
+                throw new ArgumentException(Resources.FormatException_OptionMustBeProvided(nameof(SignInScheme)), nameof(SignInScheme));
+            }
         }
 
         /// <summary>
@@ -40,6 +44,11 @@ namespace Microsoft.AspNetCore.Authentication
         /// can be downcast to a WebRequestHandler.
         /// </summary>
         public HttpMessageHandler BackchannelHttpHandler { get; set; }
+
+        /// <summary>
+        /// Used to communicate with the remote identity provider.
+        /// </summary>
+        public HttpClient Backchannel { get; set; }
 
         /// <summary>
         /// Gets or sets the type used to secure data.

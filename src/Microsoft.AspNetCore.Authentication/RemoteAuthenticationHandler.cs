@@ -12,7 +12,8 @@ using Microsoft.Extensions.Options;
 
 namespace Microsoft.AspNetCore.Authentication
 {
-    public abstract class RemoteAuthenticationHandler<TOptions> : AuthenticationHandler<TOptions>, IAuthenticationRequestHandler where TOptions : RemoteAuthenticationOptions, new()
+    public abstract class RemoteAuthenticationHandler<TOptions> : AuthenticationHandler<TOptions>, IAuthenticationRequestHandler 
+        where TOptions : RemoteAuthenticationOptions, new()
     {
         private const string CorrelationPrefix = ".AspNetCore.Correlation.";
         private const string CorrelationProperty = ".xsrf";
@@ -21,11 +22,21 @@ namespace Microsoft.AspNetCore.Authentication
 
         private static readonly RandomNumberGenerator CryptoRandom = RandomNumberGenerator.Create();
 
-        protected string SignInScheme { get; set; }
+        protected string SignInScheme => Options.SignInScheme;
 
         protected IDataProtectionProvider DataProtection { get; set; }
 
         private readonly AuthenticationOptions _sharedOptions;
+
+        /// <summary>
+        /// The handler calls methods on the events which give the application control at certain points where processing is occurring. 
+        /// If it is not provided a default instance is supplied which does nothing when the methods are called.
+        /// </summary>
+        protected new RemoteAuthenticationEvents Events
+        {
+            get { return (RemoteAuthenticationEvents)base.Events; }
+            set { base.Events = value; }
+        }
 
         protected RemoteAuthenticationHandler(IOptions<AuthenticationOptions> sharedOptions, IOptionsSnapshot<TOptions> options, IDataProtectionProvider dataProtection, ILoggerFactory logger, UrlEncoder encoder, ISystemClock clock)
             : base(options, logger, encoder, clock)
@@ -37,15 +48,21 @@ namespace Microsoft.AspNetCore.Authentication
         public override async Task InitializeAsync(AuthenticationScheme scheme, HttpContext context)
         {
             await base.InitializeAsync(scheme, context);
-            Events = Events ?? new RemoteAuthenticationEvents();
             DataProtection = Options.DataProtectionProvider ?? DataProtection;
+        }
 
-            // TODO: this needs to be done once (but we don't have access to scheme data in ext method)
-            SignInScheme = Options.SignInScheme ?? _sharedOptions.DefaultSignInScheme;
+        protected override Task<object> CreateEventsAsync()
+        {
+            return Task.FromResult<object>(new RemoteAuthenticationEvents());
+        }
 
-            if (string.IsNullOrEmpty(SignInScheme))
+        protected override void InitializeOptions()
+        {
+            base.InitializeOptions();
+
+            if (Options.SignInScheme == null)
             {
-                throw new ArgumentException(Resources.FormatException_OptionMustBeProvided(nameof(Options.SignInScheme)), nameof(Options.SignInScheme));
+                Options.SignInScheme = _sharedOptions.DefaultSignInScheme;
             }
         }
 
@@ -63,10 +80,8 @@ namespace Microsoft.AspNetCore.Authentication
 
             AuthenticationTicket ticket = null;
             Exception exception = null;
-
             try
             {
-
                 var authResult = await HandleRemoteAuthenticateAsync();
                 if (authResult == null)
                 {
@@ -97,7 +112,7 @@ namespace Microsoft.AspNetCore.Authentication
             {
                 Logger.RemoteAuthenticationError(exception.Message);
                 var errorContext = new FailureContext(Context, exception);
-                await Options.Events.RemoteFailure(errorContext);
+                await Events.RemoteFailure(errorContext);
 
                 if (errorContext.HandledResponse)
                 {
@@ -122,7 +137,7 @@ namespace Microsoft.AspNetCore.Authentication
             // Mark which provider produced this identity so we can cross-check later in HandleAuthenticateAsync
             ticketContext.Properties.Items[AuthSchemeKey] = Scheme.Name;
 
-            await Options.Events.TicketReceived(ticketContext);
+            await Events.TicketReceived(ticketContext);
 
             if (ticketContext.HandledResponse)
             {

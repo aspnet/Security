@@ -53,11 +53,9 @@ namespace Microsoft.AspNetCore.Authentication.OpenIdConnect
 
         private OpenIdConnectConfiguration _configuration;
 
-        protected HttpClient Backchannel { get; private set; }
+        protected HttpClient Backchannel => Options.Backchannel;
 
         protected HtmlEncoder HtmlEncoder { get; }
-
-        protected string SignOutScheme { get; private set; }
 
         public OpenIdConnectHandler(IOptions<AuthenticationOptions> sharedOptions, IOptionsSnapshot<OpenIdConnectOptions> options, ILoggerFactory logger, HtmlEncoder htmlEncoder, UrlEncoder encoder, IDataProtectionProvider dataProtection, ISystemClock clock)
             : base(sharedOptions, options, dataProtection, logger, encoder, clock)
@@ -75,21 +73,21 @@ namespace Microsoft.AspNetCore.Authentication.OpenIdConnect
             set { base.Events = value; }
         }
 
-        public override async Task InitializeAsync(AuthenticationScheme scheme, HttpContext context)
-        {
-            await base.InitializeAsync(scheme, context);
-            Events = Events ?? new OpenIdConnectEvents();
+        protected override Task<object> CreateEventsAsync() => Task.FromResult<object>(new OpenIdConnectEvents());
 
-            SignOutScheme = Options.SignOutScheme;
-            if (string.IsNullOrEmpty(SignOutScheme))
+        protected override void InitializeOptions()
+        {
+            base.InitializeOptions();
+
+            if (string.IsNullOrEmpty(Options.SignOutScheme))
             {
-                SignOutScheme = SignInScheme;
+                Options.SignOutScheme = SignInScheme;
             }
 
             if (Options.StateDataFormat == null)
             {
                 var dataProtector = DataProtection.CreateProtector(
-                    GetType().FullName, scheme.Name, "v1");
+                    GetType().FullName, Scheme.Name, "v1");
                 Options.StateDataFormat = new PropertiesDataFormat(dataProtector);
             }
 
@@ -98,15 +96,10 @@ namespace Microsoft.AspNetCore.Authentication.OpenIdConnect
                 var dataProtector = DataProtection.CreateProtector(
                     GetType().FullName,
                     typeof(string).FullName,
-                    scheme.Name,
+                    Scheme.Name,
                     "v1");
 
                 Options.StringDataFormat = new SecureDataFormat<string>(new StringSerializer(), dataProtector);
-            }
-
-            if (Events == null)
-            {
-                Events = new OpenIdConnectEvents();
             }
 
             if (string.IsNullOrEmpty(Options.TokenValidationParameters.ValidAudience) && !string.IsNullOrEmpty(Options.ClientId))
@@ -114,10 +107,13 @@ namespace Microsoft.AspNetCore.Authentication.OpenIdConnect
                 Options.TokenValidationParameters.ValidAudience = Options.ClientId;
             }
 
-            Backchannel = new HttpClient(Options.BackchannelHttpHandler ?? new HttpClientHandler());
-            Backchannel.DefaultRequestHeaders.UserAgent.ParseAdd("Microsoft ASP.NET Core OpenIdConnect middleware");
-            Backchannel.Timeout = Options.BackchannelTimeout;
-            Backchannel.MaxResponseContentBufferSize = 1024 * 1024 * 10; // 10 MB
+            if (Options.Backchannel == null)
+            {
+                Options.Backchannel = new HttpClient(Options.BackchannelHttpHandler ?? new HttpClientHandler());
+                Options.Backchannel.DefaultRequestHeaders.UserAgent.ParseAdd("Microsoft ASP.NET Core OpenIdConnect middleware");
+                Options.Backchannel.Timeout = Options.BackchannelTimeout;
+                Options.Backchannel.MaxResponseContentBufferSize = 1024 * 1024 * 10; // 10 MB
+            }
 
             if (Options.ConfigurationManager == null)
             {
@@ -154,6 +150,7 @@ namespace Microsoft.AspNetCore.Authentication.OpenIdConnect
                 + $"{nameof(Options.Configuration)}, or {nameof(Options.ConfigurationManager)} to {nameof(OpenIdConnectOptions)}");
             }
         }
+
 
         public override Task<bool> HandleRequestAsync()
         {
@@ -212,7 +209,7 @@ namespace Microsoft.AspNetCore.Authentication.OpenIdConnect
             // If the identifier cannot be found, bypass the session identifier checks: this may indicate that the
             // authentication cookie was already cleared, that the session identifier was lost because of a lossy
             // external/application cookie conversion or that the identity provider doesn't support sessions.
-            var sid = (await Context.AuthenticateAsync(SignOutScheme))
+            var sid = (await Context.AuthenticateAsync(Options.SignOutScheme))
                           ?.Principal
                           ?.FindFirst(JwtRegisteredClaimNames.Sid)
                           ?.Value;
@@ -235,7 +232,7 @@ namespace Microsoft.AspNetCore.Authentication.OpenIdConnect
             Logger.RemoteSignOut();
 
             // We've received a remote sign-out request
-            await Context.SignOutAsync(SignOutScheme);
+            await Context.SignOutAsync(Options.SignOutScheme);
             return true;
         }
 
@@ -274,7 +271,7 @@ namespace Microsoft.AspNetCore.Authentication.OpenIdConnect
             Logger.PostSignOutRedirect(properties.RedirectUri);
 
             // Attach the identity token to the logout request when possible.
-            message.IdTokenHint = await Context.GetTokenAsync(SignOutScheme, OpenIdConnectParameterNames.IdToken);
+            message.IdTokenHint = await Context.GetTokenAsync(Options.SignOutScheme, OpenIdConnectParameterNames.IdToken);
 
             var redirectContext = new RedirectContext(Context, Scheme, Options, properties)
             {
