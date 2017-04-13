@@ -86,7 +86,7 @@ namespace Microsoft.AspNetCore.Authentication {
             Options = OptionsSnapshot.Get(Scheme.Name) ?? new TOptions();
             if (!Options.Initialized)
             {
-                lock (Options.InitalizeLock)
+                lock (Options.InitializeLock)
                 {
                     if (!Options.Initialized)
                     {

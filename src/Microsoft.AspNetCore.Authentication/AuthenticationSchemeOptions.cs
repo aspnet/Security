@@ -45,6 +45,6 @@ namespace Microsoft.AspNetCore.Authentication
         /// <summary>
         /// Used to prevent concurrent access during intialization.
         /// </summary>
-        public object InitalizeLock { get; } = new object();
+        public object InitializeLock { get; } = new object();
     }
 }
