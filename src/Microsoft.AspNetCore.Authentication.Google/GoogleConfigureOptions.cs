@@ -8,7 +8,6 @@ namespace Microsoft.AspNetCore.Authentication.Google
 {
     internal class GoogleConfigureOptions : ConfigureNamedOptions<GoogleOptions>
     {
-        // Bind to "Google" section by default
         public GoogleConfigureOptions(IConfiguration config) :
             base(GoogleDefaults.AuthenticationScheme,
                 options => config.GetSection(GoogleDefaults.AuthenticationScheme).Bind(options))

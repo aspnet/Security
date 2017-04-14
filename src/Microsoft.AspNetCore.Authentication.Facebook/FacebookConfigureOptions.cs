@@ -8,7 +8,6 @@ namespace Microsoft.AspNetCore.Authentication.Facebook
 {
     internal class FacebookConfigureOptions : ConfigureNamedOptions<FacebookOptions>
     {
-        // Bind to "Google" section by default
         public FacebookConfigureOptions(IConfiguration config) :
             base(FacebookDefaults.AuthenticationScheme,
                 options => config.GetSection(FacebookDefaults.AuthenticationScheme).Bind(options))
