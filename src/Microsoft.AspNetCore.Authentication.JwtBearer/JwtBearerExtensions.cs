@@ -3,11 +3,24 @@
 
 using System;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.Extensions.Options;
 
 namespace Microsoft.Extensions.DependencyInjection
 {
     public static class JwtBearerExtensions
     {
+        /// <summary>
+        /// Adds JwtBearer authentication with options bound against the "Bearer" section 
+        /// from the IConfiguration in the service container.
+        /// </summary>
+        /// <param name="services"></param>
+        /// <returns></returns>
+        public static IServiceCollection AddJwtBearerAuthentication(this IServiceCollection services)
+        {
+            services.AddSingleton<IConfigureOptions<JwtBearerOptions>, JwtBearerConfigureOptions>();
+            return services.AddJwtBearerAuthentication(o => { });
+        }
+
         public static IServiceCollection AddJwtBearerAuthentication(this IServiceCollection services, Action<JwtBearerOptions> configureOptions) =>
             services.AddJwtBearerAuthentication(JwtBearerDefaults.AuthenticationScheme, configureOptions);
 

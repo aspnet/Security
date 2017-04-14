@@ -40,7 +40,7 @@ namespace Microsoft.AspNetCore.Authentication.Google
             var services = new ServiceCollection().AddGoogleAuthentication().AddSingleton<IConfiguration>(config);
             var sp = services.BuildServiceProvider();
 
-            var options = sp.GetRequiredService<IOptionsSnapshot<GoogleOptions>>().Get("Google");
+            var options = sp.GetRequiredService<IOptionsSnapshot<GoogleOptions>>().Get(GoogleDefaults.AuthenticationScheme);
             Assert.Equal("<id>", options.ClientId);
             Assert.Equal("<secret>", options.ClientSecret);
         }
