@@ -3,11 +3,24 @@
 
 using System;
 using Microsoft.AspNetCore.Authentication.OpenIdConnect;
+using Microsoft.Extensions.Options;
 
 namespace Microsoft.Extensions.DependencyInjection
 {
     public static class OpenIdConnectExtensions
     {
+        /// <summary>
+        /// Adds OpenIdConnect authentication with options bound against the "OpenIdConnect" section 
+        /// from the IConfiguration in the service container.
+        /// </summary>
+        /// <param name="services"></param>
+        /// <returns></returns>
+        public static IServiceCollection AddOpenIdConnectAuthentication(this IServiceCollection services)
+        {
+            services.AddSingleton<IConfigureOptions<OpenIdConnectOptions>, OpenIdConnectConfigureOptions>();
+            return services.AddOpenIdConnectAuthentication(o => { });
+        }
+
         public static IServiceCollection AddOpenIdConnectAuthentication(this IServiceCollection services, Action<OpenIdConnectOptions> configureOptions) =>
             services.AddOpenIdConnectAuthentication(OpenIdConnectDefaults.AuthenticationScheme, configureOptions);
 

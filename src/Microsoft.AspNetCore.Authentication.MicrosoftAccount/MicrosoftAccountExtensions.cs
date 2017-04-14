@@ -3,12 +3,24 @@
 
 using System;
 using Microsoft.AspNetCore.Authentication.MicrosoftAccount;
-using Microsoft.AspNetCore.Http;
+using Microsoft.Extensions.Options;
 
 namespace Microsoft.Extensions.DependencyInjection
 {
     public static class MicrosoftAccountExtensions
     {
+        /// <summary>
+        /// Adds MicrosoftAccount authentication with options bound against the "Microsoft" section 
+        /// from the IConfiguration in the service container.
+        /// </summary>
+        /// <param name="services"></param>
+        /// <returns></returns>
+        public static IServiceCollection AddMicrosoftAccountAuthentication(this IServiceCollection services)
+        {
+            services.AddSingleton<IConfigureOptions<MicrosoftAccountOptions>, MicrosoftAccountConfigureOptions>();
+            return services.AddMicrosoftAccountAuthentication(o => { });
+        }
+
         public static IServiceCollection AddMicrosoftAccountAuthentication(this IServiceCollection services, Action<MicrosoftAccountOptions> configureOptions) =>
             services.AddMicrosoftAccountAuthentication(MicrosoftAccountDefaults.AuthenticationScheme, configureOptions);
 
