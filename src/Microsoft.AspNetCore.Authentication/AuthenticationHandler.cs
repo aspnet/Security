@@ -10,9 +10,9 @@ using Microsoft.Extensions.Internal;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 
-namespace Microsoft.AspNetCore.Authentication {
-    public abstract class AuthenticationHandler<TOptions> : IAuthenticationHandler 
-        where TOptions : AuthenticationSchemeOptions, new()
+namespace Microsoft.AspNetCore.Authentication
+{
+    public abstract class AuthenticationHandler<TOptions> : IAuthenticationHandler where TOptions : AuthenticationSchemeOptions, new()
     {
         private Task<AuthenticateResult> _authenticateTask;
 

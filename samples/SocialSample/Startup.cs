@@ -273,11 +273,11 @@ namespace SocialSample
 
             app.Run(async context =>
             {
-                // CookieAuthenticationOptions.AutomaticAuthenticate = true (default) causes User to be set
+                // Setting DefaultAuthenticateScheme causes User to be set
                 var user = context.User;
 
                 // This is what [Authorize] calls
-                // var user = await context.AuthenticateAsync(AuthenticationManager.AutomaticScheme);
+                // var user = await context.AuthenticateAsync(DefaultAuthenticateScheme);
 
                 // This is what [Authorize(ActiveAuthenticationSchemes = MicrosoftAccountDefaults.AuthenticationScheme)] calls
                 // var user = await context.AuthenticateAsync(MicrosoftAccountDefaults.AuthenticationScheme);
@@ -287,7 +287,7 @@ namespace SocialSample
                 {
                     // This is what [Authorize] calls
                     // The cookie middleware will intercept this 401 and redirect to /login
-                    await context.ChallengeAsync(CookieAuthenticationDefaults.AuthenticationScheme);
+                    await context.ChallengeAsync();
 
                     // This is what [Authorize(ActiveAuthenticationSchemes = MicrosoftAccountDefaults.AuthenticationScheme)] calls
                     // await context.ChallengeAsync(MicrosoftAccountDefaults.AuthenticationScheme);

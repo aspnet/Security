@@ -130,14 +130,14 @@ namespace OpenIdConnectSample
                     return;
                 }
 
-                // CookieAuthenticationOptions.AutomaticAuthenticate = true (default) causes User to be set
+                // DefaultAuthenticationScheme causes User to be set
                 var user = context.User;
 
                 // This is what [Authorize] calls
-                // var user = await context.Authentication.AuthenticateAsync(AuthenticationManager.AutomaticScheme);
+                // var user = await context.AuthenticateAsync(AuthenticationManager.AutomaticScheme);
 
                 // This is what [Authorize(ActiveAuthenticationSchemes = OpenIdConnectDefaults.AuthenticationScheme)] calls
-                // var user = await context.Authentication.AuthenticateAsync(OpenIdConnectDefaults.AuthenticationScheme);
+                // var user = await context.AuthenticateAsync(OpenIdConnectDefaults.AuthenticationScheme);
 
                 // Not authenticated
                 if (user == null || !user.Identities.Any(identity => identity.IsAuthenticated))
@@ -146,7 +146,7 @@ namespace OpenIdConnectSample
                     await context.ChallengeAsync();
 
                     // This is what [Authorize(ActiveAuthenticationSchemes = OpenIdConnectDefaults.AuthenticationScheme)] calls
-                    // await context.Authentication.ChallengeAsync(OpenIdConnectDefaults.AuthenticationScheme);
+                    // await context.ChallengeAsync(OpenIdConnectDefaults.AuthenticationScheme);
 
                     return;
                 }
