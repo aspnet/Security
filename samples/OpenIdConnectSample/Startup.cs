@@ -73,6 +73,7 @@ namespace OpenIdConnectSample
             {
                 sharedOptions.DefaultAuthenticationScheme = CookieAuthenticationDefaults.AuthenticationScheme;
                 sharedOptions.DefaultSignInScheme = CookieAuthenticationDefaults.AuthenticationScheme;
+                sharedOptions.DefaultChallengeScheme = OpenIdConnectDefaults.AuthenticationScheme;
             });
         }
 
@@ -81,28 +82,7 @@ namespace OpenIdConnectSample
             loggerfactory.AddConsole(LogLevel.Information);
             loggerfactory.AddDebug(LogLevel.Information);
 
-            // Simple error page
-            app.Use(async (context, next) =>
-            {
-                try
-                {
-                    await next();
-                }
-                catch (Exception ex)
-                {
-                    if (!context.Response.HasStarted)
-                    {
-                        context.Response.Clear();
-                        context.Response.StatusCode = 500;
-                        await context.Response.WriteAsync(ex.ToString());
-                    }
-                    else
-                    {
-                        throw;
-                    }
-                }
-            });
-
+            app.UseDeveloperExceptionPage();
             app.UseAuthentication();
 
             app.Run(async context =>
@@ -163,8 +143,7 @@ namespace OpenIdConnectSample
                 if (user == null || !user.Identities.Any(identity => identity.IsAuthenticated))
                 {
                     // This is what [Authorize] calls
-                    // The cookie middleware will intercept this 401 and redirect to /login
-                    await context.ChallengeAsync(CookieAuthenticationDefaults.AuthenticationScheme);
+                    await context.ChallengeAsync();
 
                     // This is what [Authorize(ActiveAuthenticationSchemes = OpenIdConnectDefaults.AuthenticationScheme)] calls
                     // await context.Authentication.ChallengeAsync(OpenIdConnectDefaults.AuthenticationScheme);
@@ -175,7 +154,7 @@ namespace OpenIdConnectSample
                 // Authenticated, but not authorized
                 if (context.Request.Path.Equals("/restricted") && !user.Identities.Any(identity => identity.HasClaim("special", "true")))
                 {
-                    await context.ChallengeAsync(CookieAuthenticationDefaults.AuthenticationScheme);
+                    await context.ChallengeAsync();
                     return;
                 }
 

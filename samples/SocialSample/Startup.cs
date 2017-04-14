@@ -51,6 +51,12 @@ namespace SocialSample
                 throw new InvalidOperationException("User secrets must be configured for each authentication provider.");
             }
 
+            services.AddAuthentication(options =>
+            {
+                options.DefaultAuthenticationScheme = CookieAuthenticationDefaults.AuthenticationScheme;
+                options.DefaultChallengeScheme = CookieAuthenticationDefaults.AuthenticationScheme;
+            });
+
             services.AddCookieAuthentication(o => o.LoginPath = new PathString("/login"));
 
             // You must first create an app with Facebook and add its ID and Secret to your user-secrets.
@@ -200,8 +206,6 @@ namespace SocialSample
                     }
                 };
             });
-
-            services.AddAuthentication(options => options.DefaultAuthenticationScheme = CookieAuthenticationDefaults.AuthenticationScheme);
         }
 
         public void Configure(IApplicationBuilder app, ILoggerFactory loggerfactory)

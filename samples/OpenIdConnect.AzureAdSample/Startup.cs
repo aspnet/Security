@@ -72,34 +72,18 @@ namespace OpenIdConnect.AzureAdSample
             });
 
             services.AddAuthentication(sharedOptions =>
-                sharedOptions.DefaultAuthenticationScheme = CookieAuthenticationDefaults.AuthenticationScheme);
+            {
+                sharedOptions.DefaultAuthenticationScheme = CookieAuthenticationDefaults.AuthenticationScheme;
+                sharedOptions.DefaultSignInScheme = CookieAuthenticationDefaults.AuthenticationScheme;
+                sharedOptions.DefaultChallengeScheme = OpenIdConnectDefaults.AuthenticationScheme;
+            });
         }
 
         public void Configure(IApplicationBuilder app, ILoggerFactory loggerfactory)
         {
             loggerfactory.AddConsole(Microsoft.Extensions.Logging.LogLevel.Information);
 
-            // Simple error page
-            app.Use(async (context, next) =>
-            {
-                try
-                {
-                    await next();
-                }
-                catch (Exception ex)
-                {
-                    if (!context.Response.HasStarted)
-                    {
-                        context.Response.Clear();
-                        context.Response.StatusCode = 500;
-                        await context.Response.WriteAsync(ex.ToString());
-                    }
-                    else
-                    {
-                        throw;
-                    }
-                }
-            });
+            app.UseDeveloperExceptionPage();
 
             app.UseAuthentication();
 
@@ -114,9 +98,7 @@ namespace OpenIdConnect.AzureAdSample
                         return;
                     }
 
-                    await context.ChallengeAsync(
-                        OpenIdConnectDefaults.AuthenticationScheme,
-                        new AuthenticationProperties { RedirectUri = "/" });
+                    await context.ChallengeAsync(new AuthenticationProperties { RedirectUri = "/" });
                 }
                 else if (context.Request.Path.Equals("/signout"))
                 {
@@ -156,7 +138,7 @@ namespace OpenIdConnect.AzureAdSample
                 {
                     if (!context.User.Identities.Any(identity => identity.IsAuthenticated))
                     {
-                        await context.ChallengeAsync(OpenIdConnectDefaults.AuthenticationScheme, new AuthenticationProperties { RedirectUri = "/" });
+                        await context.ChallengeAsync(new AuthenticationProperties { RedirectUri = "/" });
                         return;
                     }
 

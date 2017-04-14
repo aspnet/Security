@@ -70,23 +70,7 @@ namespace JwtBearerSample
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
         public void Configure(IApplicationBuilder app)
         {
-            // Simple error page to avoid a repo dependency.
-            app.Use(async (context, next) =>
-            {
-                try
-                {
-                    await next();
-                }
-                catch (Exception ex)
-                {
-                    if (context.Response.HasStarted)
-                    {
-                        throw;
-                    }
-                    context.Response.StatusCode = 500;
-                    await context.Response.WriteAsync(ex.ToString());
-                }
-            });
+            app.UseDeveloperExceptionPage();
 
             app.UseDefaultFiles();
             app.UseStaticFiles();
@@ -106,7 +90,7 @@ namespace JwtBearerSample
                 }
                 else
                 {
-                    await context.ChallengeAsync(JwtBearerDefaults.AuthenticationScheme);
+                    await context.ChallengeAsync();
                 }
             });
 
@@ -136,4 +120,3 @@ namespace JwtBearerSample
         }
     }
 }
-
