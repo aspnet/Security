@@ -19,9 +19,20 @@ namespace Microsoft.AspNetCore.Authentication
         public AuthenticationScheme Scheme { get; private set; }
         public TOptions Options { get; private set; }
         protected HttpContext Context { get; private set; }
-        protected PathString OriginalPathBase => Context.Features.Get<IAuthenticationFeature>()?.OriginalPathBase ?? Request.PathBase;
+
+        protected HttpRequest Request
+        {
+            get { return Context.Request; }
+        }
+
+        protected HttpResponse Response
+        {
+            get { return Context.Response; }
+        }
 
         protected PathString OriginalPath => Context.Features.Get<IAuthenticationFeature>()?.OriginalPath ?? Request.Path;
+
+        protected PathString OriginalPathBase => Context.Features.Get<IAuthenticationFeature>()?.OriginalPathBase ?? Request.PathBase;
 
         protected ILogger Logger { get; }
 
@@ -36,16 +47,6 @@ namespace Microsoft.AspNetCore.Authentication
         /// If it is not provided a default instance is supplied which does nothing when the methods are called.
         /// </summary>
         protected virtual object Events { get; set; }
-
-        protected HttpRequest Request
-        {
-            get { return Context.Request; }
-        }
-
-        protected HttpResponse Response
-        {
-            get { return Context.Response; }
-        }
 
         protected string CurrentUri
         {
