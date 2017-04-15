@@ -41,6 +41,13 @@ namespace OpenIdConnectSample
 
         public void ConfigureServices(IServiceCollection services)
         {
+            services.AddAuthentication(sharedOptions =>
+            {
+                sharedOptions.DefaultAuthenticationScheme = CookieAuthenticationDefaults.AuthenticationScheme;
+                sharedOptions.DefaultSignInScheme = CookieAuthenticationDefaults.AuthenticationScheme;
+                sharedOptions.DefaultChallengeScheme = OpenIdConnectDefaults.AuthenticationScheme;
+            });
+
             services.AddCookieAuthentication();
 
             services.AddOpenIdConnectAuthentication(o =>
@@ -66,14 +73,6 @@ namespace OpenIdConnectSample
                         return c.Response.WriteAsync("An error occurred processing your authentication.");
                     }
                 };
-            });
-
-
-            services.AddAuthentication(sharedOptions =>
-            {
-                sharedOptions.DefaultAuthenticationScheme = CookieAuthenticationDefaults.AuthenticationScheme;
-                sharedOptions.DefaultSignInScheme = CookieAuthenticationDefaults.AuthenticationScheme;
-                sharedOptions.DefaultChallengeScheme = OpenIdConnectDefaults.AuthenticationScheme;
             });
         }
 
@@ -134,7 +133,7 @@ namespace OpenIdConnectSample
                 var user = context.User;
 
                 // This is what [Authorize] calls
-                // var user = await context.AuthenticateAsync(AuthenticationManager.AutomaticScheme);
+                // var user = await context.AuthenticateAsync();
 
                 // This is what [Authorize(ActiveAuthenticationSchemes = OpenIdConnectDefaults.AuthenticationScheme)] calls
                 // var user = await context.AuthenticateAsync(OpenIdConnectDefaults.AuthenticationScheme);
@@ -157,7 +156,6 @@ namespace OpenIdConnectSample
                     await context.ChallengeAsync();
                     return;
                 }
-
 
                 await WriteHtmlAsync(context.Response, async response =>
                 {

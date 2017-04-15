@@ -54,6 +54,7 @@ namespace SocialSample
             services.AddAuthentication(options =>
             {
                 options.DefaultAuthenticationScheme = CookieAuthenticationDefaults.AuthenticationScheme;
+                options.DefaultSignInScheme = CookieAuthenticationDefaults.AuthenticationScheme;
                 options.DefaultChallengeScheme = CookieAuthenticationDefaults.AuthenticationScheme;
             });
 
@@ -277,7 +278,7 @@ namespace SocialSample
                 var user = context.User;
 
                 // This is what [Authorize] calls
-                // var user = await context.AuthenticateAsync(DefaultAuthenticateScheme);
+                // var user = await context.AuthenticateAsync();
 
                 // This is what [Authorize(ActiveAuthenticationSchemes = MicrosoftAccountDefaults.AuthenticationScheme)] calls
                 // var user = await context.AuthenticateAsync(MicrosoftAccountDefaults.AuthenticationScheme);
