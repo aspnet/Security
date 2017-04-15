@@ -18,6 +18,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "OpenIdConnectSample", "samp
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Microsoft.AspNetCore.Authentication.Cookies", "src\Microsoft.AspNetCore.Authentication.Cookies\Microsoft.AspNetCore.Authentication.Cookies.csproj", "{FC152CC4-054B-457E-8D91-389C5DE3C561}"
 EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Microsoft.AspNetCore.Authentication", "src\Microsoft.AspNetCore.Authentication\Microsoft.AspNetCore.Authentication.csproj", "{BC0D4B56-1A5B-4D88-AFBF-68C0F2D545FB}"
+EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Microsoft.AspNetCore.Authentication.Facebook", "src\Microsoft.AspNetCore.Authentication.Facebook\Microsoft.AspNetCore.Authentication.Facebook.csproj", "{EEAAEE68-607B-4E33-AF3E-45C66B4DBA5A}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Microsoft.AspNetCore.Authentication.Google", "src\Microsoft.AspNetCore.Authentication.Google\Microsoft.AspNetCore.Authentication.Google.csproj", "{76579C39-B829-490D-B8BE-1BD35FE8412E}"
@@ -51,8 +53,6 @@ EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "OpenIdConnect.AzureAdSample", "samples\OpenIdConnect.AzureAdSample\OpenIdConnect.AzureAdSample.csproj", "{3A7AD414-EBDE-4F92-B307-4E8F19B6117E}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Microsoft.AspNetCore.ChunkingCookieManager.Sources.Test", "test\Microsoft.AspNetCore.ChunkingCookieManager.Sources.Test\Microsoft.AspNetCore.ChunkingCookieManager.Sources.Test.csproj", "{51563775-C659-4907-9BAF-9995BAB87D01}"
-EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Microsoft.AspNetCore.Authentication", "src\Microsoft.AspNetCore.Authentication\Microsoft.AspNetCore.Authentication.csproj", "{BC0D4B56-1A5B-4D88-AFBF-68C0F2D545FB}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

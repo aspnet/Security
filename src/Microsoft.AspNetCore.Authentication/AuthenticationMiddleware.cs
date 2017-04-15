@@ -14,15 +14,23 @@ namespace Microsoft.AspNetCore.Authentication
 
         public AuthenticationMiddleware(RequestDelegate next, IAuthenticationSchemeProvider schemes)
         {
-            _next = next ?? throw new ArgumentNullException(nameof(next));
-            Schemes = schemes ?? throw new ArgumentNullException(nameof(schemes));
+            if (next == null)
+            {
+                throw new ArgumentNullException(nameof(next));
+            }
+            if (schemes == null)
+            {
+                throw new ArgumentNullException(nameof(schemes));
+            }
+
+            _next = next;
+            Schemes = schemes;
         }
 
         public IAuthenticationSchemeProvider Schemes { get; set; }
 
         public async Task Invoke(HttpContext context)
         {
-            var oldFeature = context.Features.Get<IAuthenticationFeature>();
             try
             {
                 context.Features.Set<IAuthenticationFeature>(new AuthenticationFeature
@@ -30,16 +38,6 @@ namespace Microsoft.AspNetCore.Authentication
                     OriginalPath = context.Request.Path,
                     OriginalPathBase = context.Request.PathBase
                 });
-
-                var defaultAuthenticate = await Schemes.GetDefaultAuthenticateSchemeAsync();
-                if (defaultAuthenticate != null)
-                {
-                    var result = await context.AuthenticateAsync(defaultAuthenticate.Name);
-                    if (result?.Principal != null)
-                    {
-                        context.User = result.Principal;
-                    }
-                }
 
                 // REVIEW: alternatively could depend on a routing middleware to do this
 
@@ -54,11 +52,21 @@ namespace Microsoft.AspNetCore.Authentication
                     }
                 }
 
+                var defaultAuthenticate = await Schemes.GetDefaultAuthenticateSchemeAsync();
+                if (defaultAuthenticate != null)
+                {
+                    var result = await context.AuthenticateAsync(defaultAuthenticate.Name);
+                    if (result?.Principal != null)
+                    {
+                        context.User = result.Principal;
+                    }
+                }
+
                 await _next(context);
             }
             finally
             {
-                context.Features.Set(oldFeature);
+                context.Features.Set<IAuthenticationFeature>(null);
             }
         }
     }

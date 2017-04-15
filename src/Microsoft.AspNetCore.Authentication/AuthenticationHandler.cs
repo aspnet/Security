@@ -97,7 +97,6 @@ namespace Microsoft.AspNetCore.Authentication
                 }
             }
 
-            // REVIEW: should we validate options only once inside of the lock?
             Options.Validate();
 
             return InitializeEventsAsync();
@@ -117,10 +116,10 @@ namespace Microsoft.AspNetCore.Authentication
         }
 
         /// <summary>
-        /// Creates a new instance of the events instance, or null if events are not used.
+        /// Creates a new instance of the events instance.
         /// </summary>
         /// <returns>A new instance of the events instance.</returns>
-        protected virtual Task<object> CreateEventsAsync() => Task.FromResult<object>(null);
+        protected virtual Task<object> CreateEventsAsync() => Task.FromResult<object>(new object());
 
         /// <summary>
         /// Initializes the options, will be called only once by <see cref="InitializeAsync(AuthenticationScheme, HttpContext)"/>.

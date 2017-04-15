@@ -44,6 +44,13 @@ namespace OpenIdConnect.AzureAdSample
 
         public void ConfigureServices(IServiceCollection services)
         {
+            services.AddAuthentication(sharedOptions =>
+            {
+                sharedOptions.DefaultAuthenticationScheme = CookieAuthenticationDefaults.AuthenticationScheme;
+                sharedOptions.DefaultSignInScheme = CookieAuthenticationDefaults.AuthenticationScheme;
+                sharedOptions.DefaultChallengeScheme = OpenIdConnectDefaults.AuthenticationScheme;
+            });
+
             services.AddCookieAuthentication();
 
             services.AddOpenIdConnectAuthentication(o =>
@@ -69,13 +76,6 @@ namespace OpenIdConnect.AzureAdSample
                         context.HandleCodeRedemption(result.AccessToken, result.IdToken);
                     }
                 };
-            });
-
-            services.AddAuthentication(sharedOptions =>
-            {
-                sharedOptions.DefaultAuthenticationScheme = CookieAuthenticationDefaults.AuthenticationScheme;
-                sharedOptions.DefaultSignInScheme = CookieAuthenticationDefaults.AuthenticationScheme;
-                sharedOptions.DefaultChallengeScheme = OpenIdConnectDefaults.AuthenticationScheme;
             });
         }
 
