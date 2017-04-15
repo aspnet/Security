@@ -129,7 +129,7 @@ namespace OpenIdConnectSample
                     return;
                 }
 
-                // DefaultAuthenticationScheme causes User to be set
+                // DefaultAuthenticateScheme causes User to be set
                 var user = context.User;
 
                 // This is what [Authorize] calls
