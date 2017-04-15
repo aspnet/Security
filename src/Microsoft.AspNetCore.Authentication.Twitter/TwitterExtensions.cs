@@ -3,11 +3,24 @@
 
 using System;
 using Microsoft.AspNetCore.Authentication.Twitter;
+using Microsoft.Extensions.Options;
 
 namespace Microsoft.Extensions.DependencyInjection
 {
     public static class TwitterExtensions
     {
+        /// <summary>
+        /// Adds Twitter authentication with options bound against the "Twitter" section 
+        /// from the IConfiguration in the service container.
+        /// </summary>
+        /// <param name="services"></param>
+        /// <returns></returns>
+        public static IServiceCollection AddTwitterAuthentication(this IServiceCollection services)
+        {
+            services.AddSingleton<IConfigureOptions<TwitterOptions>, TwitterConfigureOptions>();
+            return services.AddTwitterAuthentication(o => { });
+        }
+
         public static IServiceCollection AddTwitterAuthentication(this IServiceCollection services, Action<TwitterOptions> configureOptions) =>
             services.AddTwitterAuthentication(TwitterDefaults.AuthenticationScheme, configureOptions);
 

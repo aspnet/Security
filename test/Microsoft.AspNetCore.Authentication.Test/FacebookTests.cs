@@ -2,6 +2,7 @@
 // Licensed under the Apache License, Version 2.0. See License.txt in the project root for license information.
 
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Net;
 using System.Net.Http;
@@ -15,8 +16,10 @@ using Microsoft.AspNetCore.DataProtection;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.TestHost;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging.Abstractions;
+using Microsoft.Extensions.Options;
 using Newtonsoft.Json;
 using Xunit;
 
@@ -24,6 +27,25 @@ namespace Microsoft.AspNetCore.Authentication.Facebook
 {
     public class FacebookTests
     {
+        [Fact]
+        public void AddCanBindAgainstDefaultConfig()
+        {
+            var dic = new Dictionary<string, string>
+            {
+                {"Facebook:AppId", "<id>"},
+                {"Facebook:AppSecret", "<secret>"}
+            };
+            var configurationBuilder = new ConfigurationBuilder();
+            configurationBuilder.AddInMemoryCollection(dic);
+            var config = configurationBuilder.Build();
+            var services = new ServiceCollection().AddFacebookAuthentication().AddSingleton<IConfiguration>(config);
+            var sp = services.BuildServiceProvider();
+
+            var options = sp.GetRequiredService<IOptionsSnapshot<FacebookOptions>>().Get(FacebookDefaults.AuthenticationScheme);
+            Assert.Equal("<id>", options.AppId);
+            Assert.Equal("<secret>", options.AppSecret);
+        }
+
         [Fact]
         public async Task ThrowsIfAppIdMissing()
         {

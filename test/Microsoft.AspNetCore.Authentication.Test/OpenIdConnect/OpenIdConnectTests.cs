@@ -2,20 +2,25 @@
 // Licensed under the Apache License, Version 2.0. See License.txt in the project root for license information.
 
 using System;
+using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
 using System.Net;
 using System.Text.Encodings.Web;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authentication.Cookies;
+using Microsoft.AspNetCore.Authentication.OpenIdConnect;
 using Microsoft.AspNetCore.DataProtection;
+using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging.Abstractions;
+using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Protocols.OpenIdConnect;
 using Xunit;
 
 namespace Microsoft.AspNetCore.Authentication.Test.OpenIdConnect
 {
-    public class OpenIdConnectMiddlewareTests
+    public class OpenIdConnectTests
     {
         static string noncePrefix = "OpenIdConnect." + "Nonce.";
         static string nonceDelimiter = ".";
@@ -23,6 +28,27 @@ namespace Microsoft.AspNetCore.Authentication.Test.OpenIdConnect
         const string Logout = "/logout";
         const string Signin = "/signin";
         const string Signout = "/signout";
+
+        [Fact]
+        public void AddCanBindAgainstDefaultConfig()
+        {
+            var dic = new Dictionary<string, string>
+            {
+                {"OpenIdConnect:ClientId", "<id>"},
+                {"OpenIdConnect:ClientSecret", "<secret>"},
+                {"OpenIdConnect:Authority", "<auth>"}
+            };
+            var configurationBuilder = new ConfigurationBuilder();
+            configurationBuilder.AddInMemoryCollection(dic);
+            var config = configurationBuilder.Build();
+            var services = new ServiceCollection().AddOpenIdConnectAuthentication().AddSingleton<IConfiguration>(config);
+            var sp = services.BuildServiceProvider();
+
+            var options = sp.GetRequiredService<IOptionsSnapshot<OpenIdConnectOptions>>().Get(OpenIdConnectDefaults.AuthenticationScheme);
+            Assert.Equal("<id>", options.ClientId);
+            Assert.Equal("<secret>", options.ClientSecret);
+            Assert.Equal("<auth>", options.Authority);
+        }
 
 
         /// <summary>

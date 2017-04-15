@@ -1,6 +1,7 @@
 // Copyright (c) .NET Foundation. All rights reserved. See License.txt in the project root for license information.
 
 using System;
+using System.Collections.Generic;
 using System.Net;
 using System.Net.Http;
 using System.Security.Claims;
@@ -10,13 +11,34 @@ using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.TestHost;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Options;
 using Xunit;
 
 namespace Microsoft.AspNetCore.Authentication.Twitter
 {
-    public class TwitterMiddlewareTests
+    public class TwitterTests
     {
+        [Fact]
+        public void AddCanBindAgainstDefaultConfig()
+        {
+            var dic = new Dictionary<string, string>
+            {
+                {"Twitter:ConsumerKey", "<key>"},
+                {"Twitter:ConsumerSecret", "<secret>"}
+            };
+            var configurationBuilder = new ConfigurationBuilder();
+            configurationBuilder.AddInMemoryCollection(dic);
+            var config = configurationBuilder.Build();
+            var services = new ServiceCollection().AddTwitterAuthentication().AddSingleton<IConfiguration>(config);
+            var sp = services.BuildServiceProvider();
+
+            var options = sp.GetRequiredService<IOptionsSnapshot<TwitterOptions>>().Get(TwitterDefaults.AuthenticationScheme);
+            Assert.Equal("<key>", options.ConsumerKey);
+            Assert.Equal("<secret>", options.ConsumerSecret);
+        }
+
         [Fact]
         public async Task ChallengeWillTriggerApplyRedirectEvent()
         {

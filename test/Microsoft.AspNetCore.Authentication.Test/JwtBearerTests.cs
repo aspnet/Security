@@ -2,6 +2,7 @@
 // Licensed under the Apache License, Version 2.0. See License.txt in the project root for license information.
 
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Net;
 using System.Net.Http;
@@ -15,7 +16,9 @@ using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.TestHost;
 using Microsoft.AspNetCore.Testing.xunit;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 using Xunit;
 
@@ -23,6 +26,25 @@ namespace Microsoft.AspNetCore.Authentication.JwtBearer
 {
     public class JwtBearerTests
     {
+        [Fact]
+        public void AddCanBindAgainstDefaultConfig()
+        {
+            var dic = new Dictionary<string, string>
+            {
+                {"Bearer:Audience", "<aud>"},
+                {"Bearer:Authority", "<auth>"}
+            };
+            var configurationBuilder = new ConfigurationBuilder();
+            configurationBuilder.AddInMemoryCollection(dic);
+            var config = configurationBuilder.Build();
+            var services = new ServiceCollection().AddJwtBearerAuthentication().AddSingleton<IConfiguration>(config);
+            var sp = services.BuildServiceProvider();
+
+            var options = sp.GetRequiredService<IOptionsSnapshot<JwtBearerOptions>>().Get(JwtBearerDefaults.AuthenticationScheme);
+            Assert.Equal("<aud>", options.Audience);
+            Assert.Equal("<auth>", options.Authority);
+        }
+
         [ConditionalFact(Skip = "Need to remove dependency on AAD since the generated tokens will expire")]
         [FrameworkSkipCondition(RuntimeFrameworks.Mono)]
         // https://github.com/AzureAD/azure-activedirectory-identitymodel-extensions-for-dotnet/issues/179
