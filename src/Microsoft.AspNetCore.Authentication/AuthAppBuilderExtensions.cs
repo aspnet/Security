@@ -12,9 +12,9 @@ namespace Microsoft.AspNetCore.Builder
     public static class AuthAppBuilderExtensions
     {
         /// <summary>
-        /// Adds the <see cref="AuthenticationMiddleware"/> handler to the specified <see cref="IApplicationBuilder"/>, which enables authentication capabilities.
+        /// Adds the <see cref="AuthenticationMiddleware"/> to the specified <see cref="IApplicationBuilder"/>, which enables authentication capabilities.
         /// </summary>
-        /// <param name="app">The <see cref="IApplicationBuilder"/> to add the handler to.</param>
+        /// <param name="app">The <see cref="IApplicationBuilder"/> to add the middleware to.</param>
         /// <returns>A reference to this instance after the operation has completed.</returns>
         public static IApplicationBuilder UseAuthentication(this IApplicationBuilder app)
         {
