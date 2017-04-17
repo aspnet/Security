@@ -72,7 +72,7 @@ namespace OpenIdConnect.AzureAdSample
             });
 
             services.AddAuthentication(sharedOptions =>
-                sharedOptions.DefaultAuthenticationScheme = CookieAuthenticationDefaults.AuthenticationScheme);
+                sharedOptions.DefaultAuthenticateScheme = CookieAuthenticationDefaults.AuthenticationScheme);
         }
 
         public void Configure(IApplicationBuilder app, ILoggerFactory loggerfactory)

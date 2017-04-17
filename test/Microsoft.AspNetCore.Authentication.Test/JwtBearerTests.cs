@@ -31,8 +31,17 @@ namespace Microsoft.AspNetCore.Authentication.JwtBearer
         {
             var dic = new Dictionary<string, string>
             {
-                {"Bearer:Audience", "<aud>"},
-                {"Bearer:Authority", "<auth>"}
+                {"Bearer:Audience", "<audience>"},
+                {"Bearer:Authority", "<authority>"},
+                {"Bearer:BackchannelTimeout", "0.0:0:30"},
+                {"Bearer:Challenge", "<challenge>"},
+                {"Bearer:ClaimsIssuer", "<issuer>"},
+                {"Bearer:DisplayName", "<display>"},
+                {"Bearer:IncludeErrorDetails", "true"},
+                {"Bearer:MetadataAddress", "<metadata>"},
+                {"Bearer:RefreshOnIssuerKeyNotFound", "true"},
+                {"Bearer:RequireHttpsMetadata", "true"},
+                {"Bearer:SaveToken", "true"},
             };
             var configurationBuilder = new ConfigurationBuilder();
             configurationBuilder.AddInMemoryCollection(dic);
@@ -41,8 +50,54 @@ namespace Microsoft.AspNetCore.Authentication.JwtBearer
             var sp = services.BuildServiceProvider();
 
             var options = sp.GetRequiredService<IOptionsSnapshot<JwtBearerOptions>>().Get(JwtBearerDefaults.AuthenticationScheme);
-            Assert.Equal("<aud>", options.Audience);
-            Assert.Equal("<auth>", options.Authority);
+            Assert.Equal(new TimeSpan(0, 0, 0, 30), options.BackchannelTimeout);
+            Assert.Equal("<audience>", options.Audience);
+            Assert.Equal("<authority>", options.Authority);
+            Assert.Equal("<challenge>", options.Challenge);
+            Assert.Equal("<issuer>", options.ClaimsIssuer);
+            Assert.Equal("<display>", options.DisplayName);
+            Assert.True(options.IncludeErrorDetails);
+            Assert.Equal("<metadata>", options.MetadataAddress);
+            Assert.True(options.RefreshOnIssuerKeyNotFound);
+            Assert.True(options.RequireHttpsMetadata);
+            Assert.True(options.SaveToken);
+        }
+
+        [Fact]
+        public void AddCanBindAgainstDefaultConfigAndOverride()
+        {
+            var dic = new Dictionary<string, string>
+            {
+                {"Bearer:Audience", "<audience>"},
+                {"Bearer:Authority", "<authority>"},
+                {"Bearer:BackchannelTimeout", "0.0:0:30"},
+                {"Bearer:Challenge", "<challenge>"},
+                {"Bearer:ClaimsIssuer", "<issuer>"},
+                {"Bearer:DisplayName", "<display>"},
+                {"Bearer:IncludeErrorDetails", "true"},
+                {"Bearer:MetadataAddress", "<metadata>"},
+                {"Bearer:RefreshOnIssuerKeyNotFound", "true"},
+                {"Bearer:RequireHttpsMetadata", "true"},
+                {"Bearer:SaveToken", "true"},
+            };
+            var configurationBuilder = new ConfigurationBuilder();
+            configurationBuilder.AddInMemoryCollection(dic);
+            var config = configurationBuilder.Build();
+            var services = new ServiceCollection().AddJwtBearerAuthentication(o => o.IncludeErrorDetails = false).AddSingleton<IConfiguration>(config);
+            var sp = services.BuildServiceProvider();
+
+            var options = sp.GetRequiredService<IOptionsSnapshot<JwtBearerOptions>>().Get(JwtBearerDefaults.AuthenticationScheme);
+            Assert.Equal(new TimeSpan(0, 0, 0, 30), options.BackchannelTimeout);
+            Assert.Equal("<audience>", options.Audience);
+            Assert.Equal("<authority>", options.Authority);
+            Assert.Equal("<challenge>", options.Challenge);
+            Assert.Equal("<issuer>", options.ClaimsIssuer);
+            Assert.Equal("<display>", options.DisplayName);
+            Assert.False(options.IncludeErrorDetails);
+            Assert.Equal("<metadata>", options.MetadataAddress);
+            Assert.True(options.RefreshOnIssuerKeyNotFound);
+            Assert.True(options.RequireHttpsMetadata);
+            Assert.True(options.SaveToken);
         }
 
         [ConditionalFact(Skip = "Need to remove dependency on AAD since the generated tokens will expire")]

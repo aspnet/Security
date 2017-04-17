@@ -16,15 +16,15 @@ namespace Microsoft.Extensions.DependencyInjection
         /// <param name="services"></param>
         /// <returns></returns>
         public static IServiceCollection AddFacebookAuthentication(this IServiceCollection services)
-        {
-            services.AddSingleton<IConfigureOptions<FacebookOptions>, FacebookConfigureOptions>();
-            return services.AddFacebookAuthentication(o => { });
-        }
+            => services.AddFacebookAuthentication(FacebookDefaults.AuthenticationScheme, _ => { });
 
         public static IServiceCollection AddFacebookAuthentication(this IServiceCollection services, Action<FacebookOptions> configureOptions) 
             => services.AddFacebookAuthentication(FacebookDefaults.AuthenticationScheme, configureOptions);
 
-        public static IServiceCollection AddFacebookAuthentication(this IServiceCollection services, string authenticationScheme, Action<FacebookOptions> configureOptions) 
-            => services.AddScheme<FacebookOptions, FacebookHandler>(authenticationScheme, configureOptions);
+        public static IServiceCollection AddFacebookAuthentication(this IServiceCollection services, string authenticationScheme, Action<FacebookOptions> configureOptions)
+        {
+            services.AddSingleton<IConfigureOptions<FacebookOptions>, FacebookConfigureOptions>();
+            return services.AddScheme<FacebookOptions, FacebookHandler>(authenticationScheme, configureOptions);
+        }
     }
 }

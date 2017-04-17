@@ -201,7 +201,7 @@ namespace SocialSample
                 };
             });
 
-            services.AddAuthentication(options => options.DefaultAuthenticationScheme = CookieAuthenticationDefaults.AuthenticationScheme);
+            services.AddAuthentication(options => options.DefaultAuthenticateScheme = CookieAuthenticationDefaults.AuthenticationScheme);
         }
 
         public void Configure(IApplicationBuilder app, ILoggerFactory loggerfactory)

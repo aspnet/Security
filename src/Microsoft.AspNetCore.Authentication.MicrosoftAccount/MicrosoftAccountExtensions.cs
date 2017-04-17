@@ -16,15 +16,15 @@ namespace Microsoft.Extensions.DependencyInjection
         /// <param name="services"></param>
         /// <returns></returns>
         public static IServiceCollection AddMicrosoftAccountAuthentication(this IServiceCollection services)
-        {
-            services.AddSingleton<IConfigureOptions<MicrosoftAccountOptions>, MicrosoftAccountConfigureOptions>();
-            return services.AddMicrosoftAccountAuthentication(o => { });
-        }
+            => services.AddMicrosoftAccountAuthentication(MicrosoftAccountDefaults.AuthenticationScheme, o => { });
 
         public static IServiceCollection AddMicrosoftAccountAuthentication(this IServiceCollection services, Action<MicrosoftAccountOptions> configureOptions) =>
             services.AddMicrosoftAccountAuthentication(MicrosoftAccountDefaults.AuthenticationScheme, configureOptions);
 
-        public static IServiceCollection AddMicrosoftAccountAuthentication(this IServiceCollection services, string authenticationScheme, Action<MicrosoftAccountOptions> configureOptions) =>
-            services.AddScheme<MicrosoftAccountOptions, MicrosoftAccountHandler>(authenticationScheme, configureOptions);
+        public static IServiceCollection AddMicrosoftAccountAuthentication(this IServiceCollection services, string authenticationScheme, Action<MicrosoftAccountOptions> configureOptions)
+        {
+            services.AddSingleton<IConfigureOptions<MicrosoftAccountOptions>, MicrosoftAccountConfigureOptions>();
+            return services.AddScheme<MicrosoftAccountOptions, MicrosoftAccountHandler>(authenticationScheme, configureOptions);
+        }
     }
 }
