@@ -307,10 +307,10 @@ namespace SocialSample
 
                 await context.Response.WriteAsync("Tokens:<br>");
                 
-                await context.Response.WriteAsync("Access Token: " + await context.GetTokenAsync(CookieAuthenticationDefaults.AuthenticationScheme, "access_token") + "<br>");
-                await context.Response.WriteAsync("Refresh Token: " + await context.GetTokenAsync(CookieAuthenticationDefaults.AuthenticationScheme, "refresh_token") + "<br>");
-                await context.Response.WriteAsync("Token Type: " + await context.GetTokenAsync(CookieAuthenticationDefaults.AuthenticationScheme, "token_type") + "<br>");
-                await context.Response.WriteAsync("expires_at: " + await context.GetTokenAsync(CookieAuthenticationDefaults.AuthenticationScheme, "expires_at") + "<br>");
+                await context.Response.WriteAsync("Access Token: " + await context.GetTokenAsync("access_token") + "<br>");
+                await context.Response.WriteAsync("Refresh Token: " + await context.GetTokenAsync("refresh_token") + "<br>");
+                await context.Response.WriteAsync("Token Type: " + await context.GetTokenAsync("token_type") + "<br>");
+                await context.Response.WriteAsync("expires_at: " + await context.GetTokenAsync("expires_at") + "<br>");
                 await context.Response.WriteAsync("<a href=\"/logout\">Logout</a><br>");
                 await context.Response.WriteAsync("</body></html>");
             });
