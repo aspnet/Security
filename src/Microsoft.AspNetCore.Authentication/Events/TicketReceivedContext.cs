@@ -8,7 +8,7 @@ using Microsoft.AspNetCore.Http.Authentication;
 namespace Microsoft.AspNetCore.Authentication
 {
     /// <summary>
-    /// Provides context information to middleware providers.
+    /// Provides context information to handler providers.
     /// </summary>
     public class TicketReceivedContext : BaseControlContext
     {

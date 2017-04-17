@@ -14,7 +14,7 @@ namespace Microsoft.AspNetCore.Builder
         /// <summary>
         /// Obsolete, see https://go.microsoft.com/fwlink/?linkid=845470
         /// </summary>
-        /// <param name="app">The <see cref="IApplicationBuilder"/> to add the middleware to.</param>
+        /// <param name="app">The <see cref="IApplicationBuilder"/> to add the handler to.</param>
         /// <returns>A reference to this instance after the operation has completed.</returns>
         [Obsolete("See https://go.microsoft.com/fwlink/?linkid=845470", error: true)]
         public static IApplicationBuilder UseOAuthAuthentication(this IApplicationBuilder app)
@@ -25,8 +25,8 @@ namespace Microsoft.AspNetCore.Builder
         /// <summary>
         /// Obsolete, see https://go.microsoft.com/fwlink/?linkid=845470
         /// </summary>
-        /// <param name="app">The <see cref="IApplicationBuilder"/> to add the middleware to.</param>
-        /// <param name="options">A <see cref="OAuthOptions"/> that specifies options for the middleware.</param>
+        /// <param name="app">The <see cref="IApplicationBuilder"/> to add the handler to.</param>
+        /// <param name="options">A <see cref="OAuthOptions"/> that specifies options for the handler.</param>
         /// <returns>A reference to this instance after the operation has completed.</returns>
         [Obsolete("See https://go.microsoft.com/fwlink/?linkid=845470", error: true)]
         public static IApplicationBuilder UseOAuthAuthentication(this IApplicationBuilder app, OAuthOptions options)

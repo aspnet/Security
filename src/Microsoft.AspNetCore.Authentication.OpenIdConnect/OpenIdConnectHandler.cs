@@ -110,7 +110,7 @@ namespace Microsoft.AspNetCore.Authentication.OpenIdConnect
             if (Options.Backchannel == null)
             {
                 Options.Backchannel = new HttpClient(Options.BackchannelHttpHandler ?? new HttpClientHandler());
-                Options.Backchannel.DefaultRequestHeaders.UserAgent.ParseAdd("Microsoft ASP.NET Core OpenIdConnect middleware");
+                Options.Backchannel.DefaultRequestHeaders.UserAgent.ParseAdd("Microsoft ASP.NET Core OpenIdConnect handler");
                 Options.Backchannel.Timeout = Options.BackchannelTimeout;
                 Options.Backchannel.MaxResponseContentBufferSize = 1024 * 1024 * 10; // 10 MB
             }
@@ -142,12 +142,6 @@ namespace Microsoft.AspNetCore.Authentication.OpenIdConnect
                     Options.ConfigurationManager = new ConfigurationManager<OpenIdConnectConfiguration>(Options.MetadataAddress, new OpenIdConnectConfigurationRetriever(),
                         new HttpDocumentRetriever(Backchannel) { RequireHttps = Options.RequireHttpsMetadata });
                 }
-            }
-
-            if (Options.ConfigurationManager == null)
-            {
-                throw new InvalidOperationException($"Provide {nameof(Options.Authority)}, {nameof(Options.MetadataAddress)}, "
-                + $"{nameof(Options.Configuration)}, or {nameof(Options.ConfigurationManager)} to {nameof(OpenIdConnectOptions)}");
             }
         }
 
@@ -561,7 +555,7 @@ namespace Microsoft.AspNetCore.Authentication.OpenIdConnect
                 }
 
                 var messageReceivedContext = await RunMessageReceivedEventAsync(authorizationResponse, properties);
-                if (messageReceivedContext.ProcessingCompleted(out result))
+                if (messageReceivedContext.IsProcessingComplete(out result))
                 {
                     return result;
                 }
@@ -638,7 +632,7 @@ namespace Microsoft.AspNetCore.Authentication.OpenIdConnect
                     }
 
                     var tokenValidatedContext = await RunTokenValidatedEventAsync(authorizationResponse, null, properties, ticket, jwt, nonce);
-                    if (tokenValidatedContext.ProcessingCompleted(out result))
+                    if (tokenValidatedContext.IsProcessingComplete(out result))
                     {
                         return result;
                     }
@@ -663,7 +657,7 @@ namespace Microsoft.AspNetCore.Authentication.OpenIdConnect
                 if (!string.IsNullOrEmpty(authorizationResponse.Code))
                 {
                     var authorizationCodeReceivedContext = await RunAuthorizationCodeReceivedEventAsync(authorizationResponse, properties, ticket, jwt);
-                    if (authorizationCodeReceivedContext.ProcessingCompleted(out result))
+                    if (authorizationCodeReceivedContext.IsProcessingComplete(out result))
                     {
                         return result;
                     }
@@ -681,7 +675,7 @@ namespace Microsoft.AspNetCore.Authentication.OpenIdConnect
                     }
 
                     var tokenResponseReceivedContext = await RunTokenResponseReceivedEventAsync(authorizationResponse, tokenEndpointResponse, properties, ticket);
-                    if (tokenResponseReceivedContext.ProcessingCompleted(out result))
+                    if (tokenResponseReceivedContext.IsProcessingComplete(out result))
                     {
                         return result;
                     }
@@ -708,7 +702,7 @@ namespace Microsoft.AspNetCore.Authentication.OpenIdConnect
                         }
 
                         var tokenValidatedContext = await RunTokenValidatedEventAsync(authorizationResponse, tokenEndpointResponse, properties, tokenEndpointTicket, tokenEndpointJwt, nonce);
-                        if (tokenValidatedContext.ProcessingCompleted(out result))
+                        if (tokenValidatedContext.IsProcessingComplete(out result))
                         {
                             return result;
                         }
@@ -777,7 +771,7 @@ namespace Microsoft.AspNetCore.Authentication.OpenIdConnect
                 }
 
                 var authenticationFailedContext = await RunAuthenticationFailedEventAsync(authorizationResponse, exception);
-                if (authenticationFailedContext.ProcessingCompleted(out result))
+                if (authenticationFailedContext.IsProcessingComplete(out result))
                 {
                     return result;
                 }
@@ -892,7 +886,7 @@ namespace Microsoft.AspNetCore.Authentication.OpenIdConnect
 
             var userInformationReceivedContext = await RunUserInformationReceivedEventAsync(ticket, message, user);
             AuthenticateResult result;
-            if (userInformationReceivedContext.ProcessingCompleted(out result))
+            if (userInformationReceivedContext.IsProcessingComplete(out result))
             {
                 return result;
             }

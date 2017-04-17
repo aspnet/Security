@@ -31,43 +31,36 @@ namespace Microsoft.AspNetCore.Authentication
 
         public async Task Invoke(HttpContext context)
         {
-            try
+            context.Features.Set<IAuthenticationFeature>(new AuthenticationFeature
             {
-                context.Features.Set<IAuthenticationFeature>(new AuthenticationFeature
-                {
-                    OriginalPath = context.Request.Path,
-                    OriginalPathBase = context.Request.PathBase
-                });
+                OriginalPath = context.Request.Path,
+                OriginalPathBase = context.Request.PathBase
+            });
 
-                // REVIEW: alternatively could depend on a routing middleware to do this
+            // REVIEW: alternatively could depend on a routing middleware to do this
 
-                // Give any IAuthenticationRequestHandler schemes a chance to handle the request
-                var handlers = context.RequestServices.GetRequiredService<IAuthenticationHandlerProvider>();
-                foreach (var scheme in await Schemes.GetRequestHandlerSchemesAsync())
-                {
-                    var handler = await handlers.GetHandlerAsync(context, scheme.Name) as IAuthenticationRequestHandler;
-                    if (handler != null && await handler.HandleRequestAsync())
-                    {
-                        return;
-                    }
-                }
-
-                var defaultAuthenticate = await Schemes.GetDefaultAuthenticateSchemeAsync();
-                if (defaultAuthenticate != null)
-                {
-                    var result = await context.AuthenticateAsync(defaultAuthenticate.Name);
-                    if (result?.Principal != null)
-                    {
-                        context.User = result.Principal;
-                    }
-                }
-
-                await _next(context);
-            }
-            finally
+            // Give any IAuthenticationRequestHandler schemes a chance to handle the request
+            var handlers = context.RequestServices.GetRequiredService<IAuthenticationHandlerProvider>();
+            foreach (var scheme in await Schemes.GetRequestHandlerSchemesAsync())
             {
-                context.Features.Set<IAuthenticationFeature>(null);
+                var handler = await handlers.GetHandlerAsync(context, scheme.Name) as IAuthenticationRequestHandler;
+                if (handler != null && await handler.HandleRequestAsync())
+                {
+                    return;
+                }
             }
+
+            var defaultAuthenticate = await Schemes.GetDefaultAuthenticateSchemeAsync();
+            if (defaultAuthenticate != null)
+            {
+                var result = await context.AuthenticateAsync(defaultAuthenticate.Name);
+                if (result?.Principal != null)
+                {
+                    context.User = result.Principal;
+                }
+            }
+
+            await _next(context);
         }
     }
 }

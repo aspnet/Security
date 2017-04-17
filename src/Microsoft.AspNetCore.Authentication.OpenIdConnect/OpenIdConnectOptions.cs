@@ -89,6 +89,12 @@ namespace Microsoft.AspNetCore.Authentication.OpenIdConnect
             {
                 throw new ArgumentException("Options.CallbackPath must be provided.", nameof(CallbackPath));
             }
+
+            if (ConfigurationManager == null)
+            {
+                throw new InvalidOperationException($"Provide {nameof(Authority)}, {nameof(MetadataAddress)}, "
+                + $"{nameof(Configuration)}, or {nameof(ConfigurationManager)} to {nameof(OpenIdConnectOptions)}");
+            }
         }
 
         /// <summary>
@@ -119,7 +125,7 @@ namespace Microsoft.AspNetCore.Authentication.OpenIdConnect
         public IConfigurationManager<OpenIdConnectConfiguration> ConfigurationManager { get; set; }
 
         /// <summary>
-        /// Boolean to set whether the middleware should go to user info endpoint to retrieve additional claims or not after creating an identity from id_token received from token endpoint.
+        /// Boolean to set whether the handler should go to user info endpoint to retrieve additional claims or not after creating an identity from id_token received from token endpoint.
         /// The default is 'false'.
         /// </summary>
         public bool GetClaimsFromUserInfoEndpoint { get; set; }
@@ -204,7 +210,7 @@ namespace Microsoft.AspNetCore.Authentication.OpenIdConnect
         public ICollection<string> Scope { get; } = new HashSet<string>();
 
         /// <summary>
-        /// Requests received on this path will cause the middleware to invoke SignOut using the SignInScheme.
+        /// Requests received on this path will cause the handler to invoke SignOut using the SignInScheme.
         /// </summary>
         public PathString RemoteSignOutPath { get; set; }
 
@@ -215,12 +221,12 @@ namespace Microsoft.AspNetCore.Authentication.OpenIdConnect
         public string SignOutScheme { get; set; }
 
         /// <summary>
-        /// Gets or sets the type used to secure data handled by the middleware.
+        /// Gets or sets the type used to secure data handled by the handler.
         /// </summary>
         public ISecureDataFormat<AuthenticationProperties> StateDataFormat { get; set; }
 
         /// <summary>
-        /// Gets or sets the type used to secure strings used by the middleware.
+        /// Gets or sets the type used to secure strings used by the handler.
         /// </summary>
         public ISecureDataFormat<string> StringDataFormat { get; set; }
 
@@ -243,7 +249,7 @@ namespace Microsoft.AspNetCore.Authentication.OpenIdConnect
         public bool UseTokenLifetime { get; set; }
 
         /// <summary>
-        /// Indicates if requests to the CallbackPath may also be for other components. If enabled the middleware will pass
+        /// Indicates if requests to the CallbackPath may also be for other components. If enabled the handler will pass
         /// requests through that do not contain OpenIdConnect authentication responses. Disabling this and setting the
         /// CallbackPath to a dedicated endpoint may provide better error handling.
         /// This is disabled by default.

@@ -70,7 +70,7 @@ namespace Microsoft.AspNetCore.Authentication.Twitter
                 Options.Backchannel.Timeout = Options.BackchannelTimeout;
                 Options.Backchannel.MaxResponseContentBufferSize = 1024 * 1024 * 10; // 10 MB
                 Options.Backchannel.DefaultRequestHeaders.Accept.ParseAdd("*/*");
-                Options.Backchannel.DefaultRequestHeaders.UserAgent.ParseAdd("Microsoft ASP.NET Core Twitter middleware");
+                Options.Backchannel.DefaultRequestHeaders.UserAgent.ParseAdd("Microsoft ASP.NET Core Twitter handler");
                 Options.Backchannel.DefaultRequestHeaders.ExpectContinue = false;
             }
         }

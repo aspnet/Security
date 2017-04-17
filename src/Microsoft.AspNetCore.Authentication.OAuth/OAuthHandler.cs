@@ -44,7 +44,7 @@ namespace Microsoft.AspNetCore.Authentication.OAuth
             if (Options.Backchannel == null)
             {
                 Options.Backchannel = new HttpClient(Options.BackchannelHttpHandler ?? new HttpClientHandler());
-                Options.Backchannel.DefaultRequestHeaders.UserAgent.ParseAdd("Microsoft ASP.NET Core OAuth middleware");
+                Options.Backchannel.DefaultRequestHeaders.UserAgent.ParseAdd("Microsoft ASP.NET Core OAuth handler");
                 Options.Backchannel.Timeout = Options.BackchannelTimeout;
                 Options.Backchannel.MaxResponseContentBufferSize = 1024 * 1024 * 10; // 10 MB
             }

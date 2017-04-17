@@ -98,7 +98,7 @@ namespace Microsoft.AspNetCore.Authentication.JwtBearer
 
                 // event can set the token
                 await Events.MessageReceived(messageReceivedContext);
-                if (messageReceivedContext.ProcessingCompleted(out result))
+                if (messageReceivedContext.IsProcessingComplete(out result))
                 {
                     return result;
                 }
@@ -189,7 +189,7 @@ namespace Microsoft.AspNetCore.Authentication.JwtBearer
                         };
 
                         await Events.TokenValidated(tokenValidatedContext);
-                        if (tokenValidatedContext.ProcessingCompleted(out result))
+                        if (tokenValidatedContext.IsProcessingComplete(out result))
                         {
                             return result;
                         }
@@ -215,7 +215,7 @@ namespace Microsoft.AspNetCore.Authentication.JwtBearer
                     };
 
                     await Events.AuthenticationFailed(authenticationFailedContext);
-                    if (authenticationFailedContext.ProcessingCompleted(out result))
+                    if (authenticationFailedContext.IsProcessingComplete(out result))
                     {
                         return result;
                     }
@@ -235,7 +235,7 @@ namespace Microsoft.AspNetCore.Authentication.JwtBearer
                 };
 
                 await Events.AuthenticationFailed(authenticationFailedContext);
-                if (authenticationFailedContext.ProcessingCompleted(out result))
+                if (authenticationFailedContext.IsProcessingComplete(out result))
                 {
                     return result;
                 }
@@ -260,7 +260,7 @@ namespace Microsoft.AspNetCore.Authentication.JwtBearer
             }
 
             await Events.Challenge(eventContext);
-            if (eventContext.ProcessingCompleted(out var ignored))
+            if (eventContext.IsProcessingComplete(out var ignored))
             {
                 return;
             }

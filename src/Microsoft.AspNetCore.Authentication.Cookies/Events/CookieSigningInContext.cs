@@ -16,7 +16,7 @@ namespace Microsoft.AspNetCore.Authentication.Cookies
         /// </summary>
         /// <param name="context">The HTTP request context</param>
         /// <param name="scheme">The scheme data</param>
-        /// <param name="options">The middleware options</param>
+        /// <param name="options">The handler options</param>
         /// <param name="principal">Initializes Principal property</param>
         /// <param name="properties">Initializes Extra property</param>
         /// <param name="cookieOptions">Initializes options for the authentication cookie.</param>

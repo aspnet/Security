@@ -332,8 +332,8 @@ namespace Microsoft.AspNetCore.Authentication.Test.OpenIdConnect
             Assert.Null(res.Headers.Location);
         }
 
-        // This test can be further refined. When one auth middleware skips, the authentication responsibility
-        // will be flowed to the next one. A dummy auth middleware can be added to ensure the correct logic.
+        // This test can be further refined. When one auth handler skips, the authentication responsibility
+        // will be flowed to the next one. A dummy auth handler can be added to ensure the correct logic.
         [Fact]
         public async Task OnRedirectToIdentityProviderEventSkipResponse()
         {

@@ -7,7 +7,7 @@ using Microsoft.AspNetCore.Http;
 namespace Microsoft.AspNetCore.Authentication.OAuth
 {
     /// <summary>
-    /// Context passed when a Challenge causes a redirect to authorize endpoint in the middleware.
+    /// Context passed when a Challenge causes a redirect to authorize endpoint in the handler.
     /// </summary>
     public class OAuthRedirectToAuthorizationContext : BaseContext
     {

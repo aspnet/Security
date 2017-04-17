@@ -26,7 +26,7 @@ namespace Microsoft.AspNetCore.Authentication
 
         protected IDataProtectionProvider DataProtection { get; set; }
 
-        private readonly AuthenticationOptions _sharedOptions;
+        private readonly AuthenticationOptions _authOptions;
 
         /// <summary>
         /// The handler calls methods on the events which give the application control at certain points where processing is occurring. 
@@ -41,7 +41,7 @@ namespace Microsoft.AspNetCore.Authentication
         protected RemoteAuthenticationHandler(IOptions<AuthenticationOptions> sharedOptions, IOptionsSnapshot<TOptions> options, IDataProtectionProvider dataProtection, ILoggerFactory logger, UrlEncoder encoder, ISystemClock clock)
             : base(options, logger, encoder, clock)
         {
-            _sharedOptions = sharedOptions.Value;
+            _authOptions = sharedOptions.Value;
             DataProtection = dataProtection;
         }
 
@@ -62,7 +62,7 @@ namespace Microsoft.AspNetCore.Authentication
 
             if (Options.SignInScheme == null)
             {
-                Options.SignInScheme = _sharedOptions.DefaultSignInScheme;
+                Options.SignInScheme = _authOptions.DefaultSignInScheme;
             }
         }
 
@@ -148,7 +148,7 @@ namespace Microsoft.AspNetCore.Authentication
             {
                 Logger.SigninSkipped();
                 return false;
-            };
+            }
 
             await Context.SignInAsync(SignInScheme, ticketContext.Principal, ticketContext.Properties);
 
@@ -174,10 +174,9 @@ namespace Microsoft.AspNetCore.Authentication
             var result = await Context.AuthenticateAsync(SignInScheme);
             if (result != null)
             {
-                // todo error
                 if (result.Failure != null)
                 {
-                    return AuthenticateResult.Fail(result.Failure);
+                    return result;
                 }
 
                 // The SignInScheme may be shared with multiple providers, make sure this provider issued the identity.
@@ -194,16 +193,14 @@ namespace Microsoft.AspNetCore.Authentication
                 return AuthenticateResult.Fail("Not authenticated");
             }
 
-            return AuthenticateResult.Fail("Remote authentication does not directly support authenticate");
+            return AuthenticateResult.Fail("Remote authentication does not directly support AuthenticateAsync");
         }
 
-        // REVIEW: should this forward to sign in scheme as well?
         protected override Task HandleSignOutAsync(SignOutContext context)
         {
             throw new NotSupportedException();
         }
 
-        // REVIEW: should this forward to sign in scheme as well?
         protected override Task HandleSignInAsync(SignInContext context)
         {
             throw new NotSupportedException();

@@ -6,7 +6,7 @@ using Microsoft.AspNetCore.Http;
 namespace Microsoft.AspNetCore.Authentication.Twitter
 {
     /// <summary>
-    /// The Context passed when a Challenge causes a redirect to authorize endpoint in the Twitter middleware.
+    /// The Context passed when a Challenge causes a redirect to authorize endpoint in the Twitter handler.
     /// </summary>
     public class TwitterRedirectToAuthorizationEndpointContext : BaseTwitterContext
     {
@@ -15,7 +15,7 @@ namespace Microsoft.AspNetCore.Authentication.Twitter
         /// </summary>
         /// <param name="context">The HTTP request context.</param>
         /// <param name="scheme">The scheme data</param>
-        /// <param name="options">The Twitter middleware options.</param>
+        /// <param name="options">The Twitter handler options.</param>
         /// <param name="properties">The authentication properties of the challenge.</param>
         /// <param name="redirectUri">The initial redirect URI.</param>
         public TwitterRedirectToAuthorizationEndpointContext(HttpContext context, AuthenticationScheme scheme,

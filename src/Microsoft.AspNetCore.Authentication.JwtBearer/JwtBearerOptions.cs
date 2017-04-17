@@ -12,7 +12,7 @@ using Microsoft.IdentityModel.Tokens;
 namespace Microsoft.AspNetCore.Authentication.JwtBearer
 {
     /// <summary>
-    /// Options class provides information needed to control Bearer Authentication middleware behavior
+    /// Options class provides information needed to control Bearer Authentication handler behavior
     /// </summary>
     public class JwtBearerOptions : AuthenticationSchemeOptions
     {
@@ -46,7 +46,7 @@ namespace Microsoft.AspNetCore.Authentication.JwtBearer
         public string Challenge { get; set; } = JwtBearerDefaults.AuthenticationScheme;
 
         /// <summary>
-        /// The object provided by the application to process events raised by the bearer authentication middleware.
+        /// The object provided by the application to process events raised by the bearer authentication handler.
         /// The application may implement the interface fully, or it may create an instance of JwtBearerAuthenticationEvents
         /// and assign delegates only to the events it wants to process.
         /// </summary>
@@ -106,7 +106,7 @@ namespace Microsoft.AspNetCore.Authentication.JwtBearer
 
         /// <summary>
         /// Defines whether the token validation errors should be returned to the caller.
-        /// Enabled by default, this option can be disabled to prevent the JWT middleware
+        /// Enabled by default, this option can be disabled to prevent the JWT handler
         /// from returning an error and an error_description in the WWW-Authenticate header.
         /// </summary>
         public bool IncludeErrorDetails { get; set; } = true;

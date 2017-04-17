@@ -52,7 +52,7 @@ namespace Microsoft.AspNetCore.Authentication
         /// </summary>
         /// <param name="result">The result.</param>
         /// <returns>Whether the handler should be done processing.</returns>
-        public bool ProcessingCompleted(out AuthenticateResult result)
+        public bool IsProcessingComplete(out AuthenticateResult result)
         {
             if (HandledResponse)
             {

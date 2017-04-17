@@ -12,7 +12,7 @@ using Microsoft.AspNetCore.Http;
 namespace Microsoft.AspNetCore.Authentication.Twitter
 {
     /// <summary>
-    /// Options for the Twitter authentication middleware.
+    /// Options for the Twitter authentication handler.
     /// </summary>
     public class TwitterOptions : RemoteAuthenticationOptions
     {
@@ -54,7 +54,7 @@ namespace Microsoft.AspNetCore.Authentication.Twitter
         public ClaimActionCollection ClaimActions { get; } = new ClaimActionCollection();
 
         /// <summary>
-        /// Gets or sets the type used to secure data handled by the middleware.
+        /// Gets or sets the type used to secure data handled by the handler.
         /// </summary>
         public ISecureDataFormat<RequestToken> StateDataFormat { get; set; }
 
