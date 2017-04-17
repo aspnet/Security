@@ -53,7 +53,7 @@ namespace Microsoft.AspNetCore.Authentication
         /// <summary>
         /// Gets or sets the type used to secure data.
         /// </summary>
-        public IDataProtectionProvider DataProtectionProvider { get; internal set; }
+        public IDataProtectionProvider DataProtectionProvider { get; set; }
 
         /// <summary>
         /// The request path within the application's base path where the user-agent will be returned.
