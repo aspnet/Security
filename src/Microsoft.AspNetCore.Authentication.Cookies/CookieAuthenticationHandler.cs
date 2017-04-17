@@ -70,7 +70,8 @@ namespace Microsoft.AspNetCore.Authentication.Cookies
             if (Options.TicketDataFormat == null)
             {
                 var provider = Options.DataProtectionProvider ?? Context.RequestServices.GetRequiredService<IDataProtectionProvider>();
-                var dataProtector = provider.CreateProtector(typeof(CookieAuthenticationHandler).FullName, Scheme.Name, "v2");
+                // Note: the purpose for the data protector must remain fixed for interop to work.
+                var dataProtector = provider.CreateProtector("Microsoft.AspNetCore.Authentication.Cookies.CookieAuthenticationMiddleware", Scheme.Name, "v2");
                 Options.TicketDataFormat = new TicketDataFormat(dataProtector);
             }
             if (Options.CookieManager == null)
