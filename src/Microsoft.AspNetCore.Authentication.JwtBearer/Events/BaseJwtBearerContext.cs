@@ -11,8 +11,18 @@ namespace Microsoft.AspNetCore.Authentication.JwtBearer
         public BaseJwtBearerContext(HttpContext context, AuthenticationScheme scheme, JwtBearerOptions options)
             : base(context)
         {
-            Options = options ?? throw new ArgumentNullException(nameof(options));
-            Scheme = scheme ?? throw new ArgumentException(nameof(scheme));
+            if (options == null)
+            {
+                throw new ArgumentNullException(nameof(options));
+            }
+
+            if (scheme == null)
+            {
+                throw new ArgumentNullException(nameof(scheme));
+            }
+
+            Options = options;
+            Scheme = scheme;
         }
 
         public JwtBearerOptions Options { get; }

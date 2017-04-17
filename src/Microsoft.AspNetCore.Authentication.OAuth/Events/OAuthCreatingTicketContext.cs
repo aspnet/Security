@@ -55,11 +55,41 @@ namespace Microsoft.AspNetCore.Authentication.OAuth
             JObject user)
             : base(context, scheme.Name, ticket.Properties)
         {
-            TokenResponse = tokens ?? throw new ArgumentNullException(nameof(tokens));
-            Backchannel = backchannel ?? throw new ArgumentNullException(nameof(backchannel));
-            User = user ?? throw new ArgumentNullException(nameof(user));
-            Options = options ?? throw new ArgumentNullException(nameof(options));
-            Scheme = scheme ?? throw new ArgumentNullException(nameof(scheme));
+            if (context == null)
+            {
+                throw new ArgumentNullException(nameof(context));
+            }
+
+            if (options == null)
+            {
+                throw new ArgumentNullException(nameof(options));
+            }
+
+            if (backchannel == null)
+            {
+                throw new ArgumentNullException(nameof(backchannel));
+            }
+
+            if (tokens == null)
+            {
+                throw new ArgumentNullException(nameof(tokens));
+            }
+
+            if (user == null)
+            {
+                throw new ArgumentNullException(nameof(user));
+            }
+
+            if (scheme == null)
+            {
+                throw new ArgumentNullException(nameof(scheme));
+            }
+
+            TokenResponse = tokens;
+            Backchannel = backchannel;
+            User = user;
+            Options = options;
+            Scheme = scheme;
             Ticket = ticket;
         }
 
