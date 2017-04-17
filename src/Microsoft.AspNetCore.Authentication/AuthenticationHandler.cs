@@ -136,7 +136,7 @@ namespace Microsoft.AspNetCore.Authentication
             return Request.Scheme + "://" + Request.Host + OriginalPathBase + targetPath;
         }
 
-        public async Task<AuthenticateResult> AuthenticateAsync(AuthenticateContext context)
+        public async Task<AuthenticateResult> AuthenticateAsync()
         {
             // Calling Authenticate more than once should always return the original value.
             var result = await HandleAuthenticateOnceAsync();
