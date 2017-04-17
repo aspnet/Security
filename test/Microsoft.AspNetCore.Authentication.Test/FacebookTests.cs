@@ -33,7 +33,18 @@ namespace Microsoft.AspNetCore.Authentication.Facebook
             var dic = new Dictionary<string, string>
             {
                 {"Facebook:AppId", "<id>"},
-                {"Facebook:AppSecret", "<secret>"}
+                {"Facebook:AppSecret", "<secret>"},
+                {"Facebook:AuthorizationEndpoint", "<authEndpoint>"},
+                {"Facebook:BackchannelTimeout", "0.0:0:30"},
+                //{"Facebook:CallbackPath", "/callbackpath"}, // PathString doesn't convert
+                {"Facebook:ClaimsIssuer", "<issuer>"},
+                {"Facebook:DisplayName", "<display>"},
+                {"Facebook:RemoteAuthenticationTimeout", "0.0:0:30"},
+                {"Facebook:SaveTokens", "true"},
+                {"Facebook:SendAppSecretProof", "true"},
+                {"Facebook:SignInScheme", "<signIn>"},
+                {"Facebook:TokenEndpoint", "<tokenEndpoint>"},
+                {"Facebook:UserInformationEndpoint", "<userEndpoint>"},
             };
             var configurationBuilder = new ConfigurationBuilder();
             configurationBuilder.AddInMemoryCollection(dic);
@@ -44,6 +55,62 @@ namespace Microsoft.AspNetCore.Authentication.Facebook
             var options = sp.GetRequiredService<IOptionsSnapshot<FacebookOptions>>().Get(FacebookDefaults.AuthenticationScheme);
             Assert.Equal("<id>", options.AppId);
             Assert.Equal("<secret>", options.AppSecret);
+            Assert.Equal("<authEndpoint>", options.AuthorizationEndpoint);
+            Assert.Equal(new TimeSpan(0, 0, 0, 30), options.BackchannelTimeout);
+            //Assert.Equal("/callbackpath", options.CallbackPath); // NOTE: PathString doesn't convert
+            Assert.Equal("<issuer>", options.ClaimsIssuer);
+            Assert.Equal("<id>", options.ClientId);
+            Assert.Equal("<secret>", options.ClientSecret);
+            Assert.Equal("<display>", options.DisplayName);
+            Assert.Equal(new TimeSpan(0, 0, 0, 30), options.RemoteAuthenticationTimeout);
+            Assert.True(options.SaveTokens);
+            Assert.True(options.SendAppSecretProof);
+            Assert.Equal("<signIn>", options.SignInScheme);
+            Assert.Equal("<tokenEndpoint>", options.TokenEndpoint);
+            Assert.Equal("<userEndpoint>", options.UserInformationEndpoint);
+        }
+
+        [Fact]
+        public void AddCanBindAgainstDefaultConfigAndOverride()
+        {
+            var dic = new Dictionary<string, string>
+            {
+                {"Facebook:AppId", "<id>"},
+                {"Facebook:AppSecret", "<secret>"},
+                {"Facebook:AuthorizationEndpoint", "<authEndpoint>"},
+                {"Facebook:BackchannelTimeout", "0.0:0:30"},
+                //{"Facebook:CallbackPath", "/callbackpath"}, // PathString doesn't convert
+                {"Facebook:ClaimsIssuer", "<issuer>"},
+                {"Facebook:DisplayName", "<display>"},
+                {"Facebook:RemoteAuthenticationTimeout", "0.0:0:30"},
+                {"Facebook:SaveTokens", "true"},
+                {"Facebook:SendAppSecretProof", "true"},
+                {"Facebook:SignInScheme", "<signIn>"},
+                {"Facebook:TokenEndpoint", "<tokenEndpoint>"},
+                {"Facebook:UserInformationEndpoint", "<userEndpoint>"},
+            };
+            var configurationBuilder = new ConfigurationBuilder();
+            configurationBuilder.AddInMemoryCollection(dic);
+            var config = configurationBuilder.Build();
+            var services = new ServiceCollection().AddFacebookAuthentication(o => o.SaveTokens = false).AddSingleton<IConfiguration>(config);
+            var sp = services.BuildServiceProvider();
+
+            var options = sp.GetRequiredService<IOptionsSnapshot<FacebookOptions>>().Get(FacebookDefaults.AuthenticationScheme);
+            Assert.Equal("<id>", options.AppId);
+            Assert.Equal("<secret>", options.AppSecret);
+            Assert.Equal("<authEndpoint>", options.AuthorizationEndpoint);
+            Assert.Equal(new TimeSpan(0, 0, 0, 30), options.BackchannelTimeout);
+            //Assert.Equal("/callbackpath", options.CallbackPath); // NOTE: PathString doesn't convert
+            Assert.Equal("<issuer>", options.ClaimsIssuer);
+            Assert.Equal("<id>", options.ClientId);
+            Assert.Equal("<secret>", options.ClientSecret);
+            Assert.Equal("<display>", options.DisplayName);
+            Assert.Equal(new TimeSpan(0, 0, 0, 30), options.RemoteAuthenticationTimeout);
+            Assert.False(options.SaveTokens);
+            Assert.True(options.SendAppSecretProof);
+            Assert.Equal("<signIn>", options.SignInScheme);
+            Assert.Equal("<tokenEndpoint>", options.TokenEndpoint);
+            Assert.Equal("<userEndpoint>", options.UserInformationEndpoint);
         }
 
         [Fact]
@@ -91,7 +158,7 @@ namespace Microsoft.AspNetCore.Authentication.Facebook
                     services.AddAuthentication(options =>
                     {
                         options.DefaultSignInScheme = "External";
-                        options.DefaultAuthenticationScheme = "External";
+                        options.DefaultAuthenticateScheme = "External";
                     });
                     services.AddCookieAuthentication("External", o => { });
                     services.AddFacebookAuthentication(o =>
@@ -233,7 +300,7 @@ namespace Microsoft.AspNetCore.Authentication.Facebook
                     services.AddAuthentication(options =>
                     {
                         options.DefaultSignInScheme = CookieAuthenticationDefaults.AuthenticationScheme;
-                        options.DefaultAuthenticationScheme = CookieAuthenticationDefaults.AuthenticationScheme;
+                        options.DefaultAuthenticateScheme = CookieAuthenticationDefaults.AuthenticationScheme;
                     });
                     services.AddCookieAuthentication();
                     services.AddFacebookAuthentication(o => 

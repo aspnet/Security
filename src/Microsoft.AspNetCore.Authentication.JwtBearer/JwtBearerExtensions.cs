@@ -16,15 +16,15 @@ namespace Microsoft.Extensions.DependencyInjection
         /// <param name="services"></param>
         /// <returns></returns>
         public static IServiceCollection AddJwtBearerAuthentication(this IServiceCollection services)
+            => services.AddJwtBearerAuthentication(JwtBearerDefaults.AuthenticationScheme, _ => { });
+
+        public static IServiceCollection AddJwtBearerAuthentication(this IServiceCollection services, Action<JwtBearerOptions> configureOptions) 
+            => services.AddJwtBearerAuthentication(JwtBearerDefaults.AuthenticationScheme, configureOptions);
+
+        public static IServiceCollection AddJwtBearerAuthentication(this IServiceCollection services, string authenticationScheme, Action<JwtBearerOptions> configureOptions)
         {
             services.AddSingleton<IConfigureOptions<JwtBearerOptions>, JwtBearerConfigureOptions>();
-            return services.AddJwtBearerAuthentication(o => { });
+            return services.AddScheme<JwtBearerOptions, JwtBearerHandler>(authenticationScheme, configureOptions);
         }
-
-        public static IServiceCollection AddJwtBearerAuthentication(this IServiceCollection services, Action<JwtBearerOptions> configureOptions) =>
-            services.AddJwtBearerAuthentication(JwtBearerDefaults.AuthenticationScheme, configureOptions);
-
-        public static IServiceCollection AddJwtBearerAuthentication(this IServiceCollection services, string authenticationScheme, Action<JwtBearerOptions> configureOptions) =>
-            services.AddScheme<JwtBearerOptions, JwtBearerHandler>(authenticationScheme, configureOptions);
     }
 }
