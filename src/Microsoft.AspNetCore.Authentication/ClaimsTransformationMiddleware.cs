@@ -5,6 +5,7 @@ using System;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
 
 namespace Microsoft.AspNetCore.Authentication
@@ -35,17 +36,22 @@ namespace Microsoft.AspNetCore.Authentication
 
         public async Task Invoke(HttpContext context)
         {
-            var handler = new ClaimsTransformationHandler(Options.Transformer, context);
+            var transform = Options.Transformer;
+            if (transform == null && Options.TransformerType != null)
+            {
+                transform = context.RequestServices.GetRequiredService(Options.TransformerType) as IClaimsTransformer;
+            }
+            var handler = new ClaimsTransformationHandler(transform, context);
             handler.RegisterAuthenticationHandler(context.GetAuthentication());
             try
             {
-                if (Options.Transformer != null)
+                if (transform != null)
                 {
                     var transformationContext = new ClaimsTransformationContext(context)
                     {
                         Principal = context.User
                     };
-                    context.User = await Options.Transformer.TransformAsync(transformationContext);
+                    context.User = await transform.TransformAsync(transformationContext);
                 }
                 await _next(context);
             }

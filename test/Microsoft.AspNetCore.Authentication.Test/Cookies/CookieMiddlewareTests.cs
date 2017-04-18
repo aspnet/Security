@@ -1027,6 +1027,104 @@ namespace Microsoft.AspNetCore.Authentication.Cookies
             Assert.Equal("/denied", location.LocalPath);
         }
 
+        private class WhutTransformer : IClaimsTransformer
+        {
+            private readonly HttpContext _context;
+
+            public WhutTransformer(IHttpContextAccessor context)
+            {
+                _context = context.HttpContext;
+            }
+
+            public Task<ClaimsPrincipal> TransformAsync(ClaimsTransformationContext context)
+            {
+                ((ClaimsIdentity)context.Principal.Identity).AddClaim(new Claim("whut", _context.Request.Path));
+                return Task.FromResult(context.Principal);
+            }
+        }
+
+        [Fact]
+        public async Task ClaimsTransformationTypeThrowsIfNotSpecified()
+        {
+            var builder = new WebHostBuilder()
+                .Configure(app =>
+                {
+                    app.UseCookieAuthentication();
+                    app.UseClaimsTransformation(new ClaimsTransformationOptions
+                    {
+                        TransformerType = typeof(IClaimsTransformer),
+                    });
+                })
+                .ConfigureServices(services =>
+                {
+                    services.AddAuthentication();
+                });
+            var server = new TestServer(builder);
+
+            var error = await Assert.ThrowsAsync<InvalidOperationException>(() => SendAsync(server, "http://example.com"));
+            Assert.True(error.Message.StartsWith("No service for type"));
+        }
+
+        [Theory]
+        [InlineData(true)]
+        [InlineData(false)]
+        public async Task CanUseScopedIClaimsTransformationService(bool authenticate)
+        {
+            var builder = new WebHostBuilder()
+                .Configure(app =>
+                {
+                    app.UseCookieAuthentication(new CookieAuthenticationOptions
+                    {
+                        AutomaticAuthenticate = !authenticate
+                    });
+                    app.UseClaimsTransformation(new ClaimsTransformationOptions
+                    {
+                        TransformerType = typeof(IClaimsTransformer),
+                    });
+                    app.Run(async context =>
+                    {
+                        if (context.Request.Path.StartsWithSegments(new PathString("/me")))
+                        {
+                            var user = context.User;
+                            if (authenticate)
+                            {
+                                user = await context.Authentication.AuthenticateAsync(CookieAuthenticationDefaults.AuthenticationScheme);
+                            }
+                            context.Response.StatusCode = 200;
+                            context.Response.ContentType = "text/xml";
+                            var xml = new XElement("xml");
+                            xml.Add(user.Claims.Select(c => new XElement("claim", new XAttribute("type", c.Type), new XAttribute("value", c.Value))));
+                            var xmlBytes = Encoding.UTF8.GetBytes(xml.ToString());
+                            context.Response.Body.Write(xmlBytes, 0, xmlBytes.Length);
+                        }
+                        else
+                        {
+                            await context.Authentication.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme, new ClaimsPrincipal(new ClaimsIdentity()));
+                        }
+                    });
+                })
+                .ConfigureServices(services =>
+                {
+                    services.AddScoped<IClaimsTransformer, WhutTransformer>();
+                    services.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();
+                    services.AddAuthentication();
+                });
+            var server = new TestServer(builder);
+
+            var transaction1 = await SendAsync(server, "http://example.com");
+
+            Assert.Equal(HttpStatusCode.OK, transaction1.Response.StatusCode);
+
+            var transaction2 = await SendAsync(server, "http://example.com/me/Cookies", transaction1.CookieNameValue);
+            Assert.Equal(HttpStatusCode.OK, transaction2.Response.StatusCode);
+            Assert.Equal("/me/Cookies", FindClaimValue(transaction2, "whut"));
+
+            var transaction3 = await SendAsync(server, "http://example.com/me/Cookies/three", transaction1.CookieNameValue);
+            Assert.Equal(HttpStatusCode.OK, transaction3.Response.StatusCode);
+            // Verify different request doesn't cache
+            Assert.Equal("/me/Cookies/three", FindClaimValue(transaction3, "whut"));
+        }
+
         [Fact]
         public async Task NestedMapWillNotAffectLogin()
         {
