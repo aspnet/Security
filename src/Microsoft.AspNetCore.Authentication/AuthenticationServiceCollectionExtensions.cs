@@ -3,6 +3,8 @@
 
 using System;
 using Microsoft.AspNetCore.Authentication;
+using Microsoft.Extensions.DependencyInjection.Extensions;
+using Microsoft.Extensions.ObjectPool;
 
 namespace Microsoft.Extensions.DependencyInjection
 {
@@ -12,7 +14,7 @@ namespace Microsoft.Extensions.DependencyInjection
     public static class AuthenticationServiceCollectionExtensions
     {
         /// <summary>
-        /// Adds authentication services to the specified <see cref="IServiceCollection" />. 
+        /// Adds authentication services to the specified <see cref="IServiceCollection" />.
         /// </summary>
         /// <param name="services">The <see cref="IServiceCollection" /> to add services to.</param>
         /// <returns>The <see cref="IServiceCollection"/> so that additional calls can be chained.</returns>
@@ -25,11 +27,13 @@ namespace Microsoft.Extensions.DependencyInjection
 
             services.AddWebEncoders();
             services.AddDataProtection();
+            services.TryAddSingleton<ObjectPoolProvider, DefaultObjectPoolProvider>();
+
             return services;
         }
 
         /// <summary>
-        /// Adds authentication services to the specified <see cref="IServiceCollection" />. 
+        /// Adds authentication services to the specified <see cref="IServiceCollection" />.
         /// </summary>
         /// <param name="services">The <see cref="IServiceCollection" /> to add services to.</param>
         /// <param name="configureOptions">An action delegate to configure the provided <see cref="SharedAuthenticationOptions"/>.</param>
