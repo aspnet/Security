@@ -7,6 +7,7 @@ using System.Text.Encodings.Web;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.DataProtection;
 using Microsoft.AspNetCore.Http;
+using Microsoft.Extensions.Internal;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 
@@ -45,10 +46,10 @@ namespace Microsoft.AspNetCore.Authentication
             DataProtection = dataProtection;
         }
 
-        public override async Task InitializeAsync(AuthenticationScheme scheme, HttpContext context)
+        protected override Task InitializeHandlerAsync()
         {
-            await base.InitializeAsync(scheme, context);
             DataProtection = Options.DataProtectionProvider ?? DataProtection;
+            return TaskCache.CompletedTask;
         }
 
         protected override Task<object> CreateEventsAsync()

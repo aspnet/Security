@@ -145,7 +145,6 @@ namespace Microsoft.AspNetCore.Authentication.OpenIdConnect
             }
         }
 
-
         public override Task<bool> HandleRequestAsync()
         {
             if (Options.RemoteSignOutPath.HasValue && Options.RemoteSignOutPath == Request.Path)

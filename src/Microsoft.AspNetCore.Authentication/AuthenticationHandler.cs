@@ -70,7 +70,7 @@ namespace Microsoft.AspNetCore.Authentication
         /// <param name="scheme"></param>
         /// <param name="context"></param>
         /// <returns></returns>
-        public virtual Task InitializeAsync(AuthenticationScheme scheme, HttpContext context)
+        public async Task InitializeAsync(AuthenticationScheme scheme, HttpContext context)
         {
             if (scheme == null)
             {
@@ -99,7 +99,8 @@ namespace Microsoft.AspNetCore.Authentication
 
             Options.Validate();
 
-            return InitializeEventsAsync();
+            await InitializeEventsAsync();
+            await InitializeHandlerAsync();
         }
 
         /// <summary>
@@ -119,7 +120,7 @@ namespace Microsoft.AspNetCore.Authentication
         /// Creates a new instance of the events instance.
         /// </summary>
         /// <returns>A new instance of the events instance.</returns>
-        protected virtual Task<object> CreateEventsAsync() => Task.FromResult<object>(new object());
+        protected virtual Task<object> CreateEventsAsync() => Task.FromResult(new object());
 
         /// <summary>
         /// Initializes the options, will be called only once by <see cref="InitializeAsync(AuthenticationScheme, HttpContext)"/>.
@@ -129,6 +130,15 @@ namespace Microsoft.AspNetCore.Authentication
             // REVIEW: is there a better place for this default?
             Options.DisplayName = Options.DisplayName ?? Scheme.Name;
             Options.ClaimsIssuer = Options.ClaimsIssuer ?? Scheme.Name;
+        }
+
+        /// <summary>
+        /// Called after options/events have been initialized for the handler to finish initializing itself.
+        /// </summary>
+        /// <returns>A task</returns>
+        protected virtual Task InitializeHandlerAsync()
+        {
+            return TaskCache.CompletedTask;
         }
 
         protected string BuildRedirectUri(string targetPath)

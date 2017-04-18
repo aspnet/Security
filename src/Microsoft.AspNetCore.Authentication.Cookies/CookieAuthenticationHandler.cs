@@ -10,6 +10,7 @@ using Microsoft.AspNetCore.DataProtection;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Http.Features;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Internal;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Microsoft.Net.Http.Headers;
@@ -45,12 +46,11 @@ namespace Microsoft.AspNetCore.Authentication.Cookies
             set { base.Events = value; }
         }
 
-        public override async Task InitializeAsync(AuthenticationScheme scheme, HttpContext context)
+        protected override Task InitializeHandlerAsync()
         {
-            await base.InitializeAsync(scheme, context);
-
             // Cookies needs to finish the response
             Context.Response.OnStarting(FinishResponseAsync);
+            return TaskCache.CompletedTask;
         }
 
         /// <summary>

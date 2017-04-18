@@ -46,11 +46,6 @@ namespace Microsoft.AspNetCore.Authentication.Twitter
 
         protected override Task<object> CreateEventsAsync() => Task.FromResult<object>(new TwitterEvents());
 
-        public override async Task InitializeAsync(AuthenticationScheme scheme, HttpContext context)
-        {
-            await base.InitializeAsync(scheme, context);
-        }
-
         protected override void InitializeOptions()
         {
             base.InitializeOptions();
