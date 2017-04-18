@@ -16,14 +16,16 @@ namespace Microsoft.Extensions.DependencyInjection
         /// <param name="services"></param>
         /// <returns></returns>
         public static IServiceCollection AddTwitterAuthentication(this IServiceCollection services)
-            => services.AddTwitterAuthentication(TwitterDefaults.AuthenticationScheme, _ => { });
+        {
+            services.AddSingleton<IConfigureOptions<TwitterOptions>, TwitterConfigureOptions>();
+            return services.AddTwitterAuthentication(TwitterDefaults.AuthenticationScheme, _ => { });
+        }
 
         public static IServiceCollection AddTwitterAuthentication(this IServiceCollection services, Action<TwitterOptions> configureOptions)
             => services.AddTwitterAuthentication(TwitterDefaults.AuthenticationScheme, configureOptions);
 
         public static IServiceCollection AddTwitterAuthentication(this IServiceCollection services, string authenticationScheme, Action<TwitterOptions> configureOptions)
         {
-            services.AddSingleton<IConfigureOptions<TwitterOptions>, TwitterConfigureOptions>();
             return services.AddScheme<TwitterOptions, TwitterHandler>(authenticationScheme, configureOptions);
         }
     }

@@ -55,37 +55,21 @@ namespace Microsoft.AspNetCore.Authentication.Twitter
         }
 
         [Fact]
-        public void AddCanBindAgainstDefaultConfigAndOverride()
+        public void AddWithDelegateIgnoresConfig()
         {
             var dic = new Dictionary<string, string>
             {
                 {"Twitter:ConsumerKey", "<key>"},
-                {"Twitter:ConsumerSecret", "<secret>"},
-                {"Twitter:BackchannelTimeout", "0.0:0:30"},
-                //{"Twitter:CallbackPath", "/callbackpath"}, // PathString doesn't convert
-                {"Twitter:ClaimsIssuer", "<issuer>"},
-                {"Twitter:DisplayName", "<display>"},
-                {"Twitter:RemoteAuthenticationTimeout", "0.0:0:30"},
-                {"Twitter:SaveTokens", "true"},
-                {"Twitter:SendAppSecretProof", "true"},
-                {"Twitter:SignInScheme", "<signIn>"},
             };
             var configurationBuilder = new ConfigurationBuilder();
             configurationBuilder.AddInMemoryCollection(dic);
             var config = configurationBuilder.Build();
-            var services = new ServiceCollection().AddTwitterAuthentication(o => o.SaveTokens = false).AddSingleton<IConfiguration>(config);
+            var services = new ServiceCollection().AddTwitterAuthentication(o => o.SaveTokens = true).AddSingleton<IConfiguration>(config);
             var sp = services.BuildServiceProvider();
 
             var options = sp.GetRequiredService<IOptionsSnapshot<TwitterOptions>>().Get(TwitterDefaults.AuthenticationScheme);
-            Assert.Equal(new TimeSpan(0, 0, 0, 30), options.BackchannelTimeout);
-            //Assert.Equal("/callbackpath", options.CallbackPath); // NOTE: PathString doesn't convert
-            Assert.Equal("<issuer>", options.ClaimsIssuer);
-            Assert.Equal("<key>", options.ConsumerKey);
-            Assert.Equal("<secret>", options.ConsumerSecret);
-            Assert.Equal("<display>", options.DisplayName);
-            Assert.Equal(new TimeSpan(0, 0, 0, 30), options.RemoteAuthenticationTimeout);
-            Assert.False(options.SaveTokens);
-            Assert.Equal("<signIn>", options.SignInScheme);
+            Assert.Null(options.ConsumerKey);
+            Assert.True(options.SaveTokens);
         }
 
         [Fact]

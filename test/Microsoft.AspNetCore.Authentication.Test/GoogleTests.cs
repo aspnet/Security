@@ -67,23 +67,11 @@ namespace Microsoft.AspNetCore.Authentication.Google
         }
 
         [Fact]
-        public void AddCanBindAgainstDefaultConfigAndOverride()
+        public void AddWithDelegateIgnoresConfig()
         {
             var dic = new Dictionary<string, string>
             {
                 {"Google:ClientId", "<id>"},
-                {"Google:ClientSecret", "<secret>"},
-                {"Google:AuthorizationEndpoint", "<authEndpoint>"},
-                {"Google:BackchannelTimeout", "0.0:0:30"},
-                //{"Google:CallbackPath", "/callbackpath"}, // PathString doesn't convert
-                {"Google:ClaimsIssuer", "<issuer>"},
-                {"Google:DisplayName", "<display>"},
-                {"Google:RemoteAuthenticationTimeout", "0.0:0:30"},
-                {"Google:SaveTokens", "true"},
-                {"Google:SendAppSecretProof", "true"},
-                {"Google:SignInScheme", "<signIn>"},
-                {"Google:TokenEndpoint", "<tokenEndpoint>"},
-                {"Google:UserInformationEndpoint", "<userEndpoint>"},
             };
             var configurationBuilder = new ConfigurationBuilder();
             configurationBuilder.AddInMemoryCollection(dic);
@@ -92,18 +80,8 @@ namespace Microsoft.AspNetCore.Authentication.Google
             var sp = services.BuildServiceProvider();
 
             var options = sp.GetRequiredService<IOptionsSnapshot<GoogleOptions>>().Get(GoogleDefaults.AuthenticationScheme);
-            Assert.Equal("<authEndpoint>", options.AuthorizationEndpoint);
-            Assert.Equal(new TimeSpan(0, 0, 0, 30), options.BackchannelTimeout);
-            //Assert.Equal("/callbackpath", options.CallbackPath); // NOTE: PathString doesn't convert
-            Assert.Equal("<issuer>", options.ClaimsIssuer);
-            Assert.Equal("<id>", options.ClientId);
-            Assert.Equal("<secret>", options.ClientSecret);
-            Assert.Equal("<display>", options.DisplayName);
-            Assert.Equal(new TimeSpan(0, 0, 0, 30), options.RemoteAuthenticationTimeout);
+            Assert.Null(options.ClientId);
             Assert.False(options.SaveTokens);
-            Assert.Equal("<signIn>", options.SignInScheme);
-            Assert.Equal("<tokenEndpoint>", options.TokenEndpoint);
-            Assert.Equal("<userEndpoint>", options.UserInformationEndpoint);
         }
 
         [Fact]

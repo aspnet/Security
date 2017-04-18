@@ -72,7 +72,7 @@ namespace Microsoft.AspNetCore.Authentication
                 _code = code;
             }
             
-            public Task<AuthenticateResult> AuthenticateAsync(AuthenticateContext context)
+            public Task<AuthenticateResult> AuthenticateAsync()
             {
                 throw new NotImplementedException();
             }
@@ -109,7 +109,7 @@ namespace Microsoft.AspNetCore.Authentication
         {
             private HttpContext _context;
 
-            public Task<AuthenticateResult> AuthenticateAsync(AuthenticateContext context)
+            public Task<AuthenticateResult> AuthenticateAsync()
             {
                 throw new NotImplementedException();
             }
@@ -145,7 +145,7 @@ namespace Microsoft.AspNetCore.Authentication
         {
             private HttpContext _context;
 
-            public Task<AuthenticateResult> AuthenticateAsync(AuthenticateContext context)
+            public Task<AuthenticateResult> AuthenticateAsync()
             {
                 throw new NotImplementedException();
             }

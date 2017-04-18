@@ -68,43 +68,21 @@ namespace Microsoft.AspNetCore.Authentication.Tests.MicrosoftAccount
         }
 
         [Fact]
-        public void AddCanBindAgainstDefaultConfigAndOverride()
+        public void AddWithDelegateIgnoresConfig()
         {
             var dic = new Dictionary<string, string>
             {
                 {"Microsoft:ClientId", "<id>"},
-                {"Microsoft:ClientSecret", "<secret>"},
-                {"Microsoft:AuthorizationEndpoint", "<authEndpoint>"},
-                {"Microsoft:BackchannelTimeout", "0.0:0:30"},
-                //{"Microsoft:CallbackPath", "/callbackpath"}, // PathString doesn't convert
-                {"Microsoft:ClaimsIssuer", "<issuer>"},
-                {"Microsoft:DisplayName", "<display>"},
-                {"Microsoft:RemoteAuthenticationTimeout", "0.0:0:30"},
-                {"Microsoft:SaveTokens", "true"},
-                {"Microsoft:SendAppSecretProof", "true"},
-                {"Microsoft:SignInScheme", "<signIn>"},
-                {"Microsoft:TokenEndpoint", "<tokenEndpoint>"},
-                {"Microsoft:UserInformationEndpoint", "<userEndpoint>"},
             };
             var configurationBuilder = new ConfigurationBuilder();
             configurationBuilder.AddInMemoryCollection(dic);
             var config = configurationBuilder.Build();
-            var services = new ServiceCollection().AddMicrosoftAccountAuthentication(o => o.SaveTokens = false).AddSingleton<IConfiguration>(config);
+            var services = new ServiceCollection().AddMicrosoftAccountAuthentication(o => o.SaveTokens = true).AddSingleton<IConfiguration>(config);
             var sp = services.BuildServiceProvider();
 
             var options = sp.GetRequiredService<IOptionsSnapshot<MicrosoftAccountOptions>>().Get(MicrosoftAccountDefaults.AuthenticationScheme);
-            Assert.Equal("<authEndpoint>", options.AuthorizationEndpoint);
-            Assert.Equal(new TimeSpan(0, 0, 0, 30), options.BackchannelTimeout);
-            //Assert.Equal("/callbackpath", options.CallbackPath); // NOTE: PathString doesn't convert
-            Assert.Equal("<issuer>", options.ClaimsIssuer);
-            Assert.Equal("<id>", options.ClientId);
-            Assert.Equal("<secret>", options.ClientSecret);
-            Assert.Equal("<display>", options.DisplayName);
-            Assert.Equal(new TimeSpan(0, 0, 0, 30), options.RemoteAuthenticationTimeout);
-            Assert.False(options.SaveTokens);
-            Assert.Equal("<signIn>", options.SignInScheme);
-            Assert.Equal("<tokenEndpoint>", options.TokenEndpoint);
-            Assert.Equal("<userEndpoint>", options.UserInformationEndpoint);
+            Assert.Null(options.ClientId);
+            Assert.True(options.SaveTokens);
         }
 
         [Fact]

@@ -16,14 +16,16 @@ namespace Microsoft.Extensions.DependencyInjection
         /// <param name="services"></param>
         /// <returns></returns>
         public static IServiceCollection AddGoogleAuthentication(this IServiceCollection services)
-            => services.AddGoogleAuthentication(GoogleDefaults.AuthenticationScheme, _ => { });
+        {
+            services.AddSingleton<IConfigureOptions<GoogleOptions>, GoogleConfigureOptions>();
+            return services.AddGoogleAuthentication(GoogleDefaults.AuthenticationScheme, _ => { });
+        }
 
         public static IServiceCollection AddGoogleAuthentication(this IServiceCollection services, Action<GoogleOptions> configureOptions) 
             => services.AddGoogleAuthentication(GoogleDefaults.AuthenticationScheme, configureOptions);
 
         public static IServiceCollection AddGoogleAuthentication(this IServiceCollection services, string authenticationScheme, Action<GoogleOptions> configureOptions)
         {
-            services.AddSingleton<IConfigureOptions<GoogleOptions>, GoogleConfigureOptions>();
             return services.AddScheme<GoogleOptions, GoogleHandler>(authenticationScheme, configureOptions);
         }
     }

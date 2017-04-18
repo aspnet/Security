@@ -71,23 +71,11 @@ namespace Microsoft.AspNetCore.Authentication.Facebook
         }
 
         [Fact]
-        public void AddCanBindAgainstDefaultConfigAndOverride()
+        public void AddWithDelegateIgnoresConfig()
         {
             var dic = new Dictionary<string, string>
             {
                 {"Facebook:AppId", "<id>"},
-                {"Facebook:AppSecret", "<secret>"},
-                {"Facebook:AuthorizationEndpoint", "<authEndpoint>"},
-                {"Facebook:BackchannelTimeout", "0.0:0:30"},
-                //{"Facebook:CallbackPath", "/callbackpath"}, // PathString doesn't convert
-                {"Facebook:ClaimsIssuer", "<issuer>"},
-                {"Facebook:DisplayName", "<display>"},
-                {"Facebook:RemoteAuthenticationTimeout", "0.0:0:30"},
-                {"Facebook:SaveTokens", "true"},
-                {"Facebook:SendAppSecretProof", "true"},
-                {"Facebook:SignInScheme", "<signIn>"},
-                {"Facebook:TokenEndpoint", "<tokenEndpoint>"},
-                {"Facebook:UserInformationEndpoint", "<userEndpoint>"},
             };
             var configurationBuilder = new ConfigurationBuilder();
             configurationBuilder.AddInMemoryCollection(dic);
@@ -96,21 +84,8 @@ namespace Microsoft.AspNetCore.Authentication.Facebook
             var sp = services.BuildServiceProvider();
 
             var options = sp.GetRequiredService<IOptionsSnapshot<FacebookOptions>>().Get(FacebookDefaults.AuthenticationScheme);
-            Assert.Equal("<id>", options.AppId);
-            Assert.Equal("<secret>", options.AppSecret);
-            Assert.Equal("<authEndpoint>", options.AuthorizationEndpoint);
-            Assert.Equal(new TimeSpan(0, 0, 0, 30), options.BackchannelTimeout);
-            //Assert.Equal("/callbackpath", options.CallbackPath); // NOTE: PathString doesn't convert
-            Assert.Equal("<issuer>", options.ClaimsIssuer);
-            Assert.Equal("<id>", options.ClientId);
-            Assert.Equal("<secret>", options.ClientSecret);
-            Assert.Equal("<display>", options.DisplayName);
-            Assert.Equal(new TimeSpan(0, 0, 0, 30), options.RemoteAuthenticationTimeout);
+            Assert.Null(options.AppId);
             Assert.False(options.SaveTokens);
-            Assert.True(options.SendAppSecretProof);
-            Assert.Equal("<signIn>", options.SignInScheme);
-            Assert.Equal("<tokenEndpoint>", options.TokenEndpoint);
-            Assert.Equal("<userEndpoint>", options.UserInformationEndpoint);
         }
 
         [Fact]
