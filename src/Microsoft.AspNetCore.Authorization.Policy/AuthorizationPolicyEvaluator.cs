@@ -4,8 +4,8 @@
 using System;
 using System.Security.Claims;
 using System.Threading.Tasks;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Internal;
 
 namespace Microsoft.AspNetCore.Authorization
@@ -98,34 +98,4 @@ namespace Microsoft.AspNetCore.Authorization
     //        context.Result = new ChallengeResult(effectivePolicy.AuthenticationSchemes.ToArray());
     //    }
     //}
-
-    public class AuthorizationPolicyResult
-    {
-        private AuthorizationPolicyResult() { }
-
-        /// <summary>
-        /// If true, means the callee should challenge and try again.
-        /// </summary>
-        public bool Challenged { get; private set; }
-
-        /// <summary>
-        /// Authorization was forbidden.
-        /// </summary>
-        public bool Forbidden { get; private set; }
-
-        /// <summary>
-        /// Authorization was successful.
-        /// </summary>
-        public bool Succeeded { get; private set; }
-
-        public static AuthorizationPolicyResult Challenge()
-            => new AuthorizationPolicyResult { Challenged = true };
-
-        public static AuthorizationPolicyResult Forbid()
-            => new AuthorizationPolicyResult { Forbidden = true };
-
-        public static AuthorizationPolicyResult Success()
-            => new AuthorizationPolicyResult { Succeeded = true };
-
-    }
 }

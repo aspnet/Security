@@ -3,10 +3,7 @@
   <Import Project="..\..\build\common.props" />
 
   <PropertyGroup>
-    <Description>ASP.NET Core authorization classes.
-Commonly used types:
-Microsoft.AspNetCore.Authorization.AllowAnonymousAttribute
-Microsoft.AspNetCore.Authorization.AuthorizeAttribute</Description>
+    <Description>ASP.NET Core authorization policy helper classes.</Description>
     <TargetFramework>netstandard1.3</TargetFramework>
     <NoWarn>$(NoWarn);CS1591</NoWarn>
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
