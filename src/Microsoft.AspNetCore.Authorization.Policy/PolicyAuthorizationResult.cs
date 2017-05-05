@@ -1,11 +1,11 @@
 // Copyright (c) .NET Foundation. All rights reserved.
 // Licensed under the Apache License, Version 2.0. See License.txt in the project root for license information.
 
-namespace Microsoft.AspNetCore.Authorization
+namespace Microsoft.AspNetCore.Authorization.Policy
 {
-    public class AuthorizationPolicyResult
+    public class PolicyAuthorizationResult
     {
-        private AuthorizationPolicyResult() { }
+        private PolicyAuthorizationResult() { }
 
         /// <summary>
         /// If true, means the callee should challenge and try again.
@@ -22,14 +22,14 @@ namespace Microsoft.AspNetCore.Authorization
         /// </summary>
         public bool Succeeded { get; private set; }
 
-        public static AuthorizationPolicyResult Challenge()
-            => new AuthorizationPolicyResult { Challenged = true };
+        public static PolicyAuthorizationResult Challenge()
+            => new PolicyAuthorizationResult { Challenged = true };
 
-        public static AuthorizationPolicyResult Forbid()
-            => new AuthorizationPolicyResult { Forbidden = true };
+        public static PolicyAuthorizationResult Forbid()
+            => new PolicyAuthorizationResult { Forbidden = true };
 
-        public static AuthorizationPolicyResult Success()
-            => new AuthorizationPolicyResult { Succeeded = true };
+        public static PolicyAuthorizationResult Success()
+            => new PolicyAuthorizationResult { Succeeded = true };
 
     }
 }

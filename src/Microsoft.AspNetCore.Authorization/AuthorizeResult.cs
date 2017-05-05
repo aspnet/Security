@@ -31,5 +31,7 @@ namespace Microsoft.AspNetCore.Authorization
 
         public static AuthorizeResult Failed(AuthorizeFailure failure) => new AuthorizeResult { Failure = failure };
 
+        public static AuthorizeResult Failed() => new AuthorizeResult { Failure = AuthorizeFailure.ExplicitFail() };
+
     }
 }
