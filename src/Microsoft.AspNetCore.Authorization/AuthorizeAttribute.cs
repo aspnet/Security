@@ -25,13 +25,19 @@ namespace Microsoft.AspNetCore.Authorization
             Policy = policy;
         }
 
-        /// <inheritdoc />
+        /// <summary>
+        /// Gets or sets the policy name that determines access to the resource.
+        /// </summary>
         public string Policy { get; set; }
 
-        /// <inheritdoc />
+        /// <summary>
+        /// Gets or sets a comma delimited list of roles that are allowed to access the resource.
+        /// </summary>
         public string Roles { get; set; }
 
-        /// <inheritdoc />
-        public string ActiveAuthenticationSchemes { get; set; }
+        /// <summary>
+        /// Gets or sets a comma delimited list of schemes from which user information is constructed.
+        /// </summary>
+        public string AuthenticationSchemes { get; set; }
     }
 }
