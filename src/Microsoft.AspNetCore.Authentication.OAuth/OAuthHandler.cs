@@ -10,7 +10,6 @@ using System.Security.Claims;
 using System.Text;
 using System.Text.Encodings.Web;
 using System.Threading.Tasks;
-using Microsoft.AspNetCore.DataProtection;
 using Microsoft.AspNetCore.WebUtilities;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
@@ -33,15 +32,9 @@ namespace Microsoft.AspNetCore.Authentication.OAuth
             set { base.Events = value; }
         }
 
-        public OAuthHandler(IOptions<AuthenticationOptions> sharedOptions, IOptionsSnapshot<TOptions> options, ILoggerFactory logger, UrlEncoder encoder, IDataProtectionProvider dataProtection, ISystemClock clock)
-            : base(sharedOptions, options, dataProtection, logger, encoder, clock)
+        public OAuthHandler(IOptionsSnapshot<TOptions> options, ILoggerFactory logger, UrlEncoder encoder, ISystemClock clock)
+            : base(options, logger, encoder, clock)
         { }
-
-        protected override void InitializeOptions()
-        {
-            base.InitializeOptions();
-
-        }
 
         /// <summary>
         /// Creates a new instance of the events instance.

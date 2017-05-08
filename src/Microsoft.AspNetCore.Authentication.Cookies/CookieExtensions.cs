@@ -76,6 +76,5 @@ namespace Microsoft.Extensions.DependencyInjection
                 options.DataProtectionProvider = options.DataProtectionProvider ?? _dp;
             }
         }
-
     }
 }

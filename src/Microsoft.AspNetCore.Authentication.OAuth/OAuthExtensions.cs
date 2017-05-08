@@ -47,7 +47,7 @@ namespace Microsoft.Extensions.DependencyInjection
                     options.StateDataFormat = new PropertiesDataFormat(dataProtector);
                 }
             });
-            return services.AddScheme<TOptions, THandler>(authenticationScheme, authenticationScheme, configureOptions);
+            return services.AddRemoteScheme<TOptions, THandler>(authenticationScheme, authenticationScheme, configureOptions);
         }
 
         // Used to ensure that there's always a default data protection provider
