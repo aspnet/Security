@@ -749,7 +749,7 @@ namespace Microsoft.AspNetCore.Authentication.OpenIdConnect
                     var identity = (ClaimsIdentity)ticket.Principal.Identity;
                     foreach (var action in Options.ClaimActions)
                     {
-                        action.Run(null, identity, Options.ClaimsIssuer);
+                        action.Run(null, identity, ClaimsIssuer);
                     }
                 }
 
@@ -902,7 +902,7 @@ namespace Microsoft.AspNetCore.Authentication.OpenIdConnect
 
             foreach (var action in Options.ClaimActions)
             {
-                action.Run(user, identity, Options.ClaimsIssuer);
+                action.Run(user, identity, ClaimsIssuer);
             }
 
             return AuthenticateResult.Success(ticket);

@@ -116,12 +116,12 @@ namespace Microsoft.AspNetCore.Authentication.Twitter
 
             var identity = new ClaimsIdentity(new[]
             {
-                new Claim(ClaimTypes.NameIdentifier, accessToken.UserId, ClaimValueTypes.String, Options.ClaimsIssuer),
-                new Claim(ClaimTypes.Name, accessToken.ScreenName, ClaimValueTypes.String, Options.ClaimsIssuer),
-                new Claim("urn:twitter:userid", accessToken.UserId, ClaimValueTypes.String, Options.ClaimsIssuer),
-                new Claim("urn:twitter:screenname", accessToken.ScreenName, ClaimValueTypes.String, Options.ClaimsIssuer)
+                new Claim(ClaimTypes.NameIdentifier, accessToken.UserId, ClaimValueTypes.String, ClaimsIssuer),
+                new Claim(ClaimTypes.Name, accessToken.ScreenName, ClaimValueTypes.String, ClaimsIssuer),
+                new Claim("urn:twitter:userid", accessToken.UserId, ClaimValueTypes.String, ClaimsIssuer),
+                new Claim("urn:twitter:screenname", accessToken.ScreenName, ClaimValueTypes.String, ClaimsIssuer)
             },
-            Options.ClaimsIssuer);
+            ClaimsIssuer);
 
             JObject user = null;
             if (Options.RetrieveUserDetails)
@@ -145,7 +145,7 @@ namespace Microsoft.AspNetCore.Authentication.Twitter
         {
             foreach (var action in Options.ClaimActions)
             {
-                action.Run(user, identity, Options.ClaimsIssuer);
+                action.Run(user, identity, ClaimsIssuer);
             }
 
             var context = new TwitterCreatingTicketContext(Context, Scheme, Options, properties, token.UserId, token.ScreenName, token.Token, token.TokenSecret, user)

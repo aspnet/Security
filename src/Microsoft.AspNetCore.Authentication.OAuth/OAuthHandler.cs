@@ -41,20 +41,6 @@ namespace Microsoft.AspNetCore.Authentication.OAuth
         {
             base.InitializeOptions();
 
-            if (Options.Backchannel == null)
-            {
-                Options.Backchannel = new HttpClient(Options.BackchannelHttpHandler ?? new HttpClientHandler());
-                Options.Backchannel.DefaultRequestHeaders.UserAgent.ParseAdd("Microsoft ASP.NET Core OAuth handler");
-                Options.Backchannel.Timeout = Options.BackchannelTimeout;
-                Options.Backchannel.MaxResponseContentBufferSize = 1024 * 1024 * 10; // 10 MB
-            }
-
-            if (Options.StateDataFormat == null)
-            {
-                var dataProtector = DataProtection.CreateProtector(
-                    GetType().FullName, Scheme.Name, "v1");
-                Options.StateDataFormat = new PropertiesDataFormat(dataProtector);
-            }
         }
 
         /// <summary>
@@ -119,7 +105,7 @@ namespace Microsoft.AspNetCore.Authentication.OAuth
                 return AuthenticateResult.Fail("Failed to retrieve access token.");
             }
 
-            var identity = new ClaimsIdentity(Options.ClaimsIssuer);
+            var identity = new ClaimsIdentity(ClaimsIssuer);
 
             if (Options.SaveTokens)
             {

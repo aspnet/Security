@@ -48,6 +48,8 @@ namespace Microsoft.AspNetCore.Authentication
         /// </summary>
         protected virtual object Events { get; set; }
 
+        protected virtual string ClaimsIssuer => Options.ClaimsIssuer ?? Scheme.Name;
+
         protected string CurrentUri
         {
             get
@@ -127,9 +129,6 @@ namespace Microsoft.AspNetCore.Authentication
         /// </summary>
         protected virtual void InitializeOptions()
         {
-            // REVIEW: is there a better place for this default?
-            Options.DisplayName = Options.DisplayName ?? Scheme.Name;
-            Options.ClaimsIssuer = Options.ClaimsIssuer ?? Scheme.Name;
         }
 
         /// <summary>

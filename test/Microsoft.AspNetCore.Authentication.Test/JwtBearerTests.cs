@@ -48,7 +48,6 @@ namespace Microsoft.AspNetCore.Authentication.JwtBearer
                 {"Bearer:BackchannelTimeout", "0.0:0:30"},
                 {"Bearer:Challenge", "<challenge>"},
                 {"Bearer:ClaimsIssuer", "<issuer>"},
-                {"Bearer:DisplayName", "<display>"},
                 {"Bearer:IncludeErrorDetails", "true"},
                 {"Bearer:MetadataAddress", "<metadata>"},
                 {"Bearer:RefreshOnIssuerKeyNotFound", "true"},
@@ -67,7 +66,6 @@ namespace Microsoft.AspNetCore.Authentication.JwtBearer
             Assert.Equal("<authority>", options.Authority);
             Assert.Equal("<challenge>", options.Challenge);
             Assert.Equal("<issuer>", options.ClaimsIssuer);
-            Assert.Equal("<display>", options.DisplayName);
             Assert.True(options.IncludeErrorDetails);
             Assert.Equal("<metadata>", options.MetadataAddress);
             Assert.True(options.RefreshOnIssuerKeyNotFound);
