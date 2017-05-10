@@ -1,4 +1,4 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Microsoft.NET.Sdk">
 
   <Import Project="..\..\build\common.props" />
 
@@ -18,7 +18,6 @@
   </ItemGroup>
 
   <ItemGroup Condition=" '$(TargetFramework)' == 'netstandard1.3' ">
-    <PackageReference Include="System.Runtime.Serialization.Primitives" Version="$(CoreFxVersion)" />
   </ItemGroup>
 
 </Project>
