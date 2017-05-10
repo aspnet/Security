@@ -19,7 +19,4 @@ Microsoft.AspNetCore.Authorization.AuthorizeAttribute</Description>
     <PackageReference Include="Microsoft.Extensions.TaskCache.Sources" Version="$(AspNetCoreVersion)" PrivateAssets="All" />
   </ItemGroup>
 
-  <ItemGroup Condition=" '$(TargetFramework)' == 'netstandard1.3' ">
-  </ItemGroup>
-
 </Project>
