@@ -9,9 +9,9 @@ namespace Microsoft.AspNetCore.Authorization
     /// <summary>
     /// Encapsulates the result of <see cref="IAuthorizationService.AuthorizeAsync(ClaimsPrincipal, object, IEnumerable{IAuthorizationRequirement})"/>.
     /// </summary>
-    public class AuthorizeResult
+    public class AuthorizationResult
     {
-        private AuthorizeResult() { }
+        private AuthorizationResult() { }
 
         /// <summary>
         /// True if authorization was successful.
@@ -21,17 +21,17 @@ namespace Microsoft.AspNetCore.Authorization
         /// <summary>
         /// Contains information about why authorization failed.
         /// </summary>
-        public AuthorizeFailure Failure { get; private set; }
+        public AuthorizationFailure Failure { get; private set; }
 
         /// <summary>
         /// Returns a successful result.
         /// </summary>
         /// <returns>A successful result.</returns>
-        public static AuthorizeResult Success() => new AuthorizeResult { Succeeded = true };
+        public static AuthorizationResult Success() => new AuthorizationResult { Succeeded = true };
 
-        public static AuthorizeResult Failed(AuthorizeFailure failure) => new AuthorizeResult { Failure = failure };
+        public static AuthorizationResult Failed(AuthorizationFailure failure) => new AuthorizationResult { Failure = failure };
 
-        public static AuthorizeResult Failed() => new AuthorizeResult { Failure = AuthorizeFailure.ExplicitFail() };
+        public static AuthorizationResult Failed() => new AuthorizationResult { Failure = AuthorizationFailure.ExplicitFail() };
 
     }
 }

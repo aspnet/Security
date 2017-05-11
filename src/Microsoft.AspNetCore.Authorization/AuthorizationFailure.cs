@@ -9,9 +9,9 @@ namespace Microsoft.AspNetCore.Authorization
     /// <summary>
     /// Encapsulates a failure result of <see cref="IAuthorizationService.AuthorizeAsync(ClaimsPrincipal, object, IEnumerable{IAuthorizationRequirement})"/>.
     /// </summary>
-    public class AuthorizeFailure
+    public class AuthorizationFailure
     {
-        private AuthorizeFailure() { }
+        private AuthorizationFailure() { }
 
         /// <summary>
         /// Failure was due to <see cref="AuthorizationHandlerContext.Fail"/> being called.
@@ -27,8 +27,8 @@ namespace Microsoft.AspNetCore.Authorization
         /// Return a failure due to <see cref="AuthorizationHandlerContext.Fail"/> being called.
         /// </summary>
         /// <returns>The failure.</returns>
-        public static AuthorizeFailure ExplicitFail()
-            => new AuthorizeFailure
+        public static AuthorizationFailure ExplicitFail()
+            => new AuthorizationFailure
             {
                 FailCalled = true,
                 FailedRequirements = new IAuthorizationRequirement[0]
@@ -39,8 +39,8 @@ namespace Microsoft.AspNetCore.Authorization
         /// </summary>
         /// <param name="failed">The requirements that were not met.</param>
         /// <returns>The failure.</returns>
-        public static AuthorizeFailure Failed(IEnumerable<IAuthorizationRequirement> failed)
-            => new AuthorizeFailure { FailedRequirements = failed };
+        public static AuthorizationFailure Failed(IEnumerable<IAuthorizationRequirement> failed)
+            => new AuthorizationFailure { FailedRequirements = failed };
 
     }
 }

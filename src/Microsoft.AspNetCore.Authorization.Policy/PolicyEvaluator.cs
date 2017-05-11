@@ -29,8 +29,8 @@ namespace Microsoft.AspNetCore.Authorization.Policy
         /// </summary>
         /// <param name="policy">The <see cref="AuthorizationPolicy"/>.</param>
         /// <param name="context">The <see cref="HttpContext"/>.</param>
-        /// <returns><see cref="PolicyAuthenticationResult.Success"/> unless all schemes specified by <see cref="AuthorizationPolicy.AuthenticationSchemes"/> failed to authenticate.  </returns>
-        public virtual async Task<PolicyAuthenticationResult> AuthenticateAsync(AuthorizationPolicy policy, HttpContext context)
+        /// <returns><see cref="AuthenticateResult.Success"/> unless all schemes specified by <see cref="AuthorizationPolicy.AuthenticationSchemes"/> failed to authenticate.  </returns>
+        public virtual async Task<AuthenticateResult> AuthenticateAsync(AuthorizationPolicy policy, HttpContext context)
         {
             if (policy.AuthenticationSchemes != null && policy.AuthenticationSchemes.Count > 0)
             {
@@ -44,18 +44,18 @@ namespace Microsoft.AspNetCore.Authorization.Policy
                     }
                 }
 
-                if (newPrincipal == null)
+                if (newPrincipal != null)
                 {
                     context.User = newPrincipal;
-                    return PolicyAuthenticationResult.Success();
+                    return AuthenticateResult.Success(new AuthenticationTicket(newPrincipal, string.Join(";", policy.AuthenticationSchemes)));
                 }
                 else
                 {
                     context.User = new ClaimsPrincipal(new ClaimsIdentity());
-                    return PolicyAuthenticationResult.Failed();
+                    return AuthenticateResult.None();
                 }
             }
-            return PolicyAuthenticationResult.Success();
+            return AuthenticateResult.None();
         }
 
         /// <summary>
@@ -65,9 +65,9 @@ namespace Microsoft.AspNetCore.Authorization.Policy
         /// <param name="authenticationResult">The result of a call to <see cref="AuthenticateAsync(AuthorizationPolicy, HttpContext)"/>.</param>
         /// <param name="context">The <see cref="HttpContext"/>.</param>
         /// <returns>Returns <see cref="PolicyAuthorizationResult.Success"/> if authorization succeeds.
-        /// Otherwise returns <see cref="PolicyAuthorizationResult.Forbid"/> if <see cref="PolicyAuthenticationResult.Succeeded"/>, otherwise
+        /// Otherwise returns <see cref="PolicyAuthorizationResult.Forbid"/> if <see cref="AuthenticateResult.Succeeded"/>, otherwise
         /// returns  <see cref="PolicyAuthorizationResult.Challenge"/></returns>
-        public virtual async Task<PolicyAuthorizationResult> AuthorizeAsync(AuthorizationPolicy policy, PolicyAuthenticationResult authenticationResult, HttpContext context)
+        public virtual async Task<PolicyAuthorizationResult> AuthorizeAsync(AuthorizationPolicy policy, AuthenticateResult authenticationResult, HttpContext context)
         {
             if (policy == null)
             {

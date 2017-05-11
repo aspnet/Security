@@ -12,7 +12,7 @@ namespace Microsoft.AspNetCore.Authorization
         /// Determines whether the authorization result was successful or not.
         /// </summary>
         /// <param name="context">The authorization information.</param>
-        /// <returns>The <see cref="AuthorizeResult"/>.</returns>
-        AuthorizeResult Evaluate(AuthorizationHandlerContext context);
+        /// <returns>The <see cref="AuthorizationResult"/>.</returns>
+        AuthorizationResult Evaluate(AuthorizationHandlerContext context);
     }
 }

@@ -77,7 +77,7 @@ namespace Microsoft.AspNetCore.Authorization
         /// A flag indicating whether authorization has succeded.
         /// This value is <value>true</value> when the user fulfills the policy otherwise <value>false</value>.
         /// </returns>
-        public async Task<AuthorizeResult> AuthorizeAsync(ClaimsPrincipal user, object resource, IEnumerable<IAuthorizationRequirement> requirements)
+        public async Task<AuthorizationResult> AuthorizeAsync(ClaimsPrincipal user, object resource, IEnumerable<IAuthorizationRequirement> requirements)
         {
             if (requirements == null)
             {
@@ -139,7 +139,7 @@ namespace Microsoft.AspNetCore.Authorization
         /// A flag indicating whether authorization has succeded.
         /// This value is <value>true</value> when the user fulfills the policy otherwise <value>false</value>.
         /// </returns>
-        public async Task<AuthorizeResult> AuthorizeAsync(ClaimsPrincipal user, object resource, string policyName)
+        public async Task<AuthorizationResult> AuthorizeAsync(ClaimsPrincipal user, object resource, string policyName)
         {
             if (policyName == null)
             {

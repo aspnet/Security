@@ -1089,7 +1089,7 @@ namespace Microsoft.AspNetCore.Authorization.Test
 
         public class SuccessEvaluator : IAuthorizationEvaluator
         {
-            public AuthorizeResult Evaluate(AuthorizationHandlerContext context) => AuthorizeResult.Success();
+            public AuthorizationResult Evaluate(AuthorizationHandlerContext context) => AuthorizationResult.Success();
         }
 
         [Fact]

@@ -12,12 +12,12 @@ namespace Microsoft.AspNetCore.Authorization
         /// Determines whether the authorization result was successful or not.
         /// </summary>
         /// <param name="context">The authorization information.</param>
-        /// <returns>The <see cref="AuthorizeResult"/>.</returns>
-        public AuthorizeResult Evaluate(AuthorizationHandlerContext context)
+        /// <returns>The <see cref="AuthorizationResult"/>.</returns>
+        public AuthorizationResult Evaluate(AuthorizationHandlerContext context)
             => context.HasSucceeded
-                ? AuthorizeResult.Success()
-                : AuthorizeResult.Failed(context.HasFailed
-                    ? AuthorizeFailure.ExplicitFail()
-                    : AuthorizeFailure.Failed(context.PendingRequirements));
+                ? AuthorizationResult.Success()
+                : AuthorizationResult.Failed(context.HasFailed
+                    ? AuthorizationFailure.ExplicitFail()
+                    : AuthorizationFailure.Failed(context.PendingRequirements));
     }
 }
