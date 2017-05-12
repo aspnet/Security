@@ -87,18 +87,6 @@ namespace Microsoft.AspNetCore.Authentication
             Context = context;
 
             Options = OptionsSnapshot.Get(Scheme.Name) ?? new TOptions();
-            if (!Options.Initialized)
-            {
-                lock (Options.InitializeLock)
-                {
-                    if (!Options.Initialized)
-                    {
-                        InitializeOptions();
-                        Options.Initialized = true;
-                    }
-                }
-            }
-
             Options.Validate();
 
             await InitializeEventsAsync();
@@ -123,13 +111,6 @@ namespace Microsoft.AspNetCore.Authentication
         /// </summary>
         /// <returns>A new instance of the events instance.</returns>
         protected virtual Task<object> CreateEventsAsync() => Task.FromResult(new object());
-
-        /// <summary>
-        /// Initializes the options, will be called only once by <see cref="InitializeAsync(AuthenticationScheme, HttpContext)"/>.
-        /// </summary>
-        protected virtual void InitializeOptions()
-        {
-        }
 
         /// <summary>
         /// Called after options/events have been initialized for the handler to finish initializing itself.

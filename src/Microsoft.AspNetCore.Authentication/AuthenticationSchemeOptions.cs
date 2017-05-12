@@ -40,15 +40,5 @@ namespace Microsoft.AspNetCore.Authentication
         /// If set, will be used as the service type to get the Events instance instead of the property.
         /// </summary>
         public Type EventsType { get; set; }
-
-        /// <summary>
-        /// Used to ensure that the options are only initialized once.
-        /// </summary>
-        public bool Initialized { get; set; }
-
-        /// <summary>
-        /// Used to prevent concurrent access during intialization.
-        /// </summary>
-        public object InitializeLock { get; } = new object();
     }
 }

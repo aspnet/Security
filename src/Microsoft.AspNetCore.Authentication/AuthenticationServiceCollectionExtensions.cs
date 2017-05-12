@@ -77,7 +77,7 @@ namespace Microsoft.Extensions.DependencyInjection
 
         public static IServiceCollection AddRemoteScheme<TOptions, THandler>(this IServiceCollection services, string authenticationScheme, string displayName, Action<TOptions> configureOptions)
             where TOptions : RemoteAuthenticationOptions, new()
-            where THandler : AuthenticationHandler<TOptions>
+            where THandler : RemoteAuthenticationHandler<TOptions>
         {
             services.TryAddEnumerable(ServiceDescriptor.Singleton<IInitializeOptions<TOptions>, EnsureSignInScheme<TOptions>>());
             return services.AddScheme<TOptions, THandler>(authenticationScheme, displayName, configureScheme: null, configureOptions: configureOptions);

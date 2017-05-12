@@ -72,9 +72,7 @@ namespace Microsoft.AspNetCore.Authentication.Cookies
         public CookieSecurePolicy CookieSecure { get; set; }
 
         /// <summary>
-        /// If set this will be used by the CookieAuthenticationMiddleware for data protection.
-        /// he default data protection service is based on machine key when running on ASP.NET, 
-        /// and on DPAPI when running in a different process.
+        /// If set this will be used by the CookieAuthenticationHandler for data protection.
         /// </summary>
         public IDataProtectionProvider DataProtectionProvider { get; set; }
 

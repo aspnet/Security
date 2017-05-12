@@ -51,7 +51,7 @@ namespace Microsoft.AspNetCore.Authentication.JwtBearer
                 {"Bearer:IncludeErrorDetails", "true"},
                 {"Bearer:MetadataAddress", "<metadata>"},
                 {"Bearer:RefreshOnIssuerKeyNotFound", "true"},
-                {"Bearer:RequireHttpsMetadata", "true"},
+                {"Bearer:RequireHttpsMetadata", "false"},
                 {"Bearer:SaveToken", "true"},
             };
             var configurationBuilder = new ConfigurationBuilder();
@@ -69,7 +69,7 @@ namespace Microsoft.AspNetCore.Authentication.JwtBearer
             Assert.True(options.IncludeErrorDetails);
             Assert.Equal("<metadata>", options.MetadataAddress);
             Assert.True(options.RefreshOnIssuerKeyNotFound);
-            Assert.True(options.RequireHttpsMetadata);
+            Assert.False(options.RequireHttpsMetadata);
             Assert.True(options.SaveToken);
         }
 
