@@ -1,13 +1,10 @@
 // Copyright (c) .NET Foundation. All rights reserved.
 // Licensed under the Apache License, Version 2.0. See License.txt in the project root for license information.
 
-using System;
 using System.Net.Http;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.OAuth;
 using Microsoft.AspNetCore.DataProtection;
-using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.Options;
 
 namespace Microsoft.Extensions.DependencyInjection
@@ -39,12 +36,6 @@ namespace Microsoft.Extensions.DependencyInjection
 
             if (options.StateDataFormat == null)
             {
-                if (options.DataProtectionProvider == null)
-                {
-                    // This shouldn't happen normally due to the EnsureDataProtection initialize options.
-                    throw new InvalidOperationException("DataProtectionProvider must be provided.");
-                }
-
                 var dataProtector = options.DataProtectionProvider.CreateProtector(
                     typeof(THandler).FullName, name, "v1");
                 options.StateDataFormat = new PropertiesDataFormat(dataProtector);

@@ -39,12 +39,6 @@ namespace Microsoft.AspNetCore.Authentication.OpenIdConnect
 
             if (options.StateDataFormat == null)
             {
-                if (options.DataProtectionProvider == null)
-                {
-                    // This shouldn't happen normally due to the EnsureDataProtection initialize options.
-                    throw new InvalidOperationException("DataProtectionProvider must be provided.");
-                }
-
                 var dataProtector = options.DataProtectionProvider.CreateProtector(
                     typeof(OpenIdConnectHandler).FullName, name, "v1");
                 options.StateDataFormat = new PropertiesDataFormat(dataProtector);
@@ -52,12 +46,6 @@ namespace Microsoft.AspNetCore.Authentication.OpenIdConnect
 
             if (options.StringDataFormat == null)
             {
-                if (options.DataProtectionProvider == null)
-                {
-                    // This shouldn't happen normally due to the EnsureDataProtection initialize options.
-                    throw new InvalidOperationException("DataProtectionProvider must be provided.");
-                }
-
                 var dataProtector = options.DataProtectionProvider.CreateProtector(
                     typeof(OpenIdConnectHandler).FullName,
                     typeof(string).FullName,

@@ -1,7 +1,6 @@
 // Copyright (c) .NET Foundation. All rights reserved.
 // Licensed under the Apache License, Version 2.0. See License.txt in the project root for license information.
 
-using System;
 using System.Net.Http;
 using Microsoft.AspNetCore.DataProtection;
 using Microsoft.Extensions.Options;
@@ -31,12 +30,6 @@ namespace Microsoft.AspNetCore.Authentication.Twitter
 
             if (options.StateDataFormat == null)
             {
-                if (options.DataProtectionProvider == null)
-                {
-                    // This shouldn't happen normally due to the EnsureDataProtection initialize options.
-                    throw new InvalidOperationException("DataProtectionProvider must be provided.");
-                }
-
                 var dataProtector = options.DataProtectionProvider.CreateProtector(
                     typeof(TwitterHandler).FullName, name, "v1");
                 options.StateDataFormat = new SecureDataFormat<RequestToken>(
