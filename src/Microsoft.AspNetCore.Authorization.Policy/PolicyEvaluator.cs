@@ -74,8 +74,8 @@ namespace Microsoft.AspNetCore.Authorization.Policy
                 throw new ArgumentNullException(nameof(policy));
             }
 
-            var authResult = await _authorization.AuthorizeAsync(context.User, context, policy);
-            if (authResult.Succeeded)
+            var result = await _authorization.AuthorizeAsync(context.User, context, policy);
+            if (result.Succeeded)
             {
                 return PolicyAuthorizationResult.Success();
             }
