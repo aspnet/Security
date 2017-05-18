@@ -55,7 +55,10 @@ namespace Microsoft.AspNetCore.Authorization.Policy
                     return AuthenticateResult.None();
                 }
             }
-            return AuthenticateResult.None();
+
+            return (context.User?.Identity?.IsAuthenticated ?? false) 
+                ? AuthenticateResult.Success(new AuthenticationTicket(context.User, "context.User"))
+                : AuthenticateResult.None();
         }
 
         /// <summary>
