@@ -2,6 +2,7 @@
 // Licensed under the Apache License, Version 2.0. See License.txt in the project root for license information.
 
 using Microsoft.AspNetCore.Http;
+using Microsoft.IdentityModel.Protocols.OpenIdConnect;
 
 namespace Microsoft.AspNetCore.Authentication.OpenIdConnect
 {
@@ -9,14 +10,17 @@ namespace Microsoft.AspNetCore.Authentication.OpenIdConnect
     /// When a user configures the <see cref="OpenIdConnectHandler"/> to be notified prior to redirecting to an IdentityProvider
     /// an instance of <see cref="RedirectContext"/> is passed to the 'RedirectToAuthenticationEndpoint' or 'RedirectToEndSessionEndpoint' events.
     /// </summary>
-    public class RedirectContext : BaseOpenIdConnectContext
+    public class RedirectContext : BaseSignOutContext<OpenIdConnectOptions>
     {
-        public RedirectContext(HttpContext context, AuthenticationScheme scheme, OpenIdConnectOptions options, AuthenticationProperties properties)
-            : base(context, scheme, options)
+        public RedirectContext(
+            HttpContext context,
+            AuthenticationScheme scheme,
+            OpenIdConnectOptions options,
+            AuthenticationProperties properties)
+            : base(context, scheme, options, properties)
         {
-            Properties = properties;
         }
 
-        public AuthenticationProperties Properties { get; }
+        public OpenIdConnectMessage EndSessionRequest { get; set; }
     }
 }

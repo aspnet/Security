@@ -5,9 +5,13 @@ using Microsoft.AspNetCore.Http;
 
 namespace Microsoft.AspNetCore.Authentication
 {
-    public class BaseControlContext : BaseContext
+    public class BaseControlContext<TOptions> : BaseContext<TOptions> where TOptions : AuthenticationSchemeOptions
     {
-        protected BaseControlContext(HttpContext context) : base(context)
+        protected BaseControlContext(
+            HttpContext context,
+            AuthenticationScheme scheme,
+            TOptions options)
+            : base(context, scheme, options)
         {
         }
 
@@ -26,7 +30,6 @@ namespace Microsoft.AspNetCore.Authentication
         /// <summary>
         /// Discontinue all processing for this request and return to the client.
         /// The caller is responsible for generating the full response.
-        /// Set the <see cref="Ticket"/> to trigger SignIn.
         /// </summary>
         public void HandleResponse()
         {
@@ -35,44 +38,10 @@ namespace Microsoft.AspNetCore.Authentication
 
         /// <summary>
         /// Discontinue processing the request in the current handler.
-        /// SignIn will not be called.
         /// </summary>
-        public void Skip()
+        public void SkipToNextMiddleware()
         {
             State = EventResultState.Skipped;
-        }
-
-        /// <summary>
-        /// Gets or set the <see cref="Ticket"/> to return if this event signals it handled the event.
-        /// </summary>
-        public AuthenticationTicket Ticket { get; set; }
-
-        /// <summary>
-        /// Returns true if the handler should be done processing.
-        /// </summary>
-        /// <param name="result">The result.</param>
-        /// <returns>Whether the handler should be done processing.</returns>
-        public bool IsProcessingComplete(out AuthenticateResult result)
-        {
-            if (HandledResponse)
-            {
-                if (Ticket == null)
-                {
-                    result = AuthenticateResult.Handle();
-                }
-                else
-                {
-                    result = AuthenticateResult.Success(Ticket);
-                }
-                return true;
-            }
-            else if (Skipped)
-            {
-                result = AuthenticateResult.None();
-                return true;
-            }
-            result = null;
-            return false;
         }
     }
 }
