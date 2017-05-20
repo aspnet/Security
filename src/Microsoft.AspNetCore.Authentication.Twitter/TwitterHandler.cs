@@ -46,7 +46,7 @@ namespace Microsoft.AspNetCore.Authentication.Twitter
 
         protected override Task<object> CreateEventsAsync() => Task.FromResult<object>(new TwitterEvents());
 
-        protected override async Task<AuthenticateResult> HandleRemoteAuthenticateAsync()
+        protected override async Task<RemoteAuthenticationResult> HandleRemoteAuthenticateAsync()
         {
             AuthenticationProperties properties = null;
             var query = Request.Query;
@@ -56,7 +56,7 @@ namespace Microsoft.AspNetCore.Authentication.Twitter
 
             if (requestToken == null)
             {
-                return AuthenticateResult.Fail("Invalid state cookie.");
+                return RemoteAuthenticationResult.Fail("Invalid state cookie.");
             }
 
             properties = requestToken.Properties;
@@ -66,18 +66,18 @@ namespace Microsoft.AspNetCore.Authentication.Twitter
             var returnedToken = query["oauth_token"];
             if (StringValues.IsNullOrEmpty(returnedToken))
             {
-                return AuthenticateResult.Fail("Missing oauth_token");
+                return RemoteAuthenticationResult.Fail("Missing oauth_token");
             }
 
             if (!string.Equals(returnedToken, requestToken.Token, StringComparison.Ordinal))
             {
-                return AuthenticateResult.Fail("Unmatched token");
+                return RemoteAuthenticationResult.Fail("Unmatched token");
             }
 
             var oauthVerifier = query["oauth_verifier"];
             if (StringValues.IsNullOrEmpty(oauthVerifier))
             {
-                return AuthenticateResult.Fail("Missing or blank oauth_verifier");
+                return RemoteAuthenticationResult.Fail("Missing or blank oauth_verifier");
             }
 
             var cookieOptions = new CookieOptions
@@ -114,7 +114,7 @@ namespace Microsoft.AspNetCore.Authentication.Twitter
                 });
             }
 
-            return AuthenticateResult.Success(await CreateTicketAsync(identity, properties, accessToken, user));
+            return RemoteAuthenticationResult.Success(await CreateTicketAsync(identity, properties, accessToken, user));
         }
 
         protected virtual async Task<AuthenticationTicket> CreateTicketAsync(
@@ -125,19 +125,12 @@ namespace Microsoft.AspNetCore.Authentication.Twitter
                 action.Run(user, identity, ClaimsIssuer);
             }
 
-            var context = new TwitterCreatingTicketContext(Context, Scheme, Options, properties, token.UserId, token.ScreenName, token.Token, token.TokenSecret, user)
-            {
-                Principal = new ClaimsPrincipal(identity)
-            };
+            var ticket = new AuthenticationTicket(new ClaimsPrincipal(identity), properties, Scheme.Name);
 
+            var context = new TwitterCreatingTicketContext(Context, Scheme, Options, ticket, token.UserId, token.ScreenName, token.Token, token.TokenSecret, user);
             await Events.CreatingTicket(context);
 
-            if (context.Principal?.Identity == null)
-            {
-                return null;
-            }
-
-            return new AuthenticationTicket(context.Principal, context.Properties, Scheme.Name);
+            return context.Ticket;
         }
 
         protected override async Task HandleChallengeAsync(AuthenticationProperties properties)

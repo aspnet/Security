@@ -8,7 +8,7 @@ namespace Microsoft.AspNetCore.Authentication.Cookies
     /// <summary>
     /// Context object passed to the ICookieAuthenticationEvents method SigningOut    
     /// </summary>
-    public class CookieSigningOutContext : BaseCookieContext
+    public class CookieSigningOutContext : BaseSignOutContext<CookieAuthenticationOptions>
     {
         /// <summary>
         /// 
