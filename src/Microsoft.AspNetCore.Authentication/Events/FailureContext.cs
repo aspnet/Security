@@ -9,10 +9,14 @@ namespace Microsoft.AspNetCore.Authentication
     /// <summary>
     /// Provides failure context information to handler providers.
     /// </summary>
-    public class FailureContext : BaseControlContext
+    public class FailureContext : BaseControlContext<RemoteAuthenticationOptions>
     {
-        public FailureContext(HttpContext context, Exception failure)
-            : base(context)
+        public FailureContext(
+            HttpContext context,
+            AuthenticationScheme scheme,
+            RemoteAuthenticationOptions options,
+            Exception failure)
+            : base(context, scheme, options)
         {
             Failure = failure;
         }

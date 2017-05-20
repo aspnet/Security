@@ -10,7 +10,7 @@ namespace Microsoft.AspNetCore.Authentication.Cookies
     /// <summary>
     /// Context object passed to the CookieAuthenticationEvents ValidatePrincipal method.
     /// </summary>
-    public class CookieValidatePrincipalContext : BaseCookieContext
+    public class CookieValidatePrincipalContext : BaseAuthenticationContext<CookieAuthenticationOptions>
     {
         /// <summary>
         /// Creates a new instance of the context object.
@@ -19,32 +19,15 @@ namespace Microsoft.AspNetCore.Authentication.Cookies
         /// <param name="scheme"></param>
         /// <param name="ticket">Contains the initial values for identity and extra data</param>
         /// <param name="options"></param>
-        public CookieValidatePrincipalContext(HttpContext context, AuthenticationScheme scheme, AuthenticationTicket ticket, CookieAuthenticationOptions options)
-            : base(context, scheme, options, ticket?.Properties)
+        public CookieValidatePrincipalContext(
+            HttpContext context,
+            AuthenticationScheme scheme,
+            CookieAuthenticationOptions options,
+            AuthenticationTicket ticket)
+            : base(context, scheme, options)
         {
-            if (context == null)
-            {
-                throw new ArgumentNullException(nameof(context));
-            }
-
-            if (ticket == null)
-            {
-                throw new ArgumentNullException(nameof(ticket));
-            }
-
-            if (options == null)
-            {
-                throw new ArgumentNullException(nameof(options));
-            }
-
-            Principal = ticket.Principal;
+            Ticket = ticket;
         }
-
-        /// <summary>
-        /// Contains the claims principal arriving with the request. May be altered to change the 
-        /// details of the authenticated user.
-        /// </summary>
-        public ClaimsPrincipal Principal { get; private set; }
 
         /// <summary>
         /// If true, the cookie will be renewed
@@ -58,7 +41,7 @@ namespace Microsoft.AspNetCore.Authentication.Cookies
         /// <param name="principal">The <see cref="ClaimsPrincipal"/> used as the replacement</param>
         public void ReplacePrincipal(ClaimsPrincipal principal)
         {
-            Principal = principal;
+            Ticket = new AuthenticationTicket(principal, Ticket?.Properties, Scheme.Name);
         }
 
         /// <summary>
@@ -67,7 +50,7 @@ namespace Microsoft.AspNetCore.Authentication.Cookies
         /// </summary>
         public void RejectPrincipal()
         {
-            Principal = null;
+            Ticket = null;
         }
     }
 }

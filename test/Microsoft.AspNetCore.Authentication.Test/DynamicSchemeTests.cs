@@ -75,13 +75,13 @@ namespace Microsoft.AspNetCore.Authentication
             {
             }
 
-            protected override Task<AuthenticateResult> HandleAuthenticateAsync()
+            protected override Task<AuthenticationResult> HandleAuthenticateAsync()
             {
                 var principal = new ClaimsPrincipal();
                 var id = new ClaimsIdentity();
                 id.AddClaim(new Claim(ClaimTypes.NameIdentifier, Scheme.Name, ClaimValueTypes.String, Scheme.Name));
                 principal.AddIdentity(id);
-                return Task.FromResult(AuthenticateResult.Success(new AuthenticationTicket(principal, new AuthenticationProperties(), Scheme.Name)));
+                return Task.FromResult(AuthenticationResult.Success(new AuthenticationTicket(principal, new AuthenticationProperties(), Scheme.Name)));
             }
         }
 

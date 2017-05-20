@@ -1270,7 +1270,7 @@ namespace Microsoft.AspNetCore.Authentication.Cookies
                         }
                         else if (req.Path == new PathString("/me"))
                         {
-                            Describe(res, AuthenticateResult.Success(new AuthenticationTicket(context.User, new AuthenticationProperties(), CookieAuthenticationDefaults.AuthenticationScheme)));
+                            Describe(res, AuthenticationResult.Success(new AuthenticationTicket(context.User, new AuthenticationProperties(), CookieAuthenticationDefaults.AuthenticationScheme)));
                         }
                         else if (req.Path.StartsWithSegments(new PathString("/me"), out remainder))
                         {
@@ -1293,7 +1293,7 @@ namespace Microsoft.AspNetCore.Authentication.Cookies
             return server;
         }
 
-        private static void Describe(HttpResponse res, AuthenticateResult result)
+        private static void Describe(HttpResponse res, AuthenticationResult result)
         {
             res.StatusCode = 200;
             res.ContentType = "text/xml";

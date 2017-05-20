@@ -195,22 +195,17 @@ namespace Microsoft.AspNetCore.Authentication.OpenIdConnect
 
             var redirectContext = new RedirectContext(Context, Scheme, Options, properties)
             {
-                ProtocolMessage = message
+                EndSessionRequest = message
             };
 
             await Events.RedirectToIdentityProviderForSignOut(redirectContext);
-            if (redirectContext.HandledResponse)
-            {
-                Logger.RedirectToIdentityProviderForSignOutHandledResponse();
-                return;
-            }
-            else if (redirectContext.Skipped)
+            if (redirectContext.Skipped)
             {
                 Logger.RedirectToIdentityProviderForSignOutSkipped();
                 return;
             }
 
-            message = redirectContext.ProtocolMessage;
+            message = redirectContext.EndSessionRequest;
 
             if (!string.IsNullOrEmpty(message.State))
             {
@@ -339,22 +334,17 @@ namespace Microsoft.AspNetCore.Authentication.OpenIdConnect
 
             var redirectContext = new RedirectContext(Context, Scheme, Options, properties)
             {
-                ProtocolMessage = message
+                EndSessionRequest = message
             };
 
             await Events.RedirectToIdentityProvider(redirectContext);
-            if (redirectContext.HandledResponse)
-            {
-                Logger.RedirectToIdentityProviderHandledResponse();
-                return;
-            }
-            else if (redirectContext.Skipped)
+            if (redirectContext.Skipped)
             {
                 Logger.RedirectToIdentityProviderSkipped();
                 return;
             }
 
-            message = redirectContext.ProtocolMessage;
+            message = redirectContext.EndSessionRequest;
 
             if (!string.IsNullOrEmpty(message.State))
             {
@@ -419,7 +409,7 @@ namespace Microsoft.AspNetCore.Authentication.OpenIdConnect
         /// Invoked to process incoming OpenIdConnect messages.
         /// </summary>
         /// <returns>An <see cref="AuthenticationTicket"/> if successful.</returns>
-        protected override async Task<AuthenticateResult> HandleRemoteAuthenticateAsync()
+        protected override async Task<RemoteAuthenticationResult> HandleRemoteAuthenticateAsync()
         {
             Logger.EnteringOpenIdAuthenticationHandlerHandleRemoteAuthenticateAsync(GetType().FullName);
 
@@ -437,9 +427,9 @@ namespace Microsoft.AspNetCore.Authentication.OpenIdConnect
                     if (Options.SkipUnrecognizedRequests)
                     {
                         // Not for us?
-                        return AuthenticateResult.None();
+                        return RemoteAuthenticationResult.None();
                     }
-                    return AuthenticateResult.Fail("An OpenID Connect response cannot contain an " +
+                    return RemoteAuthenticationResult.Fail("An OpenID Connect response cannot contain an " +
                             "identity token or an access token when using response_mode=query");
                 }
             }
@@ -459,12 +449,12 @@ namespace Microsoft.AspNetCore.Authentication.OpenIdConnect
                 if (Options.SkipUnrecognizedRequests)
                 {
                     // Not for us?
-                    return AuthenticateResult.None();
+                    return RemoteAuthenticationResult.None();
                 }
-                return AuthenticateResult.Fail("No message.");
+                return RemoteAuthenticationResult.Fail("No message.");
             }
 
-            AuthenticateResult result;
+            RemoteAuthenticationResult result;
 
             try
             {
@@ -479,7 +469,7 @@ namespace Microsoft.AspNetCore.Authentication.OpenIdConnect
                 {
                     return result;
                 }
-                authorizationResponse = messageReceivedContext.ProtocolMessage;
+                authorizationResponse = messageReceivedContext.AuthorizationResponse;
                 properties = messageReceivedContext.Properties;
 
                 if (properties == null)
@@ -491,9 +481,9 @@ namespace Microsoft.AspNetCore.Authentication.OpenIdConnect
                         Logger.NullOrEmptyAuthorizationResponseState();
                         if (Options.SkipUnrecognizedRequests)
                         {
-                            return AuthenticateResult.None();
+                            return RemoteAuthenticationResult.None();
                         }
-                        return AuthenticateResult.Fail(Resources.MessageStateIsNullOrEmpty);
+                        return RemoteAuthenticationResult.Fail(Resources.MessageStateIsNullOrEmpty);
                     }
 
                     // if state exists and we failed to 'unprotect' this is not a message we should process.
@@ -506,9 +496,9 @@ namespace Microsoft.AspNetCore.Authentication.OpenIdConnect
                     if (Options.SkipUnrecognizedRequests)
                     {
                         // Not for us?
-                        return AuthenticateResult.None();
+                        return RemoteAuthenticationResult.None();
                     }
-                    return AuthenticateResult.Fail(Resources.MessageStateIsInvalid);
+                    return RemoteAuthenticationResult.Fail(Resources.MessageStateIsInvalid);
                 }
 
                 string userstate = null;
@@ -517,13 +507,13 @@ namespace Microsoft.AspNetCore.Authentication.OpenIdConnect
 
                 if (!ValidateCorrelationId(properties))
                 {
-                    return AuthenticateResult.Fail("Correlation failed.");
+                    return RemoteAuthenticationResult.Fail("Correlation failed.");
                 }
 
                 // if any of the error fields are set, throw error null
                 if (!string.IsNullOrEmpty(authorizationResponse.Error))
                 {
-                    return AuthenticateResult.Fail(CreateOpenIdConnectProtocolException(authorizationResponse, response: null));
+                    return RemoteAuthenticationResult.Fail(CreateOpenIdConnectProtocolException(authorizationResponse, response: null));
                 }
 
                 if (_configuration == null && Options.ConfigurationManager != null)
@@ -556,7 +546,7 @@ namespace Microsoft.AspNetCore.Authentication.OpenIdConnect
                     {
                         return result;
                     }
-                    authorizationResponse = tokenValidatedContext.ProtocolMessage;
+                    authorizationResponse = tokenValidatedContext.AuthorizationResponse;
                     properties = tokenValidatedContext.Properties;
                     ticket = tokenValidatedContext.Ticket;
                     jwt = tokenValidatedContext.SecurityToken;
@@ -581,7 +571,7 @@ namespace Microsoft.AspNetCore.Authentication.OpenIdConnect
                     {
                         return result;
                     }
-                    authorizationResponse = authorizationCodeReceivedContext.ProtocolMessage;
+                    authorizationResponse = authorizationCodeReceivedContext.AuthorizationResponse;
                     properties = authorizationCodeReceivedContext.Properties;
                     var tokenEndpointRequest = authorizationCodeReceivedContext.TokenEndpointRequest;
                     // If the developer redeemed the code themselves...
@@ -626,7 +616,7 @@ namespace Microsoft.AspNetCore.Authentication.OpenIdConnect
                         {
                             return result;
                         }
-                        authorizationResponse = tokenValidatedContext.ProtocolMessage;
+                        authorizationResponse = tokenValidatedContext.AuthorizationResponse;
                         tokenEndpointResponse = tokenValidatedContext.TokenEndpointResponse;
                         properties = tokenValidatedContext.Properties;
                         ticket = tokenValidatedContext.Ticket;
@@ -674,7 +664,7 @@ namespace Microsoft.AspNetCore.Authentication.OpenIdConnect
                     }
                 }
 
-                return AuthenticateResult.Success(ticket);
+                return RemoteAuthenticationResult.Success(ticket);
             }
             catch (Exception exception)
             {
@@ -696,7 +686,7 @@ namespace Microsoft.AspNetCore.Authentication.OpenIdConnect
                     return result;
                 }
 
-                return AuthenticateResult.Fail(exception);
+                return RemoteAuthenticationResult.Fail(exception);
             }
         }
 
@@ -767,19 +757,19 @@ namespace Microsoft.AspNetCore.Authentication.OpenIdConnect
         /// <param name="jwt">The <see cref="JwtSecurityToken"/>.</param>
         /// <param name="ticket">authentication ticket with claims principal and identities</param>
         /// <returns>Authentication ticket with identity with additional claims, if any.</returns>
-        protected virtual async Task<AuthenticateResult> GetUserInformationAsync(OpenIdConnectMessage message, JwtSecurityToken jwt, AuthenticationTicket ticket)
+        protected virtual async Task<RemoteAuthenticationResult> GetUserInformationAsync(OpenIdConnectMessage message, JwtSecurityToken jwt, AuthenticationTicket ticket)
         {
             var userInfoEndpoint = _configuration?.UserInfoEndpoint;
 
             if (string.IsNullOrEmpty(userInfoEndpoint))
             {
                 Logger.UserInfoEndpointNotSet();
-                return AuthenticateResult.Success(ticket);
+                return RemoteAuthenticationResult.Success(ticket);
             }
             if (string.IsNullOrEmpty(message.AccessToken))
             {
                 Logger.AccessTokenNotAvailable();
-                return AuthenticateResult.Success(ticket);
+                return RemoteAuthenticationResult.Success(ticket);
             }
             Logger.RetrievingClaims();
             var requestMessage = new HttpRequestMessage(HttpMethod.Get, userInfoEndpoint);
@@ -801,11 +791,11 @@ namespace Microsoft.AspNetCore.Authentication.OpenIdConnect
             }
             else
             {
-                return AuthenticateResult.Fail("Unknown response type: " + contentType.MediaType);
+                return RemoteAuthenticationResult.Fail("Unknown response type: " + contentType.MediaType);
             }
 
             var userInformationReceivedContext = await RunUserInformationReceivedEventAsync(ticket, message, user);
-            AuthenticateResult result;
+            RemoteAuthenticationResult result;
             if (userInformationReceivedContext.IsProcessingComplete(out result))
             {
                 return result;
@@ -826,7 +816,7 @@ namespace Microsoft.AspNetCore.Authentication.OpenIdConnect
                 action.Run(user, identity, ClaimsIssuer);
             }
 
-            return AuthenticateResult.Success(ticket);
+            return RemoteAuthenticationResult.Success(ticket);
         }
 
         /// <summary>
@@ -985,8 +975,8 @@ namespace Microsoft.AspNetCore.Authentication.OpenIdConnect
             Logger.MessageReceived(message.BuildRedirectUrl());
             var messageReceivedContext = new MessageReceivedContext(Context, Scheme, Options)
             {
-                ProtocolMessage = message,
-                Properties = properties,
+                AuthorizationResponse = message,
+                Properties = properties
             };
 
             await Events.MessageReceived(messageReceivedContext);
@@ -1006,7 +996,7 @@ namespace Microsoft.AspNetCore.Authentication.OpenIdConnect
         {
             var tokenValidatedContext = new TokenValidatedContext(Context, Scheme, Options)
             {
-                ProtocolMessage = authorizationResponse,
+                AuthorizationResponse = authorizationResponse,
                 TokenEndpointResponse = tokenEndpointResponse,
                 Properties = properties,
                 Ticket = ticket,
@@ -1043,12 +1033,12 @@ namespace Microsoft.AspNetCore.Authentication.OpenIdConnect
 
             var authorizationCodeReceivedContext = new AuthorizationCodeReceivedContext(Context, Scheme, Options)
             {
-                ProtocolMessage = authorizationResponse,
+                AuthorizationResponse = authorizationResponse,
                 Properties = properties,
                 TokenEndpointRequest = tokenEndpointRequest,
                 Ticket = ticket,
                 JwtSecurityToken = jwt,
-                Backchannel = Backchannel,
+                Backchannel = Backchannel
             };
 
             await Events.AuthorizationCodeReceived(authorizationCodeReceivedContext);
@@ -1071,7 +1061,7 @@ namespace Microsoft.AspNetCore.Authentication.OpenIdConnect
             AuthenticationTicket ticket)
         {
             Logger.TokenResponseReceived();
-            var eventContext = new TokenResponseReceivedContext(Context, Scheme, Options, properties)
+            var eventContext = new TokenResponseReceivedContext(Context, Scheme, Options)
             {
                 ProtocolMessage = message,
                 TokenEndpointResponse = tokenEndpointResponse,
@@ -1119,7 +1109,7 @@ namespace Microsoft.AspNetCore.Authentication.OpenIdConnect
         {
             var authenticationFailedContext = new AuthenticationFailedContext(Context, Scheme, Options)
             {
-                ProtocolMessage = message,
+                AuthorizationResponse = message,
                 Exception = exception
             };
 
