@@ -10,7 +10,7 @@ namespace Microsoft.AspNetCore.Authentication
     /// <summary>
     /// Base context for authentication.
     /// </summary>
-    public abstract class BaseAuthenticationContext<TOptions> : BaseContext<TOptions> where TOptions : AuthenticationSchemeOptions
+    public abstract class BaseRemoteAuthenticationContext<TOptions> : BaseControlContext<TOptions> where TOptions : AuthenticationSchemeOptions
     {
         private AuthenticationProperties _properties;
 
@@ -20,7 +20,7 @@ namespace Microsoft.AspNetCore.Authentication
         /// <param name="context">The context.</param>
         /// <param name="scheme">The authentication scheme.</param>
         /// <param name="options">The authentication options associated with the scheme.</param>
-        protected BaseAuthenticationContext(
+        protected BaseRemoteAuthenticationContext(
             HttpContext context,
             AuthenticationScheme scheme,
             TOptions options)
@@ -73,23 +73,33 @@ namespace Microsoft.AspNetCore.Authentication
             Failure = new Exception(failureMessage);
         }
 
-        public bool IsProcessingComplete(out AuthenticationResult result)
+        public bool IsProcessingComplete(out RemoteAuthenticationResult result)
         {
-            if (AuthenticationSkipped)
+            if (HandledResponse)
+            {
+                result = RemoteAuthenticationResult.HandleResponse();
+                return true;
+            }
+            else if (Skipped)
+            {
+                result = RemoteAuthenticationResult.SkipToNextMiddleware();
+                return true;
+            }
+            else if (AuthenticationSkipped)
             {
                 if (Ticket == null)
                 {
-                    result = AuthenticationResult.None();
+                    result = RemoteAuthenticationResult.None();
                 }
                 else
                 {
-                    result = AuthenticationResult.Success(Ticket);
+                    result = RemoteAuthenticationResult.Success(Ticket);
                 }
                 return true;
             }
             else if (Failure != null)
             {
-                result = AuthenticationResult.Fail(Failure);
+                result = RemoteAuthenticationResult.Fail(Failure);
                 return true;
             }
             result = null;

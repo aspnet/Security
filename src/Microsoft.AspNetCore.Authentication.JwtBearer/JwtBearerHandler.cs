@@ -44,10 +44,10 @@ namespace Microsoft.AspNetCore.Authentication.JwtBearer
         /// Searches the 'Authorization' header for a 'Bearer' token. If the 'Bearer' token is found, it is validated using <see cref="TokenValidationParameters"/> set in the options.
         /// </summary>
         /// <returns></returns>
-        protected override async Task<AuthenticateResult> HandleAuthenticateAsync()
+        protected override async Task<AuthenticationResult> HandleAuthenticateAsync()
         {
             string token = null;
-            AuthenticateResult result = null;
+            AuthenticationResult result = null;
             try
             {
                 // Give application opportunity to find from a different location, adjust, or reject token
@@ -70,7 +70,7 @@ namespace Microsoft.AspNetCore.Authentication.JwtBearer
                     // If no authorization header found, nothing to process further
                     if (string.IsNullOrEmpty(authorization))
                     {
-                        return AuthenticateResult.None();
+                        return AuthenticationResult.None();
                     }
 
                     if (authorization.StartsWith("Bearer ", StringComparison.OrdinalIgnoreCase))
@@ -81,7 +81,7 @@ namespace Microsoft.AspNetCore.Authentication.JwtBearer
                     // If no token found, no further work possible
                     if (string.IsNullOrEmpty(token))
                     {
-                        return AuthenticateResult.None();
+                        return AuthenticationResult.None();
                     }
                 }
 
@@ -142,7 +142,7 @@ namespace Microsoft.AspNetCore.Authentication.JwtBearer
                         var tokenValidatedContext = new TokenValidatedContext(Context, Scheme, Options)
                         {
                             Ticket = ticket,
-                            SecurityToken = validatedToken,
+                            SecurityToken = validatedToken
                         };
 
                         await Events.TokenValidated(tokenValidatedContext);
@@ -160,7 +160,7 @@ namespace Microsoft.AspNetCore.Authentication.JwtBearer
                             });
                         }
 
-                        return AuthenticateResult.Success(ticket);
+                        return AuthenticationResult.Success(ticket);
                     }
                 }
 
@@ -177,10 +177,10 @@ namespace Microsoft.AspNetCore.Authentication.JwtBearer
                         return result;
                     }
 
-                    return AuthenticateResult.Fail(authenticationFailedContext.Exception);
+                    return AuthenticationResult.Fail(authenticationFailedContext.Exception);
                 }
 
-                return AuthenticateResult.Fail("No SecurityTokenValidator available for token: " + token ?? "[null]");
+                return AuthenticationResult.Fail("No SecurityTokenValidator available for token: " + token ?? "[null]");
             }
             catch (Exception ex)
             {
@@ -217,7 +217,7 @@ namespace Microsoft.AspNetCore.Authentication.JwtBearer
             }
 
             await Events.Challenge(eventContext);
-            if (eventContext.IsProcessingComplete(out var ignored))
+            if (eventContext.Skipped)
             {
                 return;
             }

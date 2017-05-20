@@ -193,7 +193,7 @@ namespace Microsoft.AspNetCore.Authentication.JwtBearer
                             new ClaimsPrincipal(new ClaimsIdentity(claims, context.Scheme.Name)),
                             new AuthenticationProperties(), context.Scheme.Name);
 
-                        context.HandleResponse();
+                        context.SkipAuthentication();
 
                         return Task.FromResult<object>(null);
                     }
@@ -458,7 +458,7 @@ namespace Microsoft.AspNetCore.Authentication.JwtBearer
                 {
                     OnMessageReceived = context =>
                     {
-                        context.Skip();
+                        context.SkipAuthentication();
                         return Task.FromResult(0);
                     },
                     OnTokenValidated = context =>
@@ -482,7 +482,7 @@ namespace Microsoft.AspNetCore.Authentication.JwtBearer
         }
 
         [Fact]
-        public async Task EventOnMessageReceivedHandled_NoMoreEventsExecuted()
+        public async Task EventOnMessageReceivedReject_NoMoreEventsExecuted()
         {
             var server = CreateServer(options =>
             {
@@ -490,7 +490,7 @@ namespace Microsoft.AspNetCore.Authentication.JwtBearer
                 {
                     OnMessageReceived = context =>
                     {
-                        context.HandleResponse();
+                        context.RejectAuthentication("Authentication was aborted from user code.");
                         context.Response.StatusCode = StatusCodes.Status202Accepted;
                         return Task.FromResult(0);
                     },
@@ -509,9 +509,12 @@ namespace Microsoft.AspNetCore.Authentication.JwtBearer
                 };
             });
 
-            var response = await SendAsync(server, "http://example.com/checkforerrors", "Bearer Token");
-            Assert.Equal(HttpStatusCode.Accepted, response.Response.StatusCode);
-            Assert.Equal(string.Empty, response.ResponseText);
+            var exception = await Assert.ThrowsAsync<Exception>(delegate
+            {
+                return SendAsync(server, "http://example.com/checkforerrors", "Bearer Token");
+            });
+
+            Assert.Equal("Authentication was aborted from user code.", exception.InnerException.Message);
         }
 
         [Fact]
@@ -523,7 +526,7 @@ namespace Microsoft.AspNetCore.Authentication.JwtBearer
                 {
                     OnTokenValidated = context =>
                     {
-                        context.Skip();
+                        context.SkipAuthentication();
                         return Task.FromResult(0);
                     },
                     OnAuthenticationFailed = context =>
@@ -545,7 +548,7 @@ namespace Microsoft.AspNetCore.Authentication.JwtBearer
         }
 
         [Fact]
-        public async Task EventOnTokenValidatedHandled_NoMoreEventsExecuted()
+        public async Task EventOnTokenValidatedReject_NoMoreEventsExecuted()
         {
             var server = CreateServer(options =>
             {
@@ -553,7 +556,7 @@ namespace Microsoft.AspNetCore.Authentication.JwtBearer
                 {
                     OnTokenValidated = context =>
                     {
-                        context.HandleResponse();
+                        context.RejectAuthentication("Authentication was aborted from user code.");
                         context.Response.StatusCode = StatusCodes.Status202Accepted;
                         return Task.FromResult(0);
                     },
@@ -570,9 +573,12 @@ namespace Microsoft.AspNetCore.Authentication.JwtBearer
                 options.SecurityTokenValidators.Add(new BlobTokenValidator("JWT"));
             });
 
-            var response = await SendAsync(server, "http://example.com/checkforerrors", "Bearer Token");
-            Assert.Equal(HttpStatusCode.Accepted, response.Response.StatusCode);
-            Assert.Equal(string.Empty, response.ResponseText);
+            var exception = await Assert.ThrowsAsync<Exception>(delegate
+            {
+                return SendAsync(server, "http://example.com/checkforerrors", "Bearer Token");
+            });
+
+            Assert.Equal("Authentication was aborted from user code.", exception.InnerException.Message);
         }
 
         [Fact]
@@ -588,7 +594,7 @@ namespace Microsoft.AspNetCore.Authentication.JwtBearer
                     },
                     OnAuthenticationFailed = context =>
                     {
-                        context.Skip();
+                        context.SkipAuthentication();
                         return Task.FromResult(0);
                     },
                     OnChallenge = context =>
@@ -606,7 +612,7 @@ namespace Microsoft.AspNetCore.Authentication.JwtBearer
         }
 
         [Fact]
-        public async Task EventOnAuthenticationFailedHandled_NoMoreEventsExecuted()
+        public async Task EventOnAuthenticationFailedReject_NoMoreEventsExecuted()
         {
             var server = CreateServer(options =>
             {
@@ -618,7 +624,7 @@ namespace Microsoft.AspNetCore.Authentication.JwtBearer
                     },
                     OnAuthenticationFailed = context =>
                     {
-                        context.HandleResponse();
+                        context.RejectAuthentication("Authentication was aborted from user code.");
                         context.Response.StatusCode = StatusCodes.Status202Accepted;
                         return Task.FromResult(0);
                     },
@@ -631,9 +637,12 @@ namespace Microsoft.AspNetCore.Authentication.JwtBearer
                 options.SecurityTokenValidators.Add(new BlobTokenValidator("JWT"));
             });
 
-            var response = await SendAsync(server, "http://example.com/checkforerrors", "Bearer Token");
-            Assert.Equal(HttpStatusCode.Accepted, response.Response.StatusCode);
-            Assert.Equal(string.Empty, response.ResponseText);
+            var exception = await Assert.ThrowsAsync<Exception>(delegate
+            {
+                return SendAsync(server, "http://example.com/checkforerrors", "Bearer Token");
+            });
+
+            Assert.Equal("Authentication was aborted from user code.", exception.InnerException.Message);
         }
 
         [Fact]
@@ -645,7 +654,7 @@ namespace Microsoft.AspNetCore.Authentication.JwtBearer
                 {
                     OnChallenge = context =>
                     {
-                        context.Skip();
+                        context.SkipChallenge();
                         return Task.FromResult(0);
                     },
                 };
@@ -653,29 +662,6 @@ namespace Microsoft.AspNetCore.Authentication.JwtBearer
 
             var response = await SendAsync(server, "http://example.com/unauthorized", "Bearer Token");
             Assert.Equal(HttpStatusCode.OK, response.Response.StatusCode);
-            Assert.Empty(response.Response.Headers.WwwAuthenticate);
-            Assert.Equal(string.Empty, response.ResponseText);
-        }
-
-
-        [Fact]
-        public async Task EventOnChallengeHandled_ResponseNotModified()
-        {
-            var server = CreateServer(o =>
-            {
-                o.Events = new JwtBearerEvents()
-                {
-                    OnChallenge = context =>
-                    {
-                        context.HandleResponse();
-                        context.Response.StatusCode = StatusCodes.Status202Accepted;
-                        return Task.FromResult(0);
-                    },
-                };
-            });
-
-            var response = await SendAsync(server, "http://example.com/unauthorized", "Bearer Token");
-            Assert.Equal(HttpStatusCode.Accepted, response.Response.StatusCode);
             Assert.Empty(response.Response.Headers.WwwAuthenticate);
             Assert.Equal(string.Empty, response.ResponseText);
         }
