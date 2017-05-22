@@ -698,22 +698,6 @@ namespace Microsoft.AspNetCore.Authentication.Cookies
         }
 
         [Fact]
-        public async Task CookieTurnsChallengeIntoForbidWithCookie()
-        {
-            var server = CreateServer(o => { }, SignInAsAlice);
-
-            var transaction1 = await SendAsync(server, "http://example.com/testpath");
-
-            var url = "http://example.com/challenge";
-            var transaction2 = await SendAsync(server, url, transaction1.CookieNameValue);
-
-            Assert.Equal(HttpStatusCode.Redirect, transaction2.Response.StatusCode);
-            var location = transaction2.Response.Headers.Location;
-            Assert.Equal("/Account/AccessDenied", location.LocalPath);
-            Assert.Equal("?ReturnUrl=%2Fchallenge", location.Query);
-        }
-
-        [Fact]
         public async Task CookieChallengeRedirectsToLoginWithoutCookie()
         {
             var server = CreateServer(o => { }, SignInAsAlice);
@@ -737,25 +721,6 @@ namespace Microsoft.AspNetCore.Authentication.Cookies
             Assert.Equal(HttpStatusCode.Redirect, transaction.Response.StatusCode);
             var location = transaction.Response.Headers.Location;
             Assert.Equal("/Account/AccessDenied", location.LocalPath);
-        }
-
-        [Fact]
-        public async Task CookieTurns401ToAccessDeniedWhenSetWithCookie()
-        {
-            var server = CreateServer(o =>
-            {
-                o.AccessDeniedPath = new PathString("/accessdenied");
-            },
-            SignInAsAlice);
-
-            var transaction1 = await SendAsync(server, "http://example.com/testpath");
-
-            var transaction2 = await SendAsync(server, "http://example.com/challenge", transaction1.CookieNameValue);
-
-            Assert.Equal(HttpStatusCode.Redirect, transaction2.Response.StatusCode);
-
-            var location = transaction2.Response.Headers.Location;
-            Assert.Equal("/accessdenied", location.LocalPath);
         }
 
         [Fact]
@@ -794,7 +759,8 @@ namespace Microsoft.AspNetCore.Authentication.Cookies
         public async Task MapWillAffectChallengeOnlyWithUseAuth(bool useAuth)
         {
             var builder = new WebHostBuilder()
-                .Configure(app => {
+                .Configure(app =>
+                {
                     if (useAuth)
                     {
                         app.UseAuthentication();
@@ -1291,7 +1257,7 @@ namespace Microsoft.AspNetCore.Authentication.Cookies
                         }
                         else if (req.Path == new PathString("/unauthorized"))
                         {
-                            await context.ChallengeAsync(CookieAuthenticationDefaults.AuthenticationScheme, new AuthenticationProperties(), ChallengeBehavior.Unauthorized);
+                            await context.ChallengeAsync(CookieAuthenticationDefaults.AuthenticationScheme, new AuthenticationProperties());
                         }
                         else if (req.Path == new PathString("/protected/CustomRedirect"))
                         {
