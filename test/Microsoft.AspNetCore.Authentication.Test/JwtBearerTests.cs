@@ -441,27 +441,6 @@ namespace Microsoft.AspNetCore.Authentication.JwtBearer
         }
 
         [Fact]
-        public async Task BearerTurns401To403IfAuthenticated()
-        {
-            var server = CreateServer(options =>
-            {
-                options.SecurityTokenValidators.Clear();
-                options.SecurityTokenValidators.Add(new BlobTokenValidator("JWT"));
-            });
-
-            var response = await SendAsync(server, "http://example.com/unauthorized", "Bearer Token");
-            Assert.Equal(HttpStatusCode.Forbidden, response.Response.StatusCode);
-        }
-
-        [Fact]
-        public async Task BearerDoesNothingTo401IfNotAuthenticated()
-        {
-            var server = CreateServer();
-            var response = await SendAsync(server, "http://example.com/unauthorized");
-            Assert.Equal(HttpStatusCode.Unauthorized, response.Response.StatusCode);
-        }
-
-        [Fact]
         public async Task EventOnMessageReceivedSkip_NoMoreEventsExecuted()
         {
             var server = CreateServer(options =>

@@ -884,42 +884,6 @@ namespace Microsoft.AspNetCore.Authentication.Google
         }
 
         [Fact]
-        public async Task ChallengeGoogleWhenAlreadySignedInReturnsForbidden()
-        {
-            var stateFormat = new PropertiesDataFormat(new EphemeralDataProtectionProvider(NullLoggerFactory.Instance).CreateProtector("GoogleTest"));
-            var server = CreateServer(o =>
-            {
-                o.ClientId = "Test Id";
-                o.ClientSecret = "Test Secret";
-                o.StateDataFormat = stateFormat;
-                o.SaveTokens = true;
-                o.BackchannelHttpHandler = CreateBackchannel();
-            });
-
-            // Skip the challenge step, go directly to the callback path
-
-            var properties = new AuthenticationProperties();
-            var correlationKey = ".xsrf";
-            var correlationValue = "TestCorrelationId";
-            properties.Items.Add(correlationKey, correlationValue);
-            properties.RedirectUri = "/me";
-            var state = stateFormat.Protect(properties);
-            var transaction = await server.SendAsync(
-                "https://example.com/signin-google?code=TestCode&state=" + UrlEncoder.Default.Encode(state),
-                $".AspNetCore.Correlation.Google.{correlationValue}=N");
-            Assert.Equal(HttpStatusCode.Redirect, transaction.Response.StatusCode);
-            Assert.Equal("/me", transaction.Response.Headers.GetValues("Location").First());
-            Assert.Equal(2, transaction.SetCookie.Count);
-            Assert.Contains($".AspNetCore.Correlation.Google.{correlationValue}", transaction.SetCookie[0]); // Delete
-            Assert.Contains(".AspNetCore." + TestExtensions.CookieAuthenticationScheme, transaction.SetCookie[1]);
-
-            var authCookie = transaction.AuthenticationCookieValue;
-            transaction = await server.SendAsync("https://example.com/challenge", authCookie);
-            Assert.Equal(HttpStatusCode.Redirect, transaction.Response.StatusCode);
-            Assert.StartsWith("https://example.com/Account/AccessDenied?", transaction.Response.Headers.Location.OriginalString);
-        }
-
-        [Fact]
         public async Task AuthenticateFacebookWhenAlreadySignedWithGoogleReturnsNull()
         {
             var stateFormat = new PropertiesDataFormat(new EphemeralDataProtectionProvider(NullLoggerFactory.Instance).CreateProtector("GoogleTest"));
