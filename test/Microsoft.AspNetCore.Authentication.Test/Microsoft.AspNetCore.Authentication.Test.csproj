@@ -8,6 +8,7 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\..\src\Microsoft.AspNetCore.Authentication.AzureAd\Microsoft.AspNetCore.Authentication.AzureAd.csproj" />
     <ProjectReference Include="..\..\src\Microsoft.AspNetCore.Authentication.Cookies\Microsoft.AspNetCore.Authentication.Cookies.csproj" />
     <ProjectReference Include="..\..\src\Microsoft.AspNetCore.Authentication.Facebook\Microsoft.AspNetCore.Authentication.Facebook.csproj" />
     <ProjectReference Include="..\..\src\Microsoft.AspNetCore.Authentication.Google\Microsoft.AspNetCore.Authentication.Google.csproj" />
@@ -20,6 +21,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\..\..\Configuration\src\Microsoft.Extensions.Configuration.Binder\Microsoft.Extensions.Configuration.Binder.csproj" />
     <PackageReference Include="Microsoft.AspNetCore.TestHost" Version="$(AspNetCoreVersion)" />
     <PackageReference Include="Microsoft.AspNetCore.Testing" Version="$(AspNetCoreVersion)" />
     <PackageReference Include="Microsoft.NET.Test.Sdk" Version="$(TestSdkVersion)" />
