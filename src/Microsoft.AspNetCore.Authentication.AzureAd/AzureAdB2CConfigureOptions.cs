@@ -14,7 +14,7 @@ namespace Microsoft.AspNetCore.Authentication.AzureAd
 
         public override void Configure(string name, AzureAdB2COptions options)
         {
-            _config.GetSection("Microsoft:AspNetCore:Authentication:Schemes:" + AzureDefaults.AzureAdB2CAuthenticationScheme).Bind(options);
+            _config.GetSection("Microsoft:AspNetCore:Authentication:Schemes:" + AzureAdB2CDefaults.AuthenticationScheme).Bind(options);
         }
     }
 }

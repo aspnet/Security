@@ -7,7 +7,6 @@ namespace Microsoft.AspNetCore.Authentication.AzureAd
 {
     internal class AzureAdInitializeOptions : IInitializeOptions<AzureAdOptions>
     {
-
         public AzureAdInitializeOptions() { }
 
         public void Initialize(string name, AzureAdOptions options)

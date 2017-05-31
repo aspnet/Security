@@ -39,7 +39,7 @@ namespace Microsoft.AspNetCore.Authentication.AzureAd
                 .AddSingleton<IConfiguration>(config);
             var sp = services.BuildServiceProvider();
 
-            var options = sp.GetRequiredService<IOptionsSnapshot<AzureAdOptions>>().Get(AzureDefaults.AzureAdAuthenticationScheme);
+            var options = sp.GetRequiredService<IOptionsSnapshot<AzureAdOptions>>().Get(AzureAdDefaults.AuthenticationScheme);
             Assert.Equal("<id>", options.ClientId);
             Assert.Equal("<secret>", options.ClientSecret);
             Assert.Equal("<azure>", options.Instance);
@@ -72,7 +72,7 @@ namespace Microsoft.AspNetCore.Authentication.AzureAd
                 .AddSingleton<IConfiguration>(config);
             var sp = services.BuildServiceProvider();
 
-            var options = sp.GetRequiredService<IOptionsSnapshot<AzureAdOptions>>().Get(AzureDefaults.AzureAdAuthenticationScheme);
+            var options = sp.GetRequiredService<IOptionsSnapshot<AzureAdOptions>>().Get(AzureAdDefaults.AuthenticationScheme);
             Assert.Equal("<id>", options.ClientId);
             Assert.Equal("<secret>", options.ClientSecret);
             Assert.Equal("<azure>", options.Instance);

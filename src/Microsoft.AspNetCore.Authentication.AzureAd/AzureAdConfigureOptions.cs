@@ -9,8 +9,8 @@ namespace Microsoft.AspNetCore.Authentication.AzureAd
     internal class AzureAdConfigureOptions : ConfigureDefaultOptions<AzureAdOptions>
     {
         public AzureAdConfigureOptions(IConfiguration config) :
-            base(AzureDefaults.AzureAdAuthenticationScheme,
-                options => config.GetSection("Microsoft:AspNetCore:Authentication:Schemes:"+ AzureDefaults.AzureAdAuthenticationScheme).Bind(options))
+            base(AzureAdDefaults.AuthenticationScheme,
+                options => config.GetSection("Microsoft:AspNetCore:Authentication:Schemes:"+ AzureAdDefaults.AuthenticationScheme).Bind(options))
         { }
     }
 }

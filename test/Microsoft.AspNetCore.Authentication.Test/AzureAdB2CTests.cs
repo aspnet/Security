@@ -44,7 +44,7 @@ namespace Microsoft.AspNetCore.Authentication.AzureAd
             var sp = services.BuildServiceProvider();
 
             // EditProfile options
-            var options = sp.GetRequiredService<IOptionsSnapshot<AzureAdB2COptions>>().Get(AzureDefaults.AzureAdB2CEditProfileAuthenticationScheme);
+            var options = sp.GetRequiredService<IOptionsSnapshot<AzureAdB2COptions>>().Get(AzureAdB2CDefaults.EditProfileAuthenticationScheme);
             Assert.Equal("<id>", options.ClientId);
             Assert.Equal("<secret>", options.ClientSecret);
             Assert.Equal("<azure>", options.Instance);
@@ -56,7 +56,7 @@ namespace Microsoft.AspNetCore.Authentication.AzureAd
             Assert.Equal("<azure>/<domain>/<editProfileId>/v2.0", options.Authority);
 
             // ResetPassword options
-            options = sp.GetRequiredService<IOptionsSnapshot<AzureAdB2COptions>>().Get(AzureDefaults.AzureAdB2CResetPasswordAuthenticationScheme);
+            options = sp.GetRequiredService<IOptionsSnapshot<AzureAdB2COptions>>().Get(AzureAdB2CDefaults.ResetPasswordAuthenticationScheme);
             Assert.Equal("<id>", options.ClientId);
             Assert.Equal("<secret>", options.ClientSecret);
             Assert.Equal("<azure>", options.Instance);
@@ -68,7 +68,7 @@ namespace Microsoft.AspNetCore.Authentication.AzureAd
             Assert.Equal("<azure>/<domain>/<resetId>/v2.0", options.Authority);
 
             // SignInSignUp options
-            options = sp.GetRequiredService<IOptionsSnapshot<AzureAdB2COptions>>().Get(AzureDefaults.AzureAdB2CSignInSignUpAuthenticationScheme);
+            options = sp.GetRequiredService<IOptionsSnapshot<AzureAdB2COptions>>().Get(AzureAdB2CDefaults.SignInSignUpAuthenticationScheme);
             Assert.Equal("<id>", options.ClientId);
             Assert.Equal("<secret>", options.ClientSecret);
             Assert.Equal("<azure>", options.Instance);
@@ -99,14 +99,14 @@ namespace Microsoft.AspNetCore.Authentication.AzureAd
                 .AddTransient<IConfigureOptions<AzureAdB2COptions>, ConfigureDefaults<AzureAdB2COptions>>()
                 .AddTransient<IConfigureNamedOptions<AzureAdB2COptions>, ConfigureDefaults<AzureAdB2COptions>>()
                 .AddAzureAdB2CAuthentication()
-                .Configure<AzureAdB2COptions>(AzureDefaults.AzureAdB2CEditProfileAuthenticationScheme, o => o.Authority = "(edit)")
-                .Configure<AzureAdB2COptions>(AzureDefaults.AzureAdB2CResetPasswordAuthenticationScheme, o => o.Authority = "(reset)")
-                .Configure<AzureAdB2COptions>(AzureDefaults.AzureAdB2CSignInSignUpAuthenticationScheme, o => o.Authority = "(sign)")
+                .Configure<AzureAdB2COptions>(AzureAdB2CDefaults.EditProfileAuthenticationScheme, o => o.Authority = "(edit)")
+                .Configure<AzureAdB2COptions>(AzureAdB2CDefaults.ResetPasswordAuthenticationScheme, o => o.Authority = "(reset)")
+                .Configure<AzureAdB2COptions>(AzureAdB2CDefaults.SignInSignUpAuthenticationScheme, o => o.Authority = "(sign)")
                 .AddSingleton<IConfiguration>(config);
             var sp = services.BuildServiceProvider();
 
             // EditProfile options
-            var options = sp.GetRequiredService<IOptionsSnapshot<AzureAdB2COptions>>().Get(AzureDefaults.AzureAdB2CEditProfileAuthenticationScheme);
+            var options = sp.GetRequiredService<IOptionsSnapshot<AzureAdB2COptions>>().Get(AzureAdB2CDefaults.EditProfileAuthenticationScheme);
             Assert.Equal("<id>", options.ClientId);
             Assert.Equal("<secret>", options.ClientSecret);
             Assert.Equal("<azure>", options.Instance);
@@ -114,7 +114,7 @@ namespace Microsoft.AspNetCore.Authentication.AzureAd
             Assert.Equal("(edit)", options.Authority);
 
             // ResetPassword options
-            options = sp.GetRequiredService<IOptionsSnapshot<AzureAdB2COptions>>().Get(AzureDefaults.AzureAdB2CResetPasswordAuthenticationScheme);
+            options = sp.GetRequiredService<IOptionsSnapshot<AzureAdB2COptions>>().Get(AzureAdB2CDefaults.ResetPasswordAuthenticationScheme);
             Assert.Equal("<id>", options.ClientId);
             Assert.Equal("<secret>", options.ClientSecret);
             Assert.Equal("<azure>", options.Instance);
@@ -122,7 +122,7 @@ namespace Microsoft.AspNetCore.Authentication.AzureAd
             Assert.Equal("(reset)", options.Authority);
 
             // SignInSignUp options
-            options = sp.GetRequiredService<IOptionsSnapshot<AzureAdB2COptions>>().Get(AzureDefaults.AzureAdB2CSignInSignUpAuthenticationScheme);
+            options = sp.GetRequiredService<IOptionsSnapshot<AzureAdB2COptions>>().Get(AzureAdB2CDefaults.SignInSignUpAuthenticationScheme);
             Assert.Equal("<id>", options.ClientId);
             Assert.Equal("<secret>", options.ClientSecret);
             Assert.Equal("<azure>", options.Instance);

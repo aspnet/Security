@@ -15,15 +15,15 @@ namespace Microsoft.AspNetCore.Authentication.AzureAd
             if (string.IsNullOrEmpty(options.Authority))
             {
                 // Bind to only to any of the AzureAdB2C policy schemes
-                if (name == AzureDefaults.AzureAdB2CEditProfileAuthenticationScheme)
+                if (name == AzureAdB2CDefaults.EditProfileAuthenticationScheme)
                 {
                     options.Authority = $"{options.Instance}/{options.Domain}/{options.EditProfilePolicyId}/v2.0";
                 }
-                else if (name == AzureDefaults.AzureAdB2CResetPasswordAuthenticationScheme)
+                else if (name == AzureAdB2CDefaults.ResetPasswordAuthenticationScheme)
                 {
                     options.Authority = $"{options.Instance}/{options.Domain}/{options.ResetPasswordPolicyId}/v2.0";
                 }
-                else if (name == AzureDefaults.AzureAdB2CSignInSignUpAuthenticationScheme)
+                else if (name == AzureAdB2CDefaults.SignInSignUpAuthenticationScheme)
                 {
                     options.Authority = $"{options.Instance}/{options.Domain}/{options.SignInSignUpPolicyId}/v2.0";
                 }
