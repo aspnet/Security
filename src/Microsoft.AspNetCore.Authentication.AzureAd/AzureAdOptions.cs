@@ -10,8 +10,6 @@ namespace Microsoft.AspNetCore.Authentication.AzureAd
 {
     public class AzureAdOptions : OpenIdConnectOptions
     {
-        // Set             oidcOptions.UseTokenLifetime = true; in config
-
         public string Instance { get; set; }
         public string TenantId { get; set; }
     }

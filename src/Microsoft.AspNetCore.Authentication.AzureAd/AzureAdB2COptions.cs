@@ -45,6 +45,5 @@ namespace Microsoft.AspNetCore.Authentication.AzureAd
         public string EditProfilePolicyId { get; set; }
         public string SignInSignUpPolicyId { get; set; }
         public string ResetPasswordPolicyId { get; set; }
-
     }
 }
