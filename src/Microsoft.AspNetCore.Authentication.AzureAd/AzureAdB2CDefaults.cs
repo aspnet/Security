@@ -9,6 +9,7 @@ namespace Microsoft.AspNetCore.Authentication.AzureAd
     public static class AzureAdB2CDefaults
     {
         public const string AuthenticationScheme = "AzureAdB2C";
+        public const string BearerAuthenticationScheme = "AzureAdB2C.Bearer";
         public const string SignInSignUpAuthenticationScheme = "SignInSignUp";
         public const string ResetPasswordAuthenticationScheme = "ResetPassword";
         public const string EditProfileAuthenticationScheme = "EditProfile";

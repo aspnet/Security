@@ -52,15 +52,59 @@ namespace Microsoft.AspNetCore.Authentication.AzureAd
         }
 
         [Fact]
-        public void SettingAuthorityOverrides()
+        public void InstanceRequired()
         {
             var dic = new Dictionary<string, string>
             {
                 {"Microsoft:AspNetCore:Authentication:Schemes:AzureAd:ClientId", "<id>"},
                 {"Microsoft:AspNetCore:Authentication:Schemes:AzureAd:ClientSecret", "<secret>"},
                 {"Microsoft:AspNetCore:Authentication:Schemes:AzureAd:RequireHttpsMetadata", "false"},
-                {"Microsoft:AspNetCore:Authentication:Schemes:AzureAd:Instance", "<azure>"},
                 {"Microsoft:AspNetCore:Authentication:Schemes:AzureAd:TenantId", "<tenant>"}
+            };
+
+            var configurationBuilder = new ConfigurationBuilder();
+            configurationBuilder.AddInMemoryCollection(dic);
+            var config = configurationBuilder.Build();
+            var services = new ServiceCollection()
+                .AddSingleton<IConfigureOptions<AzureAdOptions>, ConfigureDefaults<AzureAdOptions>>()
+                .AddAzureAdAuthentication()
+                .AddSingleton<IConfiguration>(config);
+            var sp = services.BuildServiceProvider();
+
+            Assert.Throws<InvalidOperationException>(() => sp.GetRequiredService<IOptionsSnapshot<AzureAdOptions>>().Get(AzureAdDefaults.AuthenticationScheme));
+        }
+
+        [Fact]
+        public void TenantIdRequired()
+        {
+            var dic = new Dictionary<string, string>
+            {
+                {"Microsoft:AspNetCore:Authentication:Schemes:AzureAd:ClientId", "<id>"},
+                {"Microsoft:AspNetCore:Authentication:Schemes:AzureAd:ClientSecret", "<secret>"},
+                {"Microsoft:AspNetCore:Authentication:Schemes:AzureAd:RequireHttpsMetadata", "false"},
+                {"Microsoft:AspNetCore:Authentication:Schemes:AzureAd:Instance", "<azure>"}
+            };
+
+            var configurationBuilder = new ConfigurationBuilder();
+            configurationBuilder.AddInMemoryCollection(dic);
+            var config = configurationBuilder.Build();
+            var services = new ServiceCollection()
+                .AddSingleton<IConfigureOptions<AzureAdOptions>, ConfigureDefaults<AzureAdOptions>>()
+                .AddAzureAdAuthentication()
+                .AddSingleton<IConfiguration>(config);
+            var sp = services.BuildServiceProvider();
+
+            Assert.Throws<InvalidOperationException>(() => sp.GetRequiredService<IOptionsSnapshot<AzureAdOptions>>().Get(AzureAdDefaults.AuthenticationScheme));
+        }
+
+        [Fact]
+        public void SettingAuthorityOverrides()
+        {
+            var dic = new Dictionary<string, string>
+            {
+                {"Microsoft:AspNetCore:Authentication:Schemes:AzureAd:ClientId", "<id>"},
+                {"Microsoft:AspNetCore:Authentication:Schemes:AzureAd:ClientSecret", "<secret>"},
+                {"Microsoft:AspNetCore:Authentication:Schemes:AzureAd:RequireHttpsMetadata", "false"}
             };
 
             var configurationBuilder = new ConfigurationBuilder();
@@ -75,8 +119,6 @@ namespace Microsoft.AspNetCore.Authentication.AzureAd
             var options = sp.GetRequiredService<IOptionsSnapshot<AzureAdOptions>>().Get(AzureAdDefaults.AuthenticationScheme);
             Assert.Equal("<id>", options.ClientId);
             Assert.Equal("<secret>", options.ClientSecret);
-            Assert.Equal("<azure>", options.Instance);
-            Assert.Equal("<tenant>", options.TenantId);
             Assert.Equal("(authority)", options.Authority);
         }
     }
