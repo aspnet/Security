@@ -3,11 +3,11 @@
   <Import Project="..\..\build\common.props" />
 
   <PropertyGroup>
-    <Description>ASP.NET Core contains middleware to support Google's OpenId and OAuth 2.0 authentication workflows.</Description>
+    <Description>Supports Azure Active Directory and Azure Active Directory B2C authentication workflows.</Description>
     <TargetFramework>netstandard2.0</TargetFramework>
     <NoWarn>$(NoWarn);CS1591</NoWarn>
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
-    <PackageTags>aspnetcore;authentication;security</PackageTags>
+    <PackageTags>aspnetcore;authentication;security;AAD;B2C</PackageTags>
     <EnableApiCheck>false</EnableApiCheck>
   </PropertyGroup>
 
