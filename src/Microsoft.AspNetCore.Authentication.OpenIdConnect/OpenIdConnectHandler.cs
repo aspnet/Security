@@ -25,9 +25,21 @@ using Newtonsoft.Json.Linq;
 namespace Microsoft.AspNetCore.Authentication.OpenIdConnect
 {
     /// <summary>
-    /// A per-request authentication handler for the OpenIdConnectAuthenticationMiddleware.
+    /// A per-request authentication handler for OpenIdConnect.
     /// </summary>
-    public class OpenIdConnectHandler : RemoteAuthenticationHandler<OpenIdConnectOptions>
+    public class OpenIdConnectHandler : OpenIdConnectHandler<OpenIdConnectOptions>
+    {
+        public OpenIdConnectHandler(IOptionsSnapshot<OpenIdConnectOptions> options, ILoggerFactory logger, HtmlEncoder htmlEncoder, UrlEncoder encoder, ISystemClock clock)
+            : base(options, logger, htmlEncoder, encoder, clock)
+        { }
+    }
+
+    /// <summary>
+    /// A per-request authentication handler for OpenIdConnect.
+    /// </summary>
+    /// <typeparam name="TOptions">The options type used to configure the handler.</typeparam>
+    public class OpenIdConnectHandler<TOptions> : RemoteAuthenticationHandler<TOptions>
+        where TOptions : OpenIdConnectOptions, new()
     {
         private const string NonceProperty = "N";
         private const string UriSchemeDelimiter = "://";
@@ -55,7 +67,7 @@ namespace Microsoft.AspNetCore.Authentication.OpenIdConnect
 
         protected HtmlEncoder HtmlEncoder { get; }
 
-        public OpenIdConnectHandler(IOptionsSnapshot<OpenIdConnectOptions> options, ILoggerFactory logger, HtmlEncoder htmlEncoder, UrlEncoder encoder, ISystemClock clock)
+        public OpenIdConnectHandler(IOptionsSnapshot<TOptions> options, ILoggerFactory logger, HtmlEncoder htmlEncoder, UrlEncoder encoder, ISystemClock clock)
             : base(options, logger, encoder, clock)
         {
             HtmlEncoder = htmlEncoder;

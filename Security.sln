@@ -64,6 +64,8 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Microsoft.AspNetCore.Authorization.Policy", "src\Microsoft.AspNetCore.Authorization.Policy\Microsoft.AspNetCore.Authorization.Policy.csproj", "{58194599-F07D-47A3-9DF2-E21A22C5EF9E}"
 EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Microsoft.AspNetCore.Authentication.AzureAd", "src\Microsoft.AspNetCore.Authentication.AzureAd\Microsoft.AspNetCore.Authentication.AzureAd.csproj", "{DEF2ED9F-F3C0-48AC-9714-E853C598E45B}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -454,6 +456,22 @@ Global
 		{58194599-F07D-47A3-9DF2-E21A22C5EF9E}.Release|x64.Build.0 = Release|Any CPU
 		{58194599-F07D-47A3-9DF2-E21A22C5EF9E}.Release|x86.ActiveCfg = Release|Any CPU
 		{58194599-F07D-47A3-9DF2-E21A22C5EF9E}.Release|x86.Build.0 = Release|Any CPU
+		{DEF2ED9F-F3C0-48AC-9714-E853C598E45B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{DEF2ED9F-F3C0-48AC-9714-E853C598E45B}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{DEF2ED9F-F3C0-48AC-9714-E853C598E45B}.Debug|Mixed Platforms.ActiveCfg = Debug|Any CPU
+		{DEF2ED9F-F3C0-48AC-9714-E853C598E45B}.Debug|Mixed Platforms.Build.0 = Debug|Any CPU
+		{DEF2ED9F-F3C0-48AC-9714-E853C598E45B}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{DEF2ED9F-F3C0-48AC-9714-E853C598E45B}.Debug|x64.Build.0 = Debug|Any CPU
+		{DEF2ED9F-F3C0-48AC-9714-E853C598E45B}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{DEF2ED9F-F3C0-48AC-9714-E853C598E45B}.Debug|x86.Build.0 = Debug|Any CPU
+		{DEF2ED9F-F3C0-48AC-9714-E853C598E45B}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{DEF2ED9F-F3C0-48AC-9714-E853C598E45B}.Release|Any CPU.Build.0 = Release|Any CPU
+		{DEF2ED9F-F3C0-48AC-9714-E853C598E45B}.Release|Mixed Platforms.ActiveCfg = Release|Any CPU
+		{DEF2ED9F-F3C0-48AC-9714-E853C598E45B}.Release|Mixed Platforms.Build.0 = Release|Any CPU
+		{DEF2ED9F-F3C0-48AC-9714-E853C598E45B}.Release|x64.ActiveCfg = Release|Any CPU
+		{DEF2ED9F-F3C0-48AC-9714-E853C598E45B}.Release|x64.Build.0 = Release|Any CPU
+		{DEF2ED9F-F3C0-48AC-9714-E853C598E45B}.Release|x86.ActiveCfg = Release|Any CPU
+		{DEF2ED9F-F3C0-48AC-9714-E853C598E45B}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -483,5 +501,6 @@ Global
 		{3A7AD414-EBDE-4F92-B307-4E8F19B6117E} = {F8C0AA27-F3FB-4286-8E4C-47EF86B539FF}
 		{51563775-C659-4907-9BAF-9995BAB87D01} = {7BF11F3A-60B6-4796-B504-579C67FFBA34}
 		{58194599-F07D-47A3-9DF2-E21A22C5EF9E} = {4D2B6A51-2F9F-44F5-8131-EA5CAC053652}
+		{DEF2ED9F-F3C0-48AC-9714-E853C598E45B} = {4D2B6A51-2F9F-44F5-8131-EA5CAC053652}
 	EndGlobalSection
 EndGlobal

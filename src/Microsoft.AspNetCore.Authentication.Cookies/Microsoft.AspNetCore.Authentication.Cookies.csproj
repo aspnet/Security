@@ -3,7 +3,7 @@
   <Import Project="..\..\build\common.props" />
 
   <PropertyGroup>
-    <Description>ASP.NET Core middleware that enables an application to use cookie based authentication.</Description>
+    <Description>Enables an application to use cookie based authentication.</Description>
     <TargetFramework>netstandard2.0</TargetFramework>
     <DefineConstants>$(DefineConstants);SECURITY</DefineConstants>
     <NoWarn>$(NoWarn);CS1591</NoWarn>
