@@ -24,7 +24,8 @@ namespace Microsoft.Extensions.DependencyInjection
 
         public static IServiceCollection AddAzureAdBearerAuthentication(this IServiceCollection services)
         {
-            services.AddAzureAdAuthentication();
+            services.AddSingleton<ConfigureDefaultOptions<AzureAdOptions>, AzureAdConfigureOptions>();
+            services.AddSingleton<IInitializeOptions<AzureAdOptions>, AzureAdInitializeOptions>();
             services.AddSingleton<IInitializeOptions<JwtBearerOptions>, BearerInitializeOptions>();
             services.AddSingleton<ConfigureDefaultOptions<JwtBearerOptions>, BearerConfigureOptions>();
             services.AddJwtBearerAuthentication(AzureAdDefaults.BearerAuthenticationScheme, _ => { });
