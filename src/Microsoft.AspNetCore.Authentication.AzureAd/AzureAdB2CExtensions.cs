@@ -29,6 +29,7 @@ namespace Microsoft.Extensions.DependencyInjection
         {
             services.AddAzureAdB2CAuthentication();
             services.AddSingleton<IInitializeOptions<JwtBearerOptions>, BearerInitializeOptions>();
+            services.AddSingleton<ConfigureDefaultOptions<JwtBearerOptions>, BearerConfigureOptions>();
             services.AddJwtBearerAuthentication(AzureAdB2CDefaults.BearerAuthenticationScheme, _ => { });
             return services;
         }
@@ -45,12 +46,24 @@ namespace Microsoft.Extensions.DependencyInjection
             }
         }
 
+        private class BearerConfigureOptions : ConfigureDefaultOptions<JwtBearerOptions>
+        {
+            private readonly IConfiguration _config;
+
+            public BearerConfigureOptions(IConfiguration config) => _config = config;
+
+            public override void Configure(string name, JwtBearerOptions options)
+            {
+                _config.GetSection("Microsoft:AspNetCore:Authentication:Schemes:" + AzureAdB2CDefaults.BearerAuthenticationScheme).Bind(options);
+            }
+        }
+
         private class BearerInitializeOptions : IInitializeOptions<JwtBearerOptions>
         {
             private readonly AzureAdB2COptions _b2cOptions;
             public BearerInitializeOptions(IOptionsSnapshot<AzureAdB2COptions> options)
             {
-                _b2cOptions = options.Get(AzureAdB2CDefaults.AuthenticationScheme);
+                _b2cOptions = options.Get(AzureAdB2CDefaults.SignInSignUpAuthenticationScheme);
             }
 
             // Binds Audience/Authority to the AzureB2C ClientId + Authority

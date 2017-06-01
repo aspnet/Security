@@ -9,5 +9,6 @@ namespace Microsoft.AspNetCore.Authentication.AzureAd
     public static class AzureAdDefaults
     {
         public const string AuthenticationScheme = "AzureAd";
+        public const string BearerAuthenticationScheme = "AzureAdBearer";
     }
 }

@@ -3,6 +3,7 @@
 
 using System;
 using Microsoft.AspNetCore.Authentication.AzureAd;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Options;
 using Microsoft.Extensions.Options.Infrastructure;
@@ -19,6 +20,15 @@ namespace Microsoft.Extensions.DependencyInjection
             services.AddSingleton<ConfigureDefaultOptions<AzureAdOptions>, AzureAdConfigureOptions>();
             services.AddSingleton<IInitializeOptions<AzureAdOptions>, AzureAdInitializeOptions>();
             return services.AddOpenIdConnectAuthentication(AzureAdDefaults.AuthenticationScheme, configureOptions);
+        }
+
+        public static IServiceCollection AddAzureAdBearerAuthentication(this IServiceCollection services)
+        {
+            services.AddAzureAdAuthentication();
+            services.AddSingleton<IInitializeOptions<JwtBearerOptions>, BearerInitializeOptions>();
+            services.AddSingleton<ConfigureDefaultOptions<JwtBearerOptions>, BearerConfigureOptions>();
+            services.AddJwtBearerAuthentication(AzureAdDefaults.BearerAuthenticationScheme, _ => { });
+            return services;
         }
 
         private class AzureAdConfigureOptions : ConfigureDefaultOptions<AzureAdOptions>
@@ -39,16 +49,54 @@ namespace Microsoft.Extensions.DependencyInjection
                 {
                     if (string.IsNullOrEmpty(options.Instance))
                     {
-                        throw new InvalidOperationException("AzureAdB2COptions requires Instance to be set.");
+                        throw new InvalidOperationException("AzureAdOptions requires Instance to be set.");
                     }
                     if (string.IsNullOrEmpty(options.TenantId))
                     {
-                        throw new InvalidOperationException("AzureAdB2COptions requires TenantId to be set.");
+                        throw new InvalidOperationException("AzureAdOptions requires TenantId to be set.");
                     }
                     options.Authority = $"{options.Instance}{options.TenantId}";
                 }
             }
         }
+
+        private class BearerConfigureOptions : ConfigureDefaultOptions<JwtBearerOptions>
+        {
+            private readonly IConfiguration _config;
+
+            public BearerConfigureOptions(IConfiguration config) => _config = config;
+
+            public override void Configure(string name, JwtBearerOptions options)
+            {
+                _config.GetSection("Microsoft:AspNetCore:Authentication:Schemes:" + AzureAdDefaults.BearerAuthenticationScheme).Bind(options);
+            }
+        }
+
+        private class BearerInitializeOptions : IInitializeOptions<JwtBearerOptions>
+        {
+            private readonly AzureAdOptions _adOptions;
+            public BearerInitializeOptions(IOptionsSnapshot<AzureAdOptions> options)
+            {
+                _adOptions = options.Get(AzureAdDefaults.AuthenticationScheme);
+            }
+
+            // Binds Audience/Authority to the Azure ClientId + Authority
+            public void Initialize(string name, JwtBearerOptions options)
+            {
+                if (name == AzureAdDefaults.BearerAuthenticationScheme)
+                {
+                    if (string.IsNullOrEmpty(options.Audience))
+                    {
+                        options.Audience = _adOptions.ClientId;
+                    }
+                    if (string.IsNullOrEmpty(options.Authority))
+                    {
+                        options.Authority = _adOptions.Authority;
+                    }
+                }
+            }
+        }
+
 
     }
 }
