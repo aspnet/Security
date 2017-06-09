@@ -6,7 +6,7 @@ using Microsoft.IdentityModel.Protocols.OpenIdConnect;
 
 namespace Microsoft.AspNetCore.Authentication.OpenIdConnect
 {
-    public class RemoteSignOutContext : BaseOpenIdConnectContext
+    public class RemoteSignOutContext : BaseRemoteAuthenticationContext<OpenIdConnectOptions>
     {
         public RemoteSignOutContext(
             HttpContext context,
@@ -17,5 +17,7 @@ namespace Microsoft.AspNetCore.Authentication.OpenIdConnect
         {
             ProtocolMessage = message;
         }
+
+        public OpenIdConnectMessage ProtocolMessage { get; set; }
     }
 }

@@ -13,17 +13,20 @@ namespace Microsoft.AspNetCore.Authentication.OpenIdConnect
     /// <summary>
     /// This Context can be used to be informed when an 'AuthorizationCode' is received over the OpenIdConnect protocol.
     /// </summary>
-    public class AuthorizationCodeReceivedContext : BaseOpenIdConnectContext
+    public class AuthorizationCodeReceivedContext : BaseRemoteAuthenticationContext<OpenIdConnectOptions>
     {
         /// <summary>
         /// Creates a <see cref="AuthorizationCodeReceivedContext"/>
         /// </summary>
-        public AuthorizationCodeReceivedContext(HttpContext context, AuthenticationScheme scheme, OpenIdConnectOptions options)
+        public AuthorizationCodeReceivedContext(
+            HttpContext context,
+            AuthenticationScheme scheme,
+            OpenIdConnectOptions options)
             : base(context, scheme, options)
         {
         }
 
-        public AuthenticationProperties Properties { get; set; }
+        public OpenIdConnectMessage AuthorizationResponse { get; set; }
 
         /// <summary>
         /// Gets or sets the <see cref="JwtSecurityToken"/> that was received in the authentication response, if any.
