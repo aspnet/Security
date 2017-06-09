@@ -36,7 +36,7 @@ namespace Microsoft.AspNetCore.Authentication
         /// <summary>
         /// Gets or sets the <see cref="AuthenticationProperties"/>.
         /// </summary>
-        public AuthenticationProperties Properties
+        public override AuthenticationProperties Properties
         {
             get => _properties ?? Ticket?.Properties;
             set => _properties = value;

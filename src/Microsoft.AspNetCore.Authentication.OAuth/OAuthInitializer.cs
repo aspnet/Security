@@ -23,7 +23,7 @@ namespace Microsoft.Extensions.DependencyInjection
             _dp = dataProtection;
         }
 
-        public void Initialize(string name, TOptions options)
+        public void PostConfigure(string name, TOptions options)
         {
             options.DataProtectionProvider = options.DataProtectionProvider ?? _dp;
             if (options.Backchannel == null)

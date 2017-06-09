@@ -18,7 +18,7 @@ using Newtonsoft.Json.Linq;
 
 namespace Microsoft.AspNetCore.Authentication.OAuth
 {
-    public class OAuthHandler<TOptions> : RemoteAuthenticationHandler<TOptions> where TOptions : OAuthOptions, new()
+    public class OAuthHandler<TOptions> : RemoteAuthenticationHandler<TOptions>, IOAuthHandler where TOptions : OAuthOptions, new()
     {
         protected HttpClient Backchannel => Options.Backchannel;
 
@@ -31,6 +31,8 @@ namespace Microsoft.AspNetCore.Authentication.OAuth
             get { return (OAuthEvents)base.Events; }
             set { base.Events = value; }
         }
+
+        OAuthOptions IOAuthHandler.Options => Options;
 
         public OAuthHandler(IOptionsSnapshot<TOptions> options, ILoggerFactory logger, UrlEncoder encoder, ISystemClock clock)
             : base(options, logger, encoder, clock)
@@ -186,7 +188,7 @@ namespace Microsoft.AspNetCore.Authentication.OAuth
         protected virtual async Task<AuthenticationTicket> CreateTicketAsync(ClaimsIdentity identity, AuthenticationProperties properties, OAuthTokenResponse tokens)
         {
             var ticket = new AuthenticationTicket(new ClaimsPrincipal(identity), properties, Scheme.Name);
-            var context = new OAuthCreatingTicketContext(ticket, Context, Scheme, Options, Backchannel, tokens);
+            var context = new OAuthCreatingTicketContext(this, ticket, Context, Scheme, Backchannel, tokens);
             await Events.CreatingTicket(context);
             return context.Ticket;
         }
@@ -202,9 +204,7 @@ namespace Microsoft.AspNetCore.Authentication.OAuth
             GenerateCorrelationId(properties);
 
             var authorizationEndpoint = BuildChallengeUrl(properties, BuildRedirectUri(Options.CallbackPath));
-            var redirectContext = new OAuthRedirectToAuthorizationContext(
-                Context, Scheme, Options,
-                properties, authorizationEndpoint);
+            var redirectContext = new OAuthRedirectToAuthorizationContext(this, Context, properties, authorizationEndpoint);
             await Events.RedirectToAuthorizationEndpoint(redirectContext);
         }
 

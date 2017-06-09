@@ -50,5 +50,11 @@ namespace Microsoft.AspNetCore.Authentication
         /// The response.
         /// </summary>
         public HttpResponse Response => HttpContext.Response;
+
+        /// <summary>
+        /// The properties
+        /// </summary>
+        public virtual AuthenticationProperties Properties { get; set; }
+
     }
 }

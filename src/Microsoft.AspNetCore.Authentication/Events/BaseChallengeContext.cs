@@ -10,7 +10,7 @@
 //    /// <summary>
 //    /// Base context for authentication.
 //    /// </summary>
-//    public abstract class BaseChallengeContext<TOptions> : HandlerContext<TOptions> where TOptions : AuthenticationSchemeOptions
+//    public abstract class BaseChallengeContext<THandler> : HandlerContext<THandler> where THandler : IAuthenticationHandler
 //    {
 //        /// <summary>
 //        /// Constructor.
@@ -19,20 +19,12 @@
 //        /// <param name="scheme">The authentication scheme.</param>
 //        /// <param name="options">The authentication options associated with the scheme.</param>
 //        /// <param name="properties">The authentication properties.</param>
-//        protected BaseChallengeContext(
-//            HttpContext context,
-//            AuthenticationScheme scheme,
-//            TOptions options,
-//            AuthenticationProperties properties)
+//        protected BaseChallengeContext(THandler handler, HttpContext context, AuthenticationProperties properties)
 //            : base(context, scheme, options)
 //        {
 //            Properties = properties;
 //        }
 
 //        public AuthenticationProperties Properties { get; set; }
-
-//        public bool Skipped { get; private set; }
-
-//        public void SkipChallenge() => Skipped = true;
 //    }
 //}

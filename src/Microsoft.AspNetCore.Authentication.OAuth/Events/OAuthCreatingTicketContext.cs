@@ -13,47 +13,47 @@ namespace Microsoft.AspNetCore.Authentication.OAuth
     /// <summary>
     /// Contains information about the login session as well as the user <see cref="System.Security.Claims.ClaimsIdentity"/>.
     /// </summary>
-    public class OAuthCreatingTicketContext : ResultContext<OAuthOptions>
+    public class OAuthCreatingTicketContext : ResultContext<IOAuthHandler>
     {
         /// <summary>
         /// Initializes a new <see cref="OAuthCreatingTicketContext"/>.
         /// </summary>
+        /// <param name="handler">The authentication handler.</param>
         /// <param name="ticket">The <see cref="AuthenticationTicket"/>.</param>
         /// <param name="context">The HTTP environment.</param>
         /// <param name="scheme">The authentication scheme.</param>
-        /// <param name="options">The options used by the authentication middleware.</param>
         /// <param name="backchannel">The HTTP client used by the authentication middleware</param>
         /// <param name="tokens">The tokens returned from the token endpoint.</param>
         public OAuthCreatingTicketContext(
+            IOAuthHandler handler,
             AuthenticationTicket ticket,
             HttpContext context,
             AuthenticationScheme scheme,
-            OAuthOptions options,
             HttpClient backchannel,
             OAuthTokenResponse tokens)
-            : this(ticket, context, scheme, options, backchannel, tokens, user: new JObject())
+            : this(handler, ticket, context, scheme, backchannel, tokens, user: new JObject())
         {
         }
 
         /// <summary>
         /// Initializes a new <see cref="OAuthCreatingTicketContext"/>.
         /// </summary>
+        /// <param name="handler">The authentication handler.</param>
         /// <param name="ticket">The <see cref="AuthenticationTicket"/>.</param>
         /// <param name="context">The HTTP environment.</param>
         /// <param name="scheme">The authentication scheme.</param>
-        /// <param name="options">The options used by the authentication middleware.</param>
         /// <param name="backchannel">The HTTP client used by the authentication middleware</param>
         /// <param name="tokens">The tokens returned from the token endpoint.</param>
         /// <param name="user">The JSON-serialized user.</param>
         public OAuthCreatingTicketContext(
+            IOAuthHandler handler,
             AuthenticationTicket ticket,
             HttpContext context,
             AuthenticationScheme scheme,
-            OAuthOptions options,
             HttpClient backchannel,
             OAuthTokenResponse tokens,
             JObject user)
-            : base(context, scheme, options)
+            : base(handler, context)
         {
             if (backchannel == null)
             {
@@ -74,6 +74,7 @@ namespace Microsoft.AspNetCore.Authentication.OAuth
             Backchannel = backchannel;
             User = user;
             Ticket = ticket;
+            Scheme = scheme;
         }
 
         /// <summary>
@@ -86,6 +87,16 @@ namespace Microsoft.AspNetCore.Authentication.OAuth
         /// Gets the token response returned by the authentication service.
         /// </summary>
         public OAuthTokenResponse TokenResponse { get; }
+
+        /// <summary>
+        /// The options.
+        /// </summary>
+        public OAuthOptions Options { get; }
+
+        /// <summary>
+        /// The scheme.
+        /// </summary>
+        public AuthenticationScheme Scheme { get; }
 
         /// <summary>
         /// Gets the access token provided by the authentication service.
