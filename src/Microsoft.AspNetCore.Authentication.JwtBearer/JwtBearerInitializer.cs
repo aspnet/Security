@@ -12,7 +12,7 @@ namespace Microsoft.AspNetCore.Authentication.JwtBearer
     /// <summary>
     /// Used to setup defaults for all <see cref="JwtBearerOptions"/>.
     /// </summary>
-    public class JwtBearerInitializer : IInitializeOptions<JwtBearerOptions>
+    public class JwtBearerInitializer : IPostConfigureOptions<JwtBearerOptions>
     {
         /// <summary>
         /// Invoked to initialize a JwtBearerOptions instance.

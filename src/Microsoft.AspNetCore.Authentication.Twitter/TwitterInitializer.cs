@@ -10,7 +10,7 @@ namespace Microsoft.AspNetCore.Authentication.Twitter
     /// <summary>
     /// Used to setup defaults for all <see cref="TwitterOptions"/>.
     /// </summary>
-    public class TwitterInitializer : IInitializeOptions<TwitterOptions>
+    public class TwitterInitializer : IPostConfigureOptions<TwitterOptions>
     {
         private readonly IDataProtectionProvider _dp;
 

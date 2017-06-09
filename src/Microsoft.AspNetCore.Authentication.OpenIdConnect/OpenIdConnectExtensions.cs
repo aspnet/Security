@@ -19,7 +19,7 @@ namespace Microsoft.Extensions.DependencyInjection
 
         public static IServiceCollection AddOpenIdConnectAuthentication(this IServiceCollection services, string authenticationScheme, Action<OpenIdConnectOptions> configureOptions)
         {
-            services.TryAddEnumerable(ServiceDescriptor.Singleton<IInitializeOptions<OpenIdConnectOptions>, OpenIdConnectInitializer>());
+            services.TryAddEnumerable(ServiceDescriptor.Singleton<IPostConfigureOptions<OpenIdConnectOptions>, OpenIdConnectInitializer>());
             services.AddSingleton<ConfigureDefaultOptions<OpenIdConnectOptions>, OpenIdConnectConfigureOptions>();
             return services.AddRemoteScheme<OpenIdConnectOptions, OpenIdConnectHandler>(authenticationScheme, authenticationScheme, configureOptions);
         }

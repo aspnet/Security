@@ -46,7 +46,7 @@ namespace Microsoft.AspNetCore.Authentication.Twitter
 
         protected override Task<object> CreateEventsAsync() => Task.FromResult<object>(new TwitterEvents());
 
-        protected override async Task<RemoteAuthenticationResult> HandleRemoteAuthenticateAsync()
+        protected override async Task<RemoteAuthenticateResult> HandleRemoteAuthenticateAsync()
         {
             AuthenticationProperties properties = null;
             var query = Request.Query;
@@ -56,7 +56,7 @@ namespace Microsoft.AspNetCore.Authentication.Twitter
 
             if (requestToken == null)
             {
-                return RemoteAuthenticationResult.Fail("Invalid state cookie.");
+                return RemoteAuthenticateResult.Fail("Invalid state cookie.");
             }
 
             properties = requestToken.Properties;
@@ -66,18 +66,18 @@ namespace Microsoft.AspNetCore.Authentication.Twitter
             var returnedToken = query["oauth_token"];
             if (StringValues.IsNullOrEmpty(returnedToken))
             {
-                return RemoteAuthenticationResult.Fail("Missing oauth_token");
+                return RemoteAuthenticateResult.Fail("Missing oauth_token");
             }
 
             if (!string.Equals(returnedToken, requestToken.Token, StringComparison.Ordinal))
             {
-                return RemoteAuthenticationResult.Fail("Unmatched token");
+                return RemoteAuthenticateResult.Fail("Unmatched token");
             }
 
             var oauthVerifier = query["oauth_verifier"];
             if (StringValues.IsNullOrEmpty(oauthVerifier))
             {
-                return RemoteAuthenticationResult.Fail("Missing or blank oauth_verifier");
+                return RemoteAuthenticateResult.Fail("Missing or blank oauth_verifier");
             }
 
             var cookieOptions = new CookieOptions
@@ -114,7 +114,7 @@ namespace Microsoft.AspNetCore.Authentication.Twitter
                 });
             }
 
-            return RemoteAuthenticationResult.Success(await CreateTicketAsync(identity, properties, accessToken, user));
+            return RemoteAuthenticateResult.Success(await CreateTicketAsync(identity, properties, accessToken, user));
         }
 
         protected virtual async Task<AuthenticationTicket> CreateTicketAsync(

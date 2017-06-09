@@ -9,27 +9,18 @@ namespace Microsoft.AspNetCore.Authentication.Cookies
     /// <summary>
     /// Context object passed to the ICookieAuthenticationEvents method SigningIn.
     /// </summary>    
-    public class CookieSigningInContext : BaseAuthenticationContext<CookieAuthenticationOptions>
+    public class CookieSigningInContext : CookieResultContext
     {
         /// <summary>
         /// Creates a new instance of the context object.
         /// </summary>
+        /// <param name="handler">The handler</param>
         /// <param name="context">The HTTP request context</param>
-        /// <param name="scheme">The scheme data</param>
-        /// <param name="options">The handler options</param>
         /// <param name="ticket">Initializes Ticket property</param>
         /// <param name="cookieOptions">Initializes options for the authentication cookie.</param>
-        public CookieSigningInContext(
-            HttpContext context,
-            AuthenticationScheme scheme,
-            CookieAuthenticationOptions options,
-            CookieOptions cookieOptions,
-            AuthenticationTicket ticket)
-            : base(context, scheme, options)
-        {
-            CookieOptions = cookieOptions;
-            Ticket = ticket;
-        }
+        public CookieSigningInContext(CookieAuthenticationHandler handler, HttpContext context, CookieOptions cookieOptions, AuthenticationTicket ticket)
+            : base(handler, context, ticket)
+            => CookieOptions = cookieOptions;
 
         /// <summary>
         /// The options for creating the outgoing cookie.

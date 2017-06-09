@@ -44,10 +44,10 @@ namespace Microsoft.AspNetCore.Authentication.JwtBearer
         /// Searches the 'Authorization' header for a 'Bearer' token. If the 'Bearer' token is found, it is validated using <see cref="TokenValidationParameters"/> set in the options.
         /// </summary>
         /// <returns></returns>
-        protected override async Task<AuthenticationResult> HandleAuthenticateAsync()
+        protected override async Task<AuthenticateResult> HandleAuthenticateAsync()
         {
             string token = null;
-            AuthenticationResult result = null;
+            AuthenticateResult result = null;
             try
             {
                 // Give application opportunity to find from a different location, adjust, or reject token
@@ -70,7 +70,7 @@ namespace Microsoft.AspNetCore.Authentication.JwtBearer
                     // If no authorization header found, nothing to process further
                     if (string.IsNullOrEmpty(authorization))
                     {
-                        return AuthenticationResult.None();
+                        return AuthenticateResult.None();
                     }
 
                     if (authorization.StartsWith("Bearer ", StringComparison.OrdinalIgnoreCase))
@@ -81,7 +81,7 @@ namespace Microsoft.AspNetCore.Authentication.JwtBearer
                     // If no token found, no further work possible
                     if (string.IsNullOrEmpty(token))
                     {
-                        return AuthenticationResult.None();
+                        return AuthenticateResult.None();
                     }
                 }
 
@@ -160,7 +160,7 @@ namespace Microsoft.AspNetCore.Authentication.JwtBearer
                             });
                         }
 
-                        return AuthenticationResult.Success(ticket);
+                        return AuthenticateResult.Success(ticket);
                     }
                 }
 
@@ -177,10 +177,10 @@ namespace Microsoft.AspNetCore.Authentication.JwtBearer
                         return result;
                     }
 
-                    return AuthenticationResult.Fail(authenticationFailedContext.Exception);
+                    return AuthenticateResult.Fail(authenticationFailedContext.Exception);
                 }
 
-                return AuthenticationResult.Fail("No SecurityTokenValidator available for token: " + token ?? "[null]");
+                return AuthenticateResult.Fail("No SecurityTokenValidator available for token: " + token ?? "[null]");
             }
             catch (Exception ex)
             {

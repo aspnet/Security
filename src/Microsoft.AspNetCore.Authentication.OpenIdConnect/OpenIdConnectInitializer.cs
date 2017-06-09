@@ -14,7 +14,7 @@ namespace Microsoft.AspNetCore.Authentication.OpenIdConnect
     /// <summary>
     /// Used to setup defaults for all <see cref="OpenIdConnectOptions"/>.
     /// </summary>
-    public class OpenIdConnectInitializer : IInitializeOptions<OpenIdConnectOptions>
+    public class OpenIdConnectInitializer : IPostConfigureOptions<OpenIdConnectOptions>
     {
         private readonly IDataProtectionProvider _dp;
 

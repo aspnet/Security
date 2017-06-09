@@ -26,11 +26,11 @@ namespace Microsoft.AspNetCore.Authorization.Policy
         /// Attempts authorization for a policy using <see cref="IAuthorizationService"/>.
         /// </summary>
         /// <param name="policy">The <see cref="AuthorizationPolicy"/>.</param>
-        /// <param name="authenticationResult">The result of a call to <see cref="AuthenticateAsync(AuthorizationPolicy, HttpContext)"/>.</param>
+        /// <param name="AuthenticateResult">The result of a call to <see cref="AuthenticateAsync(AuthorizationPolicy, HttpContext)"/>.</param>
         /// <param name="context">The <see cref="HttpContext"/>.</param>
         /// <returns>Returns <see cref="PolicyAuthorizationResult.Success"/> if authorization succeeds.
         /// Otherwise returns <see cref="PolicyAuthorizationResult.Forbid"/> if <see cref="AuthenticateResult.Succeeded"/>, otherwise
         /// returns  <see cref="PolicyAuthorizationResult.Challenge"/></returns>
-        Task<PolicyAuthorizationResult> AuthorizeAsync(AuthorizationPolicy policy, AuthenticateResult authenticationResult, HttpContext context);
+        Task<PolicyAuthorizationResult> AuthorizeAsync(AuthorizationPolicy policy, AuthenticateResult AuthenticateResult, HttpContext context);
     }
 }

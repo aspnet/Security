@@ -15,43 +15,37 @@ namespace Microsoft.AspNetCore.Authentication
 {
     public abstract class AuthenticationHandler<TOptions> : IAuthenticationHandler where TOptions : AuthenticationSchemeOptions, new()
     {
-        private Task<AuthenticationResult> _authenticateTask;
+        private Task<AuthenticateResult> _authenticateTask;
 
         public AuthenticationScheme Scheme { get; private set; }
         public TOptions Options { get; private set; }
-        protected HttpContext Context { get; private set; }
+        public HttpContext Context { get; private set; }
 
-        protected HttpRequest Request
-        {
-            get { return Context.Request; }
-        }
+        public HttpRequest Request => Context.Request;
 
-        protected HttpResponse Response
-        {
-            get { return Context.Response; }
-        }
+        public HttpResponse Response => Context.Response;
 
-        protected PathString OriginalPath => Context.Features.Get<IAuthenticationFeature>()?.OriginalPath ?? Request.Path;
+        public PathString OriginalPath => Context.Features.Get<IAuthenticationFeature>()?.OriginalPath ?? Request.Path;
 
-        protected PathString OriginalPathBase => Context.Features.Get<IAuthenticationFeature>()?.OriginalPathBase ?? Request.PathBase;
+        public PathString OriginalPathBase => Context.Features.Get<IAuthenticationFeature>()?.OriginalPathBase ?? Request.PathBase;
 
-        protected ILogger Logger { get; }
+        public ILogger Logger { get; }
 
-        protected UrlEncoder UrlEncoder { get; }
+        public UrlEncoder UrlEncoder { get; }
 
-        protected ISystemClock Clock { get; }
+        public ISystemClock Clock { get; }
 
-        protected IOptionsSnapshot<TOptions> OptionsSnapshot { get; }
+        public IOptionsSnapshot<TOptions> OptionsSnapshot { get; }
 
         /// <summary>
         /// The handler calls methods on the events which give the application control at certain points where processing is occurring. 
         /// If it is not provided a default instance is supplied which does nothing when the methods are called.
         /// </summary>
-        protected virtual object Events { get; set; }
+        public virtual object Events { get; set; }
 
-        protected virtual string ClaimsIssuer => Options.ClaimsIssuer ?? Scheme.Name;
+        public virtual string ClaimsIssuer => Options.ClaimsIssuer ?? Scheme.Name;
 
-        protected string CurrentUri
+        public string CurrentUri
         {
             get
             {
@@ -73,7 +67,7 @@ namespace Microsoft.AspNetCore.Authentication
         /// <param name="scheme"></param>
         /// <param name="context"></param>
         /// <returns></returns>
-        public async Task InitializeAsync(AuthenticationScheme scheme, HttpContext context)
+        async Task IAuthenticationHandler.InitializeAsync(AuthenticationScheme scheme, HttpContext context)
         {
             if (scheme == null)
             {
@@ -95,7 +89,7 @@ namespace Microsoft.AspNetCore.Authentication
         }
 
         /// <summary>
-        /// Initializes the events object, called once per request by <see cref="InitializeAsync(AuthenticationScheme, HttpContext)"/>.
+        /// Initializes the events object, called once per request by <see cref="IAuthenticationHandler.InitializeAsync(AuthenticationScheme, HttpContext)"/>.
         /// </summary>
         protected virtual async Task InitializeEventsAsync()
         {
@@ -127,7 +121,7 @@ namespace Microsoft.AspNetCore.Authentication
             return Request.Scheme + "://" + Request.Host + OriginalPathBase + targetPath;
         }
 
-        public async Task<AuthenticationResult> AuthenticateAsync()
+        async Task<AuthenticateResult> IAuthenticationHandler.AuthenticateAsync()
         {
             // Calling Authenticate more than once should always return the original value.
             var result = await HandleAuthenticateOnceAsync();
@@ -150,7 +144,7 @@ namespace Microsoft.AspNetCore.Authentication
         /// Used to ensure HandleAuthenticateAsync is only invoked once. The subsequent calls
         /// will return the same authenticate result.
         /// </summary>
-        protected Task<AuthenticationResult> HandleAuthenticateOnceAsync()
+        protected Task<AuthenticateResult> HandleAuthenticateOnceAsync()
         {
             if (_authenticateTask == null)
             {
@@ -165,7 +159,7 @@ namespace Microsoft.AspNetCore.Authentication
         /// calls will return the same authentication result. Any exceptions will be converted
         /// into a failed authentication result containing the exception.
         /// </summary>
-        protected async Task<AuthenticationResult> HandleAuthenticateOnceSafeAsync()
+        protected async Task<AuthenticateResult> HandleAuthenticateOnceSafeAsync()
         {
             try
             {
@@ -173,13 +167,13 @@ namespace Microsoft.AspNetCore.Authentication
             }
             catch (Exception ex)
             {
-                return AuthenticationResult.Fail(ex);
+                return AuthenticateResult.Fail(ex);
             }
         }
 
-        protected abstract Task<AuthenticationResult> HandleAuthenticateAsync();
+        protected abstract Task<AuthenticateResult> HandleAuthenticateAsync();
 
-        public async Task SignInAsync(ClaimsPrincipal user, AuthenticationProperties properties)
+        async Task IAuthenticationHandler.SignInAsync(ClaimsPrincipal user, AuthenticationProperties properties)
         {
             if (user == null)
             {
@@ -196,7 +190,7 @@ namespace Microsoft.AspNetCore.Authentication
             return TaskCache.CompletedTask;
         }
 
-        public async Task SignOutAsync(AuthenticationProperties properties)
+        async Task IAuthenticationHandler.SignOutAsync(AuthenticationProperties properties)
         {
             properties = properties ?? new AuthenticationProperties();
             await HandleSignOutAsync(properties);
@@ -232,14 +226,14 @@ namespace Microsoft.AspNetCore.Authentication
             return TaskCache.CompletedTask;
         }
 
-        public async Task ChallengeAsync(AuthenticationProperties properties)
+        async Task IAuthenticationHandler.ChallengeAsync(AuthenticationProperties properties)
         {
             properties = properties ?? new AuthenticationProperties();
             await HandleChallengeAsync(properties);
             Logger.AuthenticationSchemeChallenged(Scheme.Name);
         }
 
-        public async Task ForbidAsync(AuthenticationProperties properties)
+        async Task IAuthenticationHandler.ForbidAsync(AuthenticationProperties properties)
         {
             properties = properties ?? new AuthenticationProperties();
             await HandleForbiddenAsync(properties);

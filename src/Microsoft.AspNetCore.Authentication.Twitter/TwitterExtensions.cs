@@ -19,7 +19,7 @@ namespace Microsoft.Extensions.DependencyInjection
 
         public static IServiceCollection AddTwitterAuthentication(this IServiceCollection services, string authenticationScheme, Action<TwitterOptions> configureOptions)
         {
-            services.TryAddEnumerable(ServiceDescriptor.Singleton<IInitializeOptions<TwitterOptions>, TwitterInitializer>());
+            services.TryAddEnumerable(ServiceDescriptor.Singleton<IPostConfigureOptions<TwitterOptions>, TwitterInitializer>());
             services.AddSingleton<ConfigureDefaultOptions<TwitterOptions>, TwitterConfigureOptions>();
             return services.AddRemoteScheme<TwitterOptions, TwitterHandler>(authenticationScheme, authenticationScheme, configureOptions);
         }

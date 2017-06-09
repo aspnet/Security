@@ -12,7 +12,7 @@ namespace Microsoft.Extensions.DependencyInjection
     /// <summary>
     /// Used to setup defaults for the OAuthOptions.
     /// </summary>
-    public class OAuthInitializer<TOptions, THandler> : IInitializeOptions<TOptions>
+    public class OAuthInitializer<TOptions, THandler> : IPostConfigureOptions<TOptions>
         where TOptions : OAuthOptions, new()
         where THandler : OAuthHandler<TOptions>
     {

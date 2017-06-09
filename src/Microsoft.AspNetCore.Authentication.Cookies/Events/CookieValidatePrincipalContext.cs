@@ -10,24 +10,17 @@ namespace Microsoft.AspNetCore.Authentication.Cookies
     /// <summary>
     /// Context object passed to the CookieAuthenticationEvents ValidatePrincipal method.
     /// </summary>
-    public class CookieValidatePrincipalContext : BaseAuthenticationContext<CookieAuthenticationOptions>
+    public class CookieValidatePrincipalContext : CookieResultContext
     {
         /// <summary>
         /// Creates a new instance of the context object.
         /// </summary>
+        /// <param name="handler"></param>
         /// <param name="context"></param>
-        /// <param name="scheme"></param>
         /// <param name="ticket">Contains the initial values for identity and extra data</param>
-        /// <param name="options"></param>
-        public CookieValidatePrincipalContext(
-            HttpContext context,
-            AuthenticationScheme scheme,
-            CookieAuthenticationOptions options,
-            AuthenticationTicket ticket)
-            : base(context, scheme, options)
-        {
-            Ticket = ticket;
-        }
+        public CookieValidatePrincipalContext(CookieAuthenticationHandler handler, HttpContext context, AuthenticationTicket ticket)
+            : base(handler, context, ticket)
+        { }
 
         /// <summary>
         /// If true, the cookie will be renewed

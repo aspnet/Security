@@ -5,15 +5,10 @@ using Microsoft.AspNetCore.Http;
 
 namespace Microsoft.AspNetCore.Authentication
 {
-    public class BaseControlContext<TOptions> : BaseContext<TOptions> where TOptions : AuthenticationSchemeOptions
+    public class HandleRequestContext<THandler> : HandlerContext<THandler> where THandler : IAuthenticationHandler
     {
-        protected BaseControlContext(
-            HttpContext context,
-            AuthenticationScheme scheme,
-            TOptions options)
-            : base(context, scheme, options)
-        {
-        }
+        protected HandleRequestContext(THandler handler, HttpContext context) : base(handler, context)
+        { }
 
         public EventResultState State { get; set; }
 

@@ -6,7 +6,7 @@ using Microsoft.Extensions.Options;
 
 namespace Microsoft.AspNetCore.Authentication
 {
-    public class InitializeAuthenticationSchemeOptions<TOptions> : InitializeOptions<TOptions>
+    public class InitializeAuthenticationSchemeOptions<TOptions> : PostConfigureOptions<TOptions>
         where TOptions : AuthenticationSchemeOptions
     {
         public InitializeAuthenticationSchemeOptions(string name) 

@@ -1,23 +1,17 @@
 // Copyright (c) .NET Foundation. All rights reserved.
 // Licensed under the Apache License, Version 2.0. See License.txt in the project root for license information.
 
-using System.Security.Claims;
 using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Http.Authentication;
 
 namespace Microsoft.AspNetCore.Authentication
 {
     /// <summary>
     /// Provides context information to handler providers.
     /// </summary>
-    public class TicketReceivedContext : BaseRemoteAuthenticationContext<RemoteAuthenticationOptions>
+    public class TicketReceivedContext : RemoteResultContext<IAuthenticationHandler>
     {
-        public TicketReceivedContext(
-            HttpContext context,
-            AuthenticationScheme scheme,
-            RemoteAuthenticationOptions options,
-            AuthenticationTicket ticket)
-            : base(context, scheme, options)
+        public TicketReceivedContext(IAuthenticationHandler handler, HttpContext context, AuthenticationTicket ticket)
+            : base(handler, context)
         {
             Ticket = ticket;
         }

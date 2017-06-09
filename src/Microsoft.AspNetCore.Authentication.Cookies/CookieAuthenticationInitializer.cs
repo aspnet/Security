@@ -10,7 +10,7 @@ namespace Microsoft.AspNetCore.Authentication.Cookies
     /// <summary>
     /// Used to setup defaults for all <see cref="CookieAuthenticationOptions"/>.
     /// </summary>
-    public class CookieAuthenticationInitializer : IInitializeOptions<CookieAuthenticationOptions>
+    public class CookieAuthenticationInitializer : IPostConfigureOptions<CookieAuthenticationOptions>
     {
         private readonly IDataProtectionProvider _dp;
 
@@ -24,7 +24,7 @@ namespace Microsoft.AspNetCore.Authentication.Cookies
         /// </summary>
         /// <param name="name">The name of the options instance being initialized.</param>
         /// <param name="options">The options instance to initialize.</param>
-        public void Initialize(string name, CookieAuthenticationOptions options)
+        public void PostConfigure(string name, CookieAuthenticationOptions options)
         {
             options.DataProtectionProvider = options.DataProtectionProvider ?? _dp;
 

@@ -22,13 +22,13 @@ namespace Microsoft.AspNetCore.Authentication
 
         private static readonly RandomNumberGenerator CryptoRandom = RandomNumberGenerator.Create();
 
-        protected string SignInScheme => Options.SignInScheme;
+        public string SignInScheme => Options.SignInScheme;
 
         /// <summary>
         /// The handler calls methods on the events which give the application control at certain points where processing is occurring.
         /// If it is not provided a default instance is supplied which does nothing when the methods are called.
         /// </summary>
-        protected new RemoteAuthenticationEvents Events
+        public new RemoteAuthenticationEvents Events
         {
             get { return (RemoteAuthenticationEvents)base.Events; }
             set { base.Events = value; }
@@ -44,12 +44,14 @@ namespace Microsoft.AspNetCore.Authentication
             return Task.FromResult<object>(new RemoteAuthenticationEvents());
         }
 
-        public virtual Task<bool> ShouldHandleRequestAsync()
+        protected virtual Task<bool> ShouldHandleRequestAsync()
         {
             return Task.FromResult(Options.CallbackPath == Request.Path);
         }
 
-        public virtual async Task<bool> HandleRequestAsync()
+        Task<bool> IAuthenticationRequestHandler.HandleRequestAsync() => HandleRequestAsync();
+
+        protected virtual async Task<bool> HandleRequestAsync()
         {
             if (!await ShouldHandleRequestAsync())
             {
@@ -65,7 +67,7 @@ namespace Microsoft.AspNetCore.Authentication
                 {
                     exception = new InvalidOperationException("Invalid return state, unable to redirect.");
                 }
-                else if (authResult.HandledResponse)
+                else if (authResult.Handled)
                 {
                     return true;
                 }
@@ -89,7 +91,7 @@ namespace Microsoft.AspNetCore.Authentication
             if (exception != null)
             {
                 Logger.RemoteAuthenticationError(exception.Message);
-                var errorContext = new FailureContext(Context, Scheme, Options, exception);
+                var errorContext = new FailureContext(this, Context, exception);
                 await Events.RemoteFailure(errorContext);
 
                 if (errorContext.HandledResponse)
@@ -105,7 +107,7 @@ namespace Microsoft.AspNetCore.Authentication
             }
 
             // We have a ticket if we get here
-            var ticketContext = new TicketReceivedContext(Context, Scheme, Options, ticket)
+            var ticketContext = new TicketReceivedContext(this, Context, ticket)
             {
                 ReturnUri = ticket.Properties.RedirectUri
             };
@@ -145,9 +147,9 @@ namespace Microsoft.AspNetCore.Authentication
         ///
         /// The method process the request on the endpoint defined by CallbackPath.
         /// </summary>
-        protected abstract Task<RemoteAuthenticationResult> HandleRemoteAuthenticateAsync();
+        protected abstract Task<RemoteAuthenticateResult> HandleRemoteAuthenticateAsync();
 
-        protected override async Task<AuthenticationResult> HandleAuthenticateAsync()
+        protected override async Task<AuthenticateResult> HandleAuthenticateAsync()
         {
             var result = await Context.AuthenticateAsync(SignInScheme);
             if (result != null)
@@ -164,14 +166,14 @@ namespace Microsoft.AspNetCore.Authentication
                     && ticket.Properties.Items.TryGetValue(AuthSchemeKey, out authenticatedScheme)
                     && string.Equals(Scheme.Name, authenticatedScheme, StringComparison.Ordinal))
                 {
-                    return AuthenticationResult.Success(new AuthenticationTicket(ticket.Principal,
+                    return AuthenticateResult.Success(new AuthenticationTicket(ticket.Principal,
                         ticket.Properties, Scheme.Name));
                 }
 
-                return AuthenticationResult.Fail("Not authenticated");
+                return AuthenticateResult.Fail("Not authenticated");
             }
 
-            return AuthenticationResult.Fail("Remote authentication does not directly support AuthenticateAsync");
+            return AuthenticateResult.Fail("Remote authentication does not directly support AuthenticateAsync");
         }
 
         protected override Task HandleSignOutAsync(AuthenticationProperties properties)

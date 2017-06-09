@@ -42,7 +42,7 @@ namespace Microsoft.AspNetCore.Authentication.OAuth
         /// <returns>A new instance of the events instance.</returns>
         protected override Task<object> CreateEventsAsync() => Task.FromResult<object>(new OAuthEvents());
 
-        protected override async Task<RemoteAuthenticationResult> HandleRemoteAuthenticateAsync()
+        protected override async Task<RemoteAuthenticateResult> HandleRemoteAuthenticateAsync()
         {
             AuthenticationProperties properties = null;
             var query = Request.Query;
@@ -63,7 +63,7 @@ namespace Microsoft.AspNetCore.Authentication.OAuth
                     failureMessage.Append(";Uri=").Append(errorUri);
                 }
 
-                return RemoteAuthenticationResult.Fail(failureMessage.ToString());
+                return RemoteAuthenticateResult.Fail(failureMessage.ToString());
             }
 
             var code = query["code"];
@@ -72,30 +72,30 @@ namespace Microsoft.AspNetCore.Authentication.OAuth
             properties = Options.StateDataFormat.Unprotect(state);
             if (properties == null)
             {
-                return RemoteAuthenticationResult.Fail("The oauth state was missing or invalid.");
+                return RemoteAuthenticateResult.Fail("The oauth state was missing or invalid.");
             }
 
             // OAuth2 10.12 CSRF
             if (!ValidateCorrelationId(properties))
             {
-                return RemoteAuthenticationResult.Fail("Correlation failed.");
+                return RemoteAuthenticateResult.Fail("Correlation failed.");
             }
 
             if (StringValues.IsNullOrEmpty(code))
             {
-                return RemoteAuthenticationResult.Fail("Code was not found.");
+                return RemoteAuthenticateResult.Fail("Code was not found.");
             }
 
             var tokens = await ExchangeCodeAsync(code, BuildRedirectUri(Options.CallbackPath));
 
             if (tokens.Error != null)
             {
-                return RemoteAuthenticationResult.Fail(tokens.Error);
+                return RemoteAuthenticateResult.Fail(tokens.Error);
             }
 
             if (string.IsNullOrEmpty(tokens.AccessToken))
             {
-                return RemoteAuthenticationResult.Fail("Failed to retrieve access token.");
+                return RemoteAuthenticateResult.Fail("Failed to retrieve access token.");
             }
 
             var identity = new ClaimsIdentity(ClaimsIssuer);
@@ -137,11 +137,11 @@ namespace Microsoft.AspNetCore.Authentication.OAuth
             var ticket = await CreateTicketAsync(identity, properties, tokens);
             if (ticket != null)
             {
-                return RemoteAuthenticationResult.Success(ticket);
+                return RemoteAuthenticateResult.Success(ticket);
             }
             else
             {
-                return RemoteAuthenticationResult.Fail("Failed to retrieve user information from remote server.");
+                return RemoteAuthenticateResult.Fail("Failed to retrieve user information from remote server.");
             }
         }
 
