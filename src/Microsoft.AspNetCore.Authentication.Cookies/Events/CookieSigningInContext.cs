@@ -9,7 +9,7 @@ namespace Microsoft.AspNetCore.Authentication.Cookies
     /// <summary>
     /// Context object passed to the ICookieAuthenticationEvents method SigningIn.
     /// </summary>    
-    public class CookieSigningInContext : BaseAuthenticationContext<CookieAuthenticationOptions>
+    public class CookieSigningInContext : AuthenticateResultContext<CookieAuthenticationOptions>
     {
         /// <summary>
         /// Creates a new instance of the context object.
