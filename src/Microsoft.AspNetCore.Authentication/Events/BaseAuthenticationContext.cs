@@ -73,23 +73,23 @@ namespace Microsoft.AspNetCore.Authentication
             Failure = new Exception(failureMessage);
         }
 
-        public bool IsProcessingComplete(out AuthenticationResult result)
+        public bool IsProcessingComplete(out AuthenticateResult result)
         {
             if (AuthenticationSkipped)
             {
                 if (Ticket == null)
                 {
-                    result = AuthenticationResult.None();
+                    result = AuthenticateResult.None();
                 }
                 else
                 {
-                    result = AuthenticationResult.Success(Ticket);
+                    result = AuthenticateResult.Success(Ticket);
                 }
                 return true;
             }
             else if (Failure != null)
             {
-                result = AuthenticationResult.Fail(Failure);
+                result = AuthenticateResult.Fail(Failure);
                 return true;
             }
             result = null;
