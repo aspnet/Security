@@ -10,7 +10,7 @@ using Microsoft.IdentityModel.Protocols.OpenIdConnect;
 
 namespace Microsoft.AspNetCore.Authentication.OpenIdConnect
 {
-    public class TokenValidatedContext : BaseRemoteAuthenticationContext<OpenIdConnectOptions>
+    public class TokenValidatedContext : RemoteAuthenticateResultContext<OpenIdConnectOptions>
     {
         /// <summary>
         /// Creates a <see cref="TokenValidatedContext"/>
