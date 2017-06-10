@@ -10,7 +10,7 @@ namespace Microsoft.AspNetCore.Authentication
     /// <summary>
     /// Base context for authentication.
     /// </summary>
-    public abstract class RemoteAuthenticateResultContext<TOptions> : BaseControlContext<TOptions> where TOptions : AuthenticationSchemeOptions
+    public abstract class RemoteAuthenticateResultContext<TOptions> : HandleRequestContext<TOptions> where TOptions : AuthenticationSchemeOptions
     {
         private AuthenticationProperties _properties;
 
