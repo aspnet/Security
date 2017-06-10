@@ -5,9 +5,9 @@ using Microsoft.AspNetCore.Http;
 
 namespace Microsoft.AspNetCore.Authentication
 {
-    public class BaseControlContext<TOptions> : BaseContext<TOptions> where TOptions : AuthenticationSchemeOptions
+    public class HandleRequestContext<TOptions> : BaseContext<TOptions> where TOptions : AuthenticationSchemeOptions
     {
-        protected BaseControlContext(
+        protected HandleRequestContext(
             HttpContext context,
             AuthenticationScheme scheme,
             TOptions options)
