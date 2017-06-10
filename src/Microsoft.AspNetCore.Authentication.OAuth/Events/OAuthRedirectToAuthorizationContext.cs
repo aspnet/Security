@@ -36,8 +36,6 @@ namespace Microsoft.AspNetCore.Authentication.OAuth
         /// </summary>
         public string RedirectUri { get; private set; }
 
-        public AuthenticationProperties Properties { get; set; }
-
         public bool Skipped { get; private set; }
 
         public void Skip() => Skipped = true;

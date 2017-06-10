@@ -12,8 +12,6 @@ namespace Microsoft.AspNetCore.Authentication
     /// </summary>
     public abstract class AuthenticateResultContext<TOptions> : BaseContext<TOptions> where TOptions : AuthenticationSchemeOptions
     {
-        private AuthenticationProperties _properties;
-
         /// <summary>
         /// Constructor.
         /// </summary>
@@ -42,10 +40,21 @@ namespace Microsoft.AspNetCore.Authentication
         /// <summary>
         /// Gets or sets the <see cref="AuthenticationProperties"/>.
         /// </summary>
-        public AuthenticationProperties Properties
+        public override AuthenticationProperties Properties
         {
-            get => _properties ?? Ticket?.Properties;
-            set => _properties = value;
+            get => Ticket?.Properties ?? base.Properties;
+
+            set
+            {
+                if (Ticket != null)
+                {
+                    Ticket = new AuthenticationTicket(Principal, value, Scheme.Name);
+                }
+                else
+                {
+                    base.Properties = value;
+                }
+            }
         }
 
         public bool AuthenticationSkipped { get; private set; }
