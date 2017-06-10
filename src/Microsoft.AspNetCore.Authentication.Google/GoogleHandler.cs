@@ -16,7 +16,7 @@ using Newtonsoft.Json.Linq;
 
 namespace Microsoft.AspNetCore.Authentication.Google
 {
-    internal class GoogleHandler : OAuthHandler<GoogleOptions>
+    public class GoogleHandler : OAuthHandler<GoogleOptions>
     {
         public GoogleHandler(IOptionsSnapshot<GoogleOptions> options, ILoggerFactory logger, UrlEncoder encoder, ISystemClock clock)
             : base(options, logger, encoder, clock)
@@ -41,7 +41,7 @@ namespace Microsoft.AspNetCore.Authentication.Google
 
             var principal = new ClaimsPrincipal(identity);
             var ticket = new AuthenticationTicket(principal, properties, Scheme.Name);
-            var context = new OAuthCreatingTicketContext(ticket, Context, Scheme, Options, Backchannel, tokens, payload);
+            var context = new OAuthCreatingTicketContext(this, ticket, Context, Scheme, Backchannel, tokens, payload);
             context.RunClaimActions();
 
             await Events.CreatingTicket(context);

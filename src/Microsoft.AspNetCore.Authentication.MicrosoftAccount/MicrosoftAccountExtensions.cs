@@ -3,7 +3,6 @@
 
 using System;
 using Microsoft.AspNetCore.Authentication.MicrosoftAccount;
-using Microsoft.Extensions.Options.Infrastructure;
 
 namespace Microsoft.Extensions.DependencyInjection
 {
@@ -17,7 +16,6 @@ namespace Microsoft.Extensions.DependencyInjection
 
         public static IServiceCollection AddMicrosoftAccountAuthentication(this IServiceCollection services, string authenticationScheme, Action<MicrosoftAccountOptions> configureOptions)
         {
-            services.AddSingleton<ConfigureDefaultOptions<MicrosoftAccountOptions>, MicrosoftAccountConfigureOptions>();
             return services.AddOAuthAuthentication<MicrosoftAccountOptions, MicrosoftAccountHandler>(authenticationScheme, configureOptions);
         }
     }

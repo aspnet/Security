@@ -16,7 +16,7 @@ using Newtonsoft.Json.Linq;
 
 namespace Microsoft.AspNetCore.Authentication.Facebook
 {
-    internal class FacebookHandler : OAuthHandler<FacebookOptions>
+    public class FacebookHandler : OAuthHandler<FacebookOptions>
     {
         public FacebookHandler(IOptionsSnapshot<FacebookOptions> options, ILoggerFactory logger, UrlEncoder encoder, ISystemClock clock)
             : base(options, logger, encoder, clock)
@@ -43,7 +43,7 @@ namespace Microsoft.AspNetCore.Authentication.Facebook
             var payload = JObject.Parse(await response.Content.ReadAsStringAsync());
 
             var ticket = new AuthenticationTicket(new ClaimsPrincipal(identity), properties, Scheme.Name);
-            var context = new OAuthCreatingTicketContext(ticket, Context, Scheme, Options, Backchannel, tokens, payload);
+            var context = new OAuthCreatingTicketContext(this, ticket, Context, Scheme, Backchannel, tokens, payload);
             context.RunClaimActions();
 
             await Events.CreatingTicket(context);

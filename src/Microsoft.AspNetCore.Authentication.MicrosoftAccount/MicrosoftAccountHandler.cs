@@ -13,7 +13,7 @@ using Newtonsoft.Json.Linq;
 
 namespace Microsoft.AspNetCore.Authentication.MicrosoftAccount
 {
-    internal class MicrosoftAccountHandler : OAuthHandler<MicrosoftAccountOptions>
+    public class MicrosoftAccountHandler : OAuthHandler<MicrosoftAccountOptions>
     {
         public MicrosoftAccountHandler(IOptionsSnapshot<MicrosoftAccountOptions> options, ILoggerFactory logger, UrlEncoder encoder, ISystemClock clock)
             : base(options, logger, encoder, clock)
@@ -33,7 +33,7 @@ namespace Microsoft.AspNetCore.Authentication.MicrosoftAccount
             var payload = JObject.Parse(await response.Content.ReadAsStringAsync());
 
             var ticket = new AuthenticationTicket(new ClaimsPrincipal(identity), properties, Scheme.Name);
-            var context = new OAuthCreatingTicketContext(ticket, Context, Scheme, Options, Backchannel, tokens, payload);
+            var context = new OAuthCreatingTicketContext(this, ticket, Context, Scheme, Backchannel, tokens, payload);
             context.RunClaimActions();
 
             await Events.CreatingTicket(context);
