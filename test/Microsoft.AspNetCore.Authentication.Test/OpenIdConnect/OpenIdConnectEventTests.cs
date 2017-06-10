@@ -34,7 +34,7 @@ namespace Microsoft.AspNetCore.Authentication.Test.OpenIdConnect
         private readonly Func<UserInformationReceivedContext, Task> UserNotImpl = context => { throw new NotImplementedException("User"); };
         private readonly Func<AuthenticationFailedContext, Task> FailedNotImpl = context => { throw new NotImplementedException("Failed", context.Exception); };
         private readonly Func<TicketReceivedContext, Task> TicketNotImpl = context => { throw new NotImplementedException("Ticket"); };
-        private readonly Func<FailureContext, Task> FailureNotImpl = context => { throw new NotImplementedException("Failure", context.Failure); };
+        private readonly Func<RemoteFailureContext, Task> FailureNotImpl = context => { throw new NotImplementedException("Failure", context.Failure); };
         private readonly Func<RedirectContext, Task> RedirectNotImpl = context => { throw new NotImplementedException("Redirect"); };
         private readonly Func<RemoteSignOutContext, Task> RemoteSignOutNotImpl = context => { throw new NotImplementedException("Remote"); };
         private readonly RequestDelegate AppNotImpl = context => { throw new NotImplementedException("App"); };

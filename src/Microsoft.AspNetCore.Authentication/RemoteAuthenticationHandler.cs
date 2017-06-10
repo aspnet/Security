@@ -89,7 +89,7 @@ namespace Microsoft.AspNetCore.Authentication
             if (exception != null)
             {
                 Logger.RemoteAuthenticationError(exception.Message);
-                var errorContext = new FailureContext(Context, Scheme, Options, exception);
+                var errorContext = new RemoteFailureContext(Context, Scheme, Options, exception);
                 await Events.RemoteFailure(errorContext);
 
                 if (errorContext.HandledResponse)
