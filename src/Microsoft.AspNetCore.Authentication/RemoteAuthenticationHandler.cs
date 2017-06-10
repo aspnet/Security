@@ -147,7 +147,7 @@ namespace Microsoft.AspNetCore.Authentication
         /// </summary>
         protected abstract Task<RemoteAuthenticationResult> HandleRemoteAuthenticateAsync();
 
-        protected override async Task<AuthenticationResult> HandleAuthenticateAsync()
+        protected override async Task<AuthenticateResult> HandleAuthenticateAsync()
         {
             var result = await Context.AuthenticateAsync(SignInScheme);
             if (result != null)
@@ -164,14 +164,14 @@ namespace Microsoft.AspNetCore.Authentication
                     && ticket.Properties.Items.TryGetValue(AuthSchemeKey, out authenticatedScheme)
                     && string.Equals(Scheme.Name, authenticatedScheme, StringComparison.Ordinal))
                 {
-                    return AuthenticationResult.Success(new AuthenticationTicket(ticket.Principal,
+                    return AuthenticateResult.Success(new AuthenticationTicket(ticket.Principal,
                         ticket.Properties, Scheme.Name));
                 }
 
-                return AuthenticationResult.Fail("Not authenticated");
+                return AuthenticateResult.Fail("Not authenticated");
             }
 
-            return AuthenticationResult.Fail("Remote authentication does not directly support AuthenticateAsync");
+            return AuthenticateResult.Fail("Remote authentication does not directly support AuthenticateAsync");
         }
 
         protected override Task HandleSignOutAsync(AuthenticationProperties properties)

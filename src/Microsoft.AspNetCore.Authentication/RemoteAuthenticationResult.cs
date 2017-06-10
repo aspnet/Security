@@ -9,7 +9,7 @@ namespace Microsoft.AspNetCore.Authentication
     /// <summary>
     /// Contains the result of an Authenticate call
     /// </summary>
-    public class RemoteAuthenticationResult : AuthenticationResult
+    public class RemoteAuthenticationResult : AuthenticateResult
     {
         /// <summary>
         /// Indicates that stage of authentication was directly handled by user intervention and no

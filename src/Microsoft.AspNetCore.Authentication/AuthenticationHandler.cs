@@ -14,7 +14,7 @@ namespace Microsoft.AspNetCore.Authentication
 {
     public abstract class AuthenticationHandler<TOptions> : IAuthenticationHandler where TOptions : AuthenticationSchemeOptions, new()
     {
-        private Task<AuthenticationResult> _authenticateTask;
+        private Task<AuthenticateResult> _authenticateTask;
 
         public AuthenticationScheme Scheme { get; private set; }
         public TOptions Options { get; private set; }
@@ -126,7 +126,7 @@ namespace Microsoft.AspNetCore.Authentication
             return Request.Scheme + "://" + Request.Host + OriginalPathBase + targetPath;
         }
 
-        public async Task<AuthenticationResult> AuthenticateAsync()
+        public async Task<AuthenticateResult> AuthenticateAsync()
         {
             // Calling Authenticate more than once should always return the original value.
             var result = await HandleAuthenticateOnceAsync();
@@ -149,7 +149,7 @@ namespace Microsoft.AspNetCore.Authentication
         /// Used to ensure HandleAuthenticateAsync is only invoked once. The subsequent calls
         /// will return the same authenticate result.
         /// </summary>
-        protected Task<AuthenticationResult> HandleAuthenticateOnceAsync()
+        protected Task<AuthenticateResult> HandleAuthenticateOnceAsync()
         {
             if (_authenticateTask == null)
             {
@@ -164,7 +164,7 @@ namespace Microsoft.AspNetCore.Authentication
         /// calls will return the same authentication result. Any exceptions will be converted
         /// into a failed authentication result containing the exception.
         /// </summary>
-        protected async Task<AuthenticationResult> HandleAuthenticateOnceSafeAsync()
+        protected async Task<AuthenticateResult> HandleAuthenticateOnceSafeAsync()
         {
             try
             {
@@ -172,11 +172,11 @@ namespace Microsoft.AspNetCore.Authentication
             }
             catch (Exception ex)
             {
-                return AuthenticationResult.Fail(ex);
+                return AuthenticateResult.Fail(ex);
             }
         }
 
-        protected abstract Task<AuthenticationResult> HandleAuthenticateAsync();
+        protected abstract Task<AuthenticateResult> HandleAuthenticateAsync();
 
         public async Task SignInAsync(ClaimsPrincipal user, AuthenticationProperties properties)
         {
