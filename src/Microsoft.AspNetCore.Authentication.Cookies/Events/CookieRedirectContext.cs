@@ -37,8 +37,6 @@ namespace Microsoft.AspNetCore.Authentication.Cookies
         /// </summary>
         public string RedirectUri { get; set; }
 
-        public AuthenticationProperties Properties { get; set; }
-
         public bool Skipped { get; private set; }
 
         public void Skip() => Skipped = true;

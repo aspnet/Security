@@ -43,8 +43,6 @@ namespace Microsoft.AspNetCore.Authentication.JwtBearer
         /// </summary>
         public string ErrorUri { get; set; }
 
-        public AuthenticationProperties Properties { get; set; }
-
         public bool Skipped { get; private set; }
 
         public void Skip() => Skipped = true;
