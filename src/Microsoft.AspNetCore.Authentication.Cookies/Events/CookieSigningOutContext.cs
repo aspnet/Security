@@ -8,7 +8,7 @@ namespace Microsoft.AspNetCore.Authentication.Cookies
     /// <summary>
     /// Context object passed to the ICookieAuthenticationEvents method SigningOut    
     /// </summary>
-    public class CookieSigningOutContext : BaseSignOutContext<CookieAuthenticationOptions>
+    public class CookieSigningOutContext : BaseContext<CookieAuthenticationOptions>
     {
         /// <summary>
         /// 
@@ -24,8 +24,9 @@ namespace Microsoft.AspNetCore.Authentication.Cookies
             CookieAuthenticationOptions options, 
             AuthenticationProperties properties, 
             CookieOptions cookieOptions)
-            : base(context, scheme, options, properties)
+            : base(context, scheme, options)
         {
+            Properties = properties;
             CookieOptions = cookieOptions;
         }
 
@@ -34,5 +35,11 @@ namespace Microsoft.AspNetCore.Authentication.Cookies
         /// May be replace or altered during the SigningOut call.
         /// </summary>
         public CookieOptions CookieOptions { get; set; }
+
+        public AuthenticationProperties Properties { get; set; }
+
+        public bool Skipped { get; private set; }
+
+        public void Skip() => Skipped = true;
     }
 }
