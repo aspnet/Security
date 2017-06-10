@@ -380,7 +380,7 @@ namespace Microsoft.AspNetCore.Authentication.Cookies
                 if (redirectUri != null)
                 {
                     await Events.RedirectToReturnUrl(
-                        new CookieRedirectContext(Context, Scheme, Options, redirectUri, properties));
+                        new CookieRedirectContext(Context, Scheme, Options, properties, redirectUri));
                 }
             }
         }
@@ -406,7 +406,7 @@ namespace Microsoft.AspNetCore.Authentication.Cookies
                 returnUrl = OriginalPathBase + Request.Path + Request.QueryString;
             }
             var accessDeniedUri = Options.AccessDeniedPath + QueryString.Create(Options.ReturnUrlParameter, returnUrl);
-            var redirectContext = new CookieRedirectContext(Context, Scheme, Options, BuildRedirectUri(accessDeniedUri), properties);
+            var redirectContext = new CookieRedirectContext(Context, Scheme, Options, properties, BuildRedirectUri(accessDeniedUri));
             await Events.RedirectToAccessDenied(redirectContext);
         }
 
@@ -419,7 +419,7 @@ namespace Microsoft.AspNetCore.Authentication.Cookies
             }
 
             var loginUri = Options.LoginPath + QueryString.Create(Options.ReturnUrlParameter, redirectUri);
-            var redirectContext = new CookieRedirectContext(Context, Scheme, Options, BuildRedirectUri(loginUri), properties);
+            var redirectContext = new CookieRedirectContext(Context, Scheme, Options, properties, BuildRedirectUri(loginUri));
             await Events.RedirectToLogin(redirectContext);
         }
 

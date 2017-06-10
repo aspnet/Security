@@ -315,7 +315,7 @@ namespace Microsoft.AspNetCore.Authentication.Test.OpenIdConnect
                         {
                             context.Response.StatusCode = 410;
                             context.Response.Headers.Add("tea", "Oolong");
-                            context.SkipSignOut();
+                            context.Skip();
 
                             return Task.FromResult(0);
                         }
@@ -346,7 +346,7 @@ namespace Microsoft.AspNetCore.Authentication.Test.OpenIdConnect
                     {
                         OnRedirectToIdentityProvider = context =>
                         {
-                            context.SkipSignOut();
+                            context.Skip();
                             return Task.FromResult(0);
                         }
                     };

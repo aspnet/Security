@@ -9,7 +9,7 @@ namespace Microsoft.AspNetCore.Authentication.OAuth
     /// <summary>
     /// Context passed when a Challenge causes a redirect to authorize endpoint in the handler.
     /// </summary>
-    public class OAuthRedirectToAuthorizationContext : BaseChallengeContext<OAuthOptions>
+    public class OAuthRedirectToAuthorizationContext : BaseContext<OAuthOptions>
     {
         /// <summary>
         /// Creates a new context object.
@@ -25,8 +25,9 @@ namespace Microsoft.AspNetCore.Authentication.OAuth
             OAuthOptions options,
             AuthenticationProperties properties,
             string redirectUri)
-            : base(context, scheme, options, properties)
+            : base(context, scheme, options)
         {
+            Properties = properties;
             RedirectUri = redirectUri;
         }
 
@@ -34,5 +35,11 @@ namespace Microsoft.AspNetCore.Authentication.OAuth
         /// Gets the URI used for the redirect operation.
         /// </summary>
         public string RedirectUri { get; private set; }
+
+        public AuthenticationProperties Properties { get; set; }
+
+        public bool Skipped { get; private set; }
+
+        public void Skip() => Skipped = true;
     }
 }

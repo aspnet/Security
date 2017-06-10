@@ -10,7 +10,7 @@ namespace Microsoft.AspNetCore.Authentication.Cookies
     /// <summary>
     /// Context passed when a Challenge, SignIn, or SignOut causes a redirect in the cookie handler 
     /// </summary>
-    public class CookieRedirectContext : BaseChallengeContext<CookieAuthenticationOptions>
+    public class CookieRedirectContext : BaseContext<CookieAuthenticationOptions>
     {
         /// <summary>
         /// Creates a new context object.
@@ -20,9 +20,15 @@ namespace Microsoft.AspNetCore.Authentication.Cookies
         /// <param name="options">The cookie handler options</param>
         /// <param name="redirectUri">The initial redirect URI</param>
         /// <param name="properties">The <see cref="AuthenticationProperties"/>.</param>
-        public CookieRedirectContext(HttpContext context, AuthenticationScheme scheme, CookieAuthenticationOptions options, string redirectUri, AuthenticationProperties properties)
-            : base(context, scheme, options, properties)
+        public CookieRedirectContext(
+            HttpContext context,
+            AuthenticationScheme scheme,
+            CookieAuthenticationOptions options,
+            AuthenticationProperties properties,
+            string redirectUri)
+            : base(context, scheme, options)
         {
+            Properties = properties;
             RedirectUri = redirectUri;
         }
 
@@ -30,5 +36,11 @@ namespace Microsoft.AspNetCore.Authentication.Cookies
         /// Gets or Sets the URI used for the redirect operation.
         /// </summary>
         public string RedirectUri { get; set; }
+
+        public AuthenticationProperties Properties { get; set; }
+
+        public bool Skipped { get; private set; }
+
+        public void Skip() => Skipped = true;
     }
 }
