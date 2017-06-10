@@ -10,7 +10,7 @@ namespace Microsoft.AspNetCore.Authentication
     /// <summary>
     /// Base context for authentication.
     /// </summary>
-    public abstract class BaseRemoteAuthenticationContext<TOptions> : BaseControlContext<TOptions> where TOptions : AuthenticationSchemeOptions
+    public abstract class RemoteAuthenticateResultContext<TOptions> : BaseControlContext<TOptions> where TOptions : AuthenticationSchemeOptions
     {
         private AuthenticationProperties _properties;
 
@@ -20,7 +20,7 @@ namespace Microsoft.AspNetCore.Authentication
         /// <param name="context">The context.</param>
         /// <param name="scheme">The authentication scheme.</param>
         /// <param name="options">The authentication options associated with the scheme.</param>
-        protected BaseRemoteAuthenticationContext(
+        protected RemoteAuthenticateResultContext(
             HttpContext context,
             AuthenticationScheme scheme,
             TOptions options)
