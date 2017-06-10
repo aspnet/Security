@@ -8,7 +8,7 @@ namespace Microsoft.AspNetCore.Authentication.Twitter
     /// <summary>
     /// The Context passed when a Challenge causes a redirect to authorize endpoint in the Twitter handler.
     /// </summary>
-    public class TwitterRedirectToAuthorizationEndpointContext : BaseChallengeContext<TwitterOptions>
+    public class TwitterRedirectToAuthorizationEndpointContext : BaseContext<TwitterOptions>
     {
         /// <summary>
         /// Creates a new context object.
@@ -24,8 +24,9 @@ namespace Microsoft.AspNetCore.Authentication.Twitter
             TwitterOptions options,
             AuthenticationProperties properties,
             string redirectUri)
-            : base(context, scheme, options, properties)
+            : base(context, scheme, options)
         {
+            Properties = properties;
             RedirectUri = redirectUri;
         }
 
@@ -33,5 +34,11 @@ namespace Microsoft.AspNetCore.Authentication.Twitter
         /// Gets the URI used for the redirect operation.
         /// </summary>
         public string RedirectUri { get; private set; }
+
+        public AuthenticationProperties Properties { get; set; }
+
+        public bool Skipped { get; private set; }
+
+        public void Skip() => Skipped = true;
     }
 }

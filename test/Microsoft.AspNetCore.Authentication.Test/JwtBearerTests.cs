@@ -592,7 +592,7 @@ namespace Microsoft.AspNetCore.Authentication.JwtBearer
                 {
                     OnChallenge = context =>
                     {
-                        context.SkipChallenge();
+                        context.Skip();
                         return Task.FromResult(0);
                     },
                 };
