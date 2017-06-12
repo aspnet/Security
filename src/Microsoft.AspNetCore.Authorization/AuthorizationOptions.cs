@@ -11,7 +11,10 @@ namespace Microsoft.AspNetCore.Authorization
     /// </summary>
     public class AuthorizationOptions
     {
-        private IDictionary<string, AuthorizationPolicy> PolicyMap { get; } = new Dictionary<string, AuthorizationPolicy>(StringComparer.OrdinalIgnoreCase);
+        /// <summary>
+        /// Maps policy names to their AuthorizationPolicy.
+        /// </summary>
+        public IDictionary<string, AuthorizationPolicy> PolicyMap { get; } = new Dictionary<string, AuthorizationPolicy>(StringComparer.OrdinalIgnoreCase);
 
         /// <summary>
         /// Determines whether authentication handlers should be invoked after a failure.
