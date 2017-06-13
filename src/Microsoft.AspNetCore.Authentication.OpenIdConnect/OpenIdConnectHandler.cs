@@ -998,7 +998,6 @@ namespace Microsoft.AspNetCore.Authentication.OpenIdConnect
             {
                 AuthorizationResponse = authorizationResponse,
                 TokenEndpointResponse = tokenEndpointResponse,
-                Properties = properties,
                 Ticket = ticket,
                 SecurityToken = jwt,
                 Nonce = nonce,
