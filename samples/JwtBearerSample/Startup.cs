@@ -59,7 +59,7 @@ namespace JwtBearerSample
                 {
                     OnAuthenticationFailed = c =>
                     {
-                        c.HandleResponse();
+                        c.SkipAuthentication();
 
                         c.Response.StatusCode = 500;
                         c.Response.ContentType = "text/plain";
