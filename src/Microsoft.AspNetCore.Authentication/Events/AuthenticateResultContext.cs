@@ -50,10 +50,8 @@ namespace Microsoft.AspNetCore.Authentication
                 {
                     Ticket = new AuthenticationTicket(Principal, value, Scheme.Name);
                 }
-                else
-                {
-                    base.Properties = value;
-                }
+
+                base.Properties = value;
             }
         }
 
