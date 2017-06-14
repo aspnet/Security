@@ -24,8 +24,9 @@ namespace Microsoft.AspNetCore.Authentication.OpenIdConnect
 
         public OpenIdConnectMessage EndSessionRequest { get; set; }
 
-        public bool Skipped { get; private set; }
-
-        public void Skip() => Skipped = true;
+        public void SkipRedirection()
+        {
+            State = EventResultState.BypassDefaultLogic;
+        }
     }
 }
