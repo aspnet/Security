@@ -199,7 +199,7 @@ namespace Microsoft.AspNetCore.Authentication.OpenIdConnect
             };
 
             await Events.RedirectToIdentityProviderForSignOut(redirectContext);
-            if (redirectContext.State == EventResultState.SkipToNextMiddleware)
+            if (redirectContext.State == EventResultState.BypassDefaultLogic)
             {
                 Logger.RedirectToIdentityProviderForSignOutSkipped();
                 return;
@@ -338,7 +338,7 @@ namespace Microsoft.AspNetCore.Authentication.OpenIdConnect
             };
 
             await Events.RedirectToIdentityProvider(redirectContext);
-            if (redirectContext.State == EventResultState.SkipToNextMiddleware)
+            if (redirectContext.State == EventResultState.BypassDefaultLogic)
             {
                 Logger.RedirectToIdentityProviderSkipped();
                 return;
