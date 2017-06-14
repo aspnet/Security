@@ -11,13 +11,18 @@ namespace Microsoft.AspNetCore.Authentication
         Continue,
 
         /// <summary>
+        /// Bypass the default logic.
+        /// </summary>
+        BypassDefaultLogic,
+
+        /// <summary>
         /// Discontinue processing the request.
         /// </summary>
-        Skipped,
+        SkipToNextMiddleware,
 
         /// <summary>
         /// Discontinue all processing for this request.
         /// </summary>
-        HandledResponse
+        HandleResponse,
     }
 }

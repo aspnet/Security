@@ -15,25 +15,13 @@ namespace Microsoft.AspNetCore.Authentication
         {
         }
 
-        public EventResultState State { get; set; }
-
-        public bool HandledResponse
-        {
-            get { return State == EventResultState.HandledResponse; }
-        }
-
-        public bool Skipped
-        {
-            get { return State == EventResultState.Skipped; }
-        }
-
         /// <summary>
         /// Discontinue all processing for this request and return to the client.
         /// The caller is responsible for generating the full response.
         /// </summary>
         public void HandleResponse()
         {
-            State = EventResultState.HandledResponse;
+            State = EventResultState.HandleResponse;
         }
 
         /// <summary>
@@ -41,7 +29,7 @@ namespace Microsoft.AspNetCore.Authentication
         /// </summary>
         public void SkipToNextMiddleware()
         {
-            State = EventResultState.Skipped;
+            State = EventResultState.SkipToNextMiddleware;
         }
     }
 }
