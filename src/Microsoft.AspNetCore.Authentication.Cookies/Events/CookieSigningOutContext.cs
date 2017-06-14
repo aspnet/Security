@@ -35,9 +35,5 @@ namespace Microsoft.AspNetCore.Authentication.Cookies
         /// May be replace or altered during the SigningOut call.
         /// </summary>
         public CookieOptions CookieOptions { get; set; }
-
-        public bool Skipped { get; private set; }
-
-        public void Skip() => Skipped = true;
     }
 }
