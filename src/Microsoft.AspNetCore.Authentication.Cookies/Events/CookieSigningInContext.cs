@@ -9,7 +9,7 @@ namespace Microsoft.AspNetCore.Authentication.Cookies
     /// <summary>
     /// Context object passed to the ICookieAuthenticationEvents method SigningIn.
     /// </summary>    
-    public class CookieSigningInContext : AuthenticateResultContext<CookieAuthenticationOptions>
+    public class CookieSigningInContext : BaseContext<CookieAuthenticationOptions>
     {
         /// <summary>
         /// Creates a new instance of the context object.
@@ -36,5 +36,29 @@ namespace Microsoft.AspNetCore.Authentication.Cookies
         /// May be replace or altered during the SigningIn call.
         /// </summary>
         public CookieOptions CookieOptions { get; set; }
+
+        /// <summary>
+        /// Gets or set the <see cref="AuthenticationTicket"/> containing
+        /// the user principal and the authentication properties.
+        /// </summary>
+        public AuthenticationTicket Ticket { get; set; }
+
+        /// <summary>
+        /// Gets the <see cref="ClaimsPrincipal"/> containing the user claims.
+        /// </summary>
+        public ClaimsPrincipal Principal => Ticket?.Principal;
+
+        public override AuthenticationProperties Properties
+        {
+            get => Ticket?.Properties;
+
+            set
+            {
+                if (Ticket != null)
+                {
+                    Ticket = new AuthenticationTicket(Principal, value, Scheme.Name);
+                }
+            }
+        }
     }
 }
