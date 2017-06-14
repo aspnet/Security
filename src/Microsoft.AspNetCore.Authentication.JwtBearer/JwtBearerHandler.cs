@@ -217,7 +217,7 @@ namespace Microsoft.AspNetCore.Authentication.JwtBearer
             }
 
             await Events.Challenge(eventContext);
-            if (eventContext.State == EventResultState.SkipToNextMiddleware)
+            if (eventContext.State == EventResultState.BypassDefaultLogic)
             {
                 return;
             }

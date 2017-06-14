@@ -43,8 +43,9 @@ namespace Microsoft.AspNetCore.Authentication.JwtBearer
         /// </summary>
         public string ErrorUri { get; set; }
 
-        public bool Skipped { get; private set; }
-
-        public void Skip() => Skipped = true;
+        public void Skip()
+        {
+            State = EventResultState.BypassDefaultLogic;
+        }
     }
 }
