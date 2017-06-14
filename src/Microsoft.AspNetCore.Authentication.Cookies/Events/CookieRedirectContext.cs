@@ -36,9 +36,5 @@ namespace Microsoft.AspNetCore.Authentication.Cookies
         /// Gets or Sets the URI used for the redirect operation.
         /// </summary>
         public string RedirectUri { get; set; }
-
-        public bool Skipped { get; private set; }
-
-        public void Skip() => Skipped = true;
     }
 }
