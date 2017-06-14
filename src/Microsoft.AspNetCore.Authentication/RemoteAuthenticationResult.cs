@@ -12,10 +12,10 @@ namespace Microsoft.AspNetCore.Authentication
     public class RemoteAuthenticationResult : AuthenticateResult
     {
         /// <summary>
-        /// Indicates that stage of authentication was directly handled by user intervention and no
-        /// further processing should be attempted.
+        /// Indicates that stage of authentication was directly handled by
+        /// user intervention and no further processing should be attempted.
         /// </summary>
-        public bool HandledResponse { get; private set; }
+        public bool Handled { get; private set; }
 
         /// <summary>
         /// Indicates that the default authentication logic should be
@@ -71,9 +71,9 @@ namespace Microsoft.AspNetCore.Authentication
         /// further processing should be attempted.
         /// </summary>
         /// <returns>The result.</returns>
-        public static RemoteAuthenticationResult HandleResponse()
+        public static RemoteAuthenticationResult Handle()
         {
-            return new RemoteAuthenticationResult() { HandledResponse = true };
+            return new RemoteAuthenticationResult() { Handled = true };
         }
 
         /// <summary>
@@ -81,7 +81,7 @@ namespace Microsoft.AspNetCore.Authentication
         /// skipped and that the rest of the pipeline should be invoked.
         /// </summary>
         /// <returns>The result.</returns>
-        public static RemoteAuthenticationResult SkipToNextMiddleware()
+        public static RemoteAuthenticationResult Skip()
         {
             return new RemoteAuthenticationResult() { Skipped = true };
         }
