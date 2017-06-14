@@ -84,12 +84,12 @@ namespace Microsoft.AspNetCore.Authentication
         {
             if (HandledResponse)
             {
-                result = RemoteAuthenticationResult.HandleResponse();
+                result = RemoteAuthenticationResult.Handle();
                 return true;
             }
             else if (Skipped)
             {
-                result = RemoteAuthenticationResult.SkipToNextMiddleware();
+                result = RemoteAuthenticationResult.Skip();
                 return true;
             }
             else if (AuthenticationSkipped)
