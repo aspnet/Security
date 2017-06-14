@@ -92,11 +92,11 @@ namespace Microsoft.AspNetCore.Authentication
                 var errorContext = new RemoteFailureContext(Context, Scheme, Options, exception);
                 await Events.RemoteFailure(errorContext);
 
-                if (errorContext.HandledResponse)
+                if (errorContext.State == EventResultState.HandleResponse)
                 {
                     return true;
                 }
-                else if (errorContext.Skipped)
+                else if (errorContext.State == EventResultState.SkipToNextMiddleware)
                 {
                     return false;
                 }
@@ -117,12 +117,12 @@ namespace Microsoft.AspNetCore.Authentication
 
             await Events.TicketReceived(ticketContext);
 
-            if (ticketContext.HandledResponse)
+            if (ticketContext.State == EventResultState.HandleResponse)
             {
                 Logger.SigninHandled();
                 return true;
             }
-            else if (ticketContext.Skipped)
+            else if (ticketContext.State == EventResultState.SkipToNextMiddleware)
             {
                 Logger.SigninSkipped();
                 return false;

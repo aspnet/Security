@@ -55,48 +55,47 @@ namespace Microsoft.AspNetCore.Authentication
             }
         }
 
-        public bool AuthenticationSkipped { get; private set; }
-
         public Exception Failure { get; private set; }
 
         public void CompleteAuthentication(AuthenticationTicket ticket)
         {
+            State = EventResultState.BypassDefaultLogic;
             Ticket = ticket;
-            AuthenticationSkipped = true;
         }
 
         public void SkipAuthentication()
         {
-            AuthenticationSkipped = true;
+            State = EventResultState.BypassDefaultLogic;
         }
 
         public void RejectAuthentication(Exception failure)
         {
+            State = EventResultState.BypassDefaultLogic;
             Failure = failure;
         }
 
         public void RejectAuthentication(string failureMessage)
         {
+            State = EventResultState.BypassDefaultLogic;
             Failure = new Exception(failureMessage);
         }
 
         public bool IsProcessingComplete(out AuthenticateResult result)
         {
-            if (AuthenticationSkipped)
+            if (State == EventResultState.BypassDefaultLogic)
             {
-                if (Ticket == null)
-                {
-                    result = AuthenticateResult.None();
-                }
-                else
+                if (Ticket != null)
                 {
                     result = AuthenticateResult.Success(Ticket);
                 }
-                return true;
-            }
-            else if (Failure != null)
-            {
-                result = AuthenticateResult.Fail(Failure);
+                else if (Failure != null)
+                {
+                    result = AuthenticateResult.Fail(Failure);
+                }
+                else
+                {
+                    result = AuthenticateResult.None();
+                }
                 return true;
             }
             result = null;
