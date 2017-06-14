@@ -55,58 +55,57 @@ namespace Microsoft.AspNetCore.Authentication
             }
         }
 
-        public bool AuthenticationSkipped { get; private set; }
-
         public Exception Failure { get; private set; }
 
         public void CompleteAuthentication(AuthenticationTicket ticket)
         {
+            State = EventResultState.BypassDefaultLogic;
             Ticket = ticket;
-            AuthenticationSkipped = true;
         }
 
         public void SkipAuthentication()
         {
-            AuthenticationSkipped = true;
+            State = EventResultState.BypassDefaultLogic;
         }
 
         public void RejectAuthentication(Exception failure)
         {
+            State = EventResultState.BypassDefaultLogic;
             Failure = failure;
         }
 
         public void RejectAuthentication(string failureMessage)
         {
+            State = EventResultState.BypassDefaultLogic;
             Failure = new Exception(failureMessage);
         }
 
         public bool IsProcessingComplete(out RemoteAuthenticationResult result)
         {
-            if (HandledResponse)
+            if (State == EventResultState.HandleResponse)
             {
                 result = RemoteAuthenticationResult.Handle();
                 return true;
             }
-            else if (Skipped)
+            else if (State == EventResultState.SkipToNextMiddleware)
             {
                 result = RemoteAuthenticationResult.Skip();
                 return true;
             }
-            else if (AuthenticationSkipped)
+            else if (State == EventResultState.BypassDefaultLogic)
             {
-                if (Ticket == null)
-                {
-                    result = RemoteAuthenticationResult.None();
-                }
-                else
+                if (Ticket != null)
                 {
                     result = RemoteAuthenticationResult.Success(Ticket);
                 }
-                return true;
-            }
-            else if (Failure != null)
-            {
-                result = RemoteAuthenticationResult.Fail(Failure);
+                else if (Failure != null)
+                {
+                    result = RemoteAuthenticationResult.Fail(Failure);
+                }
+                else
+                {
+                    result = RemoteAuthenticationResult.None();
+                }
                 return true;
             }
             result = null;

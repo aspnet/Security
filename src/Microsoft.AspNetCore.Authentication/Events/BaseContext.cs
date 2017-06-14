@@ -72,5 +72,7 @@ namespace Microsoft.AspNetCore.Authentication
             get => _properties ?? (_properties = new AuthenticationProperties());
             set => _properties = value;
         }
+
+        public EventResultState State { get; protected set; }
     }
 }
