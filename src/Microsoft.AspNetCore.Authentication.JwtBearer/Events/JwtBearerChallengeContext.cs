@@ -6,15 +6,17 @@ using Microsoft.AspNetCore.Http;
 
 namespace Microsoft.AspNetCore.Authentication.JwtBearer
 {
-    public class JwtBearerChallengeContext : BaseJwtBearerContext
+    public class JwtBearerChallengeContext : BaseContext<JwtBearerOptions>
     {
-        public JwtBearerChallengeContext(HttpContext context, AuthenticationScheme scheme, JwtBearerOptions options, AuthenticationProperties properties)
+        public JwtBearerChallengeContext(
+            HttpContext context,
+            AuthenticationScheme scheme,
+            JwtBearerOptions options,
+            AuthenticationProperties properties)
             : base(context, scheme, options)
         {
             Properties = properties;
         }
-
-        public AuthenticationProperties Properties { get; }
 
         /// <summary>
         /// Any failures encountered during the authentication process.
@@ -40,5 +42,10 @@ namespace Microsoft.AspNetCore.Authentication.JwtBearer
         /// WWW-Authenticate header. This property is always null unless explicitly set.
         /// </summary>
         public string ErrorUri { get; set; }
+
+        public void Skip()
+        {
+            State = EventResultState.BypassDefaultLogic;
+        }
     }
 }

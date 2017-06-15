@@ -69,7 +69,7 @@ namespace Microsoft.AspNetCore.Authentication
                 {
                     return true;
                 }
-                else if (authResult.Nothing)
+                else if (authResult.Skipped || authResult.Nothing)
                 {
                     return false;
                 }
@@ -89,25 +89,25 @@ namespace Microsoft.AspNetCore.Authentication
             if (exception != null)
             {
                 Logger.RemoteAuthenticationError(exception.Message);
-                var errorContext = new FailureContext(Context, exception);
+                var errorContext = new RemoteFailureContext(Context, Scheme, Options, exception);
                 await Events.RemoteFailure(errorContext);
 
-                if (errorContext.HandledResponse)
+                if (errorContext.State == EventResultState.HandleResponse)
                 {
                     return true;
                 }
-                else if (errorContext.Skipped)
+                else if (errorContext.State == EventResultState.SkipToNextMiddleware)
                 {
                     return false;
                 }
 
-                throw new AggregateException("Unhandled remote failure.", exception);
+                throw exception;
             }
 
             // We have a ticket if we get here
-            var ticketContext = new TicketReceivedContext(Context, Options, ticket)
+            var ticketContext = new TicketReceivedContext(Context, Scheme, Options, ticket)
             {
-                ReturnUri = ticket.Properties.RedirectUri,
+                ReturnUri = ticket.Properties.RedirectUri
             };
             // REVIEW: is this safe or good?
             ticket.Properties.RedirectUri = null;
@@ -117,12 +117,12 @@ namespace Microsoft.AspNetCore.Authentication
 
             await Events.TicketReceived(ticketContext);
 
-            if (ticketContext.HandledResponse)
+            if (ticketContext.State == EventResultState.HandleResponse)
             {
                 Logger.SigninHandled();
                 return true;
             }
-            else if (ticketContext.Skipped)
+            else if (ticketContext.State == EventResultState.SkipToNextMiddleware)
             {
                 Logger.SigninSkipped();
                 return false;
@@ -145,7 +145,7 @@ namespace Microsoft.AspNetCore.Authentication
         ///
         /// The method process the request on the endpoint defined by CallbackPath.
         /// </summary>
-        protected abstract Task<AuthenticateResult> HandleRemoteAuthenticateAsync();
+        protected abstract Task<RemoteAuthenticationResult> HandleRemoteAuthenticateAsync();
 
         protected override async Task<AuthenticateResult> HandleAuthenticateAsync()
         {

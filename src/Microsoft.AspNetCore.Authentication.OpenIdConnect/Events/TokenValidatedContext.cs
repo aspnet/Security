@@ -10,18 +10,21 @@ using Microsoft.IdentityModel.Protocols.OpenIdConnect;
 
 namespace Microsoft.AspNetCore.Authentication.OpenIdConnect
 {
-    public class TokenValidatedContext : BaseOpenIdConnectContext
+    public class TokenValidatedContext : RemoteAuthenticateResultContext<OpenIdConnectOptions>
     {
         /// <summary>
         /// Creates a <see cref="TokenValidatedContext"/>
         /// </summary>
-        public TokenValidatedContext(HttpContext context, AuthenticationScheme scheme, OpenIdConnectOptions options)
+        public TokenValidatedContext(
+            HttpContext context,
+            AuthenticationScheme scheme,
+            OpenIdConnectOptions options)
             : base(context, scheme, options)
         {
         }
 
-        public AuthenticationProperties Properties { get; set; }
-        
+        public OpenIdConnectMessage AuthorizationResponse { get; set; }
+
         public JwtSecurityToken SecurityToken { get; set; }
 
         public OpenIdConnectMessage TokenEndpointResponse { get; set; }

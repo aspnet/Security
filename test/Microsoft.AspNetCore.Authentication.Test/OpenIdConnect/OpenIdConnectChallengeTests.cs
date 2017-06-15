@@ -158,7 +158,7 @@ namespace Microsoft.AspNetCore.Authentication.Test.OpenIdConnect
                 {
                     OnRedirectToIdentityProvider = context =>
                     {
-                        context.ProtocolMessage.State = userState;
+                        context.EndSessionRequest.State = userState;
                         return Task.FromResult(0);
                     }
                 };
@@ -238,7 +238,7 @@ namespace Microsoft.AspNetCore.Authentication.Test.OpenIdConnect
                     {
                         OnRedirectToIdentityProvider = context =>
                         {
-                            context.ProtocolMessage.ClientId = newClientId;
+                            context.EndSessionRequest.ClientId = newClientId;
                             return Task.FromResult(0);
                         }
                     };
@@ -281,7 +281,7 @@ namespace Microsoft.AspNetCore.Authentication.Test.OpenIdConnect
                     {
                         OnRedirectToIdentityProvider = context =>
                         {
-                            context.ProtocolMessage = newMessage;
+                            context.EndSessionRequest = newMessage;
 
                             return Task.FromResult(0);
                         }
@@ -315,7 +315,7 @@ namespace Microsoft.AspNetCore.Authentication.Test.OpenIdConnect
                         {
                             context.Response.StatusCode = 410;
                             context.Response.Headers.Add("tea", "Oolong");
-                            context.HandleResponse();
+                            context.SkipRedirection();
 
                             return Task.FromResult(0);
                         }
@@ -335,7 +335,7 @@ namespace Microsoft.AspNetCore.Authentication.Test.OpenIdConnect
         // This test can be further refined. When one auth handler skips, the authentication responsibility
         // will be flowed to the next one. A dummy auth handler can be added to ensure the correct logic.
         [Fact]
-        public async Task OnRedirectToIdentityProviderEventSkipResponse()
+        public async Task OnRedirectToIdentityProviderEventHandleResponse()
         {
             var settings = new TestSettings(
                 opts =>
@@ -346,7 +346,7 @@ namespace Microsoft.AspNetCore.Authentication.Test.OpenIdConnect
                     {
                         OnRedirectToIdentityProvider = context =>
                         {
-                            context.Skip();
+                            context.SkipRedirection();
                             return Task.FromResult(0);
                         }
                     };

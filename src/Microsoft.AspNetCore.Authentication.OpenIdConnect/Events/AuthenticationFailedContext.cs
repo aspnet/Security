@@ -4,15 +4,18 @@
 using System;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
+using Microsoft.IdentityModel.Protocols.OpenIdConnect;
 
 namespace Microsoft.AspNetCore.Authentication.OpenIdConnect
 {
-    public class AuthenticationFailedContext : BaseOpenIdConnectContext
+    public class AuthenticationFailedContext : RemoteAuthenticateResultContext<OpenIdConnectOptions>
     {
         public AuthenticationFailedContext(HttpContext context, AuthenticationScheme scheme, OpenIdConnectOptions options)
             : base(context, scheme, options)
         {
         }
+
+        public OpenIdConnectMessage AuthorizationResponse { get; set; }
 
         public Exception Exception { get; set; }
     }

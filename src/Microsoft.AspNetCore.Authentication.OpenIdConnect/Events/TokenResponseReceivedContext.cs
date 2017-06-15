@@ -9,18 +9,20 @@ namespace Microsoft.AspNetCore.Authentication.OpenIdConnect
     /// <summary>
     /// This Context can be used to be informed when an 'AuthorizationCode' is redeemed for tokens at the token endpoint.
     /// </summary>
-    public class TokenResponseReceivedContext : BaseOpenIdConnectContext
+    public class TokenResponseReceivedContext : RemoteAuthenticateResultContext<OpenIdConnectOptions>
     {
         /// <summary>
         /// Creates a <see cref="TokenResponseReceivedContext"/>
         /// </summary>
-        public TokenResponseReceivedContext(HttpContext context, AuthenticationScheme scheme, OpenIdConnectOptions options, AuthenticationProperties properties)
+        public TokenResponseReceivedContext(
+            HttpContext context,
+            AuthenticationScheme scheme,
+            OpenIdConnectOptions options)
             : base(context, scheme, options)
         {
-            Properties = properties;
         }
 
-        public AuthenticationProperties Properties { get; }
+        public OpenIdConnectMessage ProtocolMessage { get; set; }
 
         /// <summary>
         /// Gets or sets the <see cref="OpenIdConnectMessage"/> that contains the tokens received after redeeming the code at the token endpoint.

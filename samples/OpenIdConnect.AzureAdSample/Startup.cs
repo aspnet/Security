@@ -70,7 +70,7 @@ namespace OpenIdConnect.AzureAdSample
                         var authContext = new AuthenticationContext(Authority, AuthPropertiesTokenCache.ForCodeRedemption(context.Properties));
 
                         var result = await authContext.AcquireTokenByAuthorizationCodeAsync(
-                            context.ProtocolMessage.Code, new Uri(currentUri), credential, Resource);
+                            context.AuthorizationResponse.Code, new Uri(currentUri), credential, Resource);
 
                         context.HandleCodeRedemption(result.AccessToken, result.IdToken);
                     }

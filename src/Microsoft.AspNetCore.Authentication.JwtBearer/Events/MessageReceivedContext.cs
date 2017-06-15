@@ -5,9 +5,12 @@ using Microsoft.AspNetCore.Http;
 
 namespace Microsoft.AspNetCore.Authentication.JwtBearer
 {
-    public class MessageReceivedContext : BaseJwtBearerContext
+    public class MessageReceivedContext : AuthenticateResultContext<JwtBearerOptions>
     {
-        public MessageReceivedContext(HttpContext context, AuthenticationScheme scheme, JwtBearerOptions options)
+        public MessageReceivedContext(
+            HttpContext context,
+            AuthenticationScheme scheme,
+            JwtBearerOptions options)
             : base(context, scheme, options)
         {
         }

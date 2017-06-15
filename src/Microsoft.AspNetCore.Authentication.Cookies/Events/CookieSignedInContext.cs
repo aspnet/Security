@@ -9,7 +9,7 @@ namespace Microsoft.AspNetCore.Authentication.Cookies
     /// <summary>
     /// Context object passed to the ICookieAuthenticationEvents method SignedIn.
     /// </summary>    
-    public class CookieSignedInContext : BaseCookieContext
+    public class CookieSignedInContext : BaseContext<CookieAuthenticationOptions>
     {
         /// <summary>
         /// Creates a new instance of the context object.
@@ -17,24 +17,39 @@ namespace Microsoft.AspNetCore.Authentication.Cookies
         /// <param name="context">The HTTP request context</param>
         /// <param name="scheme">The scheme data</param>
         /// <param name="options">The handler options</param>
-        /// <param name="authenticationScheme">Initializes AuthenticationScheme property</param>
-        /// <param name="principal">Initializes Principal property</param>
-        /// <param name="properties">Initializes Properties property</param>
+        /// <param name="ticket">Initializes Ticket property</param>
         public CookieSignedInContext(
             HttpContext context,
             AuthenticationScheme scheme,
             CookieAuthenticationOptions options,
-            string authenticationScheme,
-            ClaimsPrincipal principal,
-            AuthenticationProperties properties)
-            : base(context, scheme, options, properties)
+            AuthenticationTicket ticket)
+            : base(context, scheme, options)
         {
-            Principal = principal;
+            Ticket = ticket;
         }
 
         /// <summary>
-        /// Contains the claims that were converted into the outgoing cookie.
+        /// Gets or set the <see cref="AuthenticationTicket"/> containing
+        /// the user principal and the authentication properties.
         /// </summary>
-        public ClaimsPrincipal Principal { get; }
+        public AuthenticationTicket Ticket { get; set; }
+
+        /// <summary>
+        /// Gets the <see cref="ClaimsPrincipal"/> containing the user claims.
+        /// </summary>
+        public ClaimsPrincipal Principal => Ticket?.Principal;
+
+        public override AuthenticationProperties Properties
+        {
+            get => Ticket?.Properties;
+
+            set
+            {
+                if (Ticket != null)
+                {
+                    Ticket = new AuthenticationTicket(Principal, value, Scheme.Name);
+                }
+            }
+        }
     }
 }

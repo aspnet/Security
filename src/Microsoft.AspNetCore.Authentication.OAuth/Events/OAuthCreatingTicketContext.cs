@@ -13,7 +13,7 @@ namespace Microsoft.AspNetCore.Authentication.OAuth
     /// <summary>
     /// Contains information about the login session as well as the user <see cref="System.Security.Claims.ClaimsIdentity"/>.
     /// </summary>
-    public class OAuthCreatingTicketContext : BaseAuthenticationContext
+    public class OAuthCreatingTicketContext : AuthenticateResultContext<OAuthOptions>
     {
         /// <summary>
         /// Initializes a new <see cref="OAuthCreatingTicketContext"/>.
@@ -53,18 +53,8 @@ namespace Microsoft.AspNetCore.Authentication.OAuth
             HttpClient backchannel,
             OAuthTokenResponse tokens,
             JObject user)
-            : base(context, scheme.Name, ticket.Properties)
+            : base(context, scheme, options)
         {
-            if (context == null)
-            {
-                throw new ArgumentNullException(nameof(context));
-            }
-
-            if (options == null)
-            {
-                throw new ArgumentNullException(nameof(options));
-            }
-
             if (backchannel == null)
             {
                 throw new ArgumentNullException(nameof(backchannel));
@@ -80,22 +70,11 @@ namespace Microsoft.AspNetCore.Authentication.OAuth
                 throw new ArgumentNullException(nameof(user));
             }
 
-            if (scheme == null)
-            {
-                throw new ArgumentNullException(nameof(scheme));
-            }
-
             TokenResponse = tokens;
             Backchannel = backchannel;
             User = user;
-            Options = options;
-            Scheme = scheme;
             Ticket = ticket;
         }
-
-        public OAuthOptions Options { get; }
-
-        public AuthenticationScheme Scheme { get; }
 
         /// <summary>
         /// Gets the JSON-serialized user or an empty
@@ -146,13 +125,8 @@ namespace Microsoft.AspNetCore.Authentication.OAuth
         public HttpClient Backchannel { get; }
 
         /// <summary>
-        /// The <see cref="AuthenticationTicket"/> that will be created.
-        /// </summary>
-        public AuthenticationTicket Ticket { get; set; }
-
-        /// <summary>
-        /// Gets the main identity exposed by <see cref="Ticket"/>.
-        /// This property returns <c>null</c> when <see cref="Ticket"/> is <c>null</c>.
+        /// Gets the main identity exposed by the authentication ticket.
+        /// This property returns <c>null</c> when the ticket is <c>null</c>.
         /// </summary>
         public ClaimsIdentity Identity => Ticket?.Principal.Identity as ClaimsIdentity;
 

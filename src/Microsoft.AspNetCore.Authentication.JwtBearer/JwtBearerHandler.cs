@@ -142,7 +142,7 @@ namespace Microsoft.AspNetCore.Authentication.JwtBearer
                         var tokenValidatedContext = new TokenValidatedContext(Context, Scheme, Options)
                         {
                             Ticket = ticket,
-                            SecurityToken = validatedToken,
+                            SecurityToken = validatedToken
                         };
 
                         await Events.TokenValidated(tokenValidatedContext);
@@ -217,7 +217,7 @@ namespace Microsoft.AspNetCore.Authentication.JwtBearer
             }
 
             await Events.Challenge(eventContext);
-            if (eventContext.IsProcessingComplete(out var ignored))
+            if (eventContext.State == EventResultState.BypassDefaultLogic)
             {
                 return;
             }
