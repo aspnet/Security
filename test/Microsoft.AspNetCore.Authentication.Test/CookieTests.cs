@@ -372,7 +372,7 @@ namespace Microsoft.AspNetCore.Authentication.Cookies
                 {
                     OnValidatePrincipal = async ctx =>
                     {
-                        ctx.RejectAuthentication("Authentication was aborted from user code.");
+                        ctx.Fail("Authentication was aborted from user code.");
                         await ctx.HttpContext.SignOutAsync("Cookies");
                     }
                 };
@@ -402,7 +402,7 @@ namespace Microsoft.AspNetCore.Authentication.Cookies
                 {
                     OnValidatePrincipal = async ctx =>
                     {
-                        ctx.SkipAuthentication();
+                        ctx.None();
                         await ctx.HttpContext.SignOutAsync("Cookies");
                     }
                 };
