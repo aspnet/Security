@@ -127,11 +127,11 @@ namespace Microsoft.AspNetCore.Authentication.JwtBearer
                             new Claim(ClaimsIdentity.DefaultNameClaimType, "bob")
                         };
 
-                        context.Ticket = new AuthenticationTicket(
+                        var ticket = new AuthenticationTicket(
                             new ClaimsPrincipal(new ClaimsIdentity(claims, context.Scheme.Name)),
                             new AuthenticationProperties(), context.Scheme.Name);
 
-                        context.SkipAuthentication();
+                        context.CompleteAuthentication(ticket);
 
                         return Task.FromResult<object>(null);
                     }
