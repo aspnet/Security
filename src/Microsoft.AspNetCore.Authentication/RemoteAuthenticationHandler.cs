@@ -92,13 +92,16 @@ namespace Microsoft.AspNetCore.Authentication
                 var errorContext = new RemoteFailureContext(Context, Scheme, Options, exception);
                 await Events.RemoteFailure(errorContext);
 
-                if (errorContext.State == EventResultState.HandleResponse)
+                if (errorContext.Result != null)
                 {
-                    return true;
-                }
-                else if (errorContext.State == EventResultState.SkipToNextMiddleware)
-                {
-                    return false;
+                    if (errorContext.Result.Handled)
+                    {
+                        return true;
+                    }
+                    else if (errorContext.Result.Skipped)
+                    {
+                        return false;
+                    }
                 }
 
                 throw exception;
@@ -117,15 +120,18 @@ namespace Microsoft.AspNetCore.Authentication
 
             await Events.TicketReceived(ticketContext);
 
-            if (ticketContext.State == EventResultState.HandleResponse)
+            if (ticketContext.Result != null)
             {
-                Logger.SigninHandled();
-                return true;
-            }
-            else if (ticketContext.State == EventResultState.SkipToNextMiddleware)
-            {
-                Logger.SigninSkipped();
-                return false;
+                if (ticketContext.Result.Handled)
+                {
+                    Logger.SigninHandled();
+                    return true;
+                }
+                else if (ticketContext.Result.Skipped)
+                {
+                    Logger.SigninSkipped();
+                    return false;
+                }
             }
 
             await Context.SignInAsync(SignInScheme, ticketContext.Principal, ticketContext.Properties);
@@ -145,7 +151,7 @@ namespace Microsoft.AspNetCore.Authentication
         ///
         /// The method process the request on the endpoint defined by CallbackPath.
         /// </summary>
-        protected abstract Task<RemoteAuthenticationResult> HandleRemoteAuthenticateAsync();
+        protected abstract Task<HandleRequestResult> HandleRemoteAuthenticateAsync();
 
         protected override async Task<AuthenticateResult> HandleAuthenticateAsync()
         {

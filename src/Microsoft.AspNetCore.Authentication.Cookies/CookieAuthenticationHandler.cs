@@ -163,9 +163,9 @@ namespace Microsoft.AspNetCore.Authentication.Cookies
                 RequestRefresh(context.Ticket);
             }
 
-            if (context.IsProcessingComplete(out var newResult))
+            if (context.Result != null)
             {
-                return newResult;
+                return context.Result;
             }
 
             if (context.Ticket == null)

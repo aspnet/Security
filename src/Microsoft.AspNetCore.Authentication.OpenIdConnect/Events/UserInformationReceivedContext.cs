@@ -7,7 +7,7 @@ using Newtonsoft.Json.Linq;
 
 namespace Microsoft.AspNetCore.Authentication.OpenIdConnect
 {
-    public class UserInformationReceivedContext : RemoteAuthenticateResultContext<OpenIdConnectOptions>
+    public class UserInformationReceivedContext : RemoteAuthenticationContext<OpenIdConnectOptions>
     {
         public UserInformationReceivedContext(HttpContext context, AuthenticationScheme scheme, OpenIdConnectOptions options)
             : base(context, scheme, options)

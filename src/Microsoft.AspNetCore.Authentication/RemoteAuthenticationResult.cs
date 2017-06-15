@@ -2,14 +2,13 @@
 // Licensed under the Apache License, Version 2.0. See License.txt in the project root for license information.
 
 using System;
-using System.Security.Claims;
 
 namespace Microsoft.AspNetCore.Authentication
 {
     /// <summary>
     /// Contains the result of an Authenticate call
     /// </summary>
-    public class RemoteAuthenticationResult : AuthenticateResult
+    public class HandleRequestResult : AuthenticateResult
     {
         /// <summary>
         /// Indicates that stage of authentication was directly handled by
@@ -28,13 +27,13 @@ namespace Microsoft.AspNetCore.Authentication
         /// </summary>
         /// <param name="ticket">The ticket representing the authentication result.</param>
         /// <returns>The result.</returns>
-        public static new RemoteAuthenticationResult Success(AuthenticationTicket ticket)
+        public static new HandleRequestResult Success(AuthenticationTicket ticket)
         {
             if (ticket == null)
             {
                 throw new ArgumentNullException(nameof(ticket));
             }
-            return new RemoteAuthenticationResult() { Ticket = ticket };
+            return new HandleRequestResult() { Ticket = ticket };
         }
 
         /// <summary>
@@ -42,9 +41,9 @@ namespace Microsoft.AspNetCore.Authentication
         /// </summary>
         /// <param name="failure">The failure exception.</param>
         /// <returns>The result.</returns>
-        public static new RemoteAuthenticationResult Fail(Exception failure)
+        public static new HandleRequestResult Fail(Exception failure)
         {
-            return new RemoteAuthenticationResult() { Failure = failure };
+            return new HandleRequestResult() { Failure = failure };
         }
 
         /// <summary>
@@ -52,38 +51,37 @@ namespace Microsoft.AspNetCore.Authentication
         /// </summary>
         /// <param name="failureMessage">The failure message.</param>
         /// <returns>The result.</returns>
-        public static new RemoteAuthenticationResult Fail(string failureMessage)
+        public static new HandleRequestResult Fail(string failureMessage)
         {
-            return new RemoteAuthenticationResult() { Failure = new Exception(failureMessage) };
+            return new HandleRequestResult() { Failure = new Exception(failureMessage) };
         }
 
         /// <summary>
         /// Indicates that there was no information returned for this authentication scheme.
         /// </summary>
         /// <returns>The result.</returns>
-        public static new RemoteAuthenticationResult None()
+        public static new HandleRequestResult None()
         {
-            return new RemoteAuthenticationResult() { Nothing = true };
+            return new HandleRequestResult() { Nothing = true };
         }
 
         /// <summary>
-        /// Indicates that stage of authentication was directly handled by user intervention and no
-        /// further processing should be attempted.
+        /// Discontinue all processing for this request and return to the client.
+        /// The caller is responsible for generating the full response.
         /// </summary>
         /// <returns>The result.</returns>
-        public static RemoteAuthenticationResult Handle()
+        public static HandleRequestResult Handle()
         {
-            return new RemoteAuthenticationResult() { Handled = true };
+            return new HandleRequestResult() { Handled = true };
         }
 
         /// <summary>
-        /// Indicates that the default authentication logic should be
-        /// skipped and that the rest of the pipeline should be invoked.
+        /// Discontinue processing the request in the current handler.
         /// </summary>
         /// <returns>The result.</returns>
-        public static RemoteAuthenticationResult Skip()
+        public static HandleRequestResult SkipRequest()
         {
-            return new RemoteAuthenticationResult() { Skipped = true };
+            return new HandleRequestResult() { Skipped = true };
         }
     }
 }

@@ -131,7 +131,7 @@ namespace Microsoft.AspNetCore.Authentication.JwtBearer
                             new ClaimsPrincipal(new ClaimsIdentity(claims, context.Scheme.Name)),
                             new AuthenticationProperties(), context.Scheme.Name);
 
-                        context.CompleteAuthentication(ticket);
+                        context.Success(ticket);
 
                         return Task.FromResult<object>(null);
                     }
@@ -396,7 +396,7 @@ namespace Microsoft.AspNetCore.Authentication.JwtBearer
                 {
                     OnMessageReceived = context =>
                     {
-                        context.SkipAuthentication();
+                        context.None();
                         return Task.FromResult(0);
                     },
                     OnTokenValidated = context =>
@@ -428,7 +428,7 @@ namespace Microsoft.AspNetCore.Authentication.JwtBearer
                 {
                     OnMessageReceived = context =>
                     {
-                        context.RejectAuthentication("Authentication was aborted from user code.");
+                        context.Fail("Authentication was aborted from user code.");
                         context.Response.StatusCode = StatusCodes.Status202Accepted;
                         return Task.FromResult(0);
                     },
@@ -464,7 +464,7 @@ namespace Microsoft.AspNetCore.Authentication.JwtBearer
                 {
                     OnTokenValidated = context =>
                     {
-                        context.SkipAuthentication();
+                        context.None();
                         return Task.FromResult(0);
                     },
                     OnAuthenticationFailed = context =>
@@ -494,7 +494,7 @@ namespace Microsoft.AspNetCore.Authentication.JwtBearer
                 {
                     OnTokenValidated = context =>
                     {
-                        context.RejectAuthentication("Authentication was aborted from user code.");
+                        context.Fail("Authentication was aborted from user code.");
                         context.Response.StatusCode = StatusCodes.Status202Accepted;
                         return Task.FromResult(0);
                     },
@@ -532,7 +532,7 @@ namespace Microsoft.AspNetCore.Authentication.JwtBearer
                     },
                     OnAuthenticationFailed = context =>
                     {
-                        context.SkipAuthentication();
+                        context.None();
                         return Task.FromResult(0);
                     },
                     OnChallenge = context =>
@@ -562,7 +562,7 @@ namespace Microsoft.AspNetCore.Authentication.JwtBearer
                     },
                     OnAuthenticationFailed = context =>
                     {
-                        context.RejectAuthentication("Authentication was aborted from user code.");
+                        context.Fail("Authentication was aborted from user code.");
                         context.Response.StatusCode = StatusCodes.Status202Accepted;
                         return Task.FromResult(0);
                     },

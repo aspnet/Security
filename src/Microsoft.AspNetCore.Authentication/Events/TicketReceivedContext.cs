@@ -10,7 +10,7 @@ namespace Microsoft.AspNetCore.Authentication
     /// <summary>
     /// Provides context information to handler providers.
     /// </summary>
-    public class TicketReceivedContext : RemoteAuthenticateResultContext<RemoteAuthenticationOptions>
+    public class TicketReceivedContext : RemoteAuthenticationContext<RemoteAuthenticationOptions>
     {
         public TicketReceivedContext(
             HttpContext context,

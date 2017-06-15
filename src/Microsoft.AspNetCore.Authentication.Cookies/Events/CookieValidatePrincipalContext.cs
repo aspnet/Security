@@ -10,7 +10,7 @@ namespace Microsoft.AspNetCore.Authentication.Cookies
     /// <summary>
     /// Context object passed to the CookieAuthenticationEvents ValidatePrincipal method.
     /// </summary>
-    public class CookieValidatePrincipalContext : AuthenticateResultContext<CookieAuthenticationOptions>
+    public class CookieValidatePrincipalContext : AuthenticationContext<CookieAuthenticationOptions>
     {
         /// <summary>
         /// Creates a new instance of the context object.

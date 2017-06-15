@@ -48,7 +48,7 @@ namespace Microsoft.AspNetCore.Authentication.Test.OpenIdConnect
                 OnMessageReceived = context =>
                 {
                     messageReceived = true;
-                    context.SkipToNextMiddleware();
+                    context.SkipRequest();
                     return Task.FromResult(0);
                 },
                 OnTokenValidated = TokenNotImpl,
@@ -85,7 +85,7 @@ namespace Microsoft.AspNetCore.Authentication.Test.OpenIdConnect
                 OnMessageReceived = context =>
                 {
                     messageReceived = true;
-                    context.RejectAuthentication("Authentication was aborted from user code.");
+                    context.Fail("Authentication was aborted from user code.");
                     return Task.FromResult(0);
                 },
                 OnRemoteFailure = context =>
@@ -169,7 +169,7 @@ namespace Microsoft.AspNetCore.Authentication.Test.OpenIdConnect
                 OnTokenValidated = context =>
                 {
                     tokenValidated = true;
-                    context.SkipToNextMiddleware();
+                    context.SkipRequest();
                     return Task.FromResult(0);
                 },
                 OnAuthorizationCodeReceived = CodeNotImpl,
@@ -212,7 +212,7 @@ namespace Microsoft.AspNetCore.Authentication.Test.OpenIdConnect
                 OnTokenValidated = context =>
                 {
                     tokenValidated = true;
-                    context.RejectAuthentication("Authentication was aborted from user code.");
+                    context.Fail("Authentication was aborted from user code.");
                     return Task.FromResult(0);
                 },
                 OnRemoteFailure = context =>
@@ -305,7 +305,7 @@ namespace Microsoft.AspNetCore.Authentication.Test.OpenIdConnect
                 OnTokenValidated = context =>
                 {
                     tokenValidated = true;
-                    context.CompleteAuthentication(context.Ticket);
+                    context.Success(context.Ticket);
                     // context.Ticket = null;
                     return Task.FromResult(0);
                 },
@@ -358,7 +358,7 @@ namespace Microsoft.AspNetCore.Authentication.Test.OpenIdConnect
                 OnAuthorizationCodeReceived = context =>
                 {
                     codeReceived = true;
-                    context.SkipToNextMiddleware();
+                    context.SkipRequest();
                     return Task.FromResult(0);
                 },
                 OnTokenResponseReceived = TokenResponseNotImpl,
@@ -407,7 +407,7 @@ namespace Microsoft.AspNetCore.Authentication.Test.OpenIdConnect
                 OnAuthorizationCodeReceived = context =>
                 {
                     codeReceived = true;
-                    context.RejectAuthentication("Authentication was aborted from user code.");
+                    context.Fail("Authentication was aborted from user code.");
                     return Task.FromResult(0);
                 },
                 OnRemoteFailure = context =>
@@ -511,7 +511,7 @@ namespace Microsoft.AspNetCore.Authentication.Test.OpenIdConnect
                 OnAuthorizationCodeReceived = context =>
                 {
                     codeReceived = true;
-                    context.CompleteAuthentication(context.Ticket);
+                    context.Success(context.Ticket);
                     // context.Ticket = null;
                     return Task.FromResult(0);
                 },
@@ -570,7 +570,7 @@ namespace Microsoft.AspNetCore.Authentication.Test.OpenIdConnect
                 OnTokenResponseReceived = context =>
                 {
                     tokenResponseReceived = true;
-                    context.SkipToNextMiddleware();
+                    context.SkipRequest();
                     return Task.FromResult(0);
                 },
                 OnUserInformationReceived = UserNotImpl,
@@ -625,7 +625,7 @@ namespace Microsoft.AspNetCore.Authentication.Test.OpenIdConnect
                 OnTokenResponseReceived = context =>
                 {
                     tokenResponseReceived = true;
-                    context.RejectAuthentication("Authentication was aborted from user code.");
+                    context.Fail("Authentication was aborted from user code.");
                     return Task.FromResult(0);
                 },
                 OnRemoteFailure = context =>
@@ -742,7 +742,7 @@ namespace Microsoft.AspNetCore.Authentication.Test.OpenIdConnect
                 {
                     tokenResponseReceived = true;
                     // context.Ticket = null;
-                    context.CompleteAuthentication(context.Ticket);
+                    context.Success(context.Ticket);
                     return Task.FromResult(0);
                 },
                 OnUserInformationReceived = UserNotImpl,
@@ -800,7 +800,7 @@ namespace Microsoft.AspNetCore.Authentication.Test.OpenIdConnect
                 OnTokenValidated = context =>
                 {
                     tokenValidated = true;
-                    context.SkipToNextMiddleware();
+                    context.SkipRequest();
                     return Task.FromResult(0);
                 },
                 OnUserInformationReceived = UserNotImpl,
@@ -855,7 +855,7 @@ namespace Microsoft.AspNetCore.Authentication.Test.OpenIdConnect
                 OnTokenValidated = context =>
                 {
                     tokenValidated = true;
-                    context.RejectAuthentication("Authentication was aborted from user code.");
+                    context.Fail("Authentication was aborted from user code.");
                     return Task.FromResult(0);
                 },
                 OnRemoteFailure = context =>
@@ -972,7 +972,7 @@ namespace Microsoft.AspNetCore.Authentication.Test.OpenIdConnect
                 {
                     tokenValidated = true;
                     // context.Ticket = null;
-                    context.CompleteAuthentication(context.Ticket);
+                    context.Success(context.Ticket);
                     return Task.FromResult(0);
                 },
                 OnUserInformationReceived = UserNotImpl,
@@ -1036,7 +1036,7 @@ namespace Microsoft.AspNetCore.Authentication.Test.OpenIdConnect
                 OnUserInformationReceived = context =>
                 {
                     userInfoReceived = true;
-                    context.SkipToNextMiddleware();
+                    context.SkipRequest();
                     return Task.FromResult(0);
                 },
                 OnAuthenticationFailed = FailedNotImpl,
@@ -1097,7 +1097,7 @@ namespace Microsoft.AspNetCore.Authentication.Test.OpenIdConnect
                 OnUserInformationReceived = context =>
                 {
                     userInfoReceived = true;
-                    context.RejectAuthentication("Authentication was aborted from user code.");
+                    context.Fail("Authentication was aborted from user code.");
                     return Task.FromResult(0);
                 },
                 OnRemoteFailure = context =>
@@ -1226,7 +1226,7 @@ namespace Microsoft.AspNetCore.Authentication.Test.OpenIdConnect
                 {
                     userInfoReceived = true;
                     // context.Ticket = null;
-                    context.CompleteAuthentication(context.Ticket);
+                    context.Success(context.Ticket);
                     return Task.FromResult(0);
                 },
                 OnAuthenticationFailed = FailedNotImpl,
@@ -1297,7 +1297,7 @@ namespace Microsoft.AspNetCore.Authentication.Test.OpenIdConnect
                 {
                     authFailed = true;
                     Assert.Equal("TestException", context.Exception.Message);
-                    context.SkipAuthentication();
+                    context.None();
                     return Task.FromResult(0);
                 },
                 OnRemoteFailure = FailureNotImpl,
@@ -1365,7 +1365,7 @@ namespace Microsoft.AspNetCore.Authentication.Test.OpenIdConnect
                 {
                     authFailed = true;
                     Assert.Equal("TestException", context.Exception.Message);
-                    context.RejectAuthentication("Authentication was aborted from user code.");
+                    context.Fail("Authentication was aborted from user code.");
                     return Task.FromResult(0);
                 },
                 OnRemoteFailure = context =>
@@ -1520,7 +1520,7 @@ namespace Microsoft.AspNetCore.Authentication.Test.OpenIdConnect
                         new ClaimsPrincipal(new ClaimsIdentity(claims, context.Scheme.Name)),
                         new AuthenticationProperties(), context.Scheme.Name);
 
-                    context.CompleteAuthentication(ticket);
+                    context.Success(ticket);
                     return Task.FromResult(0);
                 },
                 OnRemoteFailure = FailureNotImpl,
@@ -1598,7 +1598,7 @@ namespace Microsoft.AspNetCore.Authentication.Test.OpenIdConnect
                 {
                     remoteFailure = true;
                     Assert.Equal("TestException", context.Failure.Message);
-                    context.SkipToNextMiddleware();
+                    context.SkipRequest();
                     return Task.FromResult(0);
                 },
                 OnTicketReceived = TicketNotImpl,
@@ -1738,7 +1738,7 @@ namespace Microsoft.AspNetCore.Authentication.Test.OpenIdConnect
                 OnTicketReceived = context =>
                 {
                     ticektReceived = true;
-                    context.SkipToNextMiddleware();
+                    context.SkipRequest();
                     return Task.FromResult(0);
                 },
 
