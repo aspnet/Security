@@ -91,7 +91,7 @@ namespace Microsoft.AspNetCore.Authentication
                 {
                     result = AuthenticateResult.Fail(Failure);
                 }
-                else if(Ticket != null)
+                else if (Ticket != null)
                 {
                     result = AuthenticateResult.Success(Ticket);
                 }
