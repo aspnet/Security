@@ -18,15 +18,18 @@ namespace Microsoft.AspNetCore.Authentication.OpenIdConnect
             OpenIdConnectOptions options,
             AuthenticationProperties properties)
             : base(context, scheme, options)
-        {
-            Properties = properties;
-        }
+            => Properties = properties;
 
         public OpenIdConnectMessage EndSessionRequest { get; set; }
 
-        public void SkipRedirection()
-        {
-            State = EventResultState.BypassDefaultLogic;
-        }
+        /// <summary>
+        /// If true, will skip any default logic for this event.
+        /// </summary>
+        public bool Skipped { get; private set; }
+
+        /// <summary>
+        /// Skips any default logic for the event.
+        /// </summary>
+        public void Skip() => Skipped = true;
     }
 }

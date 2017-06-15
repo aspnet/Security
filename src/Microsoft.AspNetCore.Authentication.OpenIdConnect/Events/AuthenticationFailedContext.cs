@@ -8,7 +8,7 @@ using Microsoft.IdentityModel.Protocols.OpenIdConnect;
 
 namespace Microsoft.AspNetCore.Authentication.OpenIdConnect
 {
-    public class AuthenticationFailedContext : RemoteAuthenticateResultContext<OpenIdConnectOptions>
+    public class AuthenticationFailedContext : RemoteAuthenticationContext<OpenIdConnectOptions>
     {
         public AuthenticationFailedContext(HttpContext context, AuthenticationScheme scheme, OpenIdConnectOptions options)
             : base(context, scheme, options)

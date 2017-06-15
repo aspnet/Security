@@ -47,7 +47,6 @@ namespace Microsoft.AspNetCore.Authentication.JwtBearer
         protected override async Task<AuthenticateResult> HandleAuthenticateAsync()
         {
             string token = null;
-            AuthenticateResult result = null;
             try
             {
                 // Give application opportunity to find from a different location, adjust, or reject token
@@ -55,9 +54,9 @@ namespace Microsoft.AspNetCore.Authentication.JwtBearer
 
                 // event can set the token
                 await Events.MessageReceived(messageReceivedContext);
-                if (messageReceivedContext.IsProcessingComplete(out result))
+                if (messageReceivedContext.Result != null)
                 {
-                    return result;
+                    return messageReceivedContext.Result;
                 }
 
                 // If application retrieved token from somewhere else, use that.
@@ -146,9 +145,9 @@ namespace Microsoft.AspNetCore.Authentication.JwtBearer
                         };
 
                         await Events.TokenValidated(tokenValidatedContext);
-                        if (tokenValidatedContext.IsProcessingComplete(out result))
+                        if (tokenValidatedContext.Result != null)
                         {
-                            return result;
+                            return tokenValidatedContext.Result;
                         }
                         ticket = tokenValidatedContext.Ticket;
 
@@ -172,9 +171,9 @@ namespace Microsoft.AspNetCore.Authentication.JwtBearer
                     };
 
                     await Events.AuthenticationFailed(authenticationFailedContext);
-                    if (authenticationFailedContext.IsProcessingComplete(out result))
+                    if (authenticationFailedContext.Result != null)
                     {
-                        return result;
+                        return authenticationFailedContext.Result;
                     }
 
                     return AuthenticateResult.Fail(authenticationFailedContext.Exception);
@@ -192,9 +191,9 @@ namespace Microsoft.AspNetCore.Authentication.JwtBearer
                 };
 
                 await Events.AuthenticationFailed(authenticationFailedContext);
-                if (authenticationFailedContext.IsProcessingComplete(out result))
+                if (authenticationFailedContext.Result != null)
                 {
-                    return result;
+                    return authenticationFailedContext.Result;
                 }
 
                 throw;
@@ -217,7 +216,7 @@ namespace Microsoft.AspNetCore.Authentication.JwtBearer
             }
 
             await Events.Challenge(eventContext);
-            if (eventContext.State == EventResultState.BypassDefaultLogic)
+            if (eventContext.Skipped)
             {
                 return;
             }

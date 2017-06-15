@@ -6,7 +6,7 @@ using Microsoft.IdentityModel.Tokens;
 
 namespace Microsoft.AspNetCore.Authentication.JwtBearer
 {
-    public class TokenValidatedContext : AuthenticateResultContext<JwtBearerOptions>
+    public class TokenValidatedContext : AuthenticationContext<JwtBearerOptions>
     {
         public TokenValidatedContext(
             HttpContext context,

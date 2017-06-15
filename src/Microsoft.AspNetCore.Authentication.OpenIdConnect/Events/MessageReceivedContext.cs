@@ -7,7 +7,7 @@ using Microsoft.IdentityModel.Protocols.OpenIdConnect;
 
 namespace Microsoft.AspNetCore.Authentication.OpenIdConnect
 {
-    public class MessageReceivedContext : RemoteAuthenticateResultContext<OpenIdConnectOptions>
+    public class MessageReceivedContext : RemoteAuthenticationContext<OpenIdConnectOptions>
     {
         public MessageReceivedContext(
             HttpContext context,
