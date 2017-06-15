@@ -158,6 +158,11 @@ namespace Microsoft.AspNetCore.Authentication.Cookies
             var context = new CookieValidatePrincipalContext(Context, Scheme, Options, result.Ticket);
             await Events.ValidatePrincipal(context);
 
+            if (context.ShouldRenew && context.Ticket != null)
+            {
+                RequestRefresh(context.Ticket);
+            }
+
             if (context.IsProcessingComplete(out var newResult))
             {
                 return newResult;
@@ -166,11 +171,6 @@ namespace Microsoft.AspNetCore.Authentication.Cookies
             if (context.Ticket == null)
             {
                 return AuthenticateResult.None();
-            }
-
-            if (context.ShouldRenew)
-            {
-                RequestRefresh(result.Ticket);
             }
 
             return AuthenticateResult.Success(context.Ticket);
