@@ -370,11 +370,40 @@ namespace Microsoft.AspNetCore.Authentication.Cookies
                 o.SlidingExpiration = false;
                 o.Events = new CookieAuthenticationEvents
                 {
-                    OnValidatePrincipal = ctx =>
+                    OnValidatePrincipal = async ctx =>
                     {
-                        ctx.RejectPrincipal();
-                        ctx.HttpContext.SignOutAsync("Cookies");
-                        return Task.FromResult(0);
+                        ctx.RejectAuthentication("Authentication was aborted from user code.");
+                        await ctx.HttpContext.SignOutAsync("Cookies");
+                    }
+                };
+            },
+            context =>
+                context.SignInAsync("Cookies",
+                    new ClaimsPrincipal(new ClaimsIdentity(new GenericIdentity("Alice", "Cookies")))));
+
+            var transaction1 = await SendAsync(server, "http://example.com/testpath");
+
+            var exception = await Assert.ThrowsAsync<Exception>(delegate
+            {
+                return SendAsync(server, "http://example.com/checkforerrors", transaction1.CookieNameValue);
+            });
+
+            Assert.Equal("Authentication was aborted from user code.", exception.InnerException.Message);
+        }
+
+        [Fact]
+        public async Task CookieCanBeSkippedAndSignedOutByValidator()
+        {
+            var server = CreateServer(o =>
+            {
+                o.ExpireTimeSpan = TimeSpan.FromMinutes(10);
+                o.SlidingExpiration = false;
+                o.Events = new CookieAuthenticationEvents
+                {
+                    OnValidatePrincipal = async ctx =>
+                    {
+                        ctx.SkipAuthentication();
+                        await ctx.HttpContext.SignOutAsync("Cookies");
                     }
                 };
             },
@@ -1280,6 +1309,15 @@ namespace Microsoft.AspNetCore.Authentication.Cookies
                         else if (req.Path == new PathString("/testpath") && testpath != null)
                         {
                             await testpath(context);
+                        }
+                        else if (req.Path == new PathString("/checkforerrors"))
+                        {
+                            var result = await context.AuthenticateAsync(CookieAuthenticationDefaults.AuthenticationScheme); // this used to be "Automatic"
+                            if (result.Failure != null)
+                            {
+                                throw new Exception("Failed to authenticate", result.Failure);
+                            }
+                            return;
                         }
                         else
                         {

@@ -33,24 +33,5 @@ namespace Microsoft.AspNetCore.Authentication.Cookies
         /// If true, the cookie will be renewed
         /// </summary>
         public bool ShouldRenew { get; set; }
-
-        /// <summary>
-        /// Called to replace the claims principal. The supplied principal will replace the value of the 
-        /// Principal property, which determines the identity of the authenticated request.
-        /// </summary>
-        /// <param name="principal">The <see cref="ClaimsPrincipal"/> used as the replacement</param>
-        public void ReplacePrincipal(ClaimsPrincipal principal)
-        {
-            Ticket = new AuthenticationTicket(principal, Ticket?.Properties, Scheme.Name);
-        }
-
-        /// <summary>
-        /// Called to reject the incoming principal. This may be done if the application has determined the
-        /// account is no longer active, and the request should be treated as if it was anonymous.
-        /// </summary>
-        public void RejectPrincipal()
-        {
-            Ticket = null;
-        }
     }
 }
