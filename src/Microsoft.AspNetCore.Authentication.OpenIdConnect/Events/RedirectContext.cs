@@ -20,7 +20,7 @@ namespace Microsoft.AspNetCore.Authentication.OpenIdConnect
             : base(context, scheme, options)
             => Properties = properties;
 
-        public OpenIdConnectMessage EndSessionRequest { get; set; }
+        public OpenIdConnectMessage ProtocolMessage { get; set; }
 
         /// <summary>
         /// If true, will skip any default logic for this event.
