@@ -27,7 +27,7 @@ namespace Microsoft.AspNetCore.Authentication.OpenIdConnect
     /// <summary>
     /// A per-request authentication handler for the OpenIdConnectAuthenticationMiddleware.
     /// </summary>
-    public class OpenIdConnectHandler : RemoteAuthenticationHandler<OpenIdConnectOptions>
+    public class OpenIdConnectHandler : RemoteAuthenticationHandler<OpenIdConnectOptions>, IAuthenticationSignOutHandler
     {
         private const string NonceProperty = "N";
         private const string UriSchemeDelimiter = "://";
@@ -160,11 +160,18 @@ namespace Microsoft.AspNetCore.Authentication.OpenIdConnect
             return true;
         }
 
+        public async Task SignOutAsync(AuthenticationProperties properties)
+        {
+            properties = properties ?? new AuthenticationProperties();
+            await HandleSignOutAsync(properties);
+            Logger.SignedOut(Scheme.Name);
+        }
+
         /// <summary>
         /// Redirect user to the identity provider for sign out
         /// </summary>
         /// <returns>A task executing the sign out procedure</returns>
-        protected override async Task HandleSignOutAsync(AuthenticationProperties properties)
+        protected virtual async Task HandleSignOutAsync(AuthenticationProperties properties)
         {
             Logger.EnteringOpenIdAuthenticationHandlerHandleSignOutAsync(GetType().FullName);
 

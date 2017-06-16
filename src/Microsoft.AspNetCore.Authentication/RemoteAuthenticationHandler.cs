@@ -2,7 +2,6 @@
 // Licensed under the Apache License, Version 2.0. See License.txt in the project root for license information.
 
 using System;
-using System.Security.Claims;
 using System.Security.Cryptography;
 using System.Text.Encodings.Web;
 using System.Threading.Tasks;
@@ -178,16 +177,6 @@ namespace Microsoft.AspNetCore.Authentication
             }
 
             return AuthenticateResult.Fail("Remote authentication does not directly support AuthenticateAsync");
-        }
-
-        protected override Task HandleSignOutAsync(AuthenticationProperties properties)
-        {
-            throw new NotSupportedException();
-        }
-
-        protected override Task HandleSignInAsync(ClaimsPrincipal user, AuthenticationProperties properties)
-        {
-            throw new NotSupportedException();
         }
 
         protected override Task HandleForbiddenAsync(AuthenticationProperties properties)
