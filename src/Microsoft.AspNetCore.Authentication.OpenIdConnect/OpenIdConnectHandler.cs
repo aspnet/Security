@@ -198,7 +198,7 @@ namespace Microsoft.AspNetCore.Authentication.OpenIdConnect
 
             var redirectContext = new RedirectContext(Context, Scheme, Options, properties)
             {
-                EndSessionRequest = message
+                ProtocolMessage = message
             };
 
             await Events.RedirectToIdentityProviderForSignOut(redirectContext);
@@ -208,7 +208,7 @@ namespace Microsoft.AspNetCore.Authentication.OpenIdConnect
                 return;
             }
 
-            message = redirectContext.EndSessionRequest;
+            message = redirectContext.ProtocolMessage;
 
             if (!string.IsNullOrEmpty(message.State))
             {
@@ -337,7 +337,7 @@ namespace Microsoft.AspNetCore.Authentication.OpenIdConnect
 
             var redirectContext = new RedirectContext(Context, Scheme, Options, properties)
             {
-                EndSessionRequest = message
+                ProtocolMessage = message
             };
 
             await Events.RedirectToIdentityProvider(redirectContext);
@@ -347,7 +347,7 @@ namespace Microsoft.AspNetCore.Authentication.OpenIdConnect
                 return;
             }
 
-            message = redirectContext.EndSessionRequest;
+            message = redirectContext.ProtocolMessage;
 
             if (!string.IsNullOrEmpty(message.State))
             {
@@ -470,7 +470,7 @@ namespace Microsoft.AspNetCore.Authentication.OpenIdConnect
                 {
                     return messageReceivedContext.Result;
                 }
-                authorizationResponse = messageReceivedContext.AuthorizationResponse;
+                authorizationResponse = messageReceivedContext.ProtocolMessage;
                 properties = messageReceivedContext.Properties;
 
                 if (properties == null)
@@ -547,7 +547,7 @@ namespace Microsoft.AspNetCore.Authentication.OpenIdConnect
                     {
                         return tokenValidatedContext.Result;
                     }
-                    authorizationResponse = tokenValidatedContext.AuthorizationResponse;
+                    authorizationResponse = tokenValidatedContext.ProtocolMessage;
                     properties = tokenValidatedContext.Properties;
                     ticket = tokenValidatedContext.Ticket;
                     jwt = tokenValidatedContext.SecurityToken;
@@ -572,7 +572,7 @@ namespace Microsoft.AspNetCore.Authentication.OpenIdConnect
                     {
                         return authorizationCodeReceivedContext.Result;
                     }
-                    authorizationResponse = authorizationCodeReceivedContext.AuthorizationResponse;
+                    authorizationResponse = authorizationCodeReceivedContext.ProtocolMessage;
                     properties = authorizationCodeReceivedContext.Properties;
                     var tokenEndpointRequest = authorizationCodeReceivedContext.TokenEndpointRequest;
                     // If the developer redeemed the code themselves...
@@ -617,7 +617,7 @@ namespace Microsoft.AspNetCore.Authentication.OpenIdConnect
                         {
                             return tokenValidatedContext.Result;
                         }
-                        authorizationResponse = tokenValidatedContext.AuthorizationResponse;
+                        authorizationResponse = tokenValidatedContext.ProtocolMessage;
                         tokenEndpointResponse = tokenValidatedContext.TokenEndpointResponse;
                         properties = tokenValidatedContext.Properties;
                         ticket = tokenValidatedContext.Ticket;
@@ -975,7 +975,7 @@ namespace Microsoft.AspNetCore.Authentication.OpenIdConnect
             Logger.MessageReceived(message.BuildRedirectUrl());
             var context = new MessageReceivedContext(Context, Scheme, Options)
             {
-                AuthorizationResponse = message,
+                ProtocolMessage = message,
                 Properties = properties
             };
 
@@ -999,7 +999,7 @@ namespace Microsoft.AspNetCore.Authentication.OpenIdConnect
         {
             var context = new TokenValidatedContext(Context, Scheme, Options)
             {
-                AuthorizationResponse = authorizationResponse,
+                ProtocolMessage = authorizationResponse,
                 TokenEndpointResponse = tokenEndpointResponse,
                 Ticket = ticket,
                 SecurityToken = jwt,
@@ -1038,7 +1038,7 @@ namespace Microsoft.AspNetCore.Authentication.OpenIdConnect
 
             var context = new AuthorizationCodeReceivedContext(Context, Scheme, Options)
             {
-                AuthorizationResponse = authorizationResponse,
+                ProtocolMessage = authorizationResponse,
                 Properties = properties,
                 TokenEndpointRequest = tokenEndpointRequest,
                 Ticket = ticket,
@@ -1123,7 +1123,7 @@ namespace Microsoft.AspNetCore.Authentication.OpenIdConnect
         {
             var context = new AuthenticationFailedContext(Context, Scheme, Options)
             {
-                AuthorizationResponse = message,
+                ProtocolMessage = message,
                 Exception = exception
             };
 

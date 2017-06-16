@@ -3,9 +3,7 @@
 
 using System.IdentityModel.Tokens.Jwt;
 using System.Net.Http;
-using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Http.Authentication;
 using Microsoft.IdentityModel.Protocols.OpenIdConnect;
 
 namespace Microsoft.AspNetCore.Authentication.OpenIdConnect
@@ -23,10 +21,9 @@ namespace Microsoft.AspNetCore.Authentication.OpenIdConnect
             AuthenticationScheme scheme,
             OpenIdConnectOptions options)
             : base(context, scheme, options)
-        {
-        }
+        { }
 
-        public OpenIdConnectMessage AuthorizationResponse { get; set; }
+        public OpenIdConnectMessage ProtocolMessage { get; set; }
 
         /// <summary>
         /// Gets or sets the <see cref="JwtSecurityToken"/> that was received in the authentication response, if any.

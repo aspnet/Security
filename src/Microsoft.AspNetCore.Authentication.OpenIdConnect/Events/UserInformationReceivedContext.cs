@@ -10,9 +10,7 @@ namespace Microsoft.AspNetCore.Authentication.OpenIdConnect
     public class UserInformationReceivedContext : RemoteAuthenticationContext<OpenIdConnectOptions>
     {
         public UserInformationReceivedContext(HttpContext context, AuthenticationScheme scheme, OpenIdConnectOptions options)
-            : base(context, scheme, options)
-        {
-        }
+            : base(context, scheme, options) { }
 
         public OpenIdConnectMessage ProtocolMessage { get; set; }
 

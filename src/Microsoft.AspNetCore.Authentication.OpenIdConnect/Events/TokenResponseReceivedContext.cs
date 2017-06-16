@@ -14,13 +14,8 @@ namespace Microsoft.AspNetCore.Authentication.OpenIdConnect
         /// <summary>
         /// Creates a <see cref="TokenResponseReceivedContext"/>
         /// </summary>
-        public TokenResponseReceivedContext(
-            HttpContext context,
-            AuthenticationScheme scheme,
-            OpenIdConnectOptions options)
-            : base(context, scheme, options)
-        {
-        }
+        public TokenResponseReceivedContext(HttpContext context, AuthenticationScheme scheme, OpenIdConnectOptions options)
+            : base(context, scheme, options) { }
 
         public OpenIdConnectMessage ProtocolMessage { get; set; }
 

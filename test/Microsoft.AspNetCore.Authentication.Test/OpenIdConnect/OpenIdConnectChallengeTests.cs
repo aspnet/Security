@@ -158,7 +158,7 @@ namespace Microsoft.AspNetCore.Authentication.Test.OpenIdConnect
                 {
                     OnRedirectToIdentityProvider = context =>
                     {
-                        context.EndSessionRequest.State = userState;
+                        context.ProtocolMessage.State = userState;
                         return Task.FromResult(0);
                     }
                 };
@@ -238,7 +238,7 @@ namespace Microsoft.AspNetCore.Authentication.Test.OpenIdConnect
                     {
                         OnRedirectToIdentityProvider = context =>
                         {
-                            context.EndSessionRequest.ClientId = newClientId;
+                            context.ProtocolMessage.ClientId = newClientId;
                             return Task.FromResult(0);
                         }
                     };
@@ -281,7 +281,7 @@ namespace Microsoft.AspNetCore.Authentication.Test.OpenIdConnect
                     {
                         OnRedirectToIdentityProvider = context =>
                         {
-                            context.EndSessionRequest = newMessage;
+                            context.ProtocolMessage = newMessage;
 
                             return Task.FromResult(0);
                         }
