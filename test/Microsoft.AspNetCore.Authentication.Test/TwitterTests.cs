@@ -177,15 +177,15 @@ namespace Microsoft.AspNetCore.Authentication.Twitter
                         var res = context.Response;
                         if (req.Path == new PathString("/signIn"))
                         {
-                            await Assert.ThrowsAsync<NotSupportedException>(() => context.SignInAsync("Twitter", new ClaimsPrincipal()));
+                            await Assert.ThrowsAsync<InvalidOperationException>(() => context.SignInAsync("Twitter", new ClaimsPrincipal()));
                         }
                         else if (req.Path == new PathString("/signOut"))
                         {
-                            await Assert.ThrowsAsync<NotSupportedException>(() => context.SignOutAsync("Twitter"));
+                            await Assert.ThrowsAsync<InvalidOperationException>(() => context.SignOutAsync("Twitter"));
                         }
                         else if (req.Path == new PathString("/forbid"))
                         {
-                            await Assert.ThrowsAsync<NotSupportedException>(() => context.ForbidAsync("Twitter"));
+                            await Assert.ThrowsAsync<InvalidOperationException>(() => context.ForbidAsync("Twitter"));
                         }
                         else if (handler == null || !handler(context))
                         {

@@ -1024,15 +1024,15 @@ namespace Microsoft.AspNetCore.Authentication.Google
                         }
                         else if (req.Path == new PathString("/signIn"))
                         {
-                            await Assert.ThrowsAsync<NotSupportedException>(() => context.SignInAsync("Google", new ClaimsPrincipal()));
+                            await Assert.ThrowsAsync<InvalidOperationException>(() => context.SignInAsync("Google", new ClaimsPrincipal()));
                         }
                         else if (req.Path == new PathString("/signOut"))
                         {
-                            await Assert.ThrowsAsync<NotSupportedException>(() => context.SignOutAsync("Google"));
+                            await Assert.ThrowsAsync<InvalidOperationException>(() => context.SignOutAsync("Google"));
                         }
                         else if (req.Path == new PathString("/forbid"))
                         {
-                            await Assert.ThrowsAsync<NotSupportedException>(() => context.ForbidAsync("Google"));
+                            await Assert.ThrowsAsync<InvalidOperationException>(() => context.ForbidAsync("Google"));
                         }
                         else if (testpath != null)
                         {

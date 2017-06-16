@@ -14,7 +14,10 @@ using Microsoft.Net.Http.Headers;
 
 namespace Microsoft.AspNetCore.Authentication.Cookies
 {
-    public class CookieAuthenticationHandler : AuthenticationHandler<CookieAuthenticationOptions>
+    public class CookieAuthenticationHandler : 
+        AuthenticationHandler<CookieAuthenticationOptions>, 
+        IAuthenticationSignInHandler, 
+        IAuthenticationSignOutHandler
     {
         private const string HeaderValueNoCache = "no-cache";
         private const string HeaderValueMinusOne = "-1";
@@ -249,7 +252,19 @@ namespace Microsoft.AspNetCore.Authentication.Cookies
             }
         }
 
-        protected override async Task HandleSignInAsync(ClaimsPrincipal user, AuthenticationProperties properties)
+        public async Task SignInAsync(ClaimsPrincipal user, AuthenticationProperties properties)
+        {
+            if (user == null)
+            {
+                throw new ArgumentNullException(nameof(user));
+            }
+
+            properties = properties ?? new AuthenticationProperties();
+            await HandleSignInAsync(user, properties);
+            Logger.SignedIn(Scheme.Name);
+        }
+
+        protected virtual async Task HandleSignInAsync(ClaimsPrincipal user, AuthenticationProperties properties)
         {
             _signInCalled = true;
 
@@ -327,7 +342,14 @@ namespace Microsoft.AspNetCore.Authentication.Cookies
             await ApplyHeaders(shouldRedirect, signedInContext.Properties);
         }
 
-        protected override async Task HandleSignOutAsync(AuthenticationProperties properties)
+        public async Task SignOutAsync(AuthenticationProperties properties)
+        {
+            properties = properties ?? new AuthenticationProperties();
+            await HandleSignOutAsync(properties);
+            Logger.SignedOut(Scheme.Name);
+        }
+
+        protected virtual async Task HandleSignOutAsync(AuthenticationProperties properties)
         {
             _signOutCalled = true;
 
