@@ -4,7 +4,6 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Net.Http;
 using System.Security.Claims;
 using System.Text;
 using System.Text.Encodings.Web;
@@ -13,7 +12,6 @@ using Microsoft.AspNetCore.DataProtection;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
-using Microsoft.IdentityModel.Protocols;
 using Microsoft.IdentityModel.Protocols.OpenIdConnect;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.Net.Http.Headers;
@@ -327,16 +325,6 @@ namespace Microsoft.AspNetCore.Authentication.JwtBearer
             }
 
             return string.Join("; ", messages);
-        }
-
-        protected override Task HandleSignOutAsync(AuthenticationProperties properties)
-        {
-            throw new NotSupportedException();
-        }
-
-        protected override Task HandleSignInAsync(ClaimsPrincipal user, AuthenticationProperties properties)
-        {
-            throw new NotSupportedException();
         }
     }
 }
