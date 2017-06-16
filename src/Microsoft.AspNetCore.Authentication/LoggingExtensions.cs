@@ -10,8 +10,6 @@ namespace Microsoft.Extensions.Logging
         private static Action<ILogger, string, Exception> _authSchemeAuthenticated;
         private static Action<ILogger, string, Exception> _authSchemeNotAuthenticated;
         private static Action<ILogger, string, string, Exception> _authSchemeNotAuthenticatedWithFailure;
-        private static Action<ILogger, string, Exception> _authSchemeSignedIn;
-        private static Action<ILogger, string, Exception> _authSchemeSignedOut;
         private static Action<ILogger, string, Exception> _authSchemeChallenged;
         private static Action<ILogger, string, Exception> _authSchemeForbidden;
         private static Action<ILogger, string, Exception> _userAuthorizationFailed;
@@ -62,14 +60,6 @@ namespace Microsoft.Extensions.Logging
                 eventId: 9,
                 logLevel: LogLevel.Debug,
                 formatString: "AuthenticationScheme: {AuthenticationScheme} was not authenticated.");
-            _authSchemeSignedIn = LoggerMessage.Define<string>(
-                eventId: 10,
-                logLevel: LogLevel.Information,
-                formatString: "AuthenticationScheme: {AuthenticationScheme} signed in.");
-            _authSchemeSignedOut = LoggerMessage.Define<string>(
-                eventId: 11,
-                logLevel: LogLevel.Information,
-                formatString: "AuthenticationScheme: {AuthenticationScheme} signed out.");
             _authSchemeChallenged = LoggerMessage.Define<string>(
                 eventId: 12,
                 logLevel: LogLevel.Information,
@@ -105,16 +95,6 @@ namespace Microsoft.Extensions.Logging
         public static void AuthenticationSchemeNotAuthenticatedWithFailure(this ILogger logger, string authenticationScheme, string failureMessage)
         {
             _authSchemeNotAuthenticatedWithFailure(logger, authenticationScheme, failureMessage, null);
-        }
-
-        public static void AuthenticationSchemeSignedIn(this ILogger logger, string authenticationScheme)
-        {
-            _authSchemeSignedIn(logger, authenticationScheme, null);
-        }
-
-        public static void AuthenticationSchemeSignedOut(this ILogger logger, string authenticationScheme)
-        {
-            _authSchemeSignedOut(logger, authenticationScheme, null);
         }
 
         public static void AuthenticationSchemeChallenged(this ILogger logger, string authenticationScheme)
