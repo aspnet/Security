@@ -123,12 +123,11 @@ namespace Microsoft.AspNetCore.Authentication.Facebook
             }),
             services =>
             {
-                services.AddCookieAuthentication("External", o => { });
+                services.AddCookieAuthentication();
                 services.AddFacebookAuthentication(o =>
                 {
                     o.AppId = "Test App Id";
                     o.AppSecret = "Test App Secret";
-                    o.SignInScheme = "External";
                 });
             },
             handler: null);
@@ -182,10 +181,6 @@ namespace Microsoft.AspNetCore.Authentication.Facebook
                 app => app.UseAuthentication(),
                 services =>
                 {
-                    services.AddAuthentication(options =>
-                    {
-                        options.DefaultSignInScheme = "External";
-                    });
                     services.AddCookieAuthentication();
                     services.AddFacebookAuthentication(o =>
                     {
@@ -225,7 +220,6 @@ namespace Microsoft.AspNetCore.Authentication.Facebook
                 {
                     services.AddAuthentication(options =>
                     {
-                        options.DefaultSignInScheme = CookieAuthenticationDefaults.AuthenticationScheme;
                         options.DefaultAuthenticateScheme = CookieAuthenticationDefaults.AuthenticationScheme;
                     });
                     services.AddCookieAuthentication();
