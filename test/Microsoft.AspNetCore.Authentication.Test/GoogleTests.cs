@@ -1050,7 +1050,6 @@ namespace Microsoft.AspNetCore.Authentication.Google
                     services.AddAuthentication(o =>
                     {
                         o.DefaultAuthenticateScheme = TestExtensions.CookieAuthenticationScheme;
-                        o.DefaultSignInScheme = TestExtensions.CookieAuthenticationScheme;
                         o.DefaultChallengeScheme = GoogleDefaults.AuthenticationScheme;
                     });
                     services.AddCookieAuthentication(TestExtensions.CookieAuthenticationScheme);

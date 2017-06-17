@@ -46,19 +46,6 @@ namespace Microsoft.AspNetCore.Authentication.Test.OpenIdConnect
         }
 
         [Fact]
-        public Task ThrowsWhenSignInSchemeIsMissing()
-        {
-            return TestConfigurationException<ArgumentException>(
-                o =>
-                {
-                    o.ClientId = "Test Id";
-                    o.Authority = TestServerBuilder.DefaultAuthority;
-                    o.CallbackPath = "/";
-                },
-                ex => Assert.Equal("SignInScheme", ex.ParamName));
-        }
-
-        [Fact]
         public Task ThrowsWhenClientIdIsMissing()
         {
             return TestConfigurationException<ArgumentException>(
