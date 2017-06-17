@@ -2,6 +2,7 @@
 // Licensed under the Apache License, Version 2.0. See License.txt in the project root for license information.
 
 using System;
+using System.Diagnostics;
 using System.Linq;
 using System.Net;
 using System.Net.Http;
@@ -370,40 +371,11 @@ namespace Microsoft.AspNetCore.Authentication.Cookies
                 o.SlidingExpiration = false;
                 o.Events = new CookieAuthenticationEvents
                 {
-                    OnValidatePrincipal = async ctx =>
+                    OnValidatePrincipal = ctx =>
                     {
-                        ctx.Fail("Authentication was aborted from user code.");
-                        await ctx.HttpContext.SignOutAsync("Cookies");
-                    }
-                };
-            },
-            context =>
-                context.SignInAsync("Cookies",
-                    new ClaimsPrincipal(new ClaimsIdentity(new GenericIdentity("Alice", "Cookies")))));
-
-            var transaction1 = await SendAsync(server, "http://example.com/testpath");
-
-            var exception = await Assert.ThrowsAsync<Exception>(delegate
-            {
-                return SendAsync(server, "http://example.com/checkforerrors", transaction1.CookieNameValue);
-            });
-
-            Assert.Equal("Authentication was aborted from user code.", exception.InnerException.Message);
-        }
-
-        [Fact]
-        public async Task CookieCanBeSkippedAndSignedOutByValidator()
-        {
-            var server = CreateServer(o =>
-            {
-                o.ExpireTimeSpan = TimeSpan.FromMinutes(10);
-                o.SlidingExpiration = false;
-                o.Events = new CookieAuthenticationEvents
-                {
-                    OnValidatePrincipal = async ctx =>
-                    {
-                        ctx.None();
-                        await ctx.HttpContext.SignOutAsync("Cookies");
+                        ctx.RejectPrincipal();
+                        ctx.HttpContext.SignOutAsync("Cookies");
+                        return Task.FromResult(0);
                     }
                 };
             },
