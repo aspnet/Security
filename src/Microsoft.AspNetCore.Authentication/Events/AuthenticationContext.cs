@@ -19,9 +19,7 @@ namespace Microsoft.AspNetCore.Authentication
         /// <param name="scheme">The authentication scheme.</param>
         /// <param name="options">The authentication options associated with the scheme.</param>
         protected AuthenticationContext(HttpContext context, AuthenticationScheme scheme, TOptions options)
-            : base(context, scheme, options)
-        {
-        }
+            : base(context, scheme, options) { }
 
         /// <summary>
         /// Gets or set the <see cref="AuthenticationTicket"/> containing

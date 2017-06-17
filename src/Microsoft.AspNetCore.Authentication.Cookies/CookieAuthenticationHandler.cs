@@ -161,22 +161,17 @@ namespace Microsoft.AspNetCore.Authentication.Cookies
             var context = new CookieValidatePrincipalContext(Context, Scheme, Options, result.Ticket);
             await Events.ValidatePrincipal(context);
 
-            if (context.ShouldRenew && context.Ticket != null)
+            if (context.Principal == null)
             {
-                RequestRefresh(context.Ticket);
+                return AuthenticateResult.Fail("No principal.");
             }
 
-            if (context.Result != null)
+            if (context.ShouldRenew)
             {
-                return context.Result;
+                RequestRefresh(result.Ticket);
             }
 
-            if (context.Ticket == null)
-            {
-                return AuthenticateResult.None();
-            }
-
-            return AuthenticateResult.Success(context.Ticket);
+            return AuthenticateResult.Success(new AuthenticationTicket(context.Principal, context.Properties, Scheme.Name));
         }
 
         private CookieOptions BuildCookieOptions()
