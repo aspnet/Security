@@ -1053,9 +1053,10 @@ namespace Microsoft.AspNetCore.Authentication.Google
                         o.DefaultSignInScheme = TestExtensions.CookieAuthenticationScheme;
                         o.DefaultChallengeScheme = GoogleDefaults.AuthenticationScheme;
                     });
-                    services.AddCookieAuthentication(TestExtensions.CookieAuthenticationScheme);
-                    services.AddGoogleAuthentication(configureOptions);
-                    services.AddFacebookAuthentication(o =>
+                    services.AddAuthentication()
+                        .AddCookie(TestExtensions.CookieAuthenticationScheme)
+                        .AddGoogle(configureOptions)
+                        .AddFacebook(o =>
                     {
                         o.AppId = "Test AppId";
                         o.AppSecret = "Test AppSecrent";

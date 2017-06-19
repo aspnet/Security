@@ -22,8 +22,9 @@ namespace Microsoft.AspNetCore.Authentication.Test.OpenIdConnect
             var builder = new WebHostBuilder()
                 .ConfigureServices(services =>
                 {
-                    services.AddCookieAuthentication();
-                    services.AddOpenIdConnectAuthentication(o =>
+                    services.AddAuthentication()
+                        .AddCookie()
+                        .AddOpenIdConnect(o =>
                     {
                         o.Authority = TestServerBuilder.DefaultAuthority;
                         o.ClientId = Guid.NewGuid().ToString();
@@ -119,8 +120,9 @@ namespace Microsoft.AspNetCore.Authentication.Test.OpenIdConnect
             var builder = new WebHostBuilder()
                 .ConfigureServices(services =>
                 {
-                    services.AddCookieAuthentication();
-                    services.AddOpenIdConnectAuthentication(options);
+                    services.AddAuthentication()
+                        .AddCookie()
+                        .AddOpenIdConnect(options);
                 })
                 .Configure(app => app.UseAuthentication());
 
