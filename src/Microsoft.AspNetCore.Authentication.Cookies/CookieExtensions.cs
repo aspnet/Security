@@ -11,12 +11,14 @@ namespace Microsoft.Extensions.DependencyInjection
 {
     public static class CookieExtensions
     {
-        public static AuthenticationBuilder AddCookie(this AuthenticationBuilder builder) => builder.AddCookie(CookieAuthenticationDefaults.AuthenticationScheme);
+        public static AuthenticationBuilder AddCookie(this AuthenticationBuilder builder)
+            => builder.AddCookie(CookieAuthenticationDefaults.AuthenticationScheme);
 
-        public static AuthenticationBuilder AddCookie(this AuthenticationBuilder builder, string authenticationScheme) => builder.AddCookie(authenticationScheme, configureOptions: null);
+        public static AuthenticationBuilder AddCookie(this AuthenticationBuilder builder, string authenticationScheme)
+            => builder.AddCookie(authenticationScheme, configureOptions: null);
 
-        public static AuthenticationBuilder AddCookie(this AuthenticationBuilder builder, Action<CookieAuthenticationOptions> configureOptions) =>
-            builder.AddCookie(CookieAuthenticationDefaults.AuthenticationScheme, configureOptions);
+        public static AuthenticationBuilder AddCookie(this AuthenticationBuilder builder, Action<CookieAuthenticationOptions> configureOptions) 
+            => builder.AddCookie(CookieAuthenticationDefaults.AuthenticationScheme, configureOptions);
 
         public static AuthenticationBuilder AddCookie(this AuthenticationBuilder builder, string authenticationScheme, Action<CookieAuthenticationOptions> configureOptions)
         {
