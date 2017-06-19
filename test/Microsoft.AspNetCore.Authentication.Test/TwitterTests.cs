@@ -1,7 +1,6 @@
 // Copyright (c) .NET Foundation. All rights reserved. See License.txt in the project root for license information.
 
 using System;
-using System.Collections.Generic;
 using System.Net;
 using System.Net.Http;
 using System.Security.Claims;
@@ -13,7 +12,6 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.TestHost;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Options;
 using Xunit;
 
 namespace Microsoft.AspNetCore.Authentication.Twitter
@@ -195,13 +193,14 @@ namespace Microsoft.AspNetCore.Authentication.Twitter
                 })
                 .ConfigureServices(services =>
                 {
-                    services.AddCookieAuthentication("External", _ => { });
                     Action<TwitterOptions> wrapOptions = o =>
                     {
                         o.SignInScheme = "External";
                         options(o);
                     };
-                    services.AddTwitterAuthentication(wrapOptions);
+                    services.AddAuthentication()
+                        .AddCookie("External", _ => { })
+                        .AddTwitter(wrapOptions);
                 });
             return new TestServer(builder);
         }
