@@ -1832,8 +1832,9 @@ namespace Microsoft.AspNetCore.Authentication.Test.OpenIdConnect
             var builder = new WebHostBuilder()
                 .ConfigureServices(services =>
                 {
-                    services.AddCookieAuthentication();
-                    services.AddOpenIdConnectAuthentication(o =>
+                    services.AddAuthentication()
+                        .AddCookie()
+                        .AddOpenIdConnect(o =>
                     {
                         o.Events = events;
                         o.SignInScheme = CookieAuthenticationDefaults.AuthenticationScheme;
