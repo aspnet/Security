@@ -247,7 +247,7 @@ namespace Microsoft.AspNetCore.Authentication.Cookies
             }
         }
 
-        public async Task SignInAsync(ClaimsPrincipal user, AuthenticationProperties properties)
+        public async virtual Task SignInAsync(ClaimsPrincipal user, AuthenticationProperties properties)
         {
             if (user == null)
             {
@@ -255,12 +255,7 @@ namespace Microsoft.AspNetCore.Authentication.Cookies
             }
 
             properties = properties ?? new AuthenticationProperties();
-            await HandleSignInAsync(user, properties);
-            Logger.SignedIn(Scheme.Name);
-        }
 
-        protected virtual async Task HandleSignInAsync(ClaimsPrincipal user, AuthenticationProperties properties)
-        {
             _signInCalled = true;
 
             // Process the request cookie to initialize members like _sessionKey.
@@ -335,17 +330,14 @@ namespace Microsoft.AspNetCore.Authentication.Cookies
             // Only redirect on the login path
             var shouldRedirect = Options.LoginPath.HasValue && OriginalPath == Options.LoginPath;
             await ApplyHeaders(shouldRedirect, signedInContext.Properties);
+
+            Logger.SignedIn(Scheme.Name);
         }
 
-        public async Task SignOutAsync(AuthenticationProperties properties)
+        public async virtual Task SignOutAsync(AuthenticationProperties properties)
         {
             properties = properties ?? new AuthenticationProperties();
-            await HandleSignOutAsync(properties);
-            Logger.SignedOut(Scheme.Name);
-        }
 
-        protected virtual async Task HandleSignOutAsync(AuthenticationProperties properties)
-        {
             _signOutCalled = true;
 
             // Process the request cookie to initialize members like _sessionKey.
@@ -373,6 +365,8 @@ namespace Microsoft.AspNetCore.Authentication.Cookies
             // Only redirect on the logout path
             var shouldRedirect = Options.LogoutPath.HasValue && OriginalPath == Options.LogoutPath;
             await ApplyHeaders(shouldRedirect, context.Properties);
+
+            Logger.SignedOut(Scheme.Name);
         }
 
         private async Task ApplyHeaders(bool shouldRedirectToReturnUrl, AuthenticationProperties properties)
