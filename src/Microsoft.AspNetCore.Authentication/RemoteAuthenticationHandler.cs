@@ -34,19 +34,13 @@ namespace Microsoft.AspNetCore.Authentication
         }
 
         protected RemoteAuthenticationHandler(IOptionsSnapshot<TOptions> options, ILoggerFactory logger, UrlEncoder encoder, ISystemClock clock)
-            : base(options, logger, encoder, clock)
-        {
-        }
+            : base(options, logger, encoder, clock) { }
 
         protected override Task<object> CreateEventsAsync()
-        {
-            return Task.FromResult<object>(new RemoteAuthenticationEvents());
-        }
+            => Task.FromResult<object>(new RemoteAuthenticationEvents());
 
         public virtual Task<bool> ShouldHandleRequestAsync()
-        {
-            return Task.FromResult(Options.CallbackPath == Request.Path);
-        }
+            => Task.FromResult(Options.CallbackPath == Request.Path);
 
         public virtual async Task<bool> HandleRequestAsync()
         {
@@ -180,9 +174,7 @@ namespace Microsoft.AspNetCore.Authentication
         }
 
         protected override Task HandleForbiddenAsync(AuthenticationProperties properties)
-        {
-            return Context.ForbidAsync(SignInScheme);
-        }
+            => Context.ForbidAsync(SignInScheme);
 
         protected virtual void GenerateCorrelationId(AuthenticationProperties properties)
         {
