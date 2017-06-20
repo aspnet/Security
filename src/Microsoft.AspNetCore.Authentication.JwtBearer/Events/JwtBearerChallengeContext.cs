@@ -14,9 +14,7 @@ namespace Microsoft.AspNetCore.Authentication.JwtBearer
             JwtBearerOptions options,
             AuthenticationProperties properties)
             : base(context, scheme, options)
-        {
-            Properties = properties;
-        }
+            => Properties = properties;
 
         /// <summary>
         /// Any failures encountered during the authentication process.
@@ -44,12 +42,12 @@ namespace Microsoft.AspNetCore.Authentication.JwtBearer
         public string ErrorUri { get; set; }
 
         /// <summary>
-        /// If true, will skip any default logic for this event.
+        /// If true, will skip any default logic for this challenge.
         /// </summary>
         public bool Skipped { get; private set; }
 
         /// <summary>
-        /// Skips any default logic for the event.
+        /// Skips any default logic for this challenge.
         /// </summary>
         public void Skip() => Skipped = true;
     }

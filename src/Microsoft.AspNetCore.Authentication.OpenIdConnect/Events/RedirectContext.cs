@@ -23,12 +23,12 @@ namespace Microsoft.AspNetCore.Authentication.OpenIdConnect
         public OpenIdConnectMessage ProtocolMessage { get; set; }
 
         /// <summary>
-        /// If true, will skip any default logic for this event.
+        /// If true, will skip any default logic for this redirect.
         /// </summary>
         public bool Skipped { get; private set; }
 
         /// <summary>
-        /// Skips any default logic for the event.
+        /// Skips any default logic for this redirect.
         /// </summary>
         public void Skip() => Skipped = true;
     }
