@@ -8,7 +8,7 @@ using Microsoft.AspNetCore.Http;
 namespace Microsoft.AspNetCore.Authentication
 {
     /// <summary>
-    /// Base context for authentication.
+    /// Base context for events that produce AuthenticateResults.
     /// </summary>
     public abstract class AuthenticationContext<TOptions> : BaseContext<TOptions> where TOptions : AuthenticationSchemeOptions
     {
@@ -33,16 +33,11 @@ namespace Microsoft.AspNetCore.Authentication
         public ClaimsPrincipal Principal => Ticket?.Principal;
 
         /// <summary>
-        /// Gets the <see cref="AuthenticateResult"/> result.
-        /// </summary>
-        public AuthenticateResult Result { get; private set; }
-
-        /// <summary>
         /// Gets or sets the <see cref="AuthenticationProperties"/>.
         /// </summary>
-        public override AuthenticationProperties Properties
+        public AuthenticationProperties Properties
         {
-            get => Ticket?.Properties ?? base.Properties;
+            get => Ticket?.Properties;
 
             set
             {
@@ -50,10 +45,13 @@ namespace Microsoft.AspNetCore.Authentication
                 {
                     Ticket = new AuthenticationTicket(Principal, value, Scheme.Name);
                 }
-
-                base.Properties = value;
             }
         }
+
+        /// <summary>
+        /// Gets the <see cref="AuthenticateResult"/> result.
+        /// </summary>
+        public AuthenticateResult Result { get; private set; }
 
         public void Success(AuthenticationTicket ticket) => Result = AuthenticateResult.Success(ticket);
 

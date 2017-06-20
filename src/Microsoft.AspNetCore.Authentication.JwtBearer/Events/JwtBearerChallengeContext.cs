@@ -6,15 +6,14 @@ using Microsoft.AspNetCore.Http;
 
 namespace Microsoft.AspNetCore.Authentication.JwtBearer
 {
-    public class JwtBearerChallengeContext : BaseContext<JwtBearerOptions>
+    public class JwtBearerChallengeContext : PropertiesContext<JwtBearerOptions>
     {
         public JwtBearerChallengeContext(
             HttpContext context,
             AuthenticationScheme scheme,
             JwtBearerOptions options,
             AuthenticationProperties properties)
-            : base(context, scheme, options)
-            => Properties = properties;
+            : base(context, scheme, options, properties) { }
 
         /// <summary>
         /// Any failures encountered during the authentication process.

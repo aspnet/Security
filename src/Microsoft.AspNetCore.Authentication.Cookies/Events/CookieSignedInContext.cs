@@ -9,47 +9,25 @@ namespace Microsoft.AspNetCore.Authentication.Cookies
     /// <summary>
     /// Context object passed to the ICookieAuthenticationEvents method SignedIn.
     /// </summary>    
-    public class CookieSignedInContext : BaseContext<CookieAuthenticationOptions>
+    public class CookieSignedInContext : PrincipalContext<CookieAuthenticationOptions>
     {
         /// <summary>
         /// Creates a new instance of the context object.
         /// </summary>
         /// <param name="context">The HTTP request context</param>
         /// <param name="scheme">The scheme data</param>
+        /// <param name="principal">Initializes Principal property</param>
+        /// <param name="properties">Initializes Properties property</param>
         /// <param name="options">The handler options</param>
-        /// <param name="ticket">Initializes Ticket property</param>
         public CookieSignedInContext(
             HttpContext context,
             AuthenticationScheme scheme,
-            CookieAuthenticationOptions options,
-            AuthenticationTicket ticket)
-            : base(context, scheme, options)
+            ClaimsPrincipal principal,
+            AuthenticationProperties properties,
+            CookieAuthenticationOptions options)
+            : base(context, scheme, options, properties)
         {
-            Ticket = ticket;
-        }
-
-        /// <summary>
-        /// Gets or set the <see cref="AuthenticationTicket"/> containing
-        /// the user principal and the authentication properties.
-        /// </summary>
-        public AuthenticationTicket Ticket { get; set; }
-
-        /// <summary>
-        /// Gets the <see cref="ClaimsPrincipal"/> containing the user claims.
-        /// </summary>
-        public ClaimsPrincipal Principal => Ticket?.Principal;
-
-        public override AuthenticationProperties Properties
-        {
-            get => Ticket?.Properties;
-
-            set
-            {
-                if (Ticket != null)
-                {
-                    Ticket = new AuthenticationTicket(Principal, value, Scheme.Name);
-                }
-            }
+            Principal = principal;
         }
     }
 }

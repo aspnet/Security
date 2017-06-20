@@ -158,7 +158,7 @@ namespace Microsoft.AspNetCore.Authentication.Twitter
 
             Response.Cookies.Append(StateCookie, Options.StateDataFormat.Protect(requestToken), cookieOptions);
 
-            var redirectContext = new TwitterRedirectToAuthorizationEndpointContext(Context, Scheme, Options, properties, twitterAuthenticationEndpoint);
+            var redirectContext = new RedirectContext<TwitterOptions>(Context, Scheme, Options, properties, twitterAuthenticationEndpoint);
             await Events.RedirectToAuthorizationEndpoint(redirectContext);
         }
 

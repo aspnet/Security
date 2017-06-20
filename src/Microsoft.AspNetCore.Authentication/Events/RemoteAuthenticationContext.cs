@@ -38,18 +38,15 @@ namespace Microsoft.AspNetCore.Authentication
         /// <summary>
         /// Gets or sets the <see cref="AuthenticationProperties"/>.
         /// </summary>
-        public override AuthenticationProperties Properties
+        public AuthenticationProperties Properties
         {
-            get => Ticket?.Properties ?? base.Properties;
-
+            get => Ticket?.Properties;
             set
             {
                 if (Ticket != null)
                 {
                     Ticket = new AuthenticationTicket(Principal, value, Scheme.Name);
                 }
-
-                base.Properties = value;
             }
         }
 

@@ -32,8 +32,7 @@ namespace Microsoft.AspNetCore.Authentication.OAuth
             HttpClient backchannel,
             OAuthTokenResponse tokens)
             : this(ticket, context, scheme, options, backchannel, tokens, user: new JObject())
-        {
-        }
+        { }
 
         /// <summary>
         /// Initializes a new <see cref="OAuthCreatingTicketContext"/>.
@@ -130,10 +129,7 @@ namespace Microsoft.AspNetCore.Authentication.OAuth
         /// </summary>
         public ClaimsIdentity Identity => Ticket?.Principal.Identity as ClaimsIdentity;
 
-        public void RunClaimActions()
-        {
-            RunClaimActions(User);
-        }
+        public void RunClaimActions() => RunClaimActions(User);
 
         public void RunClaimActions(JObject userData)
         {
