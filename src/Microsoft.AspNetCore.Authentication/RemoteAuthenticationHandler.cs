@@ -62,7 +62,7 @@ namespace Microsoft.AspNetCore.Authentication
                 {
                     return true;
                 }
-                else if (authResult.Skipped || authResult.Nothing)
+                else if (authResult.Skipped || authResult.Ignored)
                 {
                     return false;
                 }

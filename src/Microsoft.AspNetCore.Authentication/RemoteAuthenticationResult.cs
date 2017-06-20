@@ -60,9 +60,9 @@ namespace Microsoft.AspNetCore.Authentication
         /// Indicates that there was no information returned for this authentication scheme.
         /// </summary>
         /// <returns>The result.</returns>
-        public static new HandleRequestResult None()
+        public static new HandleRequestResult Ignore()
         {
-            return new HandleRequestResult() { Nothing = true };
+            return new HandleRequestResult() { Ignored = true };
         }
 
         /// <summary>

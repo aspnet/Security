@@ -1297,7 +1297,7 @@ namespace Microsoft.AspNetCore.Authentication.Test.OpenIdConnect
                 {
                     authFailed = true;
                     Assert.Equal("TestException", context.Exception.Message);
-                    context.None();
+                    context.Ignore();
                     return Task.FromResult(0);
                 },
                 OnRemoteFailure = FailureNotImpl,

@@ -52,7 +52,7 @@ namespace Microsoft.AspNetCore.Authentication
 
         public void Success(AuthenticationTicket ticket) => Result = HandleRequestResult.Success(ticket);
 
-        public void None() => Result = HandleRequestResult.None();
+        public void Ignore() => Result = HandleRequestResult.Ignore();
 
         public void Fail(Exception failure) => Result = HandleRequestResult.Fail(failure);
 
