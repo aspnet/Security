@@ -160,19 +160,14 @@ namespace Microsoft.AspNetCore.Authentication.OpenIdConnect
             return true;
         }
 
-        public async Task SignOutAsync(AuthenticationProperties properties)
-        {
-            properties = properties ?? new AuthenticationProperties();
-            await HandleSignOutAsync(properties);
-            Logger.SignedOut(Scheme.Name);
-        }
-
         /// <summary>
         /// Redirect user to the identity provider for sign out
         /// </summary>
         /// <returns>A task executing the sign out procedure</returns>
-        protected virtual async Task HandleSignOutAsync(AuthenticationProperties properties)
+        public async virtual Task SignOutAsync(AuthenticationProperties properties)
         {
+            properties = properties ?? new AuthenticationProperties();
+
             Logger.EnteringOpenIdAuthenticationHandlerHandleSignOutAsync(GetType().FullName);
 
             if (_configuration == null && Options.ConfigurationManager != null)
@@ -271,6 +266,8 @@ namespace Microsoft.AspNetCore.Authentication.OpenIdConnect
             {
                 throw new NotImplementedException($"An unsupported authentication method has been configured: {Options.AuthenticationMethod}");
             }
+
+            Logger.SignedOut(Scheme.Name);
         }
 
         /// <summary>
