@@ -221,8 +221,7 @@ namespace Microsoft.AspNetCore.Authentication.OpenIdConnect
 
             if (string.IsNullOrEmpty(message.IssuerAddress))
             {
-                throw new InvalidOperationException(
-                    "Cannot redirect to the end session endpoint, the configuration may be missing or invalid.");
+                throw new InvalidOperationException("Cannot redirect to the end session endpoint, the configuration may be missing or invalid.");
             }
 
             if (Options.AuthenticationMethod == OpenIdConnectRedirectBehavior.RedirectGet)
