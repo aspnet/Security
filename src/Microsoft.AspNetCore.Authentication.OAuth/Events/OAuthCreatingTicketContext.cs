@@ -13,7 +13,7 @@ namespace Microsoft.AspNetCore.Authentication.OAuth
     /// <summary>
     /// Contains information about the login session as well as the user <see cref="System.Security.Claims.ClaimsIdentity"/>.
     /// </summary>
-    public class OAuthCreatingTicketContext : AuthenticationContext<OAuthOptions>
+    public class OAuthCreatingTicketContext : ResultContext<OAuthOptions>
     {
         /// <summary>
         /// Initializes a new <see cref="OAuthCreatingTicketContext"/>.
