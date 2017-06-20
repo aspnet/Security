@@ -107,7 +107,7 @@ namespace Microsoft.AspNetCore.Authentication.Cookies
             var cookie = Options.CookieManager.GetRequestCookie(Context, Options.CookieName);
             if (string.IsNullOrEmpty(cookie))
             {
-                return AuthenticateResult.None();
+                return AuthenticateResult.Ignore();
             }
 
             var ticket = Options.TicketDataFormat.Unprotect(cookie, GetTlsTokenBinding());

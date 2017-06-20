@@ -67,7 +67,7 @@ namespace Microsoft.AspNetCore.Authentication.JwtBearer
                     // If no authorization header found, nothing to process further
                     if (string.IsNullOrEmpty(authorization))
                     {
-                        return AuthenticateResult.None();
+                        return AuthenticateResult.Ignore();
                     }
 
                     if (authorization.StartsWith("Bearer ", StringComparison.OrdinalIgnoreCase))
@@ -78,7 +78,7 @@ namespace Microsoft.AspNetCore.Authentication.JwtBearer
                     // If no token found, no further work possible
                     if (string.IsNullOrEmpty(token))
                     {
-                        return AuthenticateResult.None();
+                        return AuthenticateResult.Ignore();
                     }
                 }
 

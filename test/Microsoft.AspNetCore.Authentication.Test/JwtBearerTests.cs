@@ -396,7 +396,7 @@ namespace Microsoft.AspNetCore.Authentication.JwtBearer
                 {
                     OnMessageReceived = context =>
                     {
-                        context.None();
+                        context.Ignore();
                         return Task.FromResult(0);
                     },
                     OnTokenValidated = context =>
@@ -464,7 +464,7 @@ namespace Microsoft.AspNetCore.Authentication.JwtBearer
                 {
                     OnTokenValidated = context =>
                     {
-                        context.None();
+                        context.Ignore();
                         return Task.FromResult(0);
                     },
                     OnAuthenticationFailed = context =>
@@ -532,7 +532,7 @@ namespace Microsoft.AspNetCore.Authentication.JwtBearer
                     },
                     OnAuthenticationFailed = context =>
                     {
-                        context.None();
+                        context.Ignore();
                         return Task.FromResult(0);
                     },
                     OnChallenge = context =>

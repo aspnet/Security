@@ -58,7 +58,7 @@ namespace Microsoft.AspNetCore.Authentication
         /// <summary>
         /// Indicates that there was no information returned for this authentication scheme.
         /// </summary>
-        public void None() => Result = AuthenticateResult.None();
+        public void Ignore() => Result = AuthenticateResult.Ignore();
 
         /// <summary>
         /// Indicates that there was a failure during authentication.
