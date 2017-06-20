@@ -12,9 +12,7 @@ namespace Microsoft.AspNetCore.Authentication.JwtBearer
             HttpContext context,
             AuthenticationScheme scheme,
             JwtBearerOptions options)
-            : base(context, scheme, options)
-        {
-        }
+            : base(context, scheme, options) { }
 
         public Exception Exception { get; set; }
     }

@@ -6,9 +6,9 @@ using Microsoft.AspNetCore.Http;
 namespace Microsoft.AspNetCore.Authentication.Cookies
 {
     /// <summary>
-    /// Context object passed to the ICookieAuthenticationEvents method SigningOut    
+    /// Context object passed to the <see cref="CookieAuthenticationEvents.SigningOut(CookieSigningOutContext)"/>
     /// </summary>
-    public class CookieSigningOutContext : BaseContext<CookieAuthenticationOptions>
+    public class CookieSigningOutContext : PropertiesContext<CookieAuthenticationOptions>
     {
         /// <summary>
         /// 
@@ -24,11 +24,8 @@ namespace Microsoft.AspNetCore.Authentication.Cookies
             CookieAuthenticationOptions options, 
             AuthenticationProperties properties, 
             CookieOptions cookieOptions)
-            : base(context, scheme, options)
-        {
-            Properties = properties;
-            CookieOptions = cookieOptions;
-        }
+            : base(context, scheme, options, properties)
+            => CookieOptions = cookieOptions;
 
         /// <summary>
         /// The options for creating the outgoing cookie.

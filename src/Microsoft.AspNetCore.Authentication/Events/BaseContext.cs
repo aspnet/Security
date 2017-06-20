@@ -11,8 +11,6 @@ namespace Microsoft.AspNetCore.Authentication
     /// </summary>
     public abstract class BaseContext<TOptions> where TOptions : AuthenticationSchemeOptions
     {
-        private AuthenticationProperties _properties;
-
         /// <summary>
         /// Constructor.
         /// </summary>
@@ -63,14 +61,5 @@ namespace Microsoft.AspNetCore.Authentication
         /// The response.
         /// </summary>
         public HttpResponse Response => HttpContext.Response;
-
-        /// <summary>
-        /// Gets or sets the <see cref="AuthenticationProperties"/>.
-        /// </summary>
-        public virtual AuthenticationProperties Properties
-        {
-            get => _properties ?? (_properties = new AuthenticationProperties());
-            set => _properties = value;
-        }
     }
 }

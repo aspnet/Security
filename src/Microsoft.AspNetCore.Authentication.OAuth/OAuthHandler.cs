@@ -202,7 +202,7 @@ namespace Microsoft.AspNetCore.Authentication.OAuth
             GenerateCorrelationId(properties);
 
             var authorizationEndpoint = BuildChallengeUrl(properties, BuildRedirectUri(Options.CallbackPath));
-            var redirectContext = new OAuthRedirectToAuthorizationContext(
+            var redirectContext = new RedirectContext<OAuthOptions>(
                 Context, Scheme, Options,
                 properties, authorizationEndpoint);
             await Events.RedirectToAuthorizationEndpoint(redirectContext);

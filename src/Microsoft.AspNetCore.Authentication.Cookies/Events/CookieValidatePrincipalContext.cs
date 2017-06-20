@@ -10,7 +10,7 @@ namespace Microsoft.AspNetCore.Authentication.Cookies
     /// <summary>
     /// Context object passed to the CookieAuthenticationEvents ValidatePrincipal method.
     /// </summary>
-    public class CookieValidatePrincipalContext : BaseContext<CookieAuthenticationOptions>
+    public class CookieValidatePrincipalContext : PrincipalContext<CookieAuthenticationOptions>
     {
         /// <summary>
         /// Creates a new instance of the context object.
@@ -20,7 +20,7 @@ namespace Microsoft.AspNetCore.Authentication.Cookies
         /// <param name="ticket">Contains the initial values for identity and extra data</param>
         /// <param name="options"></param>
         public CookieValidatePrincipalContext(HttpContext context, AuthenticationScheme scheme, CookieAuthenticationOptions options, AuthenticationTicket ticket)
-            : base(context, scheme, options)
+            : base(context, scheme, options, ticket?.Properties)
         {
             if (ticket == null)
             {
@@ -28,19 +28,12 @@ namespace Microsoft.AspNetCore.Authentication.Cookies
             }
 
             Principal = ticket.Principal;
-            Properties = ticket.Properties;
         }
 
         /// <summary>
         /// If true, the cookie will be renewed
         /// </summary>
         public bool ShouldRenew { get; set; }
-
-        /// <summary>
-        /// Contains the claims principal arriving with the request. May be altered to change the 
-        /// details of the authenticated user.
-        /// </summary>
-        public ClaimsPrincipal Principal { get; private set; }
 
         /// <summary>
         /// Called to replace the claims principal. The supplied principal will replace the value of the 
