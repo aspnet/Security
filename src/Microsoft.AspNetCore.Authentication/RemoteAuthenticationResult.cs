@@ -57,15 +57,6 @@ namespace Microsoft.AspNetCore.Authentication
         }
 
         /// <summary>
-        /// Indicates that there was no information returned for this authentication scheme.
-        /// </summary>
-        /// <returns>The result.</returns>
-        public static new HandleRequestResult Ignore()
-        {
-            return new HandleRequestResult() { Ignored = true };
-        }
-
-        /// <summary>
         /// Discontinue all processing for this request and return to the client.
         /// The caller is responsible for generating the full response.
         /// </summary>
@@ -79,7 +70,7 @@ namespace Microsoft.AspNetCore.Authentication
         /// Discontinue processing the request in the current handler.
         /// </summary>
         /// <returns>The result.</returns>
-        public static HandleRequestResult SkipRequest()
+        public static HandleRequestResult SkipHandler()
         {
             return new HandleRequestResult() { Skipped = true };
         }

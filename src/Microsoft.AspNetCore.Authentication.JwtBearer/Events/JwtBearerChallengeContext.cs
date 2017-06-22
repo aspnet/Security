@@ -43,11 +43,11 @@ namespace Microsoft.AspNetCore.Authentication.JwtBearer
         /// <summary>
         /// If true, will skip any default logic for this challenge.
         /// </summary>
-        public bool Skipped { get; private set; }
+        public bool Handled { get; private set; }
 
         /// <summary>
         /// Skips any default logic for this challenge.
         /// </summary>
-        public void Skip() => Skipped = true;
+        public void HandleResponse() => Handled = true;
     }
 }

@@ -27,6 +27,6 @@ namespace Microsoft.AspNetCore.Authentication
         /// <summary>
         /// Discontinue processing the request in the current handler.
         /// </summary>
-        public void SkipRequest() => Result = HandleRequestResult.SkipRequest();
+        public void SkipHandler() => Result = HandleRequestResult.SkipHandler();
     }
 }

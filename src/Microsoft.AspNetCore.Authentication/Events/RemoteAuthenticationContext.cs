@@ -52,8 +52,6 @@ namespace Microsoft.AspNetCore.Authentication
 
         public void Success(AuthenticationTicket ticket) => Result = HandleRequestResult.Success(ticket);
 
-        public void Ignore() => Result = HandleRequestResult.Ignore();
-
         public void Fail(Exception failure) => Result = HandleRequestResult.Fail(failure);
 
         public void Fail(string failureMessage) => Result = HandleRequestResult.Fail(failureMessage);
