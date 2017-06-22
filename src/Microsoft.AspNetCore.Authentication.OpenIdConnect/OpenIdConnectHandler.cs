@@ -206,7 +206,7 @@ namespace Microsoft.AspNetCore.Authentication.OpenIdConnect
             await Events.RedirectToIdentityProviderForSignOut(redirectContext);
             if (redirectContext.Handled)
             {
-                Logger.RedirectToIdentityProviderForSignOutSkipped();
+                Logger.RedirectToIdentityProviderForSignOutHandledResponse();
                 return;
             }
 
@@ -346,7 +346,7 @@ namespace Microsoft.AspNetCore.Authentication.OpenIdConnect
             await Events.RedirectToIdentityProvider(redirectContext);
             if (redirectContext.Handled)
             {
-                Logger.RedirectToIdentityProviderSkipped();
+                Logger.RedirectToIdentityProviderHandledResponse();
                 return;
             }
 

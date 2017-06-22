@@ -57,8 +57,6 @@ namespace JwtBearerSample
                 {
                     OnAuthenticationFailed = c =>
                     {
-                        // Ignore/Stop/Abort/
-                        // c.Fail()
                         c.NoResult();
 
                         c.Response.StatusCode = 500;
