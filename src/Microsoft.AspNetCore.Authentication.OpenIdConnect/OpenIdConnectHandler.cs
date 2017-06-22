@@ -204,7 +204,7 @@ namespace Microsoft.AspNetCore.Authentication.OpenIdConnect
             };
 
             await Events.RedirectToIdentityProviderForSignOut(redirectContext);
-            if (redirectContext.Skipped)
+            if (redirectContext.Handled)
             {
                 Logger.RedirectToIdentityProviderForSignOutSkipped();
                 return;
@@ -344,7 +344,7 @@ namespace Microsoft.AspNetCore.Authentication.OpenIdConnect
             };
 
             await Events.RedirectToIdentityProvider(redirectContext);
-            if (redirectContext.Skipped)
+            if (redirectContext.Handled)
             {
                 Logger.RedirectToIdentityProviderSkipped();
                 return;
@@ -433,7 +433,7 @@ namespace Microsoft.AspNetCore.Authentication.OpenIdConnect
                     if (Options.SkipUnrecognizedRequests)
                     {
                         // Not for us?
-                        return HandleRequestResult.Ignore();
+                        return HandleRequestResult.SkipHandler();
                     }
                     return HandleRequestResult.Fail("An OpenID Connect response cannot contain an " +
                             "identity token or an access token when using response_mode=query");
@@ -455,7 +455,7 @@ namespace Microsoft.AspNetCore.Authentication.OpenIdConnect
                 if (Options.SkipUnrecognizedRequests)
                 {
                     // Not for us?
-                    return HandleRequestResult.Ignore();
+                    return HandleRequestResult.SkipHandler();
                 }
                 return HandleRequestResult.Fail("No message.");
             }
@@ -485,7 +485,7 @@ namespace Microsoft.AspNetCore.Authentication.OpenIdConnect
                         Logger.NullOrEmptyAuthorizationResponseState();
                         if (Options.SkipUnrecognizedRequests)
                         {
-                            return HandleRequestResult.Ignore();
+                            return HandleRequestResult.SkipHandler();
                         }
                         return HandleRequestResult.Fail(Resources.MessageStateIsNullOrEmpty);
                     }
@@ -500,7 +500,7 @@ namespace Microsoft.AspNetCore.Authentication.OpenIdConnect
                     if (Options.SkipUnrecognizedRequests)
                     {
                         // Not for us?
-                        return HandleRequestResult.Ignore();
+                        return HandleRequestResult.SkipHandler();
                     }
                     return HandleRequestResult.Fail(Resources.MessageStateIsInvalid);
                 }

@@ -48,7 +48,7 @@ namespace Microsoft.AspNetCore.Authentication.Test.OpenIdConnect
                 OnMessageReceived = context =>
                 {
                     messageReceived = true;
-                    context.SkipRequest();
+                    context.SkipHandler();
                     return Task.FromResult(0);
                 },
                 OnTokenValidated = TokenNotImpl,
@@ -169,7 +169,7 @@ namespace Microsoft.AspNetCore.Authentication.Test.OpenIdConnect
                 OnTokenValidated = context =>
                 {
                     tokenValidated = true;
-                    context.SkipRequest();
+                    context.SkipHandler();
                     return Task.FromResult(0);
                 },
                 OnAuthorizationCodeReceived = CodeNotImpl,
@@ -358,7 +358,7 @@ namespace Microsoft.AspNetCore.Authentication.Test.OpenIdConnect
                 OnAuthorizationCodeReceived = context =>
                 {
                     codeReceived = true;
-                    context.SkipRequest();
+                    context.SkipHandler();
                     return Task.FromResult(0);
                 },
                 OnTokenResponseReceived = TokenResponseNotImpl,
@@ -570,7 +570,7 @@ namespace Microsoft.AspNetCore.Authentication.Test.OpenIdConnect
                 OnTokenResponseReceived = context =>
                 {
                     tokenResponseReceived = true;
-                    context.SkipRequest();
+                    context.SkipHandler();
                     return Task.FromResult(0);
                 },
                 OnUserInformationReceived = UserNotImpl,
@@ -800,7 +800,7 @@ namespace Microsoft.AspNetCore.Authentication.Test.OpenIdConnect
                 OnTokenValidated = context =>
                 {
                     tokenValidated = true;
-                    context.SkipRequest();
+                    context.SkipHandler();
                     return Task.FromResult(0);
                 },
                 OnUserInformationReceived = UserNotImpl,
@@ -1036,7 +1036,7 @@ namespace Microsoft.AspNetCore.Authentication.Test.OpenIdConnect
                 OnUserInformationReceived = context =>
                 {
                     userInfoReceived = true;
-                    context.SkipRequest();
+                    context.SkipHandler();
                     return Task.FromResult(0);
                 },
                 OnAuthenticationFailed = FailedNotImpl,
@@ -1297,7 +1297,7 @@ namespace Microsoft.AspNetCore.Authentication.Test.OpenIdConnect
                 {
                     authFailed = true;
                     Assert.Equal("TestException", context.Exception.Message);
-                    context.Ignore();
+                    context.SkipHandler();
                     return Task.FromResult(0);
                 },
                 OnRemoteFailure = FailureNotImpl,
@@ -1598,7 +1598,7 @@ namespace Microsoft.AspNetCore.Authentication.Test.OpenIdConnect
                 {
                     remoteFailure = true;
                     Assert.Equal("TestException", context.Failure.Message);
-                    context.SkipRequest();
+                    context.SkipHandler();
                     return Task.FromResult(0);
                 },
                 OnTicketReceived = TicketNotImpl,
@@ -1738,7 +1738,7 @@ namespace Microsoft.AspNetCore.Authentication.Test.OpenIdConnect
                 OnTicketReceived = context =>
                 {
                     ticektReceived = true;
-                    context.SkipRequest();
+                    context.SkipHandler();
                     return Task.FromResult(0);
                 },
 

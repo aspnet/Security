@@ -24,11 +24,11 @@ namespace Microsoft.AspNetCore.Authentication.OpenIdConnect
         /// <summary>
         /// If true, will skip any default logic for this redirect.
         /// </summary>
-        public bool Skipped { get; private set; }
+        public bool Handled { get; private set; }
 
         /// <summary>
         /// Skips any default logic for this redirect.
         /// </summary>
-        public void Skip() => Skipped = true;
+        public void HandleResponse() => Handled = true;
     }
 }
