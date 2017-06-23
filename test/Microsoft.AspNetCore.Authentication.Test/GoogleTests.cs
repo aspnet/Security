@@ -516,7 +516,7 @@ namespace Microsoft.AspNetCore.Authentication.Google
                     OnCreatingTicket = context =>
                     {
                         var refreshToken = context.RefreshToken;
-                        context.Ticket.Principal.AddIdentity(new ClaimsIdentity(new Claim[] { new Claim("RefreshToken", refreshToken, ClaimValueTypes.String, "Google") }, "Google"));
+                        context.Principal.AddIdentity(new ClaimsIdentity(new Claim[] { new Claim("RefreshToken", refreshToken, ClaimValueTypes.String, "Google") }, "Google"));
                         return Task.FromResult(0);
                     }
                 };

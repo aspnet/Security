@@ -135,10 +135,9 @@ namespace Microsoft.AspNetCore.Authentication.JwtBearer
 
                         Logger.TokenValidationSucceeded();
 
-                        var ticket = new AuthenticationTicket(principal, new AuthenticationProperties(), Scheme.Name);
                         var tokenValidatedContext = new TokenValidatedContext(Context, Scheme, Options)
                         {
-                            Ticket = ticket,
+                            Principal = principal,
                             SecurityToken = validatedToken
                         };
 
@@ -147,17 +146,16 @@ namespace Microsoft.AspNetCore.Authentication.JwtBearer
                         {
                             return tokenValidatedContext.Result;
                         }
-                        ticket = tokenValidatedContext.Ticket;
 
                         if (Options.SaveToken)
                         {
-                            ticket.Properties.StoreTokens(new[]
+                            tokenValidatedContext.Properties.StoreTokens(new[]
                             {
                                 new AuthenticationToken { Name = "access_token", Value = token }
                             });
                         }
 
-                        return AuthenticateResult.Success(ticket);
+                        return AuthenticateResult.Success(new AuthenticationTicket(tokenValidatedContext.Principal, tokenValidatedContext.Properties, Scheme.Name));
                     }
                 }
 

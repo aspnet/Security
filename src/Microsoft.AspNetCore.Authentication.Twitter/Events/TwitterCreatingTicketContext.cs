@@ -19,7 +19,8 @@ namespace Microsoft.AspNetCore.Authentication.Twitter
         /// <param name="context">The HTTP environment</param>
         /// <param name="scheme">The scheme data</param>
         /// <param name="options">The options for Twitter</param>
-        /// <param name="ticket">AuthenticationTicket.</param>
+        /// <param name="principal">The <see cref="ClaimsPrincipal"/>.</param>
+        /// <param name="properties">The <see cref="AuthenticationProperties"/>.</param>
         /// <param name="userId">Twitter user ID</param>
         /// <param name="screenName">Twitter screen name</param>
         /// <param name="accessToken">Twitter access token</param>
@@ -29,7 +30,8 @@ namespace Microsoft.AspNetCore.Authentication.Twitter
             HttpContext context,
             AuthenticationScheme scheme,
             TwitterOptions options,
-            AuthenticationTicket ticket,
+            ClaimsPrincipal principal,
+            AuthenticationProperties properties,
             string userId,
             string screenName,
             string accessToken,
@@ -42,7 +44,8 @@ namespace Microsoft.AspNetCore.Authentication.Twitter
             AccessToken = accessToken;
             AccessTokenSecret = accessTokenSecret;
             User = user ?? new JObject();
-            Ticket = ticket;
+            Principal = principal;
+            Properties = properties;
         }
 
         /// <summary>

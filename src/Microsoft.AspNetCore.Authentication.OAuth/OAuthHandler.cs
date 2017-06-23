@@ -185,10 +185,9 @@ namespace Microsoft.AspNetCore.Authentication.OAuth
 
         protected virtual async Task<AuthenticationTicket> CreateTicketAsync(ClaimsIdentity identity, AuthenticationProperties properties, OAuthTokenResponse tokens)
         {
-            var ticket = new AuthenticationTicket(new ClaimsPrincipal(identity), properties, Scheme.Name);
-            var context = new OAuthCreatingTicketContext(ticket, Context, Scheme, Options, Backchannel, tokens);
+            var context = new OAuthCreatingTicketContext(new ClaimsPrincipal(identity), properties, Context, Scheme, Options, Backchannel, tokens);
             await Events.CreatingTicket(context);
-            return context.Ticket;
+            return new AuthenticationTicket(context.Principal, context.Properties, Scheme.Name);
         }
 
         protected override async Task HandleChallengeAsync(AuthenticationProperties properties)

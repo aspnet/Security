@@ -127,12 +127,10 @@ namespace Microsoft.AspNetCore.Authentication.Twitter
                 action.Run(user, identity, ClaimsIssuer);
             }
 
-            var ticket = new AuthenticationTicket(new ClaimsPrincipal(identity), properties, Scheme.Name);
-
-            var context = new TwitterCreatingTicketContext(Context, Scheme, Options, ticket, token.UserId, token.ScreenName, token.Token, token.TokenSecret, user);
+            var context = new TwitterCreatingTicketContext(Context, Scheme, Options, new ClaimsPrincipal(identity), properties, token.UserId, token.ScreenName, token.Token, token.TokenSecret, user);
             await Events.CreatingTicket(context);
 
-            return context.Ticket;
+            return new AuthenticationTicket(context.Principal, context.Properties, Scheme.Name);
         }
 
         protected override async Task HandleChallengeAsync(AuthenticationProperties properties)

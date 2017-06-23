@@ -127,11 +127,8 @@ namespace Microsoft.AspNetCore.Authentication.JwtBearer
                             new Claim(ClaimsIdentity.DefaultNameClaimType, "bob")
                         };
 
-                        var ticket = new AuthenticationTicket(
-                            new ClaimsPrincipal(new ClaimsIdentity(claims, context.Scheme.Name)),
-                            new AuthenticationProperties(), context.Scheme.Name);
-
-                        context.Success(ticket);
+                        context.Principal = new ClaimsPrincipal(new ClaimsIdentity(claims, context.Scheme.Name));
+                        context.Success();
 
                         return Task.FromResult<object>(null);
                     }
@@ -338,7 +335,7 @@ namespace Microsoft.AspNetCore.Authentication.JwtBearer
                     {
                         // Retrieve the NameIdentifier claim from the identity
                         // returned by the custom security token validator.
-                        var identity = (ClaimsIdentity)context.Ticket.Principal.Identity;
+                        var identity = (ClaimsIdentity)context.Principal.Identity;
                         var identifier = identity.FindFirst(ClaimTypes.NameIdentifier);
 
                         Assert.Equal("Bob le Tout Puissant", identifier.Value);
