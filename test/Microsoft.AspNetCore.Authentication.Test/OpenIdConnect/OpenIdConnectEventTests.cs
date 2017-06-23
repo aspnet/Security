@@ -1512,11 +1512,8 @@ namespace Microsoft.AspNetCore.Authentication.Test.OpenIdConnect
                         new Claim(ClaimsIdentity.DefaultNameClaimType, "bob")
                     };
 
-                    var ticket = new AuthenticationTicket(
-                        new ClaimsPrincipal(new ClaimsIdentity(claims, context.Scheme.Name)),
-                        new AuthenticationProperties(), context.Scheme.Name);
-
-                    context.Success(ticket);
+                    context.Principal = new ClaimsPrincipal(new ClaimsIdentity(claims, context.Scheme.Name));
+                    context.Success();
                     return Task.FromResult(0);
                 },
                 OnRemoteFailure = FailureNotImpl,
