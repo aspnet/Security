@@ -155,7 +155,8 @@ namespace Microsoft.AspNetCore.Authentication.JwtBearer
                             });
                         }
 
-                        return AuthenticateResult.Success(new AuthenticationTicket(tokenValidatedContext.Principal, tokenValidatedContext.Properties, Scheme.Name));
+                        tokenValidatedContext.Success();
+                        return tokenValidatedContext.Result;
                     }
                 }
 
