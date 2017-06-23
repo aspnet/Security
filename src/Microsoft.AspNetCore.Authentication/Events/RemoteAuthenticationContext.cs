@@ -40,9 +40,7 @@ namespace Microsoft.AspNetCore.Authentication
         /// <summary>
         /// Calls success creating a ticket with the <see cref="Principal"/> and <see cref="Properties"/>.
         /// </summary>
-        public void Success() => Success(new AuthenticationTicket(Principal, Properties, Scheme.Name));
-
-        public void Success(AuthenticationTicket ticket) => Result = HandleRequestResult.Success(ticket);
+        public void Success() => Result = HandleRequestResult.Success(new AuthenticationTicket(Principal, Properties, Scheme.Name));
 
         public void Fail(Exception failure) => Result = HandleRequestResult.Fail(failure);
 

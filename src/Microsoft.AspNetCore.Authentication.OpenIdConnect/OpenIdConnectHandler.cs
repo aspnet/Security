@@ -474,7 +474,6 @@ namespace Microsoft.AspNetCore.Authentication.OpenIdConnect
                     return messageReceivedContext.Result;
                 }
                 authorizationResponse = messageReceivedContext.ProtocolMessage;
-                // REVIEW: should we let them set Principal here?
                 properties = messageReceivedContext.Properties;
 
                 if (properties == null)
