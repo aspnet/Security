@@ -9,7 +9,7 @@ namespace Microsoft.AspNetCore.Authentication.OpenIdConnect
     public class RemoteSignOutContext : RemoteAuthenticationContext<OpenIdConnectOptions>
     {
         public RemoteSignOutContext(HttpContext context, AuthenticationScheme scheme, OpenIdConnectOptions options, OpenIdConnectMessage message)
-            : base(context, scheme, options)
+            : base(context, scheme, options, new AuthenticationProperties())
             => ProtocolMessage = message;
 
         public OpenIdConnectMessage ProtocolMessage { get; set; }

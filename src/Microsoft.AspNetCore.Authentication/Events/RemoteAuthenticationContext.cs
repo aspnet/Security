@@ -18,39 +18,29 @@ namespace Microsoft.AspNetCore.Authentication
         /// <param name="context">The context.</param>
         /// <param name="scheme">The authentication scheme.</param>
         /// <param name="options">The authentication options associated with the scheme.</param>
+        /// <param name="properties">The authentication properties.</param>
         protected RemoteAuthenticationContext(
             HttpContext context,
             AuthenticationScheme scheme,
-            TOptions options)
-            : base(context, scheme, options) { }
-
-        /// <summary>
-        /// Gets or set the <see cref="AuthenticationTicket"/> containing
-        /// the user principal and the authentication properties.
-        /// </summary>
-        public AuthenticationTicket Ticket { get; set; }
+            TOptions options,
+            AuthenticationProperties properties)
+            : base(context, scheme, options)
+            => Properties = properties ?? new AuthenticationProperties();
 
         /// <summary>
         /// Gets the <see cref="ClaimsPrincipal"/> containing the user claims.
         /// </summary>
-        public ClaimsPrincipal Principal => Ticket?.Principal;
+        public ClaimsPrincipal Principal { get; set; }
 
         /// <summary>
         /// Gets or sets the <see cref="AuthenticationProperties"/>.
         /// </summary>
-        public AuthenticationProperties Properties
-        {
-            get => Ticket?.Properties;
-            set
-            {
-                if (Ticket != null)
-                {
-                    Ticket = new AuthenticationTicket(Principal, value, Scheme.Name);
-                }
-            }
-        }
+        public virtual AuthenticationProperties Properties { get; set; }
 
-        public void Success(AuthenticationTicket ticket) => Result = HandleRequestResult.Success(ticket);
+        /// <summary>
+        /// Calls success creating a ticket with the <see cref="Principal"/> and <see cref="Properties"/>.
+        /// </summary>
+        public void Success() => Result = HandleRequestResult.Success(new AuthenticationTicket(Principal, Properties, Scheme.Name));
 
         public void Fail(Exception failure) => Result = HandleRequestResult.Fail(failure);
 

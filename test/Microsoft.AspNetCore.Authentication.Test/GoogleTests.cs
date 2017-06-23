@@ -516,7 +516,7 @@ namespace Microsoft.AspNetCore.Authentication.Google
                     OnCreatingTicket = context =>
                     {
                         var refreshToken = context.RefreshToken;
-                        context.Ticket.Principal.AddIdentity(new ClaimsIdentity(new Claim[] { new Claim("RefreshToken", refreshToken, ClaimValueTypes.String, "Google") }, "Google"));
+                        context.Principal.AddIdentity(new ClaimsIdentity(new Claim[] { new Claim("RefreshToken", refreshToken, ClaimValueTypes.String, "Google") }, "Google"));
                         return Task.FromResult(0);
                     }
                 };
@@ -595,7 +595,7 @@ namespace Microsoft.AspNetCore.Authentication.Google
                 {
                     OnTicketReceived = context =>
                     {
-                        context.Ticket.Properties.RedirectUri = null;
+                        context.Properties.RedirectUri = null;
                         return Task.FromResult(0);
                     }
                 };
@@ -985,7 +985,7 @@ namespace Microsoft.AspNetCore.Authentication.Google
                         else if (req.Path == new PathString("/tokens"))
                         {
                             var result = await context.AuthenticateAsync(TestExtensions.CookieAuthenticationScheme);
-                            var tokens = result.Ticket.Properties.GetTokens();
+                            var tokens = result.Properties.GetTokens();
                             res.Describe(tokens);
                         }
                         else if (req.Path == new PathString("/me"))
@@ -995,17 +995,17 @@ namespace Microsoft.AspNetCore.Authentication.Google
                         else if (req.Path == new PathString("/authenticate"))
                         {
                             var result = await context.AuthenticateAsync(TestExtensions.CookieAuthenticationScheme);
-                            res.Describe(result.Ticket.Principal);
+                            res.Describe(result.Principal);
                         }
                         else if (req.Path == new PathString("/authenticateGoogle"))
                         {
                             var result = await context.AuthenticateAsync("Google");
-                            res.Describe(result?.Ticket?.Principal);
+                            res.Describe(result?.Principal);
                         }
                         else if (req.Path == new PathString("/authenticateFacebook"))
                         {
                             var result = await context.AuthenticateAsync("Facebook");
-                            res.Describe(result?.Ticket?.Principal);
+                            res.Describe(result?.Principal);
                         }
                         else if (req.Path == new PathString("/unauthorized"))
                         {

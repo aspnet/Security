@@ -263,7 +263,7 @@ namespace Microsoft.AspNetCore.Authentication.Test.OpenIdConnect
                 {
                     tokenValidated = true;
                     context.HandleResponse();
-                    context.Ticket = null;
+                    context.Principal = null;
                     context.Response.StatusCode = StatusCodes.Status202Accepted;
                     return Task.FromResult(0);
                 },
@@ -305,8 +305,7 @@ namespace Microsoft.AspNetCore.Authentication.Test.OpenIdConnect
                 OnTokenValidated = context =>
                 {
                     tokenValidated = true;
-                    context.Success(context.Ticket);
-                    // context.Ticket = null;
+                    context.Success();
                     return Task.FromResult(0);
                 },
                 OnAuthorizationCodeReceived = CodeNotImpl,
@@ -464,7 +463,7 @@ namespace Microsoft.AspNetCore.Authentication.Test.OpenIdConnect
                 {
                     codeReceived = true;
                     context.HandleResponse();
-                    context.Ticket = null;
+                    context.Principal = null;
                     context.Response.StatusCode = StatusCodes.Status202Accepted;
                     return Task.FromResult(0);
                 },
@@ -511,8 +510,7 @@ namespace Microsoft.AspNetCore.Authentication.Test.OpenIdConnect
                 OnAuthorizationCodeReceived = context =>
                 {
                     codeReceived = true;
-                    context.Success(context.Ticket);
-                    // context.Ticket = null;
+                    context.Success();
                     return Task.FromResult(0);
                 },
                 OnTokenResponseReceived = TokenResponseNotImpl,
@@ -687,7 +685,7 @@ namespace Microsoft.AspNetCore.Authentication.Test.OpenIdConnect
                 OnTokenResponseReceived = context =>
                 {
                     tokenResponseReceived = true;
-                    context.Ticket = null;
+                    context.Principal = null;
                     context.HandleResponse();
                     context.Response.StatusCode = StatusCodes.Status202Accepted;
                     return Task.FromResult(0);
@@ -741,8 +739,7 @@ namespace Microsoft.AspNetCore.Authentication.Test.OpenIdConnect
                 OnTokenResponseReceived = context =>
                 {
                     tokenResponseReceived = true;
-                    // context.Ticket = null;
-                    context.Success(context.Ticket);
+                    context.Success();
                     return Task.FromResult(0);
                 },
                 OnUserInformationReceived = UserNotImpl,
@@ -917,7 +914,7 @@ namespace Microsoft.AspNetCore.Authentication.Test.OpenIdConnect
                 OnTokenValidated = context =>
                 {
                     tokenValidated = true;
-                    context.Ticket = null;
+                    context.Principal = null;
                     context.HandleResponse();
                     context.Response.StatusCode = StatusCodes.Status202Accepted;
                     return Task.FromResult(0);
@@ -971,8 +968,7 @@ namespace Microsoft.AspNetCore.Authentication.Test.OpenIdConnect
                 OnTokenValidated = context =>
                 {
                     tokenValidated = true;
-                    // context.Ticket = null;
-                    context.Success(context.Ticket);
+                    context.Success();
                     return Task.FromResult(0);
                 },
                 OnUserInformationReceived = UserNotImpl,
@@ -1165,7 +1161,7 @@ namespace Microsoft.AspNetCore.Authentication.Test.OpenIdConnect
                 OnUserInformationReceived = context =>
                 {
                     userInfoReceived = true;
-                    context.Ticket = null;
+                    context.Principal = null;
                     context.HandleResponse();
                     context.Response.StatusCode = StatusCodes.Status202Accepted;
                     return Task.FromResult(0);
@@ -1226,7 +1222,7 @@ namespace Microsoft.AspNetCore.Authentication.Test.OpenIdConnect
                 {
                     userInfoReceived = true;
                     // context.Ticket = null;
-                    context.Success(context.Ticket);
+                    context.Success();
                     return Task.FromResult(0);
                 },
                 OnAuthenticationFailed = FailedNotImpl,
@@ -1440,7 +1436,7 @@ namespace Microsoft.AspNetCore.Authentication.Test.OpenIdConnect
                 {
                     authFailed = true;
                     Assert.Equal("TestException", context.Exception.Message);
-                    Assert.Null(context.Ticket);
+                    Assert.Null(context.Principal);
                     context.HandleResponse();
                     context.Response.StatusCode = StatusCodes.Status202Accepted;
                     return Task.FromResult(0);
@@ -1507,7 +1503,7 @@ namespace Microsoft.AspNetCore.Authentication.Test.OpenIdConnect
                 {
                     authFailed = true;
                     Assert.Equal("TestException", context.Exception.Message);
-                    Assert.Null(context.Ticket);
+                    Assert.Null(context.Principal);
 
                     var claims = new[]
                     {
@@ -1516,11 +1512,8 @@ namespace Microsoft.AspNetCore.Authentication.Test.OpenIdConnect
                         new Claim(ClaimsIdentity.DefaultNameClaimType, "bob")
                     };
 
-                    var ticket = new AuthenticationTicket(
-                        new ClaimsPrincipal(new ClaimsIdentity(claims, context.Scheme.Name)),
-                        new AuthenticationProperties(), context.Scheme.Name);
-
-                    context.Success(ticket);
+                    context.Principal = new ClaimsPrincipal(new ClaimsIdentity(claims, context.Scheme.Name));
+                    context.Success();
                     return Task.FromResult(0);
                 },
                 OnRemoteFailure = FailureNotImpl,

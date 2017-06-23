@@ -22,30 +22,17 @@ namespace Microsoft.AspNetCore.Authentication
             : base(context, scheme, options) { }
 
         /// <summary>
-        /// Gets or set the <see cref="AuthenticationTicket"/> containing
-        /// the user principal and the authentication properties.
+        /// Gets or sets the <see cref="ClaimsPrincipal"/> containing the user claims.
         /// </summary>
-        public AuthenticationTicket Ticket { get; set; }
+        public ClaimsPrincipal Principal { get; set; }
 
-        /// <summary>
-        /// Gets the <see cref="ClaimsPrincipal"/> containing the user claims.
-        /// </summary>
-        public ClaimsPrincipal Principal => Ticket?.Principal;
-
+        private AuthenticationProperties _properties;
         /// <summary>
         /// Gets or sets the <see cref="AuthenticationProperties"/>.
         /// </summary>
-        public AuthenticationProperties Properties
-        {
-            get => Ticket?.Properties;
-
-            set
-            {
-                if (Ticket != null)
-                {
-                    Ticket = new AuthenticationTicket(Principal, value, Scheme.Name);
-                }
-            }
+        public AuthenticationProperties Properties {
+            get => _properties ?? (_properties = new AuthenticationProperties());
+            set => _properties = value;
         }
 
         /// <summary>
@@ -53,7 +40,10 @@ namespace Microsoft.AspNetCore.Authentication
         /// </summary>
         public AuthenticateResult Result { get; private set; }
 
-        public void Success(AuthenticationTicket ticket) => Result = AuthenticateResult.Success(ticket);
+        /// <summary>
+        /// Calls success creating a ticket with the <see cref="Principal"/> and <see cref="Properties"/>.
+        /// </summary>
+        public void Success() => Result = HandleRequestResult.Success(new AuthenticationTicket(Principal, Properties, Scheme.Name));
 
         /// <summary>
         /// Indicates that there was no information returned for this authentication scheme.
