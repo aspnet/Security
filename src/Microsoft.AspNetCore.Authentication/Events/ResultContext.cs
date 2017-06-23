@@ -2,6 +2,7 @@
 // Licensed under the Apache License, Version 2.0. See License.txt in the project root for license information.
 
 using System;
+using System.Security.Claims;
 using Microsoft.AspNetCore.Http;
 
 namespace Microsoft.AspNetCore.Authentication
@@ -21,17 +22,28 @@ namespace Microsoft.AspNetCore.Authentication
             : base(context, scheme, options) { }
 
         /// <summary>
-        /// Gets or set the <see cref="AuthenticationTicket"/> containing
-        /// the user principal and the authentication properties.
+        /// Gets or sets the <see cref="ClaimsPrincipal"/> containing the user claims.
         /// </summary>
-        public AuthenticationTicket Ticket { get; set; }
+        public ClaimsPrincipal Principal { get; set; }
+
+        private AuthenticationProperties _properties;
+        /// <summary>
+        /// Gets or sets the <see cref="AuthenticationProperties"/>.
+        /// </summary>
+        public AuthenticationProperties Properties {
+            get => _properties ?? (_properties = new AuthenticationProperties());
+            set => _properties = value;
+        }
 
         /// <summary>
         /// Gets the <see cref="AuthenticateResult"/> result.
         /// </summary>
         public AuthenticateResult Result { get; private set; }
 
-        public void Success(AuthenticationTicket ticket) => Result = AuthenticateResult.Success(ticket);
+        /// <summary>
+        /// Calls success creating a ticket with the <see cref="Principal"/> and <see cref="Properties"/>.
+        /// </summary>
+        public void Success() => Result = HandleRequestResult.Success(new AuthenticationTicket(Principal, Properties, Scheme.Name));
 
         /// <summary>
         /// Indicates that there was no information returned for this authentication scheme.
