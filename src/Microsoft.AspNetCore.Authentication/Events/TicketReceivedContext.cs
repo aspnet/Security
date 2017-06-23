@@ -3,7 +3,6 @@
 
 using System.Security.Claims;
 using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Http.Authentication;
 
 namespace Microsoft.AspNetCore.Authentication
 {
@@ -17,10 +16,8 @@ namespace Microsoft.AspNetCore.Authentication
             AuthenticationScheme scheme,
             RemoteAuthenticationOptions options,
             AuthenticationTicket ticket)
-            : base(context, scheme, options)
-        {
-            Ticket = ticket;
-        }
+            : base(context, scheme, options, ticket?.Properties)
+            => Principal = ticket?.Principal;
 
         public string ReturnUri { get; set; }
     }

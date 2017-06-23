@@ -10,7 +10,7 @@ namespace Microsoft.AspNetCore.Authentication.OpenIdConnect
     public class AuthenticationFailedContext : RemoteAuthenticationContext<OpenIdConnectOptions>
     {
         public AuthenticationFailedContext(HttpContext context, AuthenticationScheme scheme, OpenIdConnectOptions options)
-            : base(context, scheme, options)
+            : base(context, scheme, options, new AuthenticationProperties())
         { }
 
         public OpenIdConnectMessage ProtocolMessage { get; set; }
