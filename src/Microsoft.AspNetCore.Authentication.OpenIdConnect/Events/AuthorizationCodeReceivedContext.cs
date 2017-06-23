@@ -19,9 +19,9 @@ namespace Microsoft.AspNetCore.Authentication.OpenIdConnect
         public AuthorizationCodeReceivedContext(
             HttpContext context,
             AuthenticationScheme scheme,
-            OpenIdConnectOptions options)
-            : base(context, scheme, options)
-        { }
+            OpenIdConnectOptions options,
+            AuthenticationProperties properties)
+            : base(context, scheme, options, properties) { }
 
         public OpenIdConnectMessage ProtocolMessage { get; set; }
 
