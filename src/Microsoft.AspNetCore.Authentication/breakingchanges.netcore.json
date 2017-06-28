@@ -105,18 +105,12 @@
       "Kind": "Removal"
     },
     {
-      "TypeId": "public enum Microsoft.AspNetCore.Authentication.EventResultState",
-      "MemberId": "HandledResponse = 2",
-      "Kind": "Removal"
-    },
-    {
-      "TypeId": "public enum Microsoft.AspNetCore.Authentication.EventResultState",
-      "MemberId": "Skipped = 1",
-      "Kind": "Removal"
-    },
-    {
       "TypeId": "public static class Microsoft.Extensions.DependencyInjection.AuthenticationServiceCollectionExtensions",
       "MemberId": "public static Microsoft.Extensions.DependencyInjection.IServiceCollection AddAuthentication(this Microsoft.Extensions.DependencyInjection.IServiceCollection services)",
+      "Kind": "Removal"
+    },
+    {
+      "TypeId": "public enum Microsoft.AspNetCore.Authentication.EventResultState",
       "Kind": "Removal"
     }
   ]
