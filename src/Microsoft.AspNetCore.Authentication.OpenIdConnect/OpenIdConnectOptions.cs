@@ -48,8 +48,6 @@ namespace Microsoft.AspNetCore.Authentication.OpenIdConnect
             ClaimActions.DeleteClaim("nonce");
             ClaimActions.DeleteClaim("aud");
             ClaimActions.DeleteClaim("azp");
-            ClaimActions.DeleteClaim("acr");
-            ClaimActions.DeleteClaim("amr");
             ClaimActions.DeleteClaim("iss");
             ClaimActions.DeleteClaim("iat");
             ClaimActions.DeleteClaim("nbf");
