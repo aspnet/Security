@@ -277,7 +277,7 @@ namespace Microsoft.AspNetCore.Authentication.Cookies
         {
             var server = CreateServer(o =>
             {
-                o.Cookie.Expiration = TimeSpan.FromMinutes(10);
+                o.ExpireTimeSpan = TimeSpan.FromMinutes(10);
                 o.SlidingExpiration = false;
             }, SignInAsAlice);
 
@@ -306,7 +306,7 @@ namespace Microsoft.AspNetCore.Authentication.Cookies
         {
             var server = CreateServer(o =>
             {
-                o.Cookie.Expiration = TimeSpan.FromMinutes(10);
+                o.ExpireTimeSpan = TimeSpan.FromMinutes(10);
                 o.SlidingExpiration = false;
             },
             context =>
@@ -339,7 +339,7 @@ namespace Microsoft.AspNetCore.Authentication.Cookies
         {
             var server = CreateServer(o =>
             {
-                o.Cookie.Expiration = TimeSpan.FromMinutes(10);
+                o.ExpireTimeSpan = TimeSpan.FromMinutes(10);
                 o.Events = new CookieAuthenticationEvents
                 {
                     OnValidatePrincipal = ctx =>
@@ -367,7 +367,7 @@ namespace Microsoft.AspNetCore.Authentication.Cookies
         {
             var server = CreateServer(o =>
             {
-                o.Cookie.Expiration = TimeSpan.FromMinutes(10);
+                o.ExpireTimeSpan = TimeSpan.FromMinutes(10);
                 o.SlidingExpiration = false;
                 o.Events = new CookieAuthenticationEvents
                 {
@@ -395,7 +395,7 @@ namespace Microsoft.AspNetCore.Authentication.Cookies
         {
             var server = CreateServer(o =>
             {
-                o.Cookie.Expiration = TimeSpan.FromMinutes(10);
+                o.ExpireTimeSpan = TimeSpan.FromMinutes(10);
                 o.SlidingExpiration = false;
                 o.Events = new CookieAuthenticationEvents
                 {
@@ -431,7 +431,7 @@ namespace Microsoft.AspNetCore.Authentication.Cookies
         {
             var server = CreateServer(o =>
             {
-                o.Cookie.Expiration = TimeSpan.FromMinutes(10);
+                o.ExpireTimeSpan = TimeSpan.FromMinutes(10);
                 o.SlidingExpiration = false;
                 o.Events = new CookieAuthenticationEvents
                 {
@@ -476,7 +476,7 @@ namespace Microsoft.AspNetCore.Authentication.Cookies
         {
             var server = CreateServer(o =>
             {
-                o.Cookie.Expiration = TimeSpan.FromMinutes(10);
+                o.ExpireTimeSpan = TimeSpan.FromMinutes(10);
                 o.Events = new CookieAuthenticationEvents
                 {
                     OnValidatePrincipal = ctx =>
@@ -520,7 +520,7 @@ namespace Microsoft.AspNetCore.Authentication.Cookies
         {
             var server = CreateServer(o =>
             {
-                o.Cookie.Expiration = TimeSpan.FromMinutes(10);
+                o.ExpireTimeSpan = TimeSpan.FromMinutes(10);
                 o.SlidingExpiration = false;
                 o.Events = new CookieAuthenticationEvents
                 {
@@ -569,7 +569,7 @@ namespace Microsoft.AspNetCore.Authentication.Cookies
             DateTimeOffset? lastExpiresDate = null;
             var server = CreateServer(o =>
             {
-                o.Cookie.Expiration = TimeSpan.FromMinutes(10);
+                o.ExpireTimeSpan = TimeSpan.FromMinutes(10);
                 o.SlidingExpiration = sliding;
                 o.Events = new CookieAuthenticationEvents
                 {
@@ -619,7 +619,7 @@ namespace Microsoft.AspNetCore.Authentication.Cookies
         {
             var server = CreateServer(o =>
             {
-                o.Cookie.Expiration = TimeSpan.FromMinutes(10);
+                o.ExpireTimeSpan = TimeSpan.FromMinutes(10);
                 o.SlidingExpiration = false;
                 o.Events = new CookieAuthenticationEvents()
                 {
@@ -656,7 +656,7 @@ namespace Microsoft.AspNetCore.Authentication.Cookies
         {
             var server = CreateServer(o =>
             {
-                o.Cookie.Expiration = TimeSpan.FromMinutes(10);
+                o.ExpireTimeSpan = TimeSpan.FromMinutes(10);
                 o.SlidingExpiration = true;
             },
             SignInAsAlice);
