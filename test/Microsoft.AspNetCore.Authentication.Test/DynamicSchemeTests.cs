@@ -171,12 +171,6 @@ namespace Microsoft.AspNetCore.Authentication
                             var auth = context.RequestServices.GetRequiredService<IAuthenticationSchemeProvider>();
                             auth.RemoveScheme(name);
                         }
-                        else if (req.Path.StartsWithSegments(new PathString("/ctorCount"), out remainder))
-                        {
-                            var name = (remainder.Value.Length > 0) ? remainder.Value.Substring(1) : null;
-                            var result = await context.AuthenticateAsync(name);
-                            res.Describe(result?.Ticket?.Principal);
-                        }
                         else
                         {
                             await next();
