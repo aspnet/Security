@@ -5,6 +5,7 @@ using System;
 using System.Security.Claims;
 using Microsoft.AspNetCore.Authentication.OAuth.Claims;
 using Microsoft.AspNetCore.Http;
+using System.Globalization;
 
 namespace Microsoft.AspNetCore.Authentication.Twitter
 {
@@ -84,6 +85,24 @@ namespace Microsoft.AspNetCore.Authentication.Twitter
         {
             get => _stateCookieBuilder;
             set => _stateCookieBuilder = value ?? throw new ArgumentNullException(nameof(value));
+        }
+
+        /// <summary>
+        /// Added the validate method to ensure that the customer key and customer secret values are not not empty for the twitter authentication middleware
+        /// </summary>
+        public override void Validate()
+        {
+            if (string.IsNullOrEmpty(ConsumerKey))
+            {
+                throw new ArgumentException(string.Format(CultureInfo.CurrentCulture, Resources.Exception_OptionMustBeProvided, nameof(ConsumerKey)), nameof(ConsumerKey));
+            }
+
+            if (string.IsNullOrEmpty(ConsumerSecret))
+            {
+                throw new ArgumentException(string.Format(CultureInfo.CurrentCulture, Resources.Exception_OptionMustBeProvided, nameof(ConsumerSecret)), nameof(ConsumerSecret));
+            }
+
+            base.Validate();
         }
 
         private class TwitterCookieBuilder : CookieBuilder
