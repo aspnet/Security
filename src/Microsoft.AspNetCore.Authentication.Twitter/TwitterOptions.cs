@@ -3,9 +3,9 @@
 
 using System;
 using System.Security.Claims;
+using System.Globalization;
 using Microsoft.AspNetCore.Authentication.OAuth.Claims;
 using Microsoft.AspNetCore.Http;
-using System.Globalization;
 
 namespace Microsoft.AspNetCore.Authentication.Twitter
 {
