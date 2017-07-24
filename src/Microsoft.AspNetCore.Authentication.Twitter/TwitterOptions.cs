@@ -92,6 +92,7 @@ namespace Microsoft.AspNetCore.Authentication.Twitter
         /// </summary>
         public override void Validate()
         {
+            base.Validate();
             if (string.IsNullOrEmpty(ConsumerKey))
             {
                 throw new ArgumentException(string.Format(CultureInfo.CurrentCulture, Resources.Exception_OptionMustBeProvided, nameof(ConsumerKey)), nameof(ConsumerKey));
@@ -101,8 +102,6 @@ namespace Microsoft.AspNetCore.Authentication.Twitter
             {
                 throw new ArgumentException(string.Format(CultureInfo.CurrentCulture, Resources.Exception_OptionMustBeProvided, nameof(ConsumerSecret)), nameof(ConsumerSecret));
             }
-
-            base.Validate();
         }
 
         private class TwitterCookieBuilder : CookieBuilder
