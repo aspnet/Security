@@ -12,7 +12,7 @@ namespace Microsoft.AspNetCore.Builder
     public static class TwitterAppBuilderExtensions
     {
         /// <summary>
-        /// Obsolete, see https://go.microsoft.com/fwlink/?linkid=845470
+        /// UseTwitterAuthentication is obsolete. Configure Twitter authentication with AddAuthentication().AddTwitter in ConfigureServices. See https://go.microsoft.com/fwlink/?linkid=845470 for more details.
         /// </summary>
         /// <param name="app">The <see cref="IApplicationBuilder"/> to add the handler to.</param>
         /// <returns>A reference to this instance after the operation has completed.</returns>
@@ -23,7 +23,7 @@ namespace Microsoft.AspNetCore.Builder
         }
 
         /// <summary>
-        /// Obsolete, see https://go.microsoft.com/fwlink/?linkid=845470
+        /// UseTwitterAuthentication is obsolete. Configure Twitter authentication with AddAuthentication().AddTwitter in ConfigureServices. See https://go.microsoft.com/fwlink/?linkid=845470 for more details.
         /// </summary>
         /// <param name="app">The <see cref="IApplicationBuilder"/> to add the handler to.</param>
         /// <param name="options">An action delegate to configure the provided <see cref="TwitterOptions"/>.</param>

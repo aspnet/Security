@@ -12,7 +12,7 @@ namespace Microsoft.AspNetCore.Builder
     public static class OAuthAppBuilderExtensions
     {
         /// <summary>
-        /// Obsolete, see https://go.microsoft.com/fwlink/?linkid=845470
+        /// UseOAuthAuthentication is obsolete. Configure OAuth authentication with AddAuthentication().AddOAuth in ConfigureServices. See https://go.microsoft.com/fwlink/?linkid=845470 for more details.
         /// </summary>
         /// <param name="app">The <see cref="IApplicationBuilder"/> to add the handler to.</param>
         /// <returns>A reference to this instance after the operation has completed.</returns>
@@ -23,7 +23,7 @@ namespace Microsoft.AspNetCore.Builder
         }
 
         /// <summary>
-        /// Obsolete, see https://go.microsoft.com/fwlink/?linkid=845470
+        /// UseOAuthAuthentication is obsolete. Configure OAuth authentication with AddAuthentication().AddOAuth in ConfigureServices. See https://go.microsoft.com/fwlink/?linkid=845470 for more details.
         /// </summary>
         /// <param name="app">The <see cref="IApplicationBuilder"/> to add the handler to.</param>
         /// <param name="options">A <see cref="OAuthOptions"/> that specifies options for the handler.</param>

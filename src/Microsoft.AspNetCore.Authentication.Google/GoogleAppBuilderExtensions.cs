@@ -3,8 +3,6 @@
 
 using System;
 using Microsoft.AspNetCore.Authentication.Google;
-using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Options;
 
 namespace Microsoft.AspNetCore.Builder
 {
@@ -14,7 +12,7 @@ namespace Microsoft.AspNetCore.Builder
     public static class GoogleAppBuilderExtensions
     {
         /// <summary>
-        /// Obsolete, see https://go.microsoft.com/fwlink/?linkid=845470
+        /// UseGoogleAuthentication is obsolete. Configure Google authentication with AddAuthentication().AddGoogle in ConfigureServices. See https://go.microsoft.com/fwlink/?linkid=845470 for more details.
         /// </summary>
         /// <param name="app">The <see cref="IApplicationBuilder"/> to add the handler to.</param>
         /// <returns>A reference to this instance after the operation has completed.</returns>
@@ -24,7 +22,7 @@ namespace Microsoft.AspNetCore.Builder
         }
 
         /// <summary>
-        /// Obsolete, see https://go.microsoft.com/fwlink/?linkid=845470
+        /// UseGoogleAuthentication is obsolete. Configure Google authentication with AddAuthentication().AddGoogle in ConfigureServices. See https://go.microsoft.com/fwlink/?linkid=845470 for more details.
         /// </summary>
         /// <param name="app">The <see cref="IApplicationBuilder"/> to add the handler to.</param>
         /// <param name="options">A <see cref="GoogleOptions"/> that specifies options for the handler.</param>
