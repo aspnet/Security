@@ -15,7 +15,7 @@
     <PackageReference Include="Microsoft.Owin.Security.Cookies" Version="$(OwinVersion)" />
     <PackageReference Include="Microsoft.Owin.Testing" Version="$(OwinVersion)" />
     <PackageReference Include="xunit" Version="$(XunitVersion)" />
-    <PackageReference Include="xunit.runner.visualstudio" Version="$(XunitVersion)" />
+    <PackageReference Include="xunit.runner.visualstudio" Version="$(XunitRunnerVisualStudioVersion)" />
   </ItemGroup>
 
   <ItemGroup>
