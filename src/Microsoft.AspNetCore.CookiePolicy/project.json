@@ -1,5 +1,5 @@
 {
-  "version": "1.0.3",
+  "version": "1.0.4",
   "description": "ASP.NET Core cookie policy classes to control the behavior of cookies.",
   "packOptions": {
     "repository": {
