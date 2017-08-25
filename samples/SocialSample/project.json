@@ -1,11 +1,11 @@
 {
   "dependencies": {
-    "Microsoft.AspNetCore.Authentication.Cookies": "1.0.3",
-    "Microsoft.AspNetCore.Authentication.Facebook": "1.0.3",
-    "Microsoft.AspNetCore.Authentication.Google": "1.0.3",
-    "Microsoft.AspNetCore.Authentication.MicrosoftAccount": "1.0.3",
-    "Microsoft.AspNetCore.Authentication.Twitter": "1.0.3",
-    "Microsoft.AspNetCore.DataProtection": "1.0.3",
+    "Microsoft.AspNetCore.Authentication.Cookies": "1.0.4",
+    "Microsoft.AspNetCore.Authentication.Facebook": "1.0.4",
+    "Microsoft.AspNetCore.Authentication.Google": "1.0.4",
+    "Microsoft.AspNetCore.Authentication.MicrosoftAccount": "1.0.4",
+    "Microsoft.AspNetCore.Authentication.Twitter": "1.0.4",
+    "Microsoft.AspNetCore.DataProtection": "1.0.4",
     "Microsoft.AspNetCore.Server.IISIntegration": "1.0.3",
     "Microsoft.AspNetCore.Server.Kestrel": "1.0.4",
     "Microsoft.AspNetCore.Server.Kestrel.Https": "1.0.4",
