@@ -212,7 +212,7 @@ namespace Microsoft.AspNetCore.Authentication.OpenIdConnect
         /// <summary>
         /// Gets or sets the 'prompt'.
         /// </summary>
-        public string Prompt { get; set; } = "none";
+        public string Prompt { get; set; }
 
         /// <summary>
         /// Gets the list of permissions to request.
