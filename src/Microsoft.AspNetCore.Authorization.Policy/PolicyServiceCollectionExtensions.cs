@@ -2,6 +2,7 @@
 // Licensed under the Apache License, Version 2.0. See License.txt in the project root for license information.
 
 using System;
+using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authorization.Policy;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 
@@ -12,6 +13,20 @@ namespace Microsoft.Extensions.DependencyInjection
     /// </summary>
     public static class PolicyServiceCollectionExtensions
     {
+        public static IServiceCollection AddAuthorizationRequestStuff(this IServiceCollection services)
+        {
+            if (services == null)
+            {
+                throw new ArgumentNullException(nameof(services));
+            }
+
+            services.AddAuthorization()
+                .AddSingleton<IAuthorizationRequestEvaluator, AuthorizationRequestEvaluator>()
+                .AddSingleton<IAuthenticationPolicyEvaluator, AuthenticationPolicyEvaluator>()
+                .AddSingleton<IAuthenticationPolicyProvider, AuthenticationPolicyProvider>();
+            return services;
+        }
+
         /// <summary>
         /// Adds authorization policy services to the specified <see cref="IServiceCollection" />. 
         /// </summary>
