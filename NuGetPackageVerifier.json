@@ -2,7 +2,14 @@
   "adx-nonshipping": {
     "rules": [],
     "packages": {
-      "Microsoft.AspNetCore.ChunkingCookieManager.Sources": {}
+      "Microsoft.AspNetCore.ChunkingCookieManager.Sources": {},
+      "Microsoft.AspNetCore.Authentication.WsFederation": {
+        "Exclusions": {
+          "THIRDPARTY_DEPENDENCY_NOT_REGISTERED": {
+            "Microsoft.AspNetCore.Authentication.WsFederation; .NETStandard,Version=v2.0": "New dependency for out of band release."
+          }
+        }
+      }
     }
   },
   "Default": {
