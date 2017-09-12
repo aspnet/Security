@@ -29,6 +29,10 @@ namespace Microsoft.AspNetCore.Authentication
     {
         public IDictionary<string, AuthenticationPolicy> PolicyMap { get; } = new Dictionary<string, AuthenticationPolicy>();
 
+        public string DefaultPolicy { get; set; }
+
+        public Func<HttpContext, string> DefaultPolicySelector { get; set; }
+
         public void AddPolicy(string name, Action<AuthenticationPolicyBuilder> build)
         {
             var builder = new AuthenticationPolicyBuilder(name);
@@ -40,15 +44,24 @@ namespace Microsoft.AspNetCore.Authentication
     public class AuthenticationPolicyProvider : IAuthenticationPolicyProvider
     {
         private readonly IOptionsMonitor<AuthenticationPolicyOptions> _options;
-        public AuthenticationPolicyProvider(IOptionsMonitor<AuthenticationPolicyOptions> options)
+        private readonly IDefaultAuthenticationPolicySelector _defaultSelector;
+        public AuthenticationPolicyProvider(IOptionsMonitor<AuthenticationPolicyOptions> options, IDefaultAuthenticationPolicySelector defaultPolicy)
         {
             _options = options;
+            _defaultSelector = defaultPolicy;
         }
 
-        public Task<AuthenticationPolicy> GetAsync(HttpContext context, string name)
+        public async Task<AuthenticationPolicy> GetAsync(HttpContext context, string name)
         {
+            // Use the default policy for null name
+            name = name ?? await _defaultSelector.GetDefaultPolicyAsync(context);
+            if (name == null) // If resolution fails, treat it as an unknown policy
+            {
+                return null;
+            }
+
             var map = _options.CurrentValue.PolicyMap;
-            return Task.FromResult(name != null && map.ContainsKey(name) ? map[name] : null);
+            return (name != null && map.ContainsKey(name)) ? map[name] : null;
         }
     }
 }

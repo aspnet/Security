@@ -37,32 +37,28 @@ namespace Microsoft.AspNetCore.Authentication
         public virtual async Task<AuthenticateResult> AuthenticateAsync(HttpContext context, string policyName)
         {
             var policy = await Policies.GetAsync(context, policyName);
-            if (policy != null)
+            if (policy != null && policy.AuthenticateSchemes.Any())
             {
-                var count = policy.AuthenticateSchemes.Count();
-                if (count > 0)
+                ClaimsPrincipal principal = null;
+                foreach (var s in policy.AuthenticateSchemes)
                 {
-                    ClaimsPrincipal principal = null;
-                    foreach (var s in policy.AuthenticateSchemes)
+                    var auth = await context.AuthenticateAsync(s);
+                    if (auth.Succeeded)
                     {
-                        var auth = await context.AuthenticateAsync(s);
-                        if (auth.Succeeded)
+                        if (principal == null)
                         {
-                            if (principal == null)
-                            {
-                                principal = auth.Principal;
-                            }
-                            else
-                            {
-                                // REVIEW: what about the auth properties, we just dropped them...
-                                principal = SecurityHelper.MergeUserPrincipal(principal, auth.Principal);
-                            }
+                            principal = auth.Principal;
+                        }
+                        else
+                        {
+                            // REVIEW: what about the auth properties, we just dropped them...
+                            principal = SecurityHelper.MergeUserPrincipal(principal, auth.Principal);
                         }
                     }
-                    if (principal != null)
-                    {
-                        return AuthenticateResult.Success(new AuthenticationTicket(principal, "TBD: merged schemes?"));
-                    }
+                }
+                if (principal != null)
+                {
+                    return AuthenticateResult.Success(new AuthenticationTicket(principal, "TBD: merged schemes?"));
                 }
             }
             // If no policy or schemes, just fallback to default behavior.
@@ -79,17 +75,13 @@ namespace Microsoft.AspNetCore.Authentication
         public virtual async Task ChallengeAsync(HttpContext context, string policyName, AuthenticationProperties properties)
         {
             var policy = await Policies.GetAsync(context, policyName);
-            if (policy != null)
+            if (policy != null && policy.ChallengeSchemes.Any())
             {
-                var count = policy.ChallengeSchemes.Count();
-                if (count > 0)
+                foreach (var s in policy.AuthenticateSchemes)
                 {
-                    foreach (var s in policy.AuthenticateSchemes)
-                    {
-                        await context.ChallengeAsync(s, properties);
-                    }
-                    return;
+                    await context.ChallengeAsync(s, properties);
                 }
+                return;
             }
             // If no policy or schemes, just fallback to default behavior.
             await context.ChallengeAsync(properties);
@@ -105,17 +97,13 @@ namespace Microsoft.AspNetCore.Authentication
         public virtual async Task ForbidAsync(HttpContext context, string policyName, AuthenticationProperties properties)
         {
             var policy = await Policies.GetAsync(context, policyName);
-            if (policy != null)
+            if (policy != null && policy.ForbidSchemes.Any())
             {
-                var count = policy.ChallengeSchemes.Count();
-                if (count > 0)
+                foreach (var s in policy.AuthenticateSchemes)
                 {
-                    foreach (var s in policy.AuthenticateSchemes)
-                    {
-                        await context.ChallengeAsync(s, properties);
-                    }
-                    return;
+                    await context.ForbidAsync(s, properties);
                 }
+                return;
             }
             // If no policy or schemes, just fallback to default behavior.
             await context.ForbidAsync(properties);

@@ -23,6 +23,7 @@ namespace Microsoft.Extensions.DependencyInjection
             services.AddAuthorization()
                 .AddSingleton<IAuthorizationRequestEvaluator, AuthorizationRequestEvaluator>()
                 .AddSingleton<IAuthenticationPolicyEvaluator, AuthenticationPolicyEvaluator>()
+                .AddSingleton<IDefaultAuthenticationPolicySelector, DefaultAuthenticationPolicySelector>()
                 .AddSingleton<IAuthenticationPolicyProvider, AuthenticationPolicyProvider>();
             return services;
         }
