@@ -85,7 +85,7 @@ namespace Microsoft.Extensions.DependencyInjection
             return services.AddScheme<TOptions, THandler>(authenticationScheme, displayName, configureScheme: null, configureOptions: configureOptions);
         }
 
-        // Used to ensure that there's always a default sign in scheme that's not itself
+        // Used to ensure that there's always a default data protection provider
         private class EnsureSignInScheme<TOptions> : IPostConfigureOptions<TOptions> where TOptions : RemoteAuthenticationOptions
         {
             private readonly AuthenticationOptions _authOptions;
