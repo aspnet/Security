@@ -42,7 +42,6 @@ namespace Microsoft.AspNetCore.Authentication.OpenIdConnect
 
             Events = new OpenIdConnectEvents();
             Scope.Add("openid");
-            Scope.Add("profile");
 
             ClaimActions.DeleteClaim("nonce");
             ClaimActions.DeleteClaim("aud");
