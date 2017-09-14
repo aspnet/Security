@@ -97,7 +97,7 @@ namespace Microsoft.AspNetCore.Authentication
             public void PostConfigure(string name, TOptions options)
             {
                 options.SignInScheme = options.SignInScheme ?? _authOptions.DefaultSignInScheme ?? _authOptions.DefaultScheme;
-                if (options.SignInScheme == name)
+                if (string.Equals(options.SignInScheme, name, StringComparison.Ordinal))
                 {
                     throw new InvalidOperationException(Resources.Exception_RemoteSignInSchemeCannotBeSelf);
                 }
