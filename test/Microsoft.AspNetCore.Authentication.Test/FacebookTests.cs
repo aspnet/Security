@@ -41,6 +41,38 @@ namespace Microsoft.AspNetCore.Authentication.Facebook
         }
 
         [Fact]
+        public async Task VerifySignInSchemeCannotBeSetToSelfUsingDefaultScheme()
+        {
+            var server = CreateServer(
+                app => { },
+                services => services.AddAuthentication(o => o.DefaultScheme = FacebookDefaults.AuthenticationScheme).AddFacebook(),
+                context =>
+                {
+                    // Gross
+                    context.ChallengeAsync("Facebook").GetAwaiter().GetResult();
+                    return true;
+                });
+            var error = await Assert.ThrowsAsync<InvalidOperationException>(() => server.SendAsync("https://example.com/challenge"));
+            Assert.Contains("cannot be set to itself", error.Message);
+        }
+
+        [Fact]
+        public async Task VerifySignInSchemeCannotBeSetToSelfUsingDefaultSignInScheme()
+        {
+            var server = CreateServer(
+                app => { },
+                services => services.AddAuthentication(o => o.DefaultSignInScheme = FacebookDefaults.AuthenticationScheme).AddFacebook(),
+                context =>
+                {
+                    // Gross
+                    context.ChallengeAsync("Facebook").GetAwaiter().GetResult();
+                    return true;
+                });
+            var error = await Assert.ThrowsAsync<InvalidOperationException>(() => server.SendAsync("https://example.com/challenge"));
+            Assert.Contains("cannot be set to itself", error.Message);
+        }
+
+        [Fact]
         public async Task VerifySchemeDefaults()
         {
             var services = new ServiceCollection();
