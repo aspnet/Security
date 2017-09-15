@@ -67,7 +67,7 @@ namespace Microsoft.AspNetCore.Authentication
             => string.Format(CultureInfo.CurrentCulture, GetString("Exception_OptionMustBeProvided"), p0);
 
         /// <summary>
-        /// The SignInScheme for a remote authentication handler cannot be set to itself.  If it was not explicitly set, the AuthenticationOptions.DefaultSignInScheme is used.
+        /// The SignInScheme for a remote authentication handler cannot be set to itself.  If it was not explicitly set, the AuthenticationOptions.DefaultSignInScheme or DefaultScheme is used.
         /// </summary>
         internal static string Exception_RemoteSignInSchemeCannotBeSelf
         {
@@ -75,7 +75,7 @@ namespace Microsoft.AspNetCore.Authentication
         }
 
         /// <summary>
-        /// The SignInScheme for a remote authentication handler cannot be set to itself.  If it was not explicitly set, the AuthenticationOptions.DefaultSignInScheme is used.
+        /// The SignInScheme for a remote authentication handler cannot be set to itself.  If it was not explicitly set, the AuthenticationOptions.DefaultSignInScheme or DefaultScheme is used.
         /// </summary>
         internal static string FormatException_RemoteSignInSchemeCannotBeSelf()
             => GetString("Exception_RemoteSignInSchemeCannotBeSelf");
