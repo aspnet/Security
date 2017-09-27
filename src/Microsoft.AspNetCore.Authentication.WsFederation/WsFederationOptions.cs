@@ -153,5 +153,11 @@ namespace Microsoft.AspNetCore.Authentication.WsFederation
         /// The default is true. This should be disabled only in development environments.
         /// </summary>
         public bool RequireHttpsMetadata { get; set; } = true;
+
+        /// <summary>
+        /// The Ws-Federation protocol allows the user to initiate logins without contacting the application for a Challenge first.
+        /// However, that flow is susceptible to XSRF and other attacks so it is disabled here by default.
+        /// </summary>
+        public bool AllowUnsolicitedLogins { get; set; }
     }
 }

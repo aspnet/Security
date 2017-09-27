@@ -20,6 +20,7 @@ namespace Microsoft.AspNetCore.Authentication.WsFederation
     /// </summary>
     public class WsFederationHandler : RemoteAuthenticationHandler<WsFederationOptions>, IAuthenticationSignOutHandler
     {
+        private const string CorrelationProperty = ".xsrf";
         private WsFederationConfiguration _configuration;
 
         /// <summary>
@@ -77,6 +78,8 @@ namespace Microsoft.AspNetCore.Authentication.WsFederation
             {
                 wsFederationMessage.Wreply = BuildRedirectUri(Options.CallbackPath);
             }
+
+            GenerateCorrelationId(properties);
 
             var redirectContext = new RedirectContext(Context, Scheme, Options, properties)
             {
@@ -141,12 +144,15 @@ namespace Microsoft.AspNetCore.Authentication.WsFederation
             {
                 // Retrieve our cached redirect uri
                 var state = wsFederationMessage.Wctx;
-                // WsFed allows for uninitiated logins, state may be missing.
+                // WsFed allows for uninitiated logins, state may be missing. See AllowUnsolicitedLogins.
                 var properties = Options.StateDataFormat.Unprotect(state);
 
                 if (properties == null)
                 {
-                    properties = new AuthenticationProperties();
+                    if (!Options.AllowUnsolicitedLogins)
+                    {
+                        return HandleRequestResult.Fail("Unsolicited logins are not allowed.");
+                    }
                 }
                 else
                 {
@@ -163,6 +169,15 @@ namespace Microsoft.AspNetCore.Authentication.WsFederation
                 if (messageReceivedContext.Result != null)
                 {
                     return messageReceivedContext.Result;
+                }
+                wsFederationMessage = messageReceivedContext.ProtocolMessage;
+                properties = messageReceivedContext.Properties; // Provides a new instance if not set.
+
+                // If state did flow from the challenge then validate it. See AllowUnsolicitedLogins above.
+                if (properties.Items.TryGetValue(CorrelationProperty, out string correlationId)
+                    && !ValidateCorrelationId(properties))
+                {
+                    return HandleRequestResult.Fail("Correlation failed.");
                 }
 
                 if (wsFederationMessage.Wresult == null)
@@ -187,6 +202,8 @@ namespace Microsoft.AspNetCore.Authentication.WsFederation
                 {
                     return securityTokenReceivedContext.Result;
                 }
+                wsFederationMessage = securityTokenReceivedContext.ProtocolMessage;
+                properties = messageReceivedContext.Properties;
 
                 if (_configuration == null)
                 {

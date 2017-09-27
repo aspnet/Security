@@ -1,6 +1,7 @@
 ﻿// Copyright (c) .NET Foundation. All rights reserved.
 // Licensed under the Apache License, Version 2.0. See License.txt in the project root for license information.
 
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -51,24 +52,15 @@ namespace Microsoft.AspNetCore.Authentication.WsFederation
             var response = await httpClient.GetAsync("/");
             var queryItems = QueryHelpers.ParseQuery(response.Headers.Location.Query);
 
-            // Send an invalid token and verify that the token is not honored
-            var kvps = new List<KeyValuePair<string, string>>();
-            kvps.Add(new KeyValuePair<string, string>("wa", "wsignin1.0"));
-            kvps.Add(new KeyValuePair<string, string>("wresult", File.ReadAllText(@"ValidToken.xml")));
-            kvps.Add(new KeyValuePair<string, string>("wctx", queryItems["wctx"]));
-            response = await httpClient.PostAsync(queryItems["wreply"], new FormUrlEncodedContent(kvps));
+            var request = new HttpRequestMessage(HttpMethod.Post, queryItems["wreply"]);
+            CopyCookies(response, request);
+            request.Content = CreateSignInContent("ValidToken.xml", queryItems["wctx"]);
+            response = await httpClient.SendAsync(request);
 
             Assert.Equal(HttpStatusCode.Found, response.StatusCode);
 
-            var request = new HttpRequestMessage(HttpMethod.Get, response.Headers.Location);
-            var cookies = SetCookieHeaderValue.ParseList(response.Headers.GetValues(HeaderNames.SetCookie).ToList());
-            foreach (var cookie in cookies)
-            {
-                if (cookie.Value.HasValue)
-                {
-                    request.Headers.Add(HeaderNames.Cookie, new CookieHeaderValue(cookie.Name, cookie.Value).ToString());
-                }
-            }
+            request = new HttpRequestMessage(HttpMethod.Get, response.Headers.Location);
+            CopyCookies(response, request);
             response = await httpClient.SendAsync(request);
 
             // Did the request end in the actual resource requested for
@@ -76,28 +68,26 @@ namespace Microsoft.AspNetCore.Authentication.WsFederation
         }
 
         [Fact]
-        public async Task ValidUnsolicitedTokenIsAccepted()
+        public async Task ValidUnsolicitedTokenIsRefused()
         {
             var httpClient = CreateClient();
+            var form = CreateSignInContent("ValidToken.xml", suppressWctx: true);
+            var exception = await Assert.ThrowsAsync<Exception>(() => httpClient.PostAsync(httpClient.BaseAddress + "signin-wsfed", form));
+            Assert.Contains("Unsolicited logins are not allowed.", exception.Message);
+        }
 
-            // Send an invalid token and verify that the token is not honored
-            var kvps = new List<KeyValuePair<string, string>>();
-            kvps.Add(new KeyValuePair<string, string>("wa", "wsignin1.0"));
-            kvps.Add(new KeyValuePair<string, string>("wresult", File.ReadAllText(@"ValidToken.xml")));
-            kvps.Add(new KeyValuePair<string, string>("suppressWctx", "true"));
-            var response = await httpClient.PostAsync(httpClient.BaseAddress + "signin-wsfed", new FormUrlEncodedContent(kvps));
+        [Fact]
+        public async Task ValidUnsolicitedTokenIsAcceptedWhenAllowed()
+        {
+            var httpClient = CreateClient(allowUnsolicited: true);
+
+            var form = CreateSignInContent("ValidToken.xml", suppressWctx: true);
+            var response = await httpClient.PostAsync(httpClient.BaseAddress + "signin-wsfed", form);
 
             Assert.Equal(HttpStatusCode.Found, response.StatusCode);
 
             var request = new HttpRequestMessage(HttpMethod.Get, response.Headers.Location);
-            var cookies = SetCookieHeaderValue.ParseList(response.Headers.GetValues(HeaderNames.SetCookie).ToList());
-            foreach (var cookie in cookies)
-            {
-                if (cookie.Value.HasValue)
-                {
-                    request.Headers.Add(HeaderNames.Cookie, new CookieHeaderValue(cookie.Name, cookie.Value).ToString());
-                }
-            }
+            CopyCookies(response, request);
             response = await httpClient.SendAsync(request);
 
             // Did the request end in the actual resource requested for
@@ -113,94 +103,119 @@ namespace Microsoft.AspNetCore.Authentication.WsFederation
             var response = await httpClient.GetAsync("/");
             var queryItems = QueryHelpers.ParseQuery(response.Headers.Location.Query);
 
-            // Send an invalid token and verify that the token is not honored
-            var kvps = new List<KeyValuePair<string, string>>();
-            kvps.Add(new KeyValuePair<string, string>("wa", "wsignin1.0"));
-            kvps.Add(new KeyValuePair<string, string>("wresult", File.ReadAllText(@"InvalidToken.xml")));
-            kvps.Add(new KeyValuePair<string, string>("wctx", queryItems["wctx"]));
-            response = await httpClient.PostAsync(queryItems["wreply"], new FormUrlEncodedContent(kvps));
+            var request = new HttpRequestMessage(HttpMethod.Post, queryItems["wreply"]);
+            CopyCookies(response, request);
+            request.Content = CreateSignInContent("InvalidToken.xml", queryItems["wctx"]);
+            response = await httpClient.SendAsync(request);
 
             // Did the request end in the actual resource requested for
             Assert.Equal("AuthenticationFailed", await response.Content.ReadAsStringAsync());
         }
 
-        private HttpClient CreateClient()
+        private FormUrlEncodedContent CreateSignInContent(string tokenFile, string wctx = null, bool suppressWctx = false)
         {
-            var builder = new WebHostBuilder()
-                            .ConfigureServices(ConfigureAppServices)
-                            .Configure(ConfigureApp);
-            var server = new TestServer(builder);
-            return server.CreateClient();
+            var kvps = new List<KeyValuePair<string, string>>();
+            kvps.Add(new KeyValuePair<string, string>("wa", "wsignin1.0"));
+            kvps.Add(new KeyValuePair<string, string>("wresult", File.ReadAllText(tokenFile)));
+            if (!string.IsNullOrEmpty(wctx))
+            {
+                kvps.Add(new KeyValuePair<string, string>("wctx", wctx));
+            }
+            if (suppressWctx)
+            {
+                kvps.Add(new KeyValuePair<string, string>("suppressWctx", "true"));
+            }
+            return new FormUrlEncodedContent(kvps);
         }
 
-        private void ConfigureAppServices(IServiceCollection services)
+        private void CopyCookies(HttpResponseMessage response, HttpRequestMessage request)
         {
-            services.AddAuthentication(sharedOptions =>
+            var cookies = SetCookieHeaderValue.ParseList(response.Headers.GetValues(HeaderNames.SetCookie).ToList());
+            foreach (var cookie in cookies)
             {
-                sharedOptions.DefaultScheme = CookieAuthenticationDefaults.AuthenticationScheme;
-                sharedOptions.DefaultSignInScheme = CookieAuthenticationDefaults.AuthenticationScheme;
-                sharedOptions.DefaultChallengeScheme = WsFederationDefaults.AuthenticationScheme;
-            })
-            .AddWsFederation(options =>
-            {
-                options.Wtrealm = "http://Automation1";
-                options.MetadataAddress = "https://login.windows.net/4afbc689-805b-48cf-a24c-d4aa3248a248/federationmetadata/2007-06/federationmetadata.xml";
-                options.BackchannelHttpHandler = new WaadMetadataDocumentHandler();
-                options.StateDataFormat = new CustomStateDataFormat();
-                options.SecurityTokenHandlers = new List<ISecurityTokenValidator>() { new TestSecurityTokenValidator() };
-                options.UseTokenLifetime = false;
-                options.Events = new WsFederationEvents()
+                if (cookie.Value.HasValue)
                 {
-                    MessageReceived = context =>
-                    {
-                        if (!context.ProtocolMessage.Parameters.TryGetValue("suppressWctx", out var suppress))
-                        {
-                            Assert.True(context.ProtocolMessage.Wctx.Equals("customValue"), "wctx is not my custom value");
-                        }
-                        context.HttpContext.Items["MessageReceived"] = true;
-                        return Task.FromResult(0);
-                    },
-                    RedirectToIdentityProvider = context =>
-                    {
-                        if (context.ProtocolMessage.IsSignInMessage)
-                        {
-                            // Sign in message
-                            context.ProtocolMessage.Wctx = "customValue";
-                        }
+                    request.Headers.Add(HeaderNames.Cookie, new CookieHeaderValue(cookie.Name, cookie.Value).ToString());
+                }
+            }
+        }
 
-                        return Task.FromResult(0);
-                    },
-                    SecurityTokenReceived = context =>
+        private HttpClient CreateClient(bool allowUnsolicited = false)
+        {
+            var builder = new WebHostBuilder()
+                .Configure(ConfigureApp)
+                .ConfigureServices(services =>
+                {
+                    services.AddAuthentication(sharedOptions =>
                     {
-                        context.HttpContext.Items["SecurityTokenReceived"] = true;
-                        return Task.FromResult(0);
-                    },
-                    SecurityTokenValidated = context =>
+                        sharedOptions.DefaultScheme = CookieAuthenticationDefaults.AuthenticationScheme;
+                        sharedOptions.DefaultSignInScheme = CookieAuthenticationDefaults.AuthenticationScheme;
+                        sharedOptions.DefaultChallengeScheme = WsFederationDefaults.AuthenticationScheme;
+                    })
+                    .AddCookie()
+                    .AddWsFederation(options =>
                     {
-                        Assert.True((bool)context.HttpContext.Items["MessageReceived"], "MessageReceived notification not invoked");
-                        Assert.True((bool)context.HttpContext.Items["SecurityTokenReceived"], "SecurityTokenReceived notification not invoked");
-
-                        if (context.Principal != null)
+                        options.Wtrealm = "http://Automation1";
+                        options.MetadataAddress = "https://login.windows.net/4afbc689-805b-48cf-a24c-d4aa3248a248/federationmetadata/2007-06/federationmetadata.xml";
+                        options.BackchannelHttpHandler = new WaadMetadataDocumentHandler();
+                        options.StateDataFormat = new CustomStateDataFormat();
+                        options.SecurityTokenHandlers = new List<ISecurityTokenValidator>() { new TestSecurityTokenValidator() };
+                        options.UseTokenLifetime = false;
+                        options.AllowUnsolicitedLogins = allowUnsolicited;
+                        options.Events = new WsFederationEvents()
                         {
-                            var identity = context.Principal.Identities.Single();
-                            identity.AddClaim(new Claim("ReturnEndpoint", "true"));
-                            identity.AddClaim(new Claim("Authenticated", "true"));
-                            identity.AddClaim(new Claim(identity.RoleClaimType, "Guest", ClaimValueTypes.String));
-                        }
+                            MessageReceived = context =>
+                            {
+                                if (!context.ProtocolMessage.Parameters.TryGetValue("suppressWctx", out var suppress))
+                                {
+                                    Assert.True(context.ProtocolMessage.Wctx.Equals("customValue"), "wctx is not my custom value");
+                                }
+                                context.HttpContext.Items["MessageReceived"] = true;
+                                return Task.FromResult(0);
+                            },
+                            RedirectToIdentityProvider = context =>
+                            {
+                                if (context.ProtocolMessage.IsSignInMessage)
+                                {
+                                    // Sign in message
+                                    context.ProtocolMessage.Wctx = "customValue";
+                                }
 
-                        return Task.FromResult(0);
-                    },
-                    AuthenticationFailed = context =>
-                    {
-                        context.HttpContext.Items["AuthenticationFailed"] = true;
-                        //Change the request url to something different and skip Wsfed. This new url will handle the request and let us know if this notification was invoked.
-                        context.HttpContext.Request.Path = new PathString("/AuthenticationFailed");
-                        context.SkipHandler();
-                        return Task.FromResult(0);
-                    }
-                };
-            })
-            .AddCookie();
+                                return Task.FromResult(0);
+                            },
+                            SecurityTokenReceived = context =>
+                            {
+                                context.HttpContext.Items["SecurityTokenReceived"] = true;
+                                return Task.FromResult(0);
+                            },
+                            SecurityTokenValidated = context =>
+                            {
+                                Assert.True((bool)context.HttpContext.Items["MessageReceived"], "MessageReceived notification not invoked");
+                                Assert.True((bool)context.HttpContext.Items["SecurityTokenReceived"], "SecurityTokenReceived notification not invoked");
+
+                                if (context.Principal != null)
+                                {
+                                    var identity = context.Principal.Identities.Single();
+                                    identity.AddClaim(new Claim("ReturnEndpoint", "true"));
+                                    identity.AddClaim(new Claim("Authenticated", "true"));
+                                    identity.AddClaim(new Claim(identity.RoleClaimType, "Guest", ClaimValueTypes.String));
+                                }
+
+                                return Task.FromResult(0);
+                            },
+                            AuthenticationFailed = context =>
+                            {
+                                context.HttpContext.Items["AuthenticationFailed"] = true;
+                                //Change the request url to something different and skip Wsfed. This new url will handle the request and let us know if this notification was invoked.
+                                context.HttpContext.Request.Path = new PathString("/AuthenticationFailed");
+                                context.SkipHandler();
+                                return Task.FromResult(0);
+                            }
+                        };
+                    });
+                });
+            var server = new TestServer(builder);
+            return server.CreateClient();
         }
 
         private void ConfigureApp(IApplicationBuilder app)
