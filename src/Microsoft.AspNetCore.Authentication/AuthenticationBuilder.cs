@@ -84,6 +84,10 @@ namespace Microsoft.AspNetCore.Authentication
             return AddScheme<TOptions, THandler>(authenticationScheme, displayName, configureOptions: configureOptions);
         }
 
+        // TODO: add TOptions generic overload
+        public virtual AuthenticationBuilder AddPolicyScheme(string authenticationPolicyScheme, string displayName, Action<AuthenticationPolicyOptions> configurePolicy)
+            => AddScheme<AuthenticationPolicyOptions, AuthenticationPolicyHandler<AuthenticationPolicyOptions>>(authenticationPolicyScheme, displayName, configureOptions: configurePolicy);
+
         // Used to ensure that there's always a default sign in scheme that's not itself
         private class EnsureSignInScheme<TOptions> : IPostConfigureOptions<TOptions> where TOptions : RemoteAuthenticationOptions
         {
