@@ -24,21 +24,20 @@ namespace Microsoft.AspNetCore.Authentication
             var server = CreateServer(auth =>
             {
                 auth.AddPolicyScheme("policy1", "policy1", p =>
-                {
-                    p.DefaultScheme = "auth1";
-                });
-                auth.AddPolicyScheme("policy2", "policy2", p =>
-                {
-                    p.AuthenticateScheme = "auth2";
-                });
-                auth.AddPolicyScheme("dynamic", "dynamic", p =>
-                {
-                    p.DefaultSchemeSelector = c => c.Request.QueryString.Value.Substring(1);
-                });
-
-                auth.AddScheme<TestOptions, TestHandler>("auth1", o => { });
-                auth.AddScheme<TestOptions, TestHandler>("auth2", o => { });
-                auth.AddScheme<TestOptions, TestHandler>("auth3", o => { });
+                    {
+                        p.DefaultScheme = "auth1";
+                    })
+                    .AddPolicyScheme("policy2", "policy2", p =>
+                    {
+                        p.AuthenticateScheme = "auth2";
+                    })
+                    .AddPolicyScheme("dynamic", "dynamic", p =>
+                    {
+                        p.DefaultSchemeSelector = c => c.Request.QueryString.Value.Substring(1);
+                    })
+                    .AddScheme<TestOptions, TestHandler>("auth1", o => { })
+                    .AddScheme<TestOptions, TestHandler>("auth2", o => { })
+                    .AddScheme<TestOptions, TestHandler>("auth3", o => { });
             });
             await Assert.ThrowsAsync<InvalidOperationException>(() => server.SendAsync("http://example.com/auth/One"));
 
