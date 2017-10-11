@@ -1,9 +1,9 @@
 {
   "dependencies": {
-    "Microsoft.AspNetCore.Authentication.Cookies": "1.0.4",
-    "Microsoft.AspNetCore.Authentication.OpenIdConnect": "1.0.4",
-    "Microsoft.AspNetCore.Server.IISIntegration": "1.0.4",
-    "Microsoft.AspNetCore.Server.Kestrel": "1.0.5",
+    "Microsoft.AspNetCore.Authentication.Cookies": "1.0.5",
+    "Microsoft.AspNetCore.Authentication.OpenIdConnect": "1.0.5",
+    "Microsoft.AspNetCore.Server.IISIntegration": "1.0.5",
+    "Microsoft.AspNetCore.Server.Kestrel": "1.0.6",
     "Microsoft.Extensions.Configuration.EnvironmentVariables": "1.0.2",
     "Microsoft.Extensions.Configuration.UserSecrets": "1.0.2",
     "Microsoft.Extensions.Logging.Console": "1.0.2",
@@ -14,7 +14,7 @@
     "netcoreapp1.0": {
       "dependencies": {
         "Microsoft.NETCore.App": {
-          "version": "1.0.7",
+          "version": "1.0.8-servicing-005009-00",
           "type": "platform"
         }
       }
