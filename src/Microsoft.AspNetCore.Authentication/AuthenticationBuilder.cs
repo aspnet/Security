@@ -92,8 +92,12 @@ namespace Microsoft.AspNetCore.Authentication
         /// <param name="displayName">The display name of this scheme.</param>
         /// <param name="configureOptions">Used to configure the scheme options.</param>
         /// <returns>The builder.</returns>
-        public virtual AuthenticationBuilder AddVirtualScheme(string authenticationScheme, string displayName, Action<VirtualSchemeOptions> configureOptions)
-            => AddScheme<VirtualSchemeOptions, VirtualAuthenticationHandler>(authenticationScheme, displayName, configureOptions);
+        public virtual AuthenticationBuilder AddVirtualScheme(string authenticationScheme, string displayName, Action<AuthenticationSchemeOptions> configureOptions)
+            => AddScheme<AuthenticationSchemeOptions, VirtualAuthenticationHandler>(authenticationScheme, displayName, configureOptions: o =>
+            {
+                configureOptions?.Invoke(o);
+                o.SchemeForwarding.Enabled = true;
+            });
 
         // Used to ensure that there's always a default sign in scheme that's not itself
         private class EnsureSignInScheme<TOptions> : IPostConfigureOptions<TOptions> where TOptions : RemoteAuthenticationOptions

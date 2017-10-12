@@ -24,11 +24,11 @@ namespace Microsoft.AspNetCore.Authentication
             {
                 auth.AddVirtualScheme("policy1", "policy1", p =>
                     {
-                        p.DefaultTarget = "auth1";
+                        p.SchemeForwarding.DefaultTarget = "auth1";
                     })
                     .AddVirtualScheme("policy2", "policy2", p =>
                     {
-                        p.AuthenticateTarget = "auth2";
+                        p.SchemeForwarding.AuthenticateTarget = "auth2";
                     })
                     .AddScheme<TestOptions, TestHandler>("auth1", o => { })
                     .AddScheme<TestOptions, TestHandler>("auth2", o => { })
@@ -58,7 +58,7 @@ namespace Microsoft.AspNetCore.Authentication
             {
                 auth.AddVirtualScheme("dynamic", "dynamic", p =>
                 {
-                    p.DefaultTargetSelector = c => c.Request.QueryString.Value.Substring(1);
+                    p.SchemeForwarding.DefaultTargetSelector = c => c.Request.QueryString.Value.Substring(1);
                 })
                     .AddScheme<TestOptions, TestHandler>("auth1", o => { })
                     .AddScheme<TestOptions, TestHandler>("auth2", o => { })

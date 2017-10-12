@@ -37,5 +37,36 @@ namespace Microsoft.AspNetCore.Authentication
         /// If set, will be used as the service type to get the Events instance instead of the property.
         /// </summary>
         public Type EventsType { get; set; }
+
+        /// <summary>
+        /// Used to forward authentication handler methods.
+        /// </summary>
+        public SchemeForwardingOptions SchemeForwarding { get; set; } = new SchemeForwardingOptions();
+
+        /// <summary>
+        /// Used to redirect authentication methods to another scheme
+        /// </summary>
+        public class SchemeForwardingOptions
+        {
+            /// <summary>
+            /// If enabled, the authentication methods should be retargetted to the specified scheme.
+            /// </summary>
+            public bool Enabled { get; set; }
+
+            public string DefaultTarget { get; set; }
+
+            public string AuthenticateTarget { get; set; }
+            public string ChallengeTarget { get; set; }
+            public string ForbidTarget { get; set; }
+            public string SignInTarget { get; set; }
+            public string SignOutTarget { get; set; }
+
+            /// <summary>
+            /// Used to 
+            /// </summary>
+            public Func<HttpContext, string> DefaultTargetSelector { get; set; }
+
+        }
+
     }
 }

@@ -22,12 +22,12 @@ namespace Microsoft.AspNetCore.Authentication
 
         protected HttpRequest Request
         {
-            get { return Context.Request; }
+            get => Context.Request;
         }
 
         protected HttpResponse Response
         {
-            get { return Context.Response; }
+            get => Context.Response;
         }
 
         protected PathString OriginalPath => Context.Features.Get<IAuthenticationFeature>()?.OriginalPath ?? Request.Path;
@@ -52,10 +52,7 @@ namespace Microsoft.AspNetCore.Authentication
 
         protected string CurrentUri
         {
-            get
-            {
-                return Request.Scheme + "://" + Request.Host + Request.PathBase + Request.Path + Request.QueryString;
-            }
+            get => Request.Scheme + "://" + Request.Host + Request.PathBase + Request.Path + Request.QueryString;
         }
 
         protected AuthenticationHandler(IOptionsMonitor<TOptions> options, ILoggerFactory logger, UrlEncoder encoder, ISystemClock clock)
@@ -116,18 +113,21 @@ namespace Microsoft.AspNetCore.Authentication
         /// Called after options/events have been initialized for the handler to finish initializing itself.
         /// </summary>
         /// <returns>A task</returns>
-        protected virtual Task InitializeHandlerAsync()
-        {
-            return Task.CompletedTask;
-        }
+        protected virtual Task InitializeHandlerAsync() => Task.CompletedTask;
 
         protected string BuildRedirectUri(string targetPath)
-        {
-            return Request.Scheme + "://" + Request.Host + OriginalPathBase + targetPath;
-        }
+            => Request.Scheme + "://" + Request.Host + OriginalPathBase + targetPath;
+
+        protected virtual string ResolveTarget(string scheme)
+            => scheme ?? Options.SchemeForwarding.DefaultTargetSelector?.Invoke(Context) ?? Options.SchemeForwarding.DefaultTarget;
 
         public async Task<AuthenticateResult> AuthenticateAsync()
         {
+            if (Options.SchemeForwarding.Enabled)
+            {
+                return await Context.AuthenticateAsync(ResolveTarget(Options.SchemeForwarding.AuthenticateTarget));
+            }
+
             // Calling Authenticate more than once should always return the original value.
             var result = await HandleAuthenticateOnceAsync();
             if (result?.Failure == null)
@@ -208,6 +208,11 @@ namespace Microsoft.AspNetCore.Authentication
 
         public async Task ChallengeAsync(AuthenticationProperties properties)
         {
+            if (Options.SchemeForwarding.Enabled)
+            {
+                await Context.ChallengeAsync(ResolveTarget(Options.SchemeForwarding.ChallengeTarget), properties);
+                return;
+            }
             properties = properties ?? new AuthenticationProperties();
             await HandleChallengeAsync(properties);
             Logger.AuthenticationSchemeChallenged(Scheme.Name);
@@ -215,6 +220,12 @@ namespace Microsoft.AspNetCore.Authentication
 
         public async Task ForbidAsync(AuthenticationProperties properties)
         {
+            if (Options.SchemeForwarding.Enabled)
+            {
+                await Context.ForbidAsync(ResolveTarget(Options.SchemeForwarding.ForbidTarget), properties);
+                return;
+            }
+
             properties = properties ?? new AuthenticationProperties();
             await HandleForbiddenAsync(properties);
             Logger.AuthenticationSchemeForbidden(Scheme.Name);
