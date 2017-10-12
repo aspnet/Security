@@ -7,7 +7,7 @@ using Microsoft.AspNetCore.Authentication.OpenIdConnect;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.Options;
 
-namespace using Microsoft.AspNetCore.Authentication
+namespace Microsoft.AspNetCore.Authentication
 {
     public static class OpenIdConnectExtensions
     {
