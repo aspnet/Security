@@ -84,9 +84,16 @@ namespace Microsoft.AspNetCore.Authentication
             return AddScheme<TOptions, THandler>(authenticationScheme, displayName, configureOptions: configureOptions);
         }
 
-        // TODO: add TOptions generic overload
-        public virtual AuthenticationBuilder AddPolicyScheme(string authenticationPolicyScheme, string displayName, Action<AuthenticationPolicyOptions> configurePolicy)
-            => AddScheme<AuthenticationPolicyOptions, AuthenticationPolicyHandler<AuthenticationPolicyOptions>>(authenticationPolicyScheme, displayName, configureOptions: configurePolicy);
+        /// <summary>
+        /// Adds a <see cref="VirtualAuthenticationHandler"/> based authentication handler which can be used to 
+        /// redirect to other authentication schemes.
+        /// </summary>
+        /// <param name="authenticationScheme">The name of this scheme.</param>
+        /// <param name="displayName">The display name of this scheme.</param>
+        /// <param name="configureOptions">Used to configure the scheme options.</param>
+        /// <returns>The builder.</returns>
+        public virtual AuthenticationBuilder AddVirtualScheme(string authenticationScheme, string displayName, Action<VirtualSchemeOptions> configureOptions)
+            => AddScheme<VirtualSchemeOptions, VirtualAuthenticationHandler>(authenticationScheme, displayName, configureOptions);
 
         // Used to ensure that there's always a default sign in scheme that's not itself
         private class EnsureSignInScheme<TOptions> : IPostConfigureOptions<TOptions> where TOptions : RemoteAuthenticationOptions

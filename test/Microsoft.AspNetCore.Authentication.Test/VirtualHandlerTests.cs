@@ -1,7 +1,6 @@
 // Copyright (c) .NET Foundation. All rights reserved. See License.txt in the project root for license information.
 
 using System;
-using System.Net;
 using System.Security.Claims;
 using System.Text.Encodings.Web;
 using System.Threading.Tasks;
@@ -16,30 +15,25 @@ using Xunit;
 
 namespace Microsoft.AspNetCore.Authentication
 {
-    public class PolicyHandlerTests
+    public class VirtualHandlerTests
     {
         [Fact]
-        public async Task CanDispatchViaPolicy()
+        public async Task CanDispatch()
         {
             var server = CreateServer(auth =>
             {
-                auth.AddPolicyScheme("policy1", "policy1", p =>
+                auth.AddVirtualScheme("policy1", "policy1", p =>
                     {
-                        p.DefaultScheme = "auth1";
+                        p.DefaultTarget = "auth1";
                     })
-                    .AddPolicyScheme("policy2", "policy2", p =>
+                    .AddVirtualScheme("policy2", "policy2", p =>
                     {
-                        p.AuthenticateScheme = "auth2";
-                    })
-                    .AddPolicyScheme("dynamic", "dynamic", p =>
-                    {
-                        p.DefaultSchemeSelector = c => c.Request.QueryString.Value.Substring(1);
+                        p.AuthenticateTarget = "auth2";
                     })
                     .AddScheme<TestOptions, TestHandler>("auth1", o => { })
                     .AddScheme<TestOptions, TestHandler>("auth2", o => { })
                     .AddScheme<TestOptions, TestHandler>("auth3", o => { });
             });
-            await Assert.ThrowsAsync<InvalidOperationException>(() => server.SendAsync("http://example.com/auth/One"));
 
             var transaction = await server.SendAsync("http://example.com/auth/policy1");
             Assert.Equal("auth1", transaction.FindClaimValue(ClaimTypes.NameIdentifier, "auth1"));
@@ -55,14 +49,54 @@ namespace Microsoft.AspNetCore.Authentication
 
             transaction = await server.SendAsync("http://example.com/auth/policy2");
             Assert.Equal("auth2", transaction.FindClaimValue(ClaimTypes.NameIdentifier, "auth2"));
+        }
 
-            transaction = await server.SendAsync("http://example.com/auth/dynamic?auth1");
+        [Fact]
+        public async Task CanDynamicTargetBasedOnQueryString()
+        {
+            var server = CreateServer(auth =>
+            {
+                auth.AddVirtualScheme("dynamic", "dynamic", p =>
+                {
+                    p.DefaultTargetSelector = c => c.Request.QueryString.Value.Substring(1);
+                })
+                    .AddScheme<TestOptions, TestHandler>("auth1", o => { })
+                    .AddScheme<TestOptions, TestHandler>("auth2", o => { })
+                    .AddScheme<TestOptions, TestHandler>("auth3", o => { });
+            });
+
+            var transaction = await server.SendAsync("http://example.com/auth/dynamic?auth1");
             Assert.Equal("auth1", transaction.FindClaimValue(ClaimTypes.NameIdentifier, "auth1"));
             transaction = await server.SendAsync("http://example.com/auth/dynamic?auth2");
             Assert.Equal("auth2", transaction.FindClaimValue(ClaimTypes.NameIdentifier, "auth2"));
             transaction = await server.SendAsync("http://example.com/auth/dynamic?auth3");
             Assert.Equal("auth3", transaction.FindClaimValue(ClaimTypes.NameIdentifier, "auth3"));
+        }
 
+        [Fact]
+        public async Task TargetsDefaultSchemeByDefault()
+        {
+            var server = CreateServer(auth =>
+            {
+                auth.AddVirtualScheme("virtual", "virtual", p => { })
+                    .AddScheme<TestOptions, TestHandler>("default", o => { });
+            }, "default");
+
+            var transaction = await server.SendAsync("http://example.com/auth/virtual");
+            Assert.Equal("default", transaction.FindClaimValue(ClaimTypes.NameIdentifier, "default"));
+        }
+
+        [Fact]
+        public async Task TargetsDefaultSchemeThrowsWithNoDefault()
+        {
+            var server = CreateServer(auth =>
+            {
+                auth.AddVirtualScheme("virtual", "virtual", p => { })
+                    .AddScheme<TestOptions, TestHandler>("default", o => { });
+            });
+
+            var error = await Assert.ThrowsAsync<InvalidOperationException>(() => server.SendAsync("http://example.com/auth/virtual"));
+            Assert.Contains("No authenticationScheme was specified", error.Message);
         }
 
         // TODO: test other verbs
@@ -87,7 +121,7 @@ namespace Microsoft.AspNetCore.Authentication
             }
         }
 
-        private static TestServer CreateServer(Action<AuthenticationBuilder> configureAuth = null)
+        private static TestServer CreateServer(Action<AuthenticationBuilder> configureAuth = null, string defaultScheme = null)
         {
             var builder = new WebHostBuilder()
                 .Configure(app =>
@@ -97,24 +131,11 @@ namespace Microsoft.AspNetCore.Authentication
                     {
                         var req = context.Request;
                         var res = context.Response;
-                        if (req.Path.StartsWithSegments(new PathString("/add"), out var remainder))
-                        {
-                            var name = remainder.Value.Substring(1);
-                            var auth = context.RequestServices.GetRequiredService<IAuthenticationSchemeProvider>();
-                            var scheme = new AuthenticationScheme(name, name, typeof(TestHandler));
-                            auth.AddScheme(scheme);
-                        }
-                        else if (req.Path.StartsWithSegments(new PathString("/auth"), out remainder))
+                        if (req.Path.StartsWithSegments(new PathString("/auth"), out var remainder))
                         {
                             var name = (remainder.Value.Length > 0) ? remainder.Value.Substring(1) : null;
                             var result = await context.AuthenticateAsync(name);
                             res.Describe(result?.Ticket?.Principal);
-                        }
-                        else if (req.Path.StartsWithSegments(new PathString("/remove"), out remainder))
-                        {
-                            var name = remainder.Value.Substring(1);
-                            var auth = context.RequestServices.GetRequiredService<IAuthenticationSchemeProvider>();
-                            auth.RemoveScheme(name);
                         }
                         else
                         {
@@ -124,7 +145,7 @@ namespace Microsoft.AspNetCore.Authentication
                 })
                 .ConfigureServices(services =>
                 {
-                    var auth = services.AddAuthentication();
+                    var auth = services.AddAuthentication(defaultScheme);
                     configureAuth?.Invoke(auth);
                 });
             return new TestServer(builder);
