@@ -393,8 +393,6 @@ namespace Microsoft.AspNetCore.Authentication
             Assert.Contains("No authenticationScheme was specified", error.Message);
         }
 
-        // TODO: test other verbs
-
         private class TestHandler : IAuthenticationSignInHandler
         {
             public AuthenticationScheme Scheme { get; set; }
