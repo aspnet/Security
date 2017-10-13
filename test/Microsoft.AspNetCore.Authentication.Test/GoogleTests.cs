@@ -1061,23 +1061,19 @@ namespace Microsoft.AspNetCore.Authentication.Google
                 .ConfigureServices(services =>
                 {
                     services.AddTransient<IClaimsTransformation, ClaimsTransformer>();
-                    services.AddAuthentication(o =>
-                    {
-                        o.DefaultScheme = TestExtensions.CookieAuthenticationScheme;
-                        //o.DefaultChallengeScheme = GoogleDefaults.AuthenticationScheme;
-                    });
-                    services.AddAuthentication()
-                        .AddCookie(TestExtensions.CookieAuthenticationScheme, o =>
+                    services.AddAuthentication("Auth")
+                        .AddVirtualScheme("Auth", "Auth", o =>
                         {
-                            o.SchemeForwarding.Enabled = true;
-                            o.SchemeForwarding.ChallengeTarget = GoogleDefaults.AuthenticationScheme;
+                            o.DefaultTarget = TestExtensions.CookieAuthenticationScheme;
+                            o.ChallengeTarget = GoogleDefaults.AuthenticationScheme;
                         })
+                        .AddCookie(TestExtensions.CookieAuthenticationScheme)
                         .AddGoogle(configureOptions)
                         .AddFacebook(o =>
-                    {
-                        o.AppId = "Test AppId";
-                        o.AppSecret = "Test AppSecrent";
-                    });
+                        {
+                            o.AppId = "Test AppId";
+                            o.AppSecret = "Test AppSecrent";
+                        });
                 });
             return new TestServer(builder);
         }

@@ -3,41 +3,67 @@
 
 using System;
 using System.Security.Claims;
-using System.Text.Encodings.Web;
 using System.Threading.Tasks;
-using Microsoft.Extensions.Logging;
+using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Options;
 
 namespace Microsoft.AspNetCore.Authentication
 {
     /// <summary>
-    /// Forwards calls to another authentication scheme based.
+    /// Forwards calls to another authentication scheme.
     /// </summary>
-    public class VirtualAuthenticationHandler : AuthenticationHandler<AuthenticationSchemeOptions>, IAuthenticationSignInHandler
+    public class VirtualAuthenticationHandler : IAuthenticationHandler, IAuthenticationSignInHandler
     {
-        public VirtualAuthenticationHandler(IOptionsMonitor<AuthenticationSchemeOptions> options, ILoggerFactory logger, UrlEncoder encoder, ISystemClock clock)
-            : base(options, logger, encoder, clock) { }
+        protected IOptionsMonitor<VirtualSchemeOptions> OptionsMonitor { get; }
+        public AuthenticationScheme Scheme { get; private set; }
+        public VirtualSchemeOptions Options { get; private set; }
+        protected HttpContext Context { get; private set; }
 
-        protected override Task InitializeHandlerAsync()
+        public VirtualAuthenticationHandler(IOptionsMonitor<VirtualSchemeOptions> options)
         {
-            if (!Options.SchemeForwarding.Enabled)
-            {
-                throw new InvalidOperationException("VirtualAuthenticationHandlers require options.SchemeForwarding.Enabled = true.");
-            }
-            return base.InitializeHandlerAsync();
+            OptionsMonitor = options;
         }
 
         /// <summary>
-        /// This should never get called due to Options.Targets always forwarding.
+        /// Initialize the handler, resolve the options and validate them.
         /// </summary>
-        /// <returns></returns>
-        protected override Task<AuthenticateResult> HandleAuthenticateAsync()
-            => throw new NotImplementedException();
+        /// <param name="scheme"></param>
+        /// <param name="context"></param>
+        /// <returns>A Task.</returns>
+        public Task InitializeAsync(AuthenticationScheme scheme, HttpContext context)
+        {
+            if (scheme == null)
+            {
+                throw new ArgumentNullException(nameof(scheme));
+            }
+            if (context == null)
+            {
+                throw new ArgumentNullException(nameof(context));
+            }
+
+            Scheme = scheme;
+            Context = context;
+
+            Options = OptionsMonitor.Get(Scheme.Name) ?? new VirtualSchemeOptions();
+            return Task.CompletedTask;
+        }
+
+        protected virtual string ResolveTarget(string scheme)
+            => scheme ?? Options.DefaultTargetSelector?.Invoke(Context) ?? Options.DefaultTarget;
+
+        public virtual Task<AuthenticateResult> AuthenticateAsync()
+            => Context.AuthenticateAsync(ResolveTarget(Options.AuthenticateTarget));
 
         public virtual Task SignInAsync(ClaimsPrincipal user, AuthenticationProperties properties)
-            => Context.SignInAsync(ResolveTarget(Options.SchemeForwarding.SignInTarget), user, properties);
+            => Context.SignInAsync(ResolveTarget(Options.SignInTarget), user, properties);
 
         public virtual Task SignOutAsync(AuthenticationProperties properties)
-            => Context.SignOutAsync(ResolveTarget(Options.SchemeForwarding.SignOutTarget), properties);
+            => Context.SignOutAsync(ResolveTarget(Options.SignOutTarget), properties);
+
+        public Task ChallengeAsync(AuthenticationProperties properties)
+            => Context.ChallengeAsync(ResolveTarget(Options.ChallengeTarget), properties);
+
+        public Task ForbidAsync(AuthenticationProperties properties)
+            => Context.ForbidAsync(ResolveTarget(Options.ForbidTarget), properties);
     }
 }

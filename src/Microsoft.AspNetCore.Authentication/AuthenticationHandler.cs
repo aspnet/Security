@@ -118,16 +118,8 @@ namespace Microsoft.AspNetCore.Authentication
         protected string BuildRedirectUri(string targetPath)
             => Request.Scheme + "://" + Request.Host + OriginalPathBase + targetPath;
 
-        protected virtual string ResolveTarget(string scheme)
-            => scheme ?? Options.SchemeForwarding.DefaultTargetSelector?.Invoke(Context) ?? Options.SchemeForwarding.DefaultTarget;
-
         public async Task<AuthenticateResult> AuthenticateAsync()
         {
-            if (Options.SchemeForwarding.Enabled)
-            {
-                return await Context.AuthenticateAsync(ResolveTarget(Options.SchemeForwarding.AuthenticateTarget));
-            }
-
             // Calling Authenticate more than once should always return the original value.
             var result = await HandleAuthenticateOnceAsync();
             if (result?.Failure == null)
@@ -208,11 +200,6 @@ namespace Microsoft.AspNetCore.Authentication
 
         public async Task ChallengeAsync(AuthenticationProperties properties)
         {
-            if (Options.SchemeForwarding.Enabled)
-            {
-                await Context.ChallengeAsync(ResolveTarget(Options.SchemeForwarding.ChallengeTarget), properties);
-                return;
-            }
             properties = properties ?? new AuthenticationProperties();
             await HandleChallengeAsync(properties);
             Logger.AuthenticationSchemeChallenged(Scheme.Name);
@@ -220,12 +207,6 @@ namespace Microsoft.AspNetCore.Authentication
 
         public async Task ForbidAsync(AuthenticationProperties properties)
         {
-            if (Options.SchemeForwarding.Enabled)
-            {
-                await Context.ForbidAsync(ResolveTarget(Options.SchemeForwarding.ForbidTarget), properties);
-                return;
-            }
-
             properties = properties ?? new AuthenticationProperties();
             await HandleForbiddenAsync(properties);
             Logger.AuthenticationSchemeForbidden(Scheme.Name);
