@@ -16,7 +16,6 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
-using Microsoft.Extensions.Primitives;
 using Microsoft.IdentityModel.Protocols.OpenIdConnect;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.Net.Http.Headers;
@@ -665,6 +664,19 @@ namespace Microsoft.AspNetCore.Authentication.OpenIdConnect
                     }
                     else
                     {
+                        var tokenValidatedContext = await RunSecondaryTokenValidatedEventAsync(authorizationResponse, tokenEndpointResponse, user, tokenEndpointUser, properties, tokenEndpointJwt, nonce);
+                        if (tokenValidatedContext.Result != null)
+                        {
+                            return tokenValidatedContext.Result;
+                        }
+                        authorizationResponse = tokenValidatedContext.ProtocolMessage;
+                        tokenEndpointResponse = tokenValidatedContext.TokenEndpointResponse;
+                        user = tokenValidatedContext.Principal;
+                        properties = tokenValidatedContext.Properties;
+                        jwt = tokenValidatedContext.SecurityToken;
+                        nonce = tokenValidatedContext.Nonce;
+                        tokenEndpointUser = tokenValidatedContext.SecondaryPrincipal;
+
                         if (!string.Equals(jwt.Subject, tokenEndpointJwt.Subject, StringComparison.Ordinal))
                         {
                             throw new SecurityTokenException("The sub claim does not match in the id_token's from the authorization and token endpoints.");
@@ -1035,7 +1047,8 @@ namespace Microsoft.AspNetCore.Authentication.OpenIdConnect
             return context;
         }
 
-        private async Task<TokenValidatedContext> RunTokenValidatedEventAsync(OpenIdConnectMessage authorizationResponse, OpenIdConnectMessage tokenEndpointResponse, ClaimsPrincipal user, AuthenticationProperties properties, JwtSecurityToken jwt, string nonce)
+        private async Task<TokenValidatedContext> RunTokenValidatedEventAsync(OpenIdConnectMessage authorizationResponse, OpenIdConnectMessage tokenEndpointResponse,
+            ClaimsPrincipal user, AuthenticationProperties properties, JwtSecurityToken jwt, string nonce)
         {
             var context = new TokenValidatedContext(Context, Scheme, Options, user, properties)
             {
@@ -1061,7 +1074,36 @@ namespace Microsoft.AspNetCore.Authentication.OpenIdConnect
             return context;
         }
 
-        private async Task<AuthorizationCodeReceivedContext> RunAuthorizationCodeReceivedEventAsync(OpenIdConnectMessage authorizationResponse, ClaimsPrincipal user, AuthenticationProperties properties, JwtSecurityToken jwt)
+        private async Task<SecondaryTokenValidatedContext> RunSecondaryTokenValidatedEventAsync(OpenIdConnectMessage authorizationResponse,
+            OpenIdConnectMessage tokenEndpointResponse, ClaimsPrincipal user, ClaimsPrincipal secondaryUser, AuthenticationProperties properties, JwtSecurityToken jwt, string nonce)
+        {
+            var context = new SecondaryTokenValidatedContext(Context, Scheme, Options, user, properties)
+            {
+                ProtocolMessage = authorizationResponse,
+                TokenEndpointResponse = tokenEndpointResponse,
+                SecurityToken = jwt,
+                Nonce = nonce,
+                SecondaryPrincipal = secondaryUser,
+            };
+
+            await Events.SecondaryTokenValidated(context);
+            if (context.Result != null)
+            {
+                if (context.Result.Handled)
+                {
+                    Logger.SecondaryTokenValidatedHandledResponse();
+                }
+                else if (context.Result.Skipped)
+                {
+                    Logger.SecondaryTokenValidatedSkipped();
+                }
+            }
+
+            return context;
+        }
+
+        private async Task<AuthorizationCodeReceivedContext> RunAuthorizationCodeReceivedEventAsync(OpenIdConnectMessage authorizationResponse, ClaimsPrincipal user,
+            AuthenticationProperties properties, JwtSecurityToken jwt)
         {
             Logger.AuthorizationCodeReceived();
 
@@ -1129,7 +1171,8 @@ namespace Microsoft.AspNetCore.Authentication.OpenIdConnect
             return context;
         }
 
-        private async Task<UserInformationReceivedContext> RunUserInformationReceivedEventAsync(ClaimsPrincipal principal, AuthenticationProperties properties, OpenIdConnectMessage message, JObject user)
+        private async Task<UserInformationReceivedContext> RunUserInformationReceivedEventAsync(ClaimsPrincipal principal, AuthenticationProperties properties,
+            OpenIdConnectMessage message, JObject user)
         {
             Logger.UserInformationReceived(user.ToString());
 
