@@ -3,6 +3,7 @@
 
 using System;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Authentication.Internal;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -31,31 +32,43 @@ namespace Microsoft.AspNetCore.Authentication
 
         public async Task Invoke(HttpContext context)
         {
-            context.Features.Set<IAuthenticationFeature>(new AuthenticationFeature
+            var span = AuthenticationEventSource.Log.AuthenticationMiddlewareStart(context.TraceIdentifier, context.Request.Path);
+            try
             {
-                OriginalPath = context.Request.Path,
-                OriginalPathBase = context.Request.PathBase
-            });
-
-            // Give any IAuthenticationRequestHandler schemes a chance to handle the request
-            var handlers = context.RequestServices.GetRequiredService<IAuthenticationHandlerProvider>();
-            foreach (var scheme in await Schemes.GetRequestHandlerSchemesAsync())
-            {
-                var handler = await handlers.GetHandlerAsync(context, scheme.Name) as IAuthenticationRequestHandler;
-                if (handler != null && await handler.HandleRequestAsync())
+                context.Features.Set<IAuthenticationFeature>(new AuthenticationFeature
                 {
-                    return;
+                    OriginalPath = context.Request.Path,
+                    OriginalPathBase = context.Request.PathBase
+                });
+
+                // Give any IAuthenticationRequestHandler schemes a chance to handle the request
+                var handlers = context.RequestServices.GetRequiredService<IAuthenticationHandlerProvider>();
+                foreach (var scheme in await Schemes.GetRequestHandlerSchemesAsync())
+                {
+                    var handler = await handlers.GetHandlerAsync(context, scheme.Name) as IAuthenticationRequestHandler;
+                    if (handler != null && await handler.HandleRequestAsync())
+                    {
+                        return;
+                    }
+                }
+
+                var defaultAuthenticate = await Schemes.GetDefaultAuthenticateSchemeAsync();
+                if (defaultAuthenticate != null)
+                {
+                    var result = await context.AuthenticateAsync(defaultAuthenticate.Name);
+                    if (result?.Principal != null)
+                    {
+                        context.User = result.Principal;
+                    }
                 }
             }
-
-            var defaultAuthenticate = await Schemes.GetDefaultAuthenticateSchemeAsync();
-            if (defaultAuthenticate != null)
+            catch (Exception ex)
             {
-                var result = await context.AuthenticateAsync(defaultAuthenticate.Name);
-                if (result?.Principal != null)
-                {
-                    context.User = result.Principal;
-                }
+                AuthenticationEventSource.Log.AuthenticationMiddlewareFailure(context.TraceIdentifier, context.Request.Path, ex);
+            }
+            finally
+            {
+                span.End();
             }
 
             await _next(context);
