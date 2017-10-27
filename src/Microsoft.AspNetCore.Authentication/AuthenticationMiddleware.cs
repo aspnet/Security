@@ -65,6 +65,7 @@ namespace Microsoft.AspNetCore.Authentication
             catch (Exception ex)
             {
                 AuthenticationEventSource.Log.AuthenticationMiddlewareFailure(context.TraceIdentifier, context.Request.Path, ex);
+                throw;
             }
             finally
             {
