@@ -21,6 +21,12 @@ namespace Microsoft.AspNetCore.Authentication.Test
             _eventSources = new HashSet<string>(eventSourceNames, StringComparer.Ordinal);
         }
 
+        // REVIEW: I was going to do a Dictionary<string, List<EventWrittenEventArgs>> to group by event source name,
+        // but sometimes you might want to verify the interleaving of events from different sources. This is testing code that
+        // won't ship though so we can fiddle with this as we need.
+        public IReadOnlyList<EventWrittenEventArgs> GetEventsWrittenTo(string eventSourceName) =>
+            EventsWritten.Where(e => e.EventSource.Name.Equals(eventSourceName, StringComparison.Ordinal)).ToList();
+
         protected override void OnEventSourceCreated(EventSource eventSource)
         {
             if(_eventSources != null && _eventSources.Contains(eventSource.Name))

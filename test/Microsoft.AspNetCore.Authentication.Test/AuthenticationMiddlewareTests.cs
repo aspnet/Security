@@ -68,7 +68,7 @@ namespace Microsoft.AspNetCore.Authentication
                 var server = new TestServer(builder);
                 var response = await server.CreateClient().GetAsync("http://example.com/");
 
-                Assert.Collection(listener.EventsWritten,
+                Assert.Collection(listener.GetEventsWrittenTo(EventSourceName),
                     evt =>
                     {
                         EventAssert.IsEvent(evt, 1, "AuthenticationMiddlewareStart");
