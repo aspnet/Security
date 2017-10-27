@@ -56,7 +56,6 @@ namespace Microsoft.AspNetCore.Authentication
             const string EventSourceName = "Microsoft-AspNetCore-Authentication";
             using (var listener = new CollectingEventListener(EventSourceName))
             {
-
                 var builder = new WebHostBuilder()
                     .Configure(app =>
                     {
@@ -69,42 +68,19 @@ namespace Microsoft.AspNetCore.Authentication
                 var server = new TestServer(builder);
                 var response = await server.CreateClient().GetAsync("http://example.com/");
 
-                void AssertTraceIdentifier(KeyValuePair<string, object> pair)
-                {
-                    Assert.Equal("traceIdentifier", pair.Key);
-                    Assert.IsType<string>(pair.Value);
-                }
-
-                void AssertPath(KeyValuePair<string, object> pair)
-                {
-                    Assert.Equal("path", pair.Key);
-                    Assert.Equal("/", pair.Value);
-                }
-
                 Assert.Collection(listener.EventsWritten,
                     evt =>
                     {
-                        Assert.Equal(EventSourceName, evt.EventSource.Name);
-                        Assert.Equal(1, evt.EventId);
-                        Assert.Equal("AuthenticationMiddlewareStart", evt.EventName);
-                        Assert.Collection(evt.GetPayloadAsDictionary(),
-                            AssertTraceIdentifier,
-                            AssertPath);
+                        EventAssert.IsEvent(evt, 1, "AuthenticationMiddlewareStart");
+                        EventAssert.HasPayload<string>(evt, "traceIdentifier");
+                        EventAssert.HasPayload(evt, "path", "/");
                     },
                     evt =>
                     {
-                        Assert.Equal(EventSourceName, evt.EventSource.Name);
-                        Assert.Equal(2, evt.EventId);
-                        Assert.Equal("AuthenticationMiddlewareEnd", evt.EventName);
-                        Assert.Collection(evt.GetPayloadAsDictionary(),
-                            AssertTraceIdentifier,
-                            AssertPath,
-                            pair =>
-                            {
-                                Assert.Equal("durationMilliseconds", pair.Key);
-                                var val = Assert.IsType<double>(pair.Value);
-                                Assert.InRange(val, 0, double.MaxValue);
-                            });
+                        EventAssert.IsEvent(evt, 1, "AuthenticationMiddlewareStart");
+                        EventAssert.HasPayload<string>(evt, "traceIdentifier");
+                        EventAssert.HasPayload(evt, "path", "/");
+                        EventAssert.HasPayload<double>(evt, "durationMilliseconds");
                     });
             }
         }
