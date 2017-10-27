@@ -14,11 +14,23 @@ namespace Microsoft.AspNetCore.Authentication.Test
         private ConcurrentQueue<EventWrittenEventArgs> _events = new ConcurrentQueue<EventWrittenEventArgs>();
         private HashSet<string> _eventSources;
 
+        private object _lock = new object();
+        private List<EventSource> _existingSources = new List<EventSource>();
+
         public IReadOnlyList<EventWrittenEventArgs> EventsWritten => _events.ToArray();
 
         public CollectingEventListener(params string[] eventSourceNames)
         {
-            _eventSources = new HashSet<string>(eventSourceNames, StringComparer.Ordinal);
+            lock (_lock)
+            {
+                _eventSources = new HashSet<string>(eventSourceNames, StringComparer.Ordinal);
+
+                // Enable the sources that were created before we were constructed.
+                foreach(var existingSource in _existingSources.Where(s => _eventSources.Contains(s.Name)))
+                {
+                    EnableEvents(existingSource, EventLevel.Verbose, EventKeywords.All);
+                }
+            }
         }
 
         // REVIEW: I was going to do a Dictionary<string, List<EventWrittenEventArgs>> to group by event source name,
@@ -29,7 +41,19 @@ namespace Microsoft.AspNetCore.Authentication.Test
 
         protected override void OnEventSourceCreated(EventSource eventSource)
         {
-            if(_eventSources != null && _eventSources.Contains(eventSource.Name))
+            if (_eventSources == null)
+            {
+                lock (_lock)
+                {
+                    if (_eventSources == null)
+                    {
+                        _existingSources.Add(eventSource);
+                        return;
+                    }
+                }
+            }
+
+            if (_eventSources.Contains(eventSource.Name))
             {
                 EnableEvents(eventSource, EventLevel.Verbose, EventKeywords.All);
             }

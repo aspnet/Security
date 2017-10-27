@@ -77,7 +77,7 @@ namespace Microsoft.AspNetCore.Authentication
                     },
                     evt =>
                     {
-                        EventAssert.IsEvent(evt, 1, "AuthenticationMiddlewareStart");
+                        EventAssert.IsEvent(evt, 2, "AuthenticationMiddlewareEnd");
                         EventAssert.HasPayload<string>(evt, "traceIdentifier");
                         EventAssert.HasPayload(evt, "path", "/");
                         EventAssert.HasPayload<double>(evt, "durationMilliseconds");
