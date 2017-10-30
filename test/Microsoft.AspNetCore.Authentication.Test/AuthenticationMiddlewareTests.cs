@@ -50,41 +50,6 @@ namespace Microsoft.AspNetCore.Authentication
             Assert.Equal(607, (int)response.StatusCode);
         }
 
-        [Fact]
-        public async Task WritesToAuthenticationEventSourceWhenEnabled()
-        {
-            const string EventSourceName = "Microsoft-AspNetCore-Authentication";
-            using (var listener = new CollectingEventListener(EventSourceName))
-            {
-                var builder = new WebHostBuilder()
-                    .Configure(app =>
-                    {
-                        app.UseAuthentication();
-                    })
-                    .ConfigureServices(services =>
-                    {
-                        services.AddAuthentication();
-                    });
-                var server = new TestServer(builder);
-                var response = await server.CreateClient().GetAsync("http://example.com/");
-
-                Assert.Collection(listener.GetEventsWrittenTo(EventSourceName),
-                    evt =>
-                    {
-                        EventAssert.IsEvent(evt, 1, "AuthenticationMiddlewareStart");
-                        EventAssert.HasPayload<string>(evt, "traceIdentifier");
-                        EventAssert.HasPayload(evt, "path", "/");
-                    },
-                    evt =>
-                    {
-                        EventAssert.IsEvent(evt, 2, "AuthenticationMiddlewareEnd");
-                        EventAssert.HasPayload<string>(evt, "traceIdentifier");
-                        EventAssert.HasPayload(evt, "path", "/");
-                        EventAssert.HasPayload<double>(evt, "durationMilliseconds");
-                    });
-            }
-        }
-
         private class ThreeOhFiveHandler : StatusCodeHandler
         {
             public ThreeOhFiveHandler() : base(305) { }
