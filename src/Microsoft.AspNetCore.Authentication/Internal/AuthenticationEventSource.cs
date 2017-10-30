@@ -16,24 +16,22 @@ namespace Microsoft.AspNetCore.Authentication.Internal
         }
 
         [NonEvent]
-        internal EventSpan<AuthenticationEventSource> AuthenticationMiddlewareStart(string traceIdentifier, PathString path)
+        internal void AuthenticationMiddlewareStart(HttpContext context)
         {
             if (IsEnabled(EventLevel.Informational, EventKeywords.None))
             {
-                AuthenticationMiddlewareStart(traceIdentifier, path.Value);
+                AuthenticationMiddlewareStart(context.TraceIdentifier, context.Request.Path.Value);
             }
-
-            return EventSpan.Create(this, (self, duration) => self.AuthenticationMiddlewareEnd(traceIdentifier, path, duration));
         }
 
         [NonEvent]
-        internal void AuthenticationMiddlewareEnd(string traceIdentifier, PathString path, TimeSpan duration)
+        internal void AuthenticationMiddlewareEnd(HttpContext context, TimeSpan duration)
         {
             if (IsEnabled())
             {
                 if (IsEnabled(EventLevel.Informational, EventKeywords.None))
                 {
-                    AuthenticationMiddlewareEnd(traceIdentifier, path.Value, duration.TotalMilliseconds);
+                    AuthenticationMiddlewareEnd(context.TraceIdentifier, context.Request.Path.Value, duration.TotalMilliseconds);
                 }
 
                 _authenticationMiddlewareDuration.WriteMetric((float)duration.TotalMilliseconds);
@@ -41,11 +39,11 @@ namespace Microsoft.AspNetCore.Authentication.Internal
         }
 
         [NonEvent]
-        internal void AuthenticationMiddlewareFailure(string traceIdentifier, PathString path, Exception ex)
+        internal void AuthenticationMiddlewareFailure(HttpContext context, Exception ex)
         {
             if(IsEnabled(EventLevel.Error, EventKeywords.None))
             {
-                AuthenticationMiddlewareFailure(traceIdentifier, path.Value, ex.GetType().FullName, ex.Message, ex.ToString());
+                AuthenticationMiddlewareFailure(context.TraceIdentifier, context.Request.Path.Value, ex.GetType().FullName, ex.Message, ex.ToString());
             }
         }
 

@@ -32,7 +32,8 @@ namespace Microsoft.AspNetCore.Authentication
 
         public async Task Invoke(HttpContext context)
         {
-            var span = AuthenticationEventSource.Log.AuthenticationMiddlewareStart(context.TraceIdentifier, context.Request.Path);
+            var stopwatch = ValueStopwatch.StartNew();
+            AuthenticationEventSource.Log.AuthenticationMiddlewareStart(context);
             try
             {
                 context.Features.Set<IAuthenticationFeature>(new AuthenticationFeature
@@ -64,12 +65,12 @@ namespace Microsoft.AspNetCore.Authentication
             }
             catch (Exception ex)
             {
-                AuthenticationEventSource.Log.AuthenticationMiddlewareFailure(context.TraceIdentifier, context.Request.Path, ex);
+                AuthenticationEventSource.Log.AuthenticationMiddlewareFailure(context, ex);
                 throw;
             }
             finally
             {
-                span.End();
+                AuthenticationEventSource.Log.AuthenticationMiddlewareEnd(context, stopwatch.GetElapsedTime());
             }
 
             await _next(context);
