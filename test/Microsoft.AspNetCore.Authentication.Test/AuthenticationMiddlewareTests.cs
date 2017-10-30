@@ -48,7 +48,8 @@ namespace Microsoft.AspNetCore.Authentication
             Assert.Equal(607, (int)response.StatusCode);
         }
 
-        private class ThreeOhFiveHandler : StatusCodeHandler {
+        private class ThreeOhFiveHandler : StatusCodeHandler
+        {
             public ThreeOhFiveHandler() : base(305) { }
         }
 
@@ -71,7 +72,7 @@ namespace Microsoft.AspNetCore.Authentication
             {
                 _code = code;
             }
-            
+
             public Task<AuthenticateResult> AuthenticateAsync()
             {
                 throw new NotImplementedException();
