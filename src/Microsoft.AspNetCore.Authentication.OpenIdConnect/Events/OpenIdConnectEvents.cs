@@ -59,6 +59,12 @@ namespace Microsoft.AspNetCore.Authentication.OpenIdConnect
         public Func<TokenValidatedContext, Task> OnTokenValidated { get; set; } = context => Task.CompletedTask;
 
         /// <summary>
+        /// Invoked when an IdToken from the token endpoint (in addition to the one from the authorization endpoint)
+        /// has been validated and produced an AuthenticationTicket.
+        /// </summary>
+        public Func<SecondaryTokenValidatedContext, Task> OnSecondaryTokenValidated { get; set; } = context => Task.CompletedTask;
+
+        /// <summary>
         /// Invoked when user information is retrieved from the UserInfoEndpoint.
         /// </summary>
         public Func<UserInformationReceivedContext, Task> OnUserInformationReceived { get; set; } = context => Task.CompletedTask;
@@ -80,6 +86,8 @@ namespace Microsoft.AspNetCore.Authentication.OpenIdConnect
         public virtual Task TokenResponseReceived(TokenResponseReceivedContext context) => OnTokenResponseReceived(context);
 
         public virtual Task TokenValidated(TokenValidatedContext context) => OnTokenValidated(context);
+
+        public virtual Task SecondaryTokenValidated(SecondaryTokenValidatedContext context) => OnSecondaryTokenValidated(context);
 
         public virtual Task UserInformationReceived(UserInformationReceivedContext context) => OnUserInformationReceived(context);
     }

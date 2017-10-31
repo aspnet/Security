@@ -25,6 +25,8 @@ namespace Microsoft.Extensions.Logging
         private static Action<ILogger, Exception> _tokenResponseReceived;
         private static Action<ILogger, Exception> _tokenValidatedHandledResponse;
         private static Action<ILogger, Exception> _tokenValidatedSkipped;
+        private static Action<ILogger, Exception> _secondaryTokenValidatedHandledResponse;
+        private static Action<ILogger, Exception> _secondaryTokenValidatedSkipped;
         private static Action<ILogger, Exception> _authenticationFailedContextHandledResponse;
         private static Action<ILogger, Exception> _authenticationFailedContextSkipped;
         private static Action<ILogger, Exception> _authorizationCodeReceivedContextHandledResponse;
@@ -258,6 +260,14 @@ namespace Microsoft.Extensions.Logging
                 eventId: 51,
                 logLevel: LogLevel.Debug,
                 formatString: "RedirectToSignedOutRedirectUri.Skipped");
+            _secondaryTokenValidatedHandledResponse = LoggerMessage.Define(
+                eventId: 52,
+                logLevel: LogLevel.Debug,
+                formatString: "SecondaryTokenValidated.HandledResponse");
+            _secondaryTokenValidatedSkipped = LoggerMessage.Define(
+                eventId: 53,
+                logLevel: LogLevel.Debug,
+                formatString: "SecondaryTokenValidated.Skipped");
         }
 
         public static void UpdatingConfiguration(this ILogger logger)
@@ -298,6 +308,16 @@ namespace Microsoft.Extensions.Logging
         public static void TokenValidatedSkipped(this ILogger logger)
         {
             _tokenValidatedSkipped(logger, null);
+        }
+
+        public static void SecondaryTokenValidatedHandledResponse(this ILogger logger)
+        {
+            _secondaryTokenValidatedHandledResponse(logger, null);
+        }
+
+        public static void SecondaryTokenValidatedSkipped(this ILogger logger)
+        {
+            _secondaryTokenValidatedSkipped(logger, null);
         }
 
         public static void AuthorizationCodeReceivedContextHandledResponse(this ILogger logger)
