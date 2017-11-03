@@ -9,7 +9,6 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Options;
 using Xunit;
 
 namespace Microsoft.AspNetCore.Authorization.Policy.Test
@@ -102,30 +101,6 @@ namespace Microsoft.AspNetCore.Authorization.Policy.Test
             Assert.False(result.Succeeded);
             Assert.True(result.Challenged);
             Assert.False(result.Forbidden);
-        }
-
-        [Fact]
-        public async Task Challenge()
-        {
-            // Arrange
-            var attributes = new AuthorizeAttribute[] {
-                new AuthorizeAttribute(),
-                new AuthorizeAttribute { AuthenticationSchemes = "Bearer" },
-            };
-            var options = new AuthorizationOptions();
-
-            var provider = new DefaultAuthorizationPolicyProvider(Options.Create(options));
-            var evaluator = BuildEvaluator();
-            var context = new DefaultHttpContext();
-
-            // Act
-            var combined = await AuthorizationPolicy.CombineAsync(provider, attributes);
-
-            // Act
-            var result = await evaluator.AuthorizeAsync(combined, AuthenticateResult.Fail("Oops"), context, resource: null);
-            Assert.True(result.Challenged);
-
-            Assert.Single(combined.AuthenticationSchemes.ToArray());
         }
 
         [Fact]

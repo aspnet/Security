@@ -20,24 +20,6 @@ namespace Microsoft.AspNetCore.Authroization.Test
         }
 
         [Fact]
-        public async Task TestHao()
-        {
-            // Arrange
-            var attributes = new AuthorizeAttribute[] {
-                new AuthorizeAttribute(),
-                new AuthorizeAttribute { Roles = "r1,r2", AuthenticationSchemes = "Bearer" },
-            };
-            var options = new AuthorizationOptions();
-            options.AddPolicy("1", policy => policy.RequireClaim("1"));
-            options.AddPolicy("2", policy => policy.RequireClaim("2"));
-
-            var provider = new DefaultAuthorizationPolicyProvider(Options.Create(options));
-
-            // Act
-            var combined = await AuthorizationPolicy.CombineAsync(provider, attributes);
-        }
-
-        [Fact]
         public async Task CanCombineAuthorizeAttributes()
         {
             // Arrange
