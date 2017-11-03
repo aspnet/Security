@@ -23,5 +23,11 @@ namespace Microsoft.AspNetCore.Authentication
         /// Used to select a default scheme to target based on the request.
         /// </summary>
         public Func<HttpContext, string> DefaultSelector { get; set; }
+
+
+        /// <summary>
+        /// Check that the options are valid. Should throw an exception if things are not ok.
+        /// </summary>
+        public virtual void Validate() { }
     }
 }

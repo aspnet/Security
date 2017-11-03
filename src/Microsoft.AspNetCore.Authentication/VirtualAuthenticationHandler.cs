@@ -45,6 +45,8 @@ namespace Microsoft.AspNetCore.Authentication
             Context = context;
 
             Options = OptionsMonitor.Get(Scheme.Name) ?? new VirtualSchemeOptions();
+            Options.Validate();
+
             return Task.CompletedTask;
         }
 
