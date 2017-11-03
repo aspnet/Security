@@ -11,17 +11,17 @@ namespace Microsoft.AspNetCore.Authentication
     /// </summary>
     public class VirtualSchemeOptions
     {
-        public string DefaultTarget { get; set; }
+        public string Default { get; set; }
 
-        public string AuthenticateTarget { get; set; }
-        public string ChallengeTarget { get; set; }
-        public string ForbidTarget { get; set; }
-        public string SignInTarget { get; set; }
-        public string SignOutTarget { get; set; }
+        public string Authenticate { get; set; }
+        public string Challenge { get; set; }
+        public string Forbid { get; set; }
+        public string SignIn { get; set; }
+        public string SignOut { get; set; }
 
         /// <summary>
-        /// Used to select a default target scheme based on the request.
+        /// Used to select a default scheme to target based on the request.
         /// </summary>
-        public Func<HttpContext, string> DefaultTargetSelector { get; set; }
+        public Func<HttpContext, string> DefaultSelector { get; set; }
     }
 }

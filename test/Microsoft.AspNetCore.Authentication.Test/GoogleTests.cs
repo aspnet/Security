@@ -1064,8 +1064,8 @@ namespace Microsoft.AspNetCore.Authentication.Google
                     services.AddAuthentication("Auth")
                         .AddVirtualScheme("Auth", "Auth", o =>
                         {
-                            o.DefaultTarget = TestExtensions.CookieAuthenticationScheme;
-                            o.ChallengeTarget = GoogleDefaults.AuthenticationScheme;
+                            o.Default = TestExtensions.CookieAuthenticationScheme;
+                            o.Challenge = GoogleDefaults.AuthenticationScheme;
                         })
                         .AddCookie(TestExtensions.CookieAuthenticationScheme)
                         .AddGoogle(configureOptions)

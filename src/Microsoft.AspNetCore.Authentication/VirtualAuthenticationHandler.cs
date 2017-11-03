@@ -49,21 +49,21 @@ namespace Microsoft.AspNetCore.Authentication
         }
 
         protected virtual string ResolveTarget(string scheme)
-            => scheme ?? Options.DefaultTargetSelector?.Invoke(Context) ?? Options.DefaultTarget;
+            => scheme ?? Options.DefaultSelector?.Invoke(Context) ?? Options.Default;
 
         public virtual Task<AuthenticateResult> AuthenticateAsync()
-            => Context.AuthenticateAsync(ResolveTarget(Options.AuthenticateTarget));
+            => Context.AuthenticateAsync(ResolveTarget(Options.Authenticate));
 
         public virtual Task SignInAsync(ClaimsPrincipal user, AuthenticationProperties properties)
-            => Context.SignInAsync(ResolveTarget(Options.SignInTarget), user, properties);
+            => Context.SignInAsync(ResolveTarget(Options.SignIn), user, properties);
 
         public virtual Task SignOutAsync(AuthenticationProperties properties)
-            => Context.SignOutAsync(ResolveTarget(Options.SignOutTarget), properties);
+            => Context.SignOutAsync(ResolveTarget(Options.SignOut), properties);
 
         public Task ChallengeAsync(AuthenticationProperties properties)
-            => Context.ChallengeAsync(ResolveTarget(Options.ChallengeTarget), properties);
+            => Context.ChallengeAsync(ResolveTarget(Options.Challenge), properties);
 
         public Task ForbidAsync(AuthenticationProperties properties)
-            => Context.ForbidAsync(ResolveTarget(Options.ForbidTarget), properties);
+            => Context.ForbidAsync(ResolveTarget(Options.Forbid), properties);
     }
 }
