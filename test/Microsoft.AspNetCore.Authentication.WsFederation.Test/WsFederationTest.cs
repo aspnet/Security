@@ -112,6 +112,47 @@ namespace Microsoft.AspNetCore.Authentication.WsFederation
             Assert.Equal("AuthenticationFailed", await response.Content.ReadAsStringAsync());
         }
 
+        [Fact]
+        public async Task EventsResolvedFromDI()
+        {
+            var builder = new WebHostBuilder()
+                .ConfigureServices(services =>
+                {
+                    services.AddSingleton<MyWsFedEvents>();
+                    services.AddAuthentication(sharedOptions =>
+                    {
+                        sharedOptions.DefaultScheme = CookieAuthenticationDefaults.AuthenticationScheme;
+                        sharedOptions.DefaultSignInScheme = CookieAuthenticationDefaults.AuthenticationScheme;
+                        sharedOptions.DefaultChallengeScheme = WsFederationDefaults.AuthenticationScheme;
+                    })
+                    .AddCookie()
+                    .AddWsFederation(options =>
+                    {
+                        options.Wtrealm = "http://Automation1";
+                        options.MetadataAddress = "https://login.windows.net/4afbc689-805b-48cf-a24c-d4aa3248a248/federationmetadata/2007-06/federationmetadata.xml";
+                        options.BackchannelHttpHandler = new WaadMetadataDocumentHandler();
+                        options.EventsType = typeof(MyWsFedEvents);
+                    });
+                })
+                .Configure(app =>
+                {
+                    app.Run(context => context.ChallengeAsync());
+                });
+            var server = new TestServer(builder);
+
+            var result = await server.CreateClient().GetAsync("");
+            Assert.Contains("CustomKey=CustomValue", result.Headers.Location.Query);
+        }
+
+        private class MyWsFedEvents : WsFederationEvents
+        {
+            public override Task RedirectToIdentityProvider(RedirectContext context)
+            {
+                context.ProtocolMessage.SetParameter("CustomKey", "CustomValue");
+                return base.RedirectToIdentityProvider(context);
+            }
+        }
+
         private FormUrlEncodedContent CreateSignInContent(string tokenFile, string wctx = null, bool suppressWctx = false)
         {
             var kvps = new List<KeyValuePair<string, string>>();
@@ -164,7 +205,7 @@ namespace Microsoft.AspNetCore.Authentication.WsFederation
                         options.AllowUnsolicitedLogins = allowUnsolicited;
                         options.Events = new WsFederationEvents()
                         {
-                            MessageReceived = context =>
+                            OnMessageReceived = context =>
                             {
                                 if (!context.ProtocolMessage.Parameters.TryGetValue("suppressWctx", out var suppress))
                                 {
@@ -173,7 +214,7 @@ namespace Microsoft.AspNetCore.Authentication.WsFederation
                                 context.HttpContext.Items["MessageReceived"] = true;
                                 return Task.FromResult(0);
                             },
-                            RedirectToIdentityProvider = context =>
+                            OnRedirectToIdentityProvider = context =>
                             {
                                 if (context.ProtocolMessage.IsSignInMessage)
                                 {
@@ -183,12 +224,12 @@ namespace Microsoft.AspNetCore.Authentication.WsFederation
 
                                 return Task.FromResult(0);
                             },
-                            SecurityTokenReceived = context =>
+                            OnSecurityTokenReceived = context =>
                             {
                                 context.HttpContext.Items["SecurityTokenReceived"] = true;
                                 return Task.FromResult(0);
                             },
-                            SecurityTokenValidated = context =>
+                            OnSecurityTokenValidated = context =>
                             {
                                 Assert.True((bool)context.HttpContext.Items["MessageReceived"], "MessageReceived notification not invoked");
                                 Assert.True((bool)context.HttpContext.Items["SecurityTokenReceived"], "SecurityTokenReceived notification not invoked");
@@ -203,7 +244,7 @@ namespace Microsoft.AspNetCore.Authentication.WsFederation
 
                                 return Task.FromResult(0);
                             },
-                            AuthenticationFailed = context =>
+                            OnAuthenticationFailed = context =>
                             {
                                 context.HttpContext.Items["AuthenticationFailed"] = true;
                                 //Change the request url to something different and skip Wsfed. This new url will handle the request and let us know if this notification was invoked.

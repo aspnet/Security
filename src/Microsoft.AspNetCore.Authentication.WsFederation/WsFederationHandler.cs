@@ -36,6 +36,22 @@ namespace Microsoft.AspNetCore.Authentication.WsFederation
         }
 
         /// <summary>
+        /// The handler calls methods on the events which give the application control at certain points where processing is occurring.
+        /// If it is not provided a default instance is supplied which does nothing when the methods are called.
+        /// </summary>
+        protected new WsFederationEvents Events
+        {
+            get { return (WsFederationEvents)base.Events; }
+            set { base.Events = value; }
+        }
+
+        /// <summary>
+        /// Creates a new instance of the events instance.
+        /// </summary>
+        /// <returns>A new instance of the events instance.</returns>
+        protected override Task<object> CreateEventsAsync() => Task.FromResult<object>(new WsFederationEvents());
+
+        /// <summary>
         /// Handles Challenge
         /// </summary>
         /// <returns></returns>
@@ -85,7 +101,7 @@ namespace Microsoft.AspNetCore.Authentication.WsFederation
             {
                 ProtocolMessage = wsFederationMessage
             };
-            await Options.Events.RedirectToIdentityProvider(redirectContext);
+            await Events.RedirectToIdentityProvider(redirectContext);
 
             if (redirectContext.Handled)
             {
@@ -165,7 +181,7 @@ namespace Microsoft.AspNetCore.Authentication.WsFederation
                 {
                     ProtocolMessage = wsFederationMessage
                 };
-                await Options.Events.MessageReceived(messageReceivedContext);
+                await Events.MessageReceived(messageReceivedContext);
                 if (messageReceivedContext.Result != null)
                 {
                     return messageReceivedContext.Result;
@@ -197,7 +213,7 @@ namespace Microsoft.AspNetCore.Authentication.WsFederation
                 {
                     ProtocolMessage = wsFederationMessage
                 };
-                await Options.Events.SecurityTokenReceived(securityTokenReceivedContext);
+                await Events.SecurityTokenReceived(securityTokenReceivedContext);
                 if (securityTokenReceivedContext.Result != null)
                 {
                     return securityTokenReceivedContext.Result;
@@ -254,7 +270,7 @@ namespace Microsoft.AspNetCore.Authentication.WsFederation
                     SecurityToken = parsedToken,
                 };
 
-                await Options.Events.SecurityTokenValidated(securityTokenValidatedContext);
+                await Events.SecurityTokenValidated(securityTokenValidatedContext);
                 if (securityTokenValidatedContext.Result != null)
                 {
                     return securityTokenValidatedContext.Result;
@@ -281,7 +297,7 @@ namespace Microsoft.AspNetCore.Authentication.WsFederation
                     ProtocolMessage = wsFederationMessage,
                     Exception = exception
                 };
-                await Options.Events.AuthenticationFailed(authenticationFailedContext);
+                await Events.AuthenticationFailed(authenticationFailedContext);
                 if (authenticationFailedContext.Result != null)
                 {
                     return authenticationFailedContext.Result;
@@ -330,7 +346,7 @@ namespace Microsoft.AspNetCore.Authentication.WsFederation
             {
                 ProtocolMessage = wsFederationMessage
             };
-            await Options.Events.RedirectToIdentityProvider(redirectContext);
+            await Events.RedirectToIdentityProvider(redirectContext);
 
             if (!redirectContext.Handled)
             {
