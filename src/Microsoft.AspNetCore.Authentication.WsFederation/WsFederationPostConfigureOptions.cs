@@ -35,7 +35,12 @@ namespace Microsoft.AspNetCore.Authentication.WsFederation
         public void PostConfigure(string name, WsFederationOptions options)
         {
             options.DataProtectionProvider = options.DataProtectionProvider ?? _dp;
-            
+
+            if (string.IsNullOrEmpty(options.SignOutScheme))
+            {
+                options.SignOutScheme = options.SignInScheme;
+            }
+
             if (options.StateDataFormat == null)
             {
                 var dataProtector = options.DataProtectionProvider.CreateProtector(

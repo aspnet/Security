@@ -52,6 +52,20 @@ namespace Microsoft.AspNetCore.Authentication.WsFederation
         protected override Task<object> CreateEventsAsync() => Task.FromResult<object>(new WsFederationEvents());
 
         /// <summary>
+        /// Overridden to handle remote signout requests
+        /// </summary>
+        /// <returns></returns>
+        public override Task<bool> HandleRequestAsync()
+        {
+            if (Options.RemoteSignOutPath.HasValue && Options.RemoteSignOutPath == Request.Path)
+            {
+                return HandleRemoteSignOutAsync();
+            }
+
+            return base.HandleRequestAsync();
+        }
+
+        /// <summary>
         /// Handles Challenge
         /// </summary>
         /// <returns></returns>
@@ -357,6 +371,49 @@ namespace Microsoft.AspNetCore.Authentication.WsFederation
                 }
                 Response.Redirect(redirectUri);
             }
+        }
+
+        /// <summary>
+        /// Handles requests to the RemoteSignOutPath and signs out the user.
+        /// </summary>
+        /// <returns></returns>
+        protected virtual async Task<bool> HandleRemoteSignOutAsync()
+        {
+            WsFederationMessage message = null;
+
+            if (string.Equals(Request.Method, "GET", StringComparison.OrdinalIgnoreCase))
+            {
+                message = new WsFederationMessage(Request.Query.Select(pair => new KeyValuePair<string, string[]>(pair.Key, pair.Value)));
+            }
+
+            var remoteSignOutContext = new RemoteSignOutContext(Context, Scheme, Options, message);
+            await Events.RemoteSignOut(remoteSignOutContext);
+
+            if (remoteSignOutContext.Result != null)
+            {
+                if (remoteSignOutContext.Result.Handled)
+                {
+                    Logger.RemoteSignOutHandledResponse();
+                    return true;
+                }
+                if (remoteSignOutContext.Result.Skipped)
+                {
+                    Logger.RemoteSignOutSkipped();
+                    return false;
+                }
+            }
+
+            if (message == null
+                || !string.Equals(message.Wa, WsFederationConstants.WsFederationActions.SignOutCleanup, StringComparison.OrdinalIgnoreCase))
+            {
+                return false;
+            }
+
+            Logger.RemoteSignOut();
+
+            // We've received a remote sign-out request
+            await Context.SignOutAsync(Options.SignOutScheme);
+            return true;
         }
 
         /// <summary>

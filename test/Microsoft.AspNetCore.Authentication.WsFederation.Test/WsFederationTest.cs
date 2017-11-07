@@ -113,6 +113,20 @@ namespace Microsoft.AspNetCore.Authentication.WsFederation
         }
 
         [Fact]
+        public async Task RemoteSignoutRequestTriggersSignout()
+        {
+            var httpClient = CreateClient();
+
+            var response = await httpClient.GetAsync("/signout-wsfed?wa=wsignoutcleanup1.0");
+            response.EnsureSuccessStatusCode();
+
+            var cookie = response.Headers.GetValues(HeaderNames.SetCookie).Single();
+            Assert.Equal(".AspNetCore.Cookies=; expires=Thu, 01 Jan 1970 00:00:00 GMT; path=/; samesite=lax", cookie);
+            Assert.Equal("OnRemoteSignOut", response.Headers.GetValues("EventHeader").Single());
+            Assert.Equal("", await response.Content.ReadAsStringAsync());
+        }
+
+        [Fact]
         public async Task EventsResolvedFromDI()
         {
             var builder = new WebHostBuilder()
@@ -250,6 +264,11 @@ namespace Microsoft.AspNetCore.Authentication.WsFederation
                                 //Change the request url to something different and skip Wsfed. This new url will handle the request and let us know if this notification was invoked.
                                 context.HttpContext.Request.Path = new PathString("/AuthenticationFailed");
                                 context.SkipHandler();
+                                return Task.FromResult(0);
+                            },
+                            OnRemoteSignOut = context =>
+                            {
+                                context.Response.Headers["EventHeader"] = "OnRemoteSignOut";
                                 return Task.FromResult(0);
                             }
                         };

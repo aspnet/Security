@@ -27,6 +27,11 @@ namespace Microsoft.AspNetCore.Authentication.WsFederation
         public Func<RedirectContext, Task> OnRedirectToIdentityProvider { get; set; } = context => Task.CompletedTask;
 
         /// <summary>
+        /// Invoked when a wsignoutcleanup request is received at the RemoteSignOutPath endpoint.
+        /// </summary>
+        public Func<RemoteSignOutContext, Task> OnRemoteSignOut { get; set; } = context => Task.CompletedTask;
+
+        /// <summary>
         /// Invoked with the security token that has been extracted from the protocol message.
         /// </summary>
         public Func<SecurityTokenReceivedContext, Task> OnSecurityTokenReceived { get; set; } = context => Task.CompletedTask;
@@ -50,6 +55,11 @@ namespace Microsoft.AspNetCore.Authentication.WsFederation
         /// Invoked to manipulate redirects to the identity provider for SignIn, SignOut, or Challenge.
         /// </summary>
         public virtual Task RedirectToIdentityProvider(RedirectContext context) => OnRedirectToIdentityProvider(context);
+
+        /// <summary>
+        /// Invoked when a wsignoutcleanup request is received at the RemoteSignOutPath endpoint.
+        /// </summary>
+        public virtual Task RemoteSignOut(RemoteSignOutContext context) => OnRemoteSignOut(context);
 
         /// <summary>
         /// Invoked with the security token that has been extracted from the protocol message.
