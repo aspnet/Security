@@ -11,6 +11,9 @@ namespace Microsoft.Extensions.Logging
         private static Action<ILogger, Exception> _signInWithoutToken;
         private static Action<ILogger, Exception> _exceptionProcessingMessage;
         private static Action<ILogger, string, Exception> _malformedRedirectUri;
+        private static Action<ILogger, Exception> _remoteSignOutHandledResponse;
+        private static Action<ILogger, Exception> _remoteSignOutSkipped;
+        private static Action<ILogger, Exception> _remoteSignOut;
 
         static LoggingExtensions()
         {
@@ -30,6 +33,18 @@ namespace Microsoft.Extensions.Logging
                 eventId: 4,
                 logLevel: LogLevel.Warning,
                 formatString: "The sign-out redirect URI '{0}' is malformed.");
+            _remoteSignOutHandledResponse = LoggerMessage.Define(
+               eventId: 5,
+               logLevel: LogLevel.Debug,
+               formatString: "RemoteSignOutContext.HandledResponse");
+            _remoteSignOutSkipped = LoggerMessage.Define(
+               eventId: 6,
+               logLevel: LogLevel.Debug,
+               formatString: "RemoteSignOutContext.Skipped");
+            _remoteSignOut = LoggerMessage.Define(
+               eventId: 7,
+               logLevel: LogLevel.Information,
+               formatString: "Remote signout request processed.");
         }
 
         public static void SignInWithoutWresult(this ILogger logger)
@@ -50,6 +65,21 @@ namespace Microsoft.Extensions.Logging
         public static void MalformedRedirectUri(this ILogger logger, string uri)
         {
             _malformedRedirectUri(logger, uri, null);
+        }
+
+        public static void RemoteSignOutHandledResponse(this ILogger logger)
+        {
+            _remoteSignOutHandledResponse(logger, null);
+        }
+
+        public static void RemoteSignOutSkipped(this ILogger logger)
+        {
+            _remoteSignOutSkipped(logger, null);
+        }
+
+        public static void RemoteSignOut(this ILogger logger)
+        {
+            _remoteSignOut(logger, null);
         }
     }
 }

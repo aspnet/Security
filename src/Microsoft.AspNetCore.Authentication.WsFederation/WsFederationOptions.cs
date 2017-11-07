@@ -5,6 +5,7 @@ using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.IdentityModel.Tokens.Jwt;
+using Microsoft.AspNetCore.Http;
 using Microsoft.IdentityModel.Protocols;
 using Microsoft.IdentityModel.Protocols.WsFederation;
 using Microsoft.IdentityModel.Tokens;
@@ -32,6 +33,7 @@ namespace Microsoft.AspNetCore.Authentication.WsFederation
         public WsFederationOptions()
         {
             CallbackPath = "/signin-wsfed";
+            RemoteSignOutPath = "/signout-wsfed";
             Events = new WsFederationEvents();
         }
 
@@ -159,5 +161,16 @@ namespace Microsoft.AspNetCore.Authentication.WsFederation
         /// However, that flow is susceptible to XSRF and other attacks so it is disabled here by default.
         /// </summary>
         public bool AllowUnsolicitedLogins { get; set; }
+
+        /// <summary>
+        /// Requests received on this path will cause the handler to invoke SignOut using the SignInScheme.
+        /// </summary>
+        public PathString RemoteSignOutPath { get; set; }
+
+        /// <summary>
+        /// The Authentication Scheme to use with SignOutAsync from RemoteSignOutPath. SignInScheme will be used if this
+        /// is not set.
+        /// </summary>
+        public string SignOutScheme { get; set; }
     }
 }
