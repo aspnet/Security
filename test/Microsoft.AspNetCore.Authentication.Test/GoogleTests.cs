@@ -1061,13 +1061,8 @@ namespace Microsoft.AspNetCore.Authentication.Google
                 .ConfigureServices(services =>
                 {
                     services.AddTransient<IClaimsTransformation, ClaimsTransformer>();
-                    services.AddAuthentication("Auth")
-                        .AddVirtualScheme("Auth", "Auth", o =>
-                        {
-                            o.Default = TestExtensions.CookieAuthenticationScheme;
-                            o.Challenge = GoogleDefaults.AuthenticationScheme;
-                        })
-                        .AddCookie(TestExtensions.CookieAuthenticationScheme)
+                    services.AddAuthentication(TestExtensions.CookieAuthenticationScheme)
+                        .AddCookie(TestExtensions.CookieAuthenticationScheme, o => o.ForwardChallenge = GoogleDefaults.AuthenticationScheme)
                         .AddGoogle(configureOptions)
                         .AddFacebook(o =>
                         {

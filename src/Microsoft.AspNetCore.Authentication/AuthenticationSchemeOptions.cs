@@ -2,6 +2,7 @@
 // Licensed under the Apache License, Version 2.0. See License.txt in the project root for license information.
 
 using System;
+using Microsoft.AspNetCore.Http;
 
 namespace Microsoft.AspNetCore.Authentication
 {
@@ -36,5 +37,21 @@ namespace Microsoft.AspNetCore.Authentication
         /// If set, will be used as the service type to get the Events instance instead of the property.
         /// </summary>
         public Type EventsType { get; set; }
+
+        // Scheme forwarding properties
+
+        public string ForwardDefault { get; set; }
+
+        public string ForwardAuthenticate { get; set; }
+        public string ForwardChallenge { get; set; }
+        public string ForwardForbid { get; set; }
+        public string ForwardSignIn { get; set; }
+        public string ForwardSignOut { get; set; }
+
+        /// <summary>
+        /// Used to select a default scheme to target based on the request.
+        /// </summary>
+        public Func<HttpContext, string> ForwardDefaultSelector { get; set; }
+
     }
 }
