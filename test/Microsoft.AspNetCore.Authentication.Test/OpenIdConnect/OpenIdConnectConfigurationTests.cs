@@ -55,7 +55,7 @@ namespace Microsoft.AspNetCore.Authentication.Test.OpenIdConnect
             services.AddAuthentication(OpenIdConnectDefaults.AuthenticationScheme)
                 .AddOpenIdConnect(o =>
                 {
-                    o.ForwardDefault = OpenIdConnectDefaults.AuthenticationScheme;
+                    o.ForwardDefault = "alias";
                     o.ClientId = "Test Id";
                     o.ClientSecret = "Test Secret";
                     o.Authority = TestServerBuilder.DefaultAuthority;
@@ -72,25 +72,17 @@ namespace Microsoft.AspNetCore.Authentication.Test.OpenIdConnect
 
             var e = await Assert.ThrowsAsync<InvalidOperationException>(() => context.AuthenticateAsync());
             Assert.Contains(error, e.Message);
-            e = await Assert.ThrowsAsync<InvalidOperationException>(() => context.AuthenticateAsync(OpenIdConnectDefaults.AuthenticationScheme));
-            Assert.Contains(error, e.Message);
             e = await Assert.ThrowsAsync<InvalidOperationException>(() => context.AuthenticateAsync("alias"));
             Assert.Contains(error, e.Message);
             e = await Assert.ThrowsAsync<InvalidOperationException>(() => context.ChallengeAsync());
-            Assert.Contains(error, e.Message);
-            e = await Assert.ThrowsAsync<InvalidOperationException>(() => context.ChallengeAsync(OpenIdConnectDefaults.AuthenticationScheme));
             Assert.Contains(error, e.Message);
             e = await Assert.ThrowsAsync<InvalidOperationException>(() => context.ChallengeAsync("alias"));
             Assert.Contains(error, e.Message);
             e = await Assert.ThrowsAsync<InvalidOperationException>(() => context.ForbidAsync());
             Assert.Contains(error, e.Message);
-            e = await Assert.ThrowsAsync<InvalidOperationException>(() => context.ForbidAsync(OpenIdConnectDefaults.AuthenticationScheme));
-            Assert.Contains(error, e.Message);
             e = await Assert.ThrowsAsync<InvalidOperationException>(() => context.ForbidAsync("alias"));
             Assert.Contains(error, e.Message);
             e = await Assert.ThrowsAsync<InvalidOperationException>(() => context.SignOutAsync());
-            Assert.Contains(error, e.Message);
-            e = await Assert.ThrowsAsync<InvalidOperationException>(() => context.SignOutAsync(OpenIdConnectDefaults.AuthenticationScheme));
             Assert.Contains(error, e.Message);
             e = await Assert.ThrowsAsync<InvalidOperationException>(() => context.SignOutAsync("alias"));
             Assert.Contains(error, e.Message);

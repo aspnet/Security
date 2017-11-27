@@ -135,7 +135,7 @@ namespace Microsoft.AspNetCore.Authentication
             try
             {
                 var target = ResolveTarget(Options.ForwardAuthenticate);
-                if (target != null)
+                if (target != null && !string.Equals(target, Scheme.Name, StringComparison.Ordinal))
                 {
                     return await Context.AuthenticateAsync(target);
                 }
@@ -234,7 +234,7 @@ namespace Microsoft.AspNetCore.Authentication
             try
             {
                 var target = ResolveTarget(Options.ForwardChallenge);
-                if (target != null)
+                if (target != null && !string.Equals(target, Scheme.Name, StringComparison.Ordinal))
                 {
                     await Context.ChallengeAsync(target, properties);
                     return;
@@ -261,7 +261,7 @@ namespace Microsoft.AspNetCore.Authentication
             try
             {
                 var target = ResolveTarget(Options.ForwardForbid);
-                if (target != null)
+                if (target != null && !string.Equals(target, Scheme.Name, StringComparison.Ordinal))
                 {
                     await Context.ForbidAsync(target, properties);
                     return;

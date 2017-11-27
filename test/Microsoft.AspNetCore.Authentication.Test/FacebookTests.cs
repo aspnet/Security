@@ -104,7 +104,7 @@ namespace Microsoft.AspNetCore.Authentication.Facebook
             services.AddAuthentication(FacebookDefaults.AuthenticationScheme)
                 .AddFacebook(o =>
                 {
-                    o.ForwardDefault = FacebookDefaults.AuthenticationScheme;
+                    o.ForwardDefault = "alias";
                     o.AppId = "Test App Id";
                     o.AppSecret = "Test App Secret";
                     o.SignInScheme = "Cookies";
@@ -120,19 +120,13 @@ namespace Microsoft.AspNetCore.Authentication.Facebook
 
             var e = await Assert.ThrowsAsync<InvalidOperationException>(() => context.AuthenticateAsync());
             Assert.Contains(error, e.Message);
-            e = await Assert.ThrowsAsync<InvalidOperationException>(() => context.AuthenticateAsync(FacebookDefaults.AuthenticationScheme));
-            Assert.Contains(error, e.Message);
             e = await Assert.ThrowsAsync<InvalidOperationException>(() => context.AuthenticateAsync("alias"));
             Assert.Contains(error, e.Message);
             e = await Assert.ThrowsAsync<InvalidOperationException>(() => context.ChallengeAsync());
             Assert.Contains(error, e.Message);
-            e = await Assert.ThrowsAsync<InvalidOperationException>(() => context.ChallengeAsync(FacebookDefaults.AuthenticationScheme));
-            Assert.Contains(error, e.Message);
             e = await Assert.ThrowsAsync<InvalidOperationException>(() => context.ChallengeAsync("alias"));
             Assert.Contains(error, e.Message);
             e = await Assert.ThrowsAsync<InvalidOperationException>(() => context.ForbidAsync());
-            Assert.Contains(error, e.Message);
-            e = await Assert.ThrowsAsync<InvalidOperationException>(() => context.ForbidAsync(FacebookDefaults.AuthenticationScheme));
             Assert.Contains(error, e.Message);
             e = await Assert.ThrowsAsync<InvalidOperationException>(() => context.ForbidAsync("alias"));
             Assert.Contains(error, e.Message);

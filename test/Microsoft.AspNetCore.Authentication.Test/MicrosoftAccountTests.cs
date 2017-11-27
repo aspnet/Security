@@ -61,7 +61,7 @@ namespace Microsoft.AspNetCore.Authentication.Tests.MicrosoftAccount
             services.AddAuthentication(MicrosoftAccountDefaults.AuthenticationScheme)
                 .AddMicrosoftAccount(o =>
                 {
-                    o.ForwardDefault = MicrosoftAccountDefaults.AuthenticationScheme;
+                    o.ForwardDefault = "alias";
                     o.ClientId = "Test Id";
                     o.ClientSecret = "Test Secret";
                     o.SignInScheme = "Cookies";
@@ -77,19 +77,13 @@ namespace Microsoft.AspNetCore.Authentication.Tests.MicrosoftAccount
 
             var e = await Assert.ThrowsAsync<InvalidOperationException>(() => context.AuthenticateAsync());
             Assert.Contains(error, e.Message);
-            e = await Assert.ThrowsAsync<InvalidOperationException>(() => context.AuthenticateAsync(MicrosoftAccountDefaults.AuthenticationScheme));
-            Assert.Contains(error, e.Message);
             e = await Assert.ThrowsAsync<InvalidOperationException>(() => context.AuthenticateAsync("alias"));
             Assert.Contains(error, e.Message);
             e = await Assert.ThrowsAsync<InvalidOperationException>(() => context.ChallengeAsync());
             Assert.Contains(error, e.Message);
-            e = await Assert.ThrowsAsync<InvalidOperationException>(() => context.ChallengeAsync(MicrosoftAccountDefaults.AuthenticationScheme));
-            Assert.Contains(error, e.Message);
             e = await Assert.ThrowsAsync<InvalidOperationException>(() => context.ChallengeAsync("alias"));
             Assert.Contains(error, e.Message);
             e = await Assert.ThrowsAsync<InvalidOperationException>(() => context.ForbidAsync());
-            Assert.Contains(error, e.Message);
-            e = await Assert.ThrowsAsync<InvalidOperationException>(() => context.ForbidAsync(MicrosoftAccountDefaults.AuthenticationScheme));
             Assert.Contains(error, e.Message);
             e = await Assert.ThrowsAsync<InvalidOperationException>(() => context.ForbidAsync("alias"));
             Assert.Contains(error, e.Message);

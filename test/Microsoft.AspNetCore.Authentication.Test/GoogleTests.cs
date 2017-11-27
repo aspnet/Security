@@ -82,7 +82,7 @@ namespace Microsoft.AspNetCore.Authentication.Google
             services.AddAuthentication(GoogleDefaults.AuthenticationScheme)
                 .AddGoogle(o =>
                 {
-                    o.ForwardDefault = GoogleDefaults.AuthenticationScheme;
+                    o.ForwardDefault = "alias";
                     o.ClientId = "Test Id";
                     o.ClientSecret = "Test Secret";
                     o.SignInScheme = "Cookies";
@@ -98,19 +98,13 @@ namespace Microsoft.AspNetCore.Authentication.Google
 
             var e = await Assert.ThrowsAsync<InvalidOperationException>(() => context.AuthenticateAsync());
             Assert.Contains(error, e.Message);
-            e = await Assert.ThrowsAsync<InvalidOperationException>(() => context.AuthenticateAsync(GoogleDefaults.AuthenticationScheme));
-            Assert.Contains(error, e.Message);
             e = await Assert.ThrowsAsync<InvalidOperationException>(() => context.AuthenticateAsync("alias"));
             Assert.Contains(error, e.Message);
             e = await Assert.ThrowsAsync<InvalidOperationException>(() => context.ChallengeAsync());
             Assert.Contains(error, e.Message);
-            e = await Assert.ThrowsAsync<InvalidOperationException>(() => context.ChallengeAsync(GoogleDefaults.AuthenticationScheme));
-            Assert.Contains(error, e.Message);
             e = await Assert.ThrowsAsync<InvalidOperationException>(() => context.ChallengeAsync("alias"));
             Assert.Contains(error, e.Message);
             e = await Assert.ThrowsAsync<InvalidOperationException>(() => context.ForbidAsync());
-            Assert.Contains(error, e.Message);
-            e = await Assert.ThrowsAsync<InvalidOperationException>(() => context.ForbidAsync(GoogleDefaults.AuthenticationScheme));
             Assert.Contains(error, e.Message);
             e = await Assert.ThrowsAsync<InvalidOperationException>(() => context.ForbidAsync("alias"));
             Assert.Contains(error, e.Message);

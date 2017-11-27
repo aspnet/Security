@@ -47,9 +47,9 @@ namespace Microsoft.AspNetCore.Authentication.JwtBearer
             services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
                 .AddJwtBearer(o =>
                 {
-                    o.ForwardDefault = JwtBearerDefaults.AuthenticationScheme;
-                    o.Authority = "https://login.windows.net/tushartest.onmicrosoft.com";
-                    o.Audience = "https://TusharTest.onmicrosoft.com/TodoListService-ManualJwt";
+                    o.ForwardDefault = "alias";
+                    o.Authority = "https://login.windows.net/";
+                    o.Audience = "https://whatever";
                 })
                 .AddScheme("alias", "alias", p => p.ForwardDefault = JwtBearerDefaults.AuthenticationScheme);
 
@@ -61,19 +61,13 @@ namespace Microsoft.AspNetCore.Authentication.JwtBearer
 
             var e = await Assert.ThrowsAsync<InvalidOperationException>(() => context.AuthenticateAsync());
             Assert.Contains(error, e.Message);
-            e = await Assert.ThrowsAsync<InvalidOperationException>(() => context.AuthenticateAsync(JwtBearerDefaults.AuthenticationScheme));
-            Assert.Contains(error, e.Message);
             e = await Assert.ThrowsAsync<InvalidOperationException>(() => context.AuthenticateAsync("alias"));
             Assert.Contains(error, e.Message);
             e = await Assert.ThrowsAsync<InvalidOperationException>(() => context.ChallengeAsync());
             Assert.Contains(error, e.Message);
-            e = await Assert.ThrowsAsync<InvalidOperationException>(() => context.ChallengeAsync(JwtBearerDefaults.AuthenticationScheme));
-            Assert.Contains(error, e.Message);
             e = await Assert.ThrowsAsync<InvalidOperationException>(() => context.ChallengeAsync("alias"));
             Assert.Contains(error, e.Message);
             e = await Assert.ThrowsAsync<InvalidOperationException>(() => context.ForbidAsync());
-            Assert.Contains(error, e.Message);
-            e = await Assert.ThrowsAsync<InvalidOperationException>(() => context.ForbidAsync(JwtBearerDefaults.AuthenticationScheme));
             Assert.Contains(error, e.Message);
             e = await Assert.ThrowsAsync<InvalidOperationException>(() => context.ForbidAsync("alias"));
             Assert.Contains(error, e.Message);

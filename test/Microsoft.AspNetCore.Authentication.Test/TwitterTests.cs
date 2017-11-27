@@ -53,7 +53,7 @@ namespace Microsoft.AspNetCore.Authentication.Twitter
             services.AddAuthentication(TwitterDefaults.AuthenticationScheme)
                 .AddTwitter(o =>
                 {
-                    o.ForwardDefault = TwitterDefaults.AuthenticationScheme;
+                    o.ForwardDefault = "alias";
                     o.ConsumerKey = "Test Id";
                     o.ConsumerSecret = "Test Secret";
                     o.SignInScheme = "Cookies";
@@ -69,19 +69,14 @@ namespace Microsoft.AspNetCore.Authentication.Twitter
 
             var e = await Assert.ThrowsAsync<InvalidOperationException>(() => context.AuthenticateAsync());
             Assert.Contains(error, e.Message);
-            e = await Assert.ThrowsAsync<InvalidOperationException>(() => context.AuthenticateAsync(TwitterDefaults.AuthenticationScheme));
-            Assert.Contains(error, e.Message);
             e = await Assert.ThrowsAsync<InvalidOperationException>(() => context.AuthenticateAsync("alias"));
             Assert.Contains(error, e.Message);
             e = await Assert.ThrowsAsync<InvalidOperationException>(() => context.ChallengeAsync());
             Assert.Contains(error, e.Message);
-            e = await Assert.ThrowsAsync<InvalidOperationException>(() => context.ChallengeAsync(TwitterDefaults.AuthenticationScheme));
             Assert.Contains(error, e.Message);
             e = await Assert.ThrowsAsync<InvalidOperationException>(() => context.ChallengeAsync("alias"));
             Assert.Contains(error, e.Message);
             e = await Assert.ThrowsAsync<InvalidOperationException>(() => context.ForbidAsync());
-            Assert.Contains(error, e.Message);
-            e = await Assert.ThrowsAsync<InvalidOperationException>(() => context.ForbidAsync(TwitterDefaults.AuthenticationScheme));
             Assert.Contains(error, e.Message);
             e = await Assert.ThrowsAsync<InvalidOperationException>(() => context.ForbidAsync("alias"));
             Assert.Contains(error, e.Message);
