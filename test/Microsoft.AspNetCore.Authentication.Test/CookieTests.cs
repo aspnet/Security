@@ -40,6 +40,53 @@ namespace Microsoft.AspNetCore.Authentication.Cookies
         }
 
         [Fact]
+        public async Task TargetsSelfDoesntStackOverflow()
+        {
+            var services = new ServiceCollection().AddOptions().AddLogging();
+
+            services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
+                .AddCookie(o => o.ForwardDefault = CookieAuthenticationDefaults.AuthenticationScheme)
+                .AddScheme("alias", "alias", p => p.ForwardDefault = CookieAuthenticationDefaults.AuthenticationScheme);
+
+            var sp = services.BuildServiceProvider();
+            var context = new DefaultHttpContext();
+            context.RequestServices = sp;
+
+            const string error = "resulted in a recursive call back to itself";
+
+            var e = await Assert.ThrowsAsync<InvalidOperationException>(() => context.AuthenticateAsync());
+            Assert.Contains(error, e.Message);
+            e = await Assert.ThrowsAsync<InvalidOperationException>(() => context.AuthenticateAsync(CookieAuthenticationDefaults.AuthenticationScheme));
+            Assert.Contains(error, e.Message);
+            e = await Assert.ThrowsAsync<InvalidOperationException>(() => context.AuthenticateAsync("alias"));
+            Assert.Contains(error, e.Message);
+            e = await Assert.ThrowsAsync<InvalidOperationException>(() => context.ChallengeAsync());
+            Assert.Contains(error, e.Message);
+            e = await Assert.ThrowsAsync<InvalidOperationException>(() => context.ChallengeAsync(CookieAuthenticationDefaults.AuthenticationScheme));
+            Assert.Contains(error, e.Message);
+            e = await Assert.ThrowsAsync<InvalidOperationException>(() => context.ChallengeAsync("alias"));
+            Assert.Contains(error, e.Message);
+            e = await Assert.ThrowsAsync<InvalidOperationException>(() => context.ForbidAsync());
+            Assert.Contains(error, e.Message);
+            e = await Assert.ThrowsAsync<InvalidOperationException>(() => context.ForbidAsync(CookieAuthenticationDefaults.AuthenticationScheme));
+            Assert.Contains(error, e.Message);
+            e = await Assert.ThrowsAsync<InvalidOperationException>(() => context.ForbidAsync("alias"));
+            Assert.Contains(error, e.Message);
+            e = await Assert.ThrowsAsync<InvalidOperationException>(() => context.SignOutAsync());
+            Assert.Contains(error, e.Message);
+            e = await Assert.ThrowsAsync<InvalidOperationException>(() => context.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme));
+            Assert.Contains(error, e.Message);
+            e = await Assert.ThrowsAsync<InvalidOperationException>(() => context.SignOutAsync("alias"));
+            Assert.Contains(error, e.Message);
+            e = await Assert.ThrowsAsync<InvalidOperationException>(() => context.SignInAsync(new ClaimsPrincipal()));
+            Assert.Contains(error, e.Message);
+            e = await Assert.ThrowsAsync<InvalidOperationException>(() => context.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme, new ClaimsPrincipal()));
+            Assert.Contains(error, e.Message);
+            e = await Assert.ThrowsAsync<InvalidOperationException>(() => context.SignInAsync("alias", new ClaimsPrincipal()));
+            Assert.Contains(error, e.Message);
+        }
+
+        [Fact]
         public async Task NormalRequestPassesThrough()
         {
             var server = CreateServer(s => { });

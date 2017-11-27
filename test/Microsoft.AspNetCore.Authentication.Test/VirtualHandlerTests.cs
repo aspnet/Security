@@ -407,7 +407,6 @@ namespace Microsoft.AspNetCore.Authentication
             await Assert.ThrowsAsync<InvalidOperationException>(() => context.SignInAsync("alias", new ClaimsPrincipal()));
         }
 
-
         [Fact]
         public async Task TargetsDefaultSchemeThrowsWithNoDefault()
         {

@@ -27,6 +27,9 @@ namespace Microsoft.AspNetCore.Authentication.Cookies
         private bool _signInCalled;
         private bool _signOutCalled;
 
+        private bool _inSignIn;
+        private bool _inSignOut;
+
         private DateTimeOffset? _refreshIssuedUtc;
         private DateTimeOffset? _refreshExpiresUtc;
         private string _sessionKey;
@@ -240,119 +243,160 @@ namespace Microsoft.AspNetCore.Authentication.Cookies
                 throw new ArgumentNullException(nameof(user));
             }
 
-            properties = properties ?? new AuthenticationProperties();
-
-            _signInCalled = true;
-
-            // Process the request cookie to initialize members like _sessionKey.
-            await EnsureCookieTicket();
-            var cookieOptions = BuildCookieOptions();
-
-            var signInContext = new CookieSigningInContext(
-                Context,
-                Scheme,
-                Options,
-                user,
-                properties,
-                cookieOptions);
-
-            DateTimeOffset issuedUtc;
-            if (signInContext.Properties.IssuedUtc.HasValue)
+            if (_inSignIn)
             {
-                issuedUtc = signInContext.Properties.IssuedUtc.Value;
-            }
-            else
-            {
-                issuedUtc = Clock.UtcNow;
-                signInContext.Properties.IssuedUtc = issuedUtc;
+                throw new InvalidOperationException("SignIn for scheme:[" + Scheme.Name + "] resulted in a recursive call back to itself.");
             }
 
-            if (!signInContext.Properties.ExpiresUtc.HasValue)
+            _inSignIn = true;
+            try
             {
-                signInContext.Properties.ExpiresUtc = issuedUtc.Add(Options.ExpireTimeSpan);
-            }
-
-            await Events.SigningIn(signInContext);
-
-            if (signInContext.Properties.IsPersistent)
-            {
-                var expiresUtc = signInContext.Properties.ExpiresUtc ?? issuedUtc.Add(Options.ExpireTimeSpan);
-                signInContext.CookieOptions.Expires = expiresUtc.ToUniversalTime();
-            }
-
-            var ticket = new AuthenticationTicket(signInContext.Principal, signInContext.Properties, signInContext.Scheme.Name);
-
-            if (Options.SessionStore != null)
-            {
-                if (_sessionKey != null)
+                var target = ResolveTarget(Options.ForwardSignIn);
+                if (target != null)
                 {
-                    await Options.SessionStore.RemoveAsync(_sessionKey);
+                    await Context.SignInAsync(target, user, properties);
+                    return;
                 }
-                _sessionKey = await Options.SessionStore.StoreAsync(ticket);
-                var principal = new ClaimsPrincipal(
-                    new ClaimsIdentity(
-                        new[] { new Claim(SessionIdClaim, _sessionKey, ClaimValueTypes.String, Options.ClaimsIssuer) },
-                        Options.ClaimsIssuer));
-                ticket = new AuthenticationTicket(principal, null, Scheme.Name);
+
+                properties = properties ?? new AuthenticationProperties();
+
+                _signInCalled = true;
+
+                // Process the request cookie to initialize members like _sessionKey.
+                await EnsureCookieTicket();
+                var cookieOptions = BuildCookieOptions();
+
+                var signInContext = new CookieSigningInContext(
+                    Context,
+                    Scheme,
+                    Options,
+                    user,
+                    properties,
+                    cookieOptions);
+
+                DateTimeOffset issuedUtc;
+                if (signInContext.Properties.IssuedUtc.HasValue)
+                {
+                    issuedUtc = signInContext.Properties.IssuedUtc.Value;
+                }
+                else
+                {
+                    issuedUtc = Clock.UtcNow;
+                    signInContext.Properties.IssuedUtc = issuedUtc;
+                }
+
+                if (!signInContext.Properties.ExpiresUtc.HasValue)
+                {
+                    signInContext.Properties.ExpiresUtc = issuedUtc.Add(Options.ExpireTimeSpan);
+                }
+
+                await Events.SigningIn(signInContext);
+
+                if (signInContext.Properties.IsPersistent)
+                {
+                    var expiresUtc = signInContext.Properties.ExpiresUtc ?? issuedUtc.Add(Options.ExpireTimeSpan);
+                    signInContext.CookieOptions.Expires = expiresUtc.ToUniversalTime();
+                }
+
+                var ticket = new AuthenticationTicket(signInContext.Principal, signInContext.Properties, signInContext.Scheme.Name);
+
+                if (Options.SessionStore != null)
+                {
+                    if (_sessionKey != null)
+                    {
+                        await Options.SessionStore.RemoveAsync(_sessionKey);
+                    }
+                    _sessionKey = await Options.SessionStore.StoreAsync(ticket);
+                    var principal = new ClaimsPrincipal(
+                        new ClaimsIdentity(
+                            new[] { new Claim(SessionIdClaim, _sessionKey, ClaimValueTypes.String, Options.ClaimsIssuer) },
+                            Options.ClaimsIssuer));
+                    ticket = new AuthenticationTicket(principal, null, Scheme.Name);
+                }
+
+                var cookieValue = Options.TicketDataFormat.Protect(ticket, GetTlsTokenBinding());
+
+                Options.CookieManager.AppendResponseCookie(
+                    Context,
+                    Options.Cookie.Name,
+                    cookieValue,
+                    signInContext.CookieOptions);
+
+                var signedInContext = new CookieSignedInContext(
+                    Context,
+                    Scheme,
+                    signInContext.Principal,
+                    signInContext.Properties,
+                    Options);
+
+                await Events.SignedIn(signedInContext);
+
+                // Only redirect on the login path
+                var shouldRedirect = Options.LoginPath.HasValue && OriginalPath == Options.LoginPath;
+                await ApplyHeaders(shouldRedirect, signedInContext.Properties);
+
+                Logger.SignedIn(Scheme.Name);
             }
-
-            var cookieValue = Options.TicketDataFormat.Protect(ticket, GetTlsTokenBinding());
-
-            Options.CookieManager.AppendResponseCookie(
-                Context,
-                Options.Cookie.Name,
-                cookieValue,
-                signInContext.CookieOptions);
-
-            var signedInContext = new CookieSignedInContext(
-                Context,
-                Scheme,
-                signInContext.Principal,
-                signInContext.Properties,
-                Options);
-
-            await Events.SignedIn(signedInContext);
-
-            // Only redirect on the login path
-            var shouldRedirect = Options.LoginPath.HasValue && OriginalPath == Options.LoginPath;
-            await ApplyHeaders(shouldRedirect, signedInContext.Properties);
-
-            Logger.SignedIn(Scheme.Name);
+            finally
+            {
+                _inSignIn = false;
+            }
         }
 
         public async virtual Task SignOutAsync(AuthenticationProperties properties)
         {
-            properties = properties ?? new AuthenticationProperties();
-
-            _signOutCalled = true;
-
-            // Process the request cookie to initialize members like _sessionKey.
-            await EnsureCookieTicket();
-            var cookieOptions = BuildCookieOptions();
-            if (Options.SessionStore != null && _sessionKey != null)
+            if (_inSignOut)
             {
-                await Options.SessionStore.RemoveAsync(_sessionKey);
+                throw new InvalidOperationException("SignOut for scheme:[" + Scheme.Name + "] resulted in a recursive call back to itself.");
             }
 
-            var context = new CookieSigningOutContext(
-                Context,
-                Scheme,
-                Options,
-                properties,
-                cookieOptions);
+            _inSignOut = true;
 
-            await Events.SigningOut(context);
+            try
+            {
+                var target = ResolveTarget(Options.ForwardSignIn);
+                if (target != null)
+                {
+                    await Context.SignOutAsync(target, properties);
+                    return;
+                }
 
-            Options.CookieManager.DeleteCookie(
-                Context,
-                Options.Cookie.Name,
-                context.CookieOptions);
+                properties = properties ?? new AuthenticationProperties();
 
-            // Only redirect on the logout path
-            var shouldRedirect = Options.LogoutPath.HasValue && OriginalPath == Options.LogoutPath;
-            await ApplyHeaders(shouldRedirect, context.Properties);
+                _signOutCalled = true;
 
-            Logger.SignedOut(Scheme.Name);
+                // Process the request cookie to initialize members like _sessionKey.
+                await EnsureCookieTicket();
+                var cookieOptions = BuildCookieOptions();
+                if (Options.SessionStore != null && _sessionKey != null)
+                {
+                    await Options.SessionStore.RemoveAsync(_sessionKey);
+                }
+
+                var context = new CookieSigningOutContext(
+                    Context,
+                    Scheme,
+                    Options,
+                    properties,
+                    cookieOptions);
+
+                await Events.SigningOut(context);
+
+                Options.CookieManager.DeleteCookie(
+                    Context,
+                    Options.Cookie.Name,
+                    context.CookieOptions);
+
+                // Only redirect on the logout path
+                var shouldRedirect = Options.LogoutPath.HasValue && OriginalPath == Options.LogoutPath;
+                await ApplyHeaders(shouldRedirect, context.Properties);
+
+                Logger.SignedOut(Scheme.Name);
+            }
+            finally
+            {
+                _inSignOut = false;
+            }
         }
 
         private async Task ApplyHeaders(bool shouldRedirectToReturnUrl, AuthenticationProperties properties)

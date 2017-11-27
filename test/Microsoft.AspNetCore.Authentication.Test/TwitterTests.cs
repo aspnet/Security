@@ -46,6 +46,63 @@ namespace Microsoft.AspNetCore.Authentication.Twitter
         }
 
         [Fact]
+        public async Task TargetsSelfDoesntStackOverflow()
+        {
+            var services = new ServiceCollection().AddOptions().AddLogging();
+
+            services.AddAuthentication(TwitterDefaults.AuthenticationScheme)
+                .AddTwitter(o =>
+                {
+                    o.ForwardDefault = TwitterDefaults.AuthenticationScheme;
+                    o.ConsumerKey = "Test Id";
+                    o.ConsumerSecret = "Test Secret";
+                    o.SignInScheme = "Cookies";
+                })
+                .AddCookie()
+                .AddScheme("alias", "alias", p => p.ForwardDefault = TwitterDefaults.AuthenticationScheme);
+
+            var sp = services.BuildServiceProvider();
+            var context = new DefaultHttpContext();
+            context.RequestServices = sp;
+
+            const string error = "resulted in a recursive call back to itself";
+
+            var e = await Assert.ThrowsAsync<InvalidOperationException>(() => context.AuthenticateAsync());
+            Assert.Contains(error, e.Message);
+            e = await Assert.ThrowsAsync<InvalidOperationException>(() => context.AuthenticateAsync(TwitterDefaults.AuthenticationScheme));
+            Assert.Contains(error, e.Message);
+            e = await Assert.ThrowsAsync<InvalidOperationException>(() => context.AuthenticateAsync("alias"));
+            Assert.Contains(error, e.Message);
+            e = await Assert.ThrowsAsync<InvalidOperationException>(() => context.ChallengeAsync());
+            Assert.Contains(error, e.Message);
+            e = await Assert.ThrowsAsync<InvalidOperationException>(() => context.ChallengeAsync(TwitterDefaults.AuthenticationScheme));
+            Assert.Contains(error, e.Message);
+            e = await Assert.ThrowsAsync<InvalidOperationException>(() => context.ChallengeAsync("alias"));
+            Assert.Contains(error, e.Message);
+            e = await Assert.ThrowsAsync<InvalidOperationException>(() => context.ForbidAsync());
+            Assert.Contains(error, e.Message);
+            e = await Assert.ThrowsAsync<InvalidOperationException>(() => context.ForbidAsync(TwitterDefaults.AuthenticationScheme));
+            Assert.Contains(error, e.Message);
+            e = await Assert.ThrowsAsync<InvalidOperationException>(() => context.ForbidAsync("alias"));
+            Assert.Contains(error, e.Message);
+
+            const string noHandlerError = "is configured to handle sign";
+
+            e = await Assert.ThrowsAsync<InvalidOperationException>(() => context.SignOutAsync());
+            Assert.Contains(noHandlerError, e.Message);
+            e = await Assert.ThrowsAsync<InvalidOperationException>(() => context.SignOutAsync(TwitterDefaults.AuthenticationScheme));
+            Assert.Contains(noHandlerError, e.Message);
+            e = await Assert.ThrowsAsync<InvalidOperationException>(() => context.SignOutAsync("alias"));
+            Assert.Contains(noHandlerError, e.Message);
+            e = await Assert.ThrowsAsync<InvalidOperationException>(() => context.SignInAsync(new ClaimsPrincipal()));
+            Assert.Contains(noHandlerError, e.Message);
+            e = await Assert.ThrowsAsync<InvalidOperationException>(() => context.SignInAsync(TwitterDefaults.AuthenticationScheme, new ClaimsPrincipal()));
+            Assert.Contains(noHandlerError, e.Message);
+            e = await Assert.ThrowsAsync<InvalidOperationException>(() => context.SignInAsync("alias", new ClaimsPrincipal()));
+            Assert.Contains(noHandlerError, e.Message);
+        }
+
+        [Fact]
         public async Task ChallengeWillTriggerApplyRedirectEvent()
         {
             var server = CreateServer(o =>

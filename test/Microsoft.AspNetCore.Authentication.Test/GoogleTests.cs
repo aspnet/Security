@@ -75,6 +75,63 @@ namespace Microsoft.AspNetCore.Authentication.Google
         }
 
         [Fact]
+        public async Task TargetsSelfDoesntStackOverflow()
+        {
+            var services = new ServiceCollection().AddOptions().AddLogging();
+
+            services.AddAuthentication(GoogleDefaults.AuthenticationScheme)
+                .AddGoogle(o =>
+                {
+                    o.ForwardDefault = GoogleDefaults.AuthenticationScheme;
+                    o.ClientId = "Test Id";
+                    o.ClientSecret = "Test Secret";
+                    o.SignInScheme = "Cookies";
+                })
+                .AddCookie()
+                .AddScheme("alias", "alias", p => p.ForwardDefault = GoogleDefaults.AuthenticationScheme);
+
+            var sp = services.BuildServiceProvider();
+            var context = new DefaultHttpContext();
+            context.RequestServices = sp;
+
+            const string error = "resulted in a recursive call back to itself";
+
+            var e = await Assert.ThrowsAsync<InvalidOperationException>(() => context.AuthenticateAsync());
+            Assert.Contains(error, e.Message);
+            e = await Assert.ThrowsAsync<InvalidOperationException>(() => context.AuthenticateAsync(GoogleDefaults.AuthenticationScheme));
+            Assert.Contains(error, e.Message);
+            e = await Assert.ThrowsAsync<InvalidOperationException>(() => context.AuthenticateAsync("alias"));
+            Assert.Contains(error, e.Message);
+            e = await Assert.ThrowsAsync<InvalidOperationException>(() => context.ChallengeAsync());
+            Assert.Contains(error, e.Message);
+            e = await Assert.ThrowsAsync<InvalidOperationException>(() => context.ChallengeAsync(GoogleDefaults.AuthenticationScheme));
+            Assert.Contains(error, e.Message);
+            e = await Assert.ThrowsAsync<InvalidOperationException>(() => context.ChallengeAsync("alias"));
+            Assert.Contains(error, e.Message);
+            e = await Assert.ThrowsAsync<InvalidOperationException>(() => context.ForbidAsync());
+            Assert.Contains(error, e.Message);
+            e = await Assert.ThrowsAsync<InvalidOperationException>(() => context.ForbidAsync(GoogleDefaults.AuthenticationScheme));
+            Assert.Contains(error, e.Message);
+            e = await Assert.ThrowsAsync<InvalidOperationException>(() => context.ForbidAsync("alias"));
+            Assert.Contains(error, e.Message);
+
+            const string noHandlerError = "is configured to handle sign";
+
+            e = await Assert.ThrowsAsync<InvalidOperationException>(() => context.SignOutAsync());
+            Assert.Contains(noHandlerError, e.Message);
+            e = await Assert.ThrowsAsync<InvalidOperationException>(() => context.SignOutAsync(GoogleDefaults.AuthenticationScheme));
+            Assert.Contains(noHandlerError, e.Message);
+            e = await Assert.ThrowsAsync<InvalidOperationException>(() => context.SignOutAsync("alias"));
+            Assert.Contains(noHandlerError, e.Message);
+            e = await Assert.ThrowsAsync<InvalidOperationException>(() => context.SignInAsync(new ClaimsPrincipal()));
+            Assert.Contains(noHandlerError, e.Message);
+            e = await Assert.ThrowsAsync<InvalidOperationException>(() => context.SignInAsync(GoogleDefaults.AuthenticationScheme, new ClaimsPrincipal()));
+            Assert.Contains(noHandlerError, e.Message);
+            e = await Assert.ThrowsAsync<InvalidOperationException>(() => context.SignInAsync("alias", new ClaimsPrincipal()));
+            Assert.Contains(noHandlerError, e.Message);
+        }
+
+        [Fact]
         public async Task SignInThrows()
         {
             var server = CreateServer(o =>
