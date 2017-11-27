@@ -3,10 +3,12 @@
 
 using System;
 using System.Net;
+using System.Security.Claims;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authentication.OpenIdConnect;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.TestHost;
 using Microsoft.Extensions.DependencyInjection;
 using Xunit;
@@ -44,6 +46,65 @@ namespace Microsoft.AspNetCore.Authentication.Test.OpenIdConnect
             var transaction = await server.SendAsync(@"https://example.com");
             Assert.Equal(HttpStatusCode.OK, transaction.Response.StatusCode);
         }
+
+        [Fact]
+        public async Task TargetsSelfDoesntStackOverflow()
+        {
+            var services = new ServiceCollection().AddOptions().AddLogging();
+
+            services.AddAuthentication(OpenIdConnectDefaults.AuthenticationScheme)
+                .AddOpenIdConnect(o =>
+                {
+                    o.ForwardDefault = OpenIdConnectDefaults.AuthenticationScheme;
+                    o.ClientId = "Test Id";
+                    o.ClientSecret = "Test Secret";
+                    o.Authority = TestServerBuilder.DefaultAuthority;
+                    o.SignInScheme = "Cookies";
+                })
+                .AddCookie()
+                .AddScheme("alias", "alias", p => p.ForwardDefault = OpenIdConnectDefaults.AuthenticationScheme);
+
+            var sp = services.BuildServiceProvider();
+            var context = new DefaultHttpContext();
+            context.RequestServices = sp;
+
+            const string error = "resulted in a recursive call back to itself";
+
+            var e = await Assert.ThrowsAsync<InvalidOperationException>(() => context.AuthenticateAsync());
+            Assert.Contains(error, e.Message);
+            e = await Assert.ThrowsAsync<InvalidOperationException>(() => context.AuthenticateAsync(OpenIdConnectDefaults.AuthenticationScheme));
+            Assert.Contains(error, e.Message);
+            e = await Assert.ThrowsAsync<InvalidOperationException>(() => context.AuthenticateAsync("alias"));
+            Assert.Contains(error, e.Message);
+            e = await Assert.ThrowsAsync<InvalidOperationException>(() => context.ChallengeAsync());
+            Assert.Contains(error, e.Message);
+            e = await Assert.ThrowsAsync<InvalidOperationException>(() => context.ChallengeAsync(OpenIdConnectDefaults.AuthenticationScheme));
+            Assert.Contains(error, e.Message);
+            e = await Assert.ThrowsAsync<InvalidOperationException>(() => context.ChallengeAsync("alias"));
+            Assert.Contains(error, e.Message);
+            e = await Assert.ThrowsAsync<InvalidOperationException>(() => context.ForbidAsync());
+            Assert.Contains(error, e.Message);
+            e = await Assert.ThrowsAsync<InvalidOperationException>(() => context.ForbidAsync(OpenIdConnectDefaults.AuthenticationScheme));
+            Assert.Contains(error, e.Message);
+            e = await Assert.ThrowsAsync<InvalidOperationException>(() => context.ForbidAsync("alias"));
+            Assert.Contains(error, e.Message);
+            e = await Assert.ThrowsAsync<InvalidOperationException>(() => context.SignOutAsync());
+            Assert.Contains(error, e.Message);
+            e = await Assert.ThrowsAsync<InvalidOperationException>(() => context.SignOutAsync(OpenIdConnectDefaults.AuthenticationScheme));
+            Assert.Contains(error, e.Message);
+            e = await Assert.ThrowsAsync<InvalidOperationException>(() => context.SignOutAsync("alias"));
+            Assert.Contains(error, e.Message);
+
+            const string noHandlerError = "is configured to handle sign";
+
+            e = await Assert.ThrowsAsync<InvalidOperationException>(() => context.SignInAsync(new ClaimsPrincipal()));
+            Assert.Contains(noHandlerError, e.Message);
+            e = await Assert.ThrowsAsync<InvalidOperationException>(() => context.SignInAsync(OpenIdConnectDefaults.AuthenticationScheme, new ClaimsPrincipal()));
+            Assert.Contains(noHandlerError, e.Message);
+            e = await Assert.ThrowsAsync<InvalidOperationException>(() => context.SignInAsync("alias", new ClaimsPrincipal()));
+            Assert.Contains(noHandlerError, e.Message);
+        }
+
 
         [Fact]
         public Task ThrowsWhenSignInSchemeIsSetToSelf()
