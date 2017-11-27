@@ -17,6 +17,9 @@ namespace Microsoft.AspNetCore.Authentication
         protected override Task<AuthenticateResult> HandleAuthenticateAsync()
             => Context.AuthenticateAsync();
 
+        protected override Task HandleChallengeAsync(AuthenticationProperties properties)
+            => Context.ChallengeAsync(properties);
+
         protected override Task HandleSignInAsync(ClaimsPrincipal user, AuthenticationProperties properties)
             => Context.SignInAsync(user, properties);
 

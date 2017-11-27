@@ -378,6 +378,37 @@ namespace Microsoft.AspNetCore.Authentication
         }
 
         [Fact]
+        public async Task TargetsSelfDoesntStackOverflow()
+        {
+            var services = new ServiceCollection().AddOptions().AddLogging();
+
+            services.AddAuthentication("virtual")
+                .AddScheme("virtual", "virtual", p => { })
+                .AddScheme("alias", "alias", p => p.ForwardDefault = "virtual");
+
+            var sp = services.BuildServiceProvider();
+            var context = new DefaultHttpContext();
+            context.RequestServices = sp;
+
+            await Assert.ThrowsAsync<InvalidOperationException>(() => context.AuthenticateAsync());
+            await Assert.ThrowsAsync<InvalidOperationException>(() => context.AuthenticateAsync("virtual"));
+            await Assert.ThrowsAsync<InvalidOperationException>(() => context.AuthenticateAsync("alias"));
+            await Assert.ThrowsAsync<InvalidOperationException>(() => context.ChallengeAsync());
+            await Assert.ThrowsAsync<InvalidOperationException>(() => context.ChallengeAsync("virtual"));
+            await Assert.ThrowsAsync<InvalidOperationException>(() => context.ChallengeAsync("alias"));
+            await Assert.ThrowsAsync<InvalidOperationException>(() => context.ForbidAsync());
+            await Assert.ThrowsAsync<InvalidOperationException>(() => context.ForbidAsync("virtual"));
+            await Assert.ThrowsAsync<InvalidOperationException>(() => context.ForbidAsync("alias"));
+            await Assert.ThrowsAsync<InvalidOperationException>(() => context.SignOutAsync());
+            await Assert.ThrowsAsync<InvalidOperationException>(() => context.SignOutAsync("virtual"));
+            await Assert.ThrowsAsync<InvalidOperationException>(() => context.SignOutAsync("alias"));
+            await Assert.ThrowsAsync<InvalidOperationException>(() => context.SignInAsync(new ClaimsPrincipal()));
+            await Assert.ThrowsAsync<InvalidOperationException>(() => context.SignInAsync("virtual", new ClaimsPrincipal()));
+            await Assert.ThrowsAsync<InvalidOperationException>(() => context.SignInAsync("alias", new ClaimsPrincipal()));
+        }
+
+
+        [Fact]
         public async Task TargetsDefaultSchemeThrowsWithNoDefault()
         {
             var server = CreateServer(services =>
