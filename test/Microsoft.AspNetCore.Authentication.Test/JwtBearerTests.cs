@@ -39,6 +39,61 @@ namespace Microsoft.AspNetCore.Authentication.JwtBearer
             Assert.Null(scheme.DisplayName);
         }
 
+        [Fact]
+        public async Task TargetsSelfDoesntStackOverflow()
+        {
+            var services = new ServiceCollection().AddOptions().AddLogging();
+
+            services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+                .AddJwtBearer(o =>
+                {
+                    o.ForwardDefault = JwtBearerDefaults.AuthenticationScheme;
+                    o.Authority = "https://login.windows.net/tushartest.onmicrosoft.com";
+                    o.Audience = "https://TusharTest.onmicrosoft.com/TodoListService-ManualJwt";
+                })
+                .AddScheme("alias", "alias", p => p.ForwardDefault = JwtBearerDefaults.AuthenticationScheme);
+
+            var sp = services.BuildServiceProvider();
+            var context = new DefaultHttpContext();
+            context.RequestServices = sp;
+
+            const string error = "resulted in a recursive call back to itself";
+
+            var e = await Assert.ThrowsAsync<InvalidOperationException>(() => context.AuthenticateAsync());
+            Assert.Contains(error, e.Message);
+            e = await Assert.ThrowsAsync<InvalidOperationException>(() => context.AuthenticateAsync(JwtBearerDefaults.AuthenticationScheme));
+            Assert.Contains(error, e.Message);
+            e = await Assert.ThrowsAsync<InvalidOperationException>(() => context.AuthenticateAsync("alias"));
+            Assert.Contains(error, e.Message);
+            e = await Assert.ThrowsAsync<InvalidOperationException>(() => context.ChallengeAsync());
+            Assert.Contains(error, e.Message);
+            e = await Assert.ThrowsAsync<InvalidOperationException>(() => context.ChallengeAsync(JwtBearerDefaults.AuthenticationScheme));
+            Assert.Contains(error, e.Message);
+            e = await Assert.ThrowsAsync<InvalidOperationException>(() => context.ChallengeAsync("alias"));
+            Assert.Contains(error, e.Message);
+            e = await Assert.ThrowsAsync<InvalidOperationException>(() => context.ForbidAsync());
+            Assert.Contains(error, e.Message);
+            e = await Assert.ThrowsAsync<InvalidOperationException>(() => context.ForbidAsync(JwtBearerDefaults.AuthenticationScheme));
+            Assert.Contains(error, e.Message);
+            e = await Assert.ThrowsAsync<InvalidOperationException>(() => context.ForbidAsync("alias"));
+            Assert.Contains(error, e.Message);
+
+            const string noHandlerError = "is configured to handle sign";
+
+            e = await Assert.ThrowsAsync<InvalidOperationException>(() => context.SignOutAsync());
+            Assert.Contains(noHandlerError, e.Message);
+            e = await Assert.ThrowsAsync<InvalidOperationException>(() => context.SignOutAsync(JwtBearerDefaults.AuthenticationScheme));
+            Assert.Contains(noHandlerError, e.Message);
+            e = await Assert.ThrowsAsync<InvalidOperationException>(() => context.SignOutAsync("alias"));
+            Assert.Contains(noHandlerError, e.Message);
+            e = await Assert.ThrowsAsync<InvalidOperationException>(() => context.SignInAsync(new ClaimsPrincipal()));
+            Assert.Contains(noHandlerError, e.Message);
+            e = await Assert.ThrowsAsync<InvalidOperationException>(() => context.SignInAsync(JwtBearerDefaults.AuthenticationScheme, new ClaimsPrincipal()));
+            Assert.Contains(noHandlerError, e.Message);
+            e = await Assert.ThrowsAsync<InvalidOperationException>(() => context.SignInAsync("alias", new ClaimsPrincipal()));
+            Assert.Contains(noHandlerError, e.Message);
+        }
+
         [ConditionalFact(Skip = "Need to remove dependency on AAD since the generated tokens will expire")]
         [FrameworkSkipCondition(RuntimeFrameworks.Mono)]
         // https://github.com/AzureAD/azure-activedirectory-identitymodel-extensions-for-dotnet/issues/179
