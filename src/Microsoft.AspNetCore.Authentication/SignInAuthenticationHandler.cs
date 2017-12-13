@@ -32,7 +32,7 @@ namespace Microsoft.AspNetCore.Authentication
             try
             {
                 var target = ResolveTarget(Options.ForwardSignIn);
-                return (target != null && !string.Equals(target, Scheme.Name, StringComparison.Ordinal))
+                return (target != null)
                     ? Context.SignInAsync(target, user, properties)
                     : HandleSignInAsync(user, properties ?? new AuthenticationProperties());
             }

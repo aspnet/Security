@@ -31,7 +31,7 @@ namespace Microsoft.AspNetCore.Authentication
             try
             {
                 var target = ResolveTarget(Options.ForwardSignOut);
-                return (target != null && !string.Equals(target, Scheme.Name, StringComparison.Ordinal))
+                return (target != null)
                     ? Context.SignOutAsync(target, properties)
                     : HandleSignOutAsync(properties ?? new AuthenticationProperties());
             }
