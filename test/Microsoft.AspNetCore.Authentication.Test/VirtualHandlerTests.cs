@@ -453,21 +453,38 @@ namespace Microsoft.AspNetCore.Authentication
             var context = new DefaultHttpContext();
             context.RequestServices = sp;
 
-            await Assert.ThrowsAsync<InvalidOperationException>(() => context.AuthenticateAsync());
-            await Assert.ThrowsAsync<InvalidOperationException>(() => context.AuthenticateAsync("virtual"));
-            await Assert.ThrowsAsync<InvalidOperationException>(() => context.AuthenticateAsync("alias"));
-            await Assert.ThrowsAsync<InvalidOperationException>(() => context.ChallengeAsync());
-            await Assert.ThrowsAsync<InvalidOperationException>(() => context.ChallengeAsync("virtual"));
-            await Assert.ThrowsAsync<InvalidOperationException>(() => context.ChallengeAsync("alias"));
-            await Assert.ThrowsAsync<InvalidOperationException>(() => context.ForbidAsync());
-            await Assert.ThrowsAsync<InvalidOperationException>(() => context.ForbidAsync("virtual"));
-            await Assert.ThrowsAsync<InvalidOperationException>(() => context.ForbidAsync("alias"));
-            await Assert.ThrowsAsync<InvalidOperationException>(() => context.SignOutAsync());
-            await Assert.ThrowsAsync<InvalidOperationException>(() => context.SignOutAsync("virtual"));
-            await Assert.ThrowsAsync<InvalidOperationException>(() => context.SignOutAsync("alias"));
-            await Assert.ThrowsAsync<InvalidOperationException>(() => context.SignInAsync(new ClaimsPrincipal()));
-            await Assert.ThrowsAsync<InvalidOperationException>(() => context.SignInAsync("virtual", new ClaimsPrincipal()));
-            await Assert.ThrowsAsync<InvalidOperationException>(() => context.SignInAsync("alias", new ClaimsPrincipal()));
+            const string error = "resulted in a recursive call back to itself. Check for cycles in either Forward";
+
+            var e = await Assert.ThrowsAsync<InvalidOperationException>(() => context.AuthenticateAsync());
+            Assert.Contains(error, e.Message);
+            e = await Assert.ThrowsAsync<InvalidOperationException>(() => context.AuthenticateAsync("virtual"));
+            Assert.Contains(error, e.Message);
+            e = await Assert.ThrowsAsync<InvalidOperationException>(() => context.AuthenticateAsync("alias"));
+            Assert.Contains(error, e.Message);
+            e = await Assert.ThrowsAsync<InvalidOperationException>(() => context.ChallengeAsync());
+            Assert.Contains(error, e.Message);
+            e = await Assert.ThrowsAsync<InvalidOperationException>(() => context.ChallengeAsync("virtual"));
+            Assert.Contains(error, e.Message);
+            e = await Assert.ThrowsAsync<InvalidOperationException>(() => context.ChallengeAsync("alias"));
+            Assert.Contains(error, e.Message);
+            e = await Assert.ThrowsAsync<InvalidOperationException>(() => context.ForbidAsync());
+            Assert.Contains(error, e.Message);
+            e = await Assert.ThrowsAsync<InvalidOperationException>(() => context.ForbidAsync("virtual"));
+            Assert.Contains(error, e.Message);
+            e = await Assert.ThrowsAsync<InvalidOperationException>(() => context.ForbidAsync("alias"));
+            Assert.Contains(error, e.Message);
+            e = await Assert.ThrowsAsync<InvalidOperationException>(() => context.SignOutAsync());
+            Assert.Contains(error, e.Message);
+            e = await Assert.ThrowsAsync<InvalidOperationException>(() => context.SignOutAsync("virtual"));
+            Assert.Contains(error, e.Message);
+            e = await Assert.ThrowsAsync<InvalidOperationException>(() => context.SignOutAsync("alias"));
+            Assert.Contains(error, e.Message);
+            e = await Assert.ThrowsAsync<InvalidOperationException>(() => context.SignInAsync(new ClaimsPrincipal()));
+            Assert.Contains(error, e.Message);
+            e = await Assert.ThrowsAsync<InvalidOperationException>(() => context.SignInAsync("virtual", new ClaimsPrincipal()));
+            Assert.Contains(error, e.Message);
+            e = await Assert.ThrowsAsync<InvalidOperationException>(() => context.SignInAsync("alias", new ClaimsPrincipal()));
+            Assert.Contains(error, e.Message);
         }
 
         [Fact]

@@ -24,7 +24,7 @@ namespace Microsoft.AspNetCore.Authentication
         {
             if (_inSignOut)
             {
-                throw new InvalidOperationException("SignOut for scheme:[" + Scheme.Name + "] resulted in a recursive call back to itself.");
+                throw new InvalidOperationException("SignOut for scheme:[" + Scheme.Name + "] resulted in a recursive call back to itself. Check for cycles in either ForwardSignOut, ForwardDefault, or ForwardDefaultSelector.");
             }
 
             _inSignOut = true;

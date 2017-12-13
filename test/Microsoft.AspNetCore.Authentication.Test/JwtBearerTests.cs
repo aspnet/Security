@@ -57,7 +57,7 @@ namespace Microsoft.AspNetCore.Authentication.JwtBearer
             var context = new DefaultHttpContext();
             context.RequestServices = sp;
 
-            const string error = "resulted in a recursive call back to itself";
+            const string error = "resulted in a recursive call back to itself. Check for cycles in either Forward";
 
             var e = await Assert.ThrowsAsync<InvalidOperationException>(() => context.AuthenticateAsync());
             Assert.Contains(error, e.Message);

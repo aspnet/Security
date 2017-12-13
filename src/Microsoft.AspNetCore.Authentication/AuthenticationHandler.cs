@@ -135,7 +135,7 @@ namespace Microsoft.AspNetCore.Authentication
         {
             if (_inAuthenticate)
             {
-                throw new InvalidOperationException("Authenticate for scheme:[" + Scheme.Name + "] resulted in a recursive call back to itself.");
+                throw new InvalidOperationException("Authenticate for scheme:[" + Scheme.Name + "] resulted in a recursive call back to itself. Check for cycles in either ForwardAuthenticate, ForwardDefault, or ForwardDefaultSelector.");
             }
 
             _inAuthenticate = true;
@@ -234,7 +234,7 @@ namespace Microsoft.AspNetCore.Authentication
         {
             if (_inChallenge)
             {
-                throw new InvalidOperationException("Challenge for scheme:[" + Scheme.Name + "] resulted in a recursive call back to itself.");
+                throw new InvalidOperationException("Challenge for scheme:[" + Scheme.Name + "] resulted in a recursive call back to itself. Check for cycles in either ForwardChallenge, ForwardDefault, or ForwardDefaultSelector.");
             }
 
             _inChallenge = true;
@@ -261,7 +261,7 @@ namespace Microsoft.AspNetCore.Authentication
         {
             if (_inForbid)
             {
-                throw new InvalidOperationException("Forbid for scheme:[" + Scheme.Name + "] resulted in a recursive call back to itself.");
+                throw new InvalidOperationException("Forbid for scheme:[" + Scheme.Name + "] resulted in a recursive call back to itself. Check for cycles in either ForwardForbid, ForwardDefault, or ForwardDefaultSelector.");
             }
 
             _inForbid = true;
