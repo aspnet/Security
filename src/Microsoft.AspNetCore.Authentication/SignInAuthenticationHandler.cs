@@ -25,7 +25,7 @@ namespace Microsoft.AspNetCore.Authentication
         {
             if (_inSignIn)
             {
-                throw new InvalidOperationException("SignIn for scheme:[" + Scheme.Name + "] resulted in a recursive call back to itself.");
+                throw new InvalidOperationException("SignIn for scheme:[" + Scheme.Name + "] resulted in a recursive call back to itself. Check for cycles in either ForwardSignIn, ForwardDefault, or ForwardDefaultSelector.");
             }
 
             _inSignIn = true;
