@@ -122,7 +122,14 @@ namespace Microsoft.AspNetCore.Authentication
             => Request.Scheme + "://" + Request.Host + OriginalPathBase + targetPath;
 
         protected virtual string ResolveTarget(string scheme)
-            => scheme ?? Options.ForwardDefaultSelector?.Invoke(Context) ?? Options.ForwardDefault;
+        {
+            var target = scheme ?? Options.ForwardDefaultSelector?.Invoke(Context) ?? Options.ForwardDefault;
+
+            // Prevent self targetting
+            return string.Equals(target, Scheme.Name, StringComparison.Ordinal)
+                ? null
+                : target;
+        }
 
         public async Task<AuthenticateResult> AuthenticateAsync()
         {
@@ -135,7 +142,7 @@ namespace Microsoft.AspNetCore.Authentication
             try
             {
                 var target = ResolveTarget(Options.ForwardAuthenticate);
-                if (target != null && !string.Equals(target, Scheme.Name, StringComparison.Ordinal))
+                if (target != null)
                 {
                     return await Context.AuthenticateAsync(target);
                 }
@@ -234,7 +241,7 @@ namespace Microsoft.AspNetCore.Authentication
             try
             {
                 var target = ResolveTarget(Options.ForwardChallenge);
-                if (target != null && !string.Equals(target, Scheme.Name, StringComparison.Ordinal))
+                if (target != null)
                 {
                     await Context.ChallengeAsync(target, properties);
                     return;
@@ -261,7 +268,7 @@ namespace Microsoft.AspNetCore.Authentication
             try
             {
                 var target = ResolveTarget(Options.ForwardForbid);
-                if (target != null && !string.Equals(target, Scheme.Name, StringComparison.Ordinal))
+                if (target != null)
                 {
                     await Context.ForbidAsync(target, properties);
                     return;
