@@ -15,9 +15,6 @@ namespace Microsoft.AspNetCore.Authentication
     public abstract class AuthenticationHandler<TOptions> : IAuthenticationHandler where TOptions : AuthenticationSchemeOptions, new()
     {
         private Task<AuthenticateResult> _authenticateTask;
-        private bool _inAuthenticate;
-        private bool _inChallenge;
-        private bool _inForbid;
 
         public AuthenticationScheme Scheme { get; private set; }
         public TOptions Options { get; private set; }
@@ -133,44 +130,31 @@ namespace Microsoft.AspNetCore.Authentication
 
         public async Task<AuthenticateResult> AuthenticateAsync()
         {
-            if (_inAuthenticate)
+            var target = ResolveTarget(Options.ForwardAuthenticate);
+            if (target != null)
             {
-                throw new InvalidOperationException("Authenticate for scheme:[" + Scheme.Name + "] resulted in a recursive call back to itself. Check for cycles in either ForwardAuthenticate, ForwardDefault, or ForwardDefaultSelector.");
+                return await Context.AuthenticateAsync(target);
             }
 
-            _inAuthenticate = true;
-            try
+            // Calling Authenticate more than once should always return the original value.
+            var result = await HandleAuthenticateOnceAsync();
+            if (result?.Failure == null)
             {
-                var target = ResolveTarget(Options.ForwardAuthenticate);
-                if (target != null)
+                var ticket = result?.Ticket;
+                if (ticket?.Principal != null)
                 {
-                    return await Context.AuthenticateAsync(target);
-                }
-
-                // Calling Authenticate more than once should always return the original value.
-                var result = await HandleAuthenticateOnceAsync();
-                if (result?.Failure == null)
-                {
-                    var ticket = result?.Ticket;
-                    if (ticket?.Principal != null)
-                    {
-                        Logger.AuthenticationSchemeAuthenticated(Scheme.Name);
-                    }
-                    else
-                    {
-                        Logger.AuthenticationSchemeNotAuthenticated(Scheme.Name);
-                    }
+                    Logger.AuthenticationSchemeAuthenticated(Scheme.Name);
                 }
                 else
                 {
-                    Logger.AuthenticationSchemeNotAuthenticatedWithFailure(Scheme.Name, result.Failure.Message);
+                    Logger.AuthenticationSchemeNotAuthenticated(Scheme.Name);
                 }
-                return result;
             }
-            finally
+            else
             {
-                _inAuthenticate = false;
+                Logger.AuthenticationSchemeNotAuthenticatedWithFailure(Scheme.Name, result.Failure.Message);
             }
+            return result;
         }
 
         /// <summary>
@@ -232,56 +216,30 @@ namespace Microsoft.AspNetCore.Authentication
 
         public async Task ChallengeAsync(AuthenticationProperties properties)
         {
-            if (_inChallenge)
+            var target = ResolveTarget(Options.ForwardChallenge);
+            if (target != null)
             {
-                throw new InvalidOperationException("Challenge for scheme:[" + Scheme.Name + "] resulted in a recursive call back to itself. Check for cycles in either ForwardChallenge, ForwardDefault, or ForwardDefaultSelector.");
+                await Context.ChallengeAsync(target, properties);
+                return;
             }
 
-            _inChallenge = true;
-            try
-            {
-                var target = ResolveTarget(Options.ForwardChallenge);
-                if (target != null)
-                {
-                    await Context.ChallengeAsync(target, properties);
-                    return;
-                }
-
-                properties = properties ?? new AuthenticationProperties();
-                await HandleChallengeAsync(properties);
-                Logger.AuthenticationSchemeChallenged(Scheme.Name);
-            }
-            finally
-            {
-                _inChallenge = false;
-            }
+            properties = properties ?? new AuthenticationProperties();
+            await HandleChallengeAsync(properties);
+            Logger.AuthenticationSchemeChallenged(Scheme.Name);
         }
 
         public async Task ForbidAsync(AuthenticationProperties properties)
         {
-            if (_inForbid)
+            var target = ResolveTarget(Options.ForwardForbid);
+            if (target != null)
             {
-                throw new InvalidOperationException("Forbid for scheme:[" + Scheme.Name + "] resulted in a recursive call back to itself. Check for cycles in either ForwardForbid, ForwardDefault, or ForwardDefaultSelector.");
+                await Context.ForbidAsync(target, properties);
+                return;
             }
 
-            _inForbid = true;
-            try
-            {
-                var target = ResolveTarget(Options.ForwardForbid);
-                if (target != null)
-                {
-                    await Context.ForbidAsync(target, properties);
-                    return;
-                }
-
-                properties = properties ?? new AuthenticationProperties();
-                await HandleForbiddenAsync(properties);
-                Logger.AuthenticationSchemeForbidden(Scheme.Name);
-            }
-            finally
-            {
-                _inForbid = false;
-            }
+            properties = properties ?? new AuthenticationProperties();
+            await HandleForbiddenAsync(properties);
+            Logger.AuthenticationSchemeForbidden(Scheme.Name);
         }
     }
 }

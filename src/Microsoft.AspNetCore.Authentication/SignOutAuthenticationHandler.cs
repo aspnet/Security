@@ -15,30 +15,15 @@ namespace Microsoft.AspNetCore.Authentication
     public abstract class SignOutAuthenticationHandler<TOptions> : AuthenticationHandler<TOptions>, IAuthenticationSignOutHandler
         where TOptions : AuthenticationSchemeOptions, new()
     {
-        private bool _inSignOut;
-
         public SignOutAuthenticationHandler(IOptionsMonitor<TOptions> options, ILoggerFactory logger, UrlEncoder encoder, ISystemClock clock) : base(options, logger, encoder, clock)
         { }
 
         public Task SignOutAsync(AuthenticationProperties properties)
         {
-            if (_inSignOut)
-            {
-                throw new InvalidOperationException("SignOut for scheme:[" + Scheme.Name + "] resulted in a recursive call back to itself. Check for cycles in either ForwardSignOut, ForwardDefault, or ForwardDefaultSelector.");
-            }
-
-            _inSignOut = true;
-            try
-            {
-                var target = ResolveTarget(Options.ForwardSignOut);
-                return (target != null)
-                    ? Context.SignOutAsync(target, properties)
-                    : HandleSignOutAsync(properties ?? new AuthenticationProperties());
-            }
-            finally
-            {
-                _inSignOut = false;
-            }
+            var target = ResolveTarget(Options.ForwardSignOut);
+            return (target != null)
+                ? Context.SignOutAsync(target, properties)
+                : HandleSignOutAsync(properties ?? new AuthenticationProperties());
         }
 
         /// <summary>
