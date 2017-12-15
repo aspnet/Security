@@ -16,30 +16,15 @@ namespace Microsoft.AspNetCore.Authentication
     public abstract class SignInAuthenticationHandler<TOptions> : SignOutAuthenticationHandler<TOptions>, IAuthenticationSignInHandler
             where TOptions : AuthenticationSchemeOptions, new()
     {
-        private bool _inSignIn;
-
         public SignInAuthenticationHandler(IOptionsMonitor<TOptions> options, ILoggerFactory logger, UrlEncoder encoder, ISystemClock clock) : base(options, logger, encoder, clock)
         { }
 
         public Task SignInAsync(ClaimsPrincipal user, AuthenticationProperties properties)
         {
-            if (_inSignIn)
-            {
-                throw new InvalidOperationException("SignIn for scheme:[" + Scheme.Name + "] resulted in a recursive call back to itself. Check for cycles in either ForwardSignIn, ForwardDefault, or ForwardDefaultSelector.");
-            }
-
-            _inSignIn = true;
-            try
-            {
-                var target = ResolveTarget(Options.ForwardSignIn);
-                return (target != null)
-                    ? Context.SignInAsync(target, user, properties)
-                    : HandleSignInAsync(user, properties ?? new AuthenticationProperties());
-            }
-            finally
-            {
-                _inSignIn = false;
-            }
+            var target = ResolveTarget(Options.ForwardSignIn);
+            return (target != null)
+                ? Context.SignInAsync(target, user, properties)
+                : HandleSignInAsync(user, properties ?? new AuthenticationProperties());
         }
 
         /// <summary>
