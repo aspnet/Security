@@ -49,30 +49,35 @@ namespace Microsoft.AspNetCore.Authentication
         /// <summary>
         /// If set, this specifies the target scheme that this scheme should forward AuthenticateAsync calls to.
         /// For example Context.AuthenticateAsync("ThisScheme") => Context.AuthenticateAsync("ForwardAuthenticateValue");
+        /// Set the target to the current scheme to disable forwarding and allow normal processing.
         /// </summary>
         public string ForwardAuthenticate { get; set; }
 
         /// <summary>
         /// If set, this specifies the target scheme that this scheme should forward ChallengeAsync calls to.
         /// For example Context.ChallengeAsync("ThisScheme") => Context.ChallengeAsync("ForwardChallengeValue");
+        /// Set the target to the current scheme to disable forwarding and allow normal processing.
         /// </summary>
         public string ForwardChallenge { get; set; }
 
         /// <summary>
         /// If set, this specifies the target scheme that this scheme should forward ForbidAsync calls to.
         /// For example Context.ForbidAsync("ThisScheme") => Context.ForbidAsync("ForwardForbidValue");
+        /// Set the target to the current scheme to disable forwarding and allow normal processing.
         /// </summary>
         public string ForwardForbid { get; set; }
 
         /// <summary>
         /// If set, this specifies the target scheme that this scheme should forward SignInAsync calls to.
         /// For example Context.SignInAsync("ThisScheme") => Context.SignInAsync("ForwardSignInValue");
+        /// Set the target to the current scheme to disable forwarding and allow normal processing.
         /// </summary>
         public string ForwardSignIn { get; set; }
 
         /// <summary>
         /// If set, this specifies the target scheme that this scheme should forward SignOutAsync calls to.
         /// For example Context.SignOutAsync("ThisScheme") => Context.SignInAsync("ForwardSignOutValue");
+        /// Set the target to the current scheme to disable forwarding and allow normal processing.
         /// </summary>
         public string ForwardSignOut { get; set; }
 
