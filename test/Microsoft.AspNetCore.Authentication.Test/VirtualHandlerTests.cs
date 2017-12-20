@@ -13,7 +13,7 @@ using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Xunit;
 
-namespace Microsoft.AspNetCore.Authentication
+namespace Microsoft.AspNetCore.Authentication.Tests
 {
     public class VirtualHandlerTests
     {
@@ -281,6 +281,50 @@ namespace Microsoft.AspNetCore.Authentication
         }
 
         [Fact]
+        public async Task TargetsSelfResultsInFallbackToDefault()
+        {
+            var services = new ServiceCollection().AddOptions().AddLogging();
+
+            services.AddAuthentication(o =>
+            {
+                o.AddScheme<TestHandler>("auth1", "auth1");
+                o.DefaultScheme = "auth1";
+            })
+            .AddScheme("forward", "forward", p =>
+            {
+                p.ForwardDefault = "forward";
+            });
+
+            var handler1 = new TestHandler();
+            services.AddSingleton(handler1);
+
+            var sp = services.BuildServiceProvider();
+            var context = new DefaultHttpContext();
+            context.RequestServices = sp;
+
+            Assert.Equal(0, handler1.AuthenticateCount);
+            Assert.Equal(0, handler1.ForbidCount);
+            Assert.Equal(0, handler1.ChallengeCount);
+            Assert.Equal(0, handler1.SignInCount);
+            Assert.Equal(0, handler1.SignOutCount);
+
+            await context.AuthenticateAsync("forward");
+            Assert.Equal(1, handler1.AuthenticateCount);
+
+            await context.ForbidAsync("forward");
+            Assert.Equal(1, handler1.ForbidCount);
+
+            await context.ChallengeAsync("forward");
+            Assert.Equal(1, handler1.ChallengeCount);
+
+            await context.SignOutAsync("forward");
+            Assert.Equal(1, handler1.SignOutCount);
+
+            await context.SignInAsync("forward", new ClaimsPrincipal());
+            Assert.Equal(1, handler1.SignInCount);
+        }
+
+        [Fact]
         public async Task VirtualSchemeTargetsOverrideDefaultTarget()
         {
             var services = new ServiceCollection().AddOptions().AddLogging();
@@ -439,54 +483,6 @@ namespace Microsoft.AspNetCore.Authentication
             var transaction = await server.SendAsync("http://example.com/auth/virtual");
             Assert.Equal("default", transaction.FindClaimValue(ClaimTypes.NameIdentifier, "default"));
         }
-
-        // Stack overflow checking is not currently implemented
-        //[Fact]
-        //public async Task TargetsSelfDoesntStackOverflow()
-        //{
-        //    var services = new ServiceCollection().AddOptions().AddLogging();
-
-        //    services.AddAuthentication("virtual")
-        //        .AddScheme("virtual", "virtual", p => { })
-        //        .AddScheme("alias", "alias", p => p.ForwardDefault = "virtual");
-
-        //    var sp = services.BuildServiceProvider();
-        //    var context = new DefaultHttpContext();
-        //    context.RequestServices = sp;
-
-        //    const string error = "resulted in a recursive call back to itself. Check for cycles in either Forward";
-
-        //    var e = await Assert.ThrowsAsync<InvalidOperationException>(() => context.AuthenticateAsync());
-        //    Assert.Contains(error, e.Message);
-        //    e = await Assert.ThrowsAsync<InvalidOperationException>(() => context.AuthenticateAsync("virtual"));
-        //    Assert.Contains(error, e.Message);
-        //    e = await Assert.ThrowsAsync<InvalidOperationException>(() => context.AuthenticateAsync("alias"));
-        //    Assert.Contains(error, e.Message);
-        //    e = await Assert.ThrowsAsync<InvalidOperationException>(() => context.ChallengeAsync());
-        //    Assert.Contains(error, e.Message);
-        //    e = await Assert.ThrowsAsync<InvalidOperationException>(() => context.ChallengeAsync("virtual"));
-        //    Assert.Contains(error, e.Message);
-        //    e = await Assert.ThrowsAsync<InvalidOperationException>(() => context.ChallengeAsync("alias"));
-        //    Assert.Contains(error, e.Message);
-        //    e = await Assert.ThrowsAsync<InvalidOperationException>(() => context.ForbidAsync());
-        //    Assert.Contains(error, e.Message);
-        //    e = await Assert.ThrowsAsync<InvalidOperationException>(() => context.ForbidAsync("virtual"));
-        //    Assert.Contains(error, e.Message);
-        //    e = await Assert.ThrowsAsync<InvalidOperationException>(() => context.ForbidAsync("alias"));
-        //    Assert.Contains(error, e.Message);
-        //    e = await Assert.ThrowsAsync<InvalidOperationException>(() => context.SignOutAsync());
-        //    Assert.Contains(error, e.Message);
-        //    e = await Assert.ThrowsAsync<InvalidOperationException>(() => context.SignOutAsync("virtual"));
-        //    Assert.Contains(error, e.Message);
-        //    e = await Assert.ThrowsAsync<InvalidOperationException>(() => context.SignOutAsync("alias"));
-        //    Assert.Contains(error, e.Message);
-        //    e = await Assert.ThrowsAsync<InvalidOperationException>(() => context.SignInAsync(new ClaimsPrincipal()));
-        //    Assert.Contains(error, e.Message);
-        //    e = await Assert.ThrowsAsync<InvalidOperationException>(() => context.SignInAsync("virtual", new ClaimsPrincipal()));
-        //    Assert.Contains(error, e.Message);
-        //    e = await Assert.ThrowsAsync<InvalidOperationException>(() => context.SignInAsync("alias", new ClaimsPrincipal()));
-        //    Assert.Contains(error, e.Message);
-        //}
 
         [Fact]
         public async Task TargetsDefaultSchemeThrowsWithNoDefault()
