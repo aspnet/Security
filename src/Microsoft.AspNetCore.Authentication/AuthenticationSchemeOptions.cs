@@ -82,7 +82,7 @@ namespace Microsoft.AspNetCore.Authentication
         public string ForwardSignOut { get; set; }
 
         /// <summary>
-        /// Used to select a default scheme from the current request that authentication handlers should forward all authentication operations to
+        /// Used to select a default scheme for the current request that authentication handlers should forward all authentication operations to
         /// by default. The default forwarding logic will check the most specific ForwardAuthenticate/Challenge/Forbid/SignIn/SignOut 
         /// setting first, followed by checking the ForwardDefaultSelector, followed by ForwardDefault. The first non null result
         /// will be used as the target scheme to forward to.
