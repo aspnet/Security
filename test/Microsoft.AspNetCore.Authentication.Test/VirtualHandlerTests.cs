@@ -600,55 +600,7 @@ namespace Microsoft.AspNetCore.Authentication
             }
         }
 
-        private class TestHandler2 : IAuthenticationSignInHandler
-        {
-            public AuthenticationScheme Scheme { get; set; }
-            public int SignInCount { get; set; }
-            public int SignOutCount { get; set; }
-            public int ForbidCount { get; set; }
-            public int ChallengeCount { get; set; }
-            public int AuthenticateCount { get; set; }
-
-            public Task<AuthenticateResult> AuthenticateAsync()
-            {
-                AuthenticateCount++;
-                var principal = new ClaimsPrincipal();
-                var id = new ClaimsIdentity();
-                id.AddClaim(new Claim(ClaimTypes.NameIdentifier, Scheme.Name, ClaimValueTypes.String, Scheme.Name));
-                principal.AddIdentity(id);
-                return Task.FromResult(AuthenticateResult.Success(new AuthenticationTicket(principal, new AuthenticationProperties(), Scheme.Name)));
-            }
-
-            public Task ChallengeAsync(AuthenticationProperties properties)
-            {
-                ChallengeCount++;
-                return Task.CompletedTask;
-            }
-
-            public Task ForbidAsync(AuthenticationProperties properties)
-            {
-                ForbidCount++;
-                return Task.CompletedTask;
-            }
-
-            public Task InitializeAsync(AuthenticationScheme scheme, HttpContext context)
-            {
-                Scheme = scheme;
-                return Task.CompletedTask;
-            }
-
-            public Task SignInAsync(ClaimsPrincipal user, AuthenticationProperties properties)
-            {
-                SignInCount++;
-                return Task.CompletedTask;
-            }
-
-            public Task SignOutAsync(AuthenticationProperties properties)
-            {
-                SignOutCount++;
-                return Task.CompletedTask;
-            }
-        }
+        private class TestHandler2 : TestHandler { }
 
         private static TestServer CreateServer(Action<IServiceCollection> configure = null, string defaultScheme = null)
         {
