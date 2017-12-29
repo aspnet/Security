@@ -76,7 +76,7 @@ namespace Microsoft.AspNetCore.Authentication.OAuth
                     failureMessage.Append(";Uri=").Append(errorUri);
                 }
 
-                return HandleRequestResult.Fail(failureMessage.ToString(), properties);
+                return HandleRequestResult.Fail(failureMessage.ToString(), error, errorDescription, properties);
             }
 
             var code = query["code"];

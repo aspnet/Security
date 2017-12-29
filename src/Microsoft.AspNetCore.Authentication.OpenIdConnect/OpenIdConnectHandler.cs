@@ -552,7 +552,7 @@ namespace Microsoft.AspNetCore.Authentication.OpenIdConnect
                 // if any of the error fields are set, throw error null
                 if (!string.IsNullOrEmpty(authorizationResponse.Error))
                 {
-                    return HandleRequestResult.Fail(CreateOpenIdConnectProtocolException(authorizationResponse, response: null), properties);
+                    return CreateOpenIdConnectFailure(authorizationResponse, properties);
                 }
 
                 if (_configuration == null && Options.ConfigurationManager != null)
@@ -1247,26 +1247,27 @@ namespace Microsoft.AspNetCore.Authentication.OpenIdConnect
             return BuildRedirectUri(uri);
         }
 
+        private HandleRequestResult CreateOpenIdConnectFailure(OpenIdConnectMessage message, AuthenticationProperties properties)
+        {
+            var description = message.ErrorDescription ?? "error_description is null";
+            var errorUri = message.ErrorUri ?? "error_uri is null";
+
+            Logger.ResponseError(message.Error, description, errorUri);
+
+            return HandleRequestResult.Fail(new OpenIdConnectProtocolException(string.Format(
+                CultureInfo.InvariantCulture, Resources.MessageContainsError, message.Error, description, errorUri)),
+                message.Error, message.ErrorDescription, properties);
+        }
+
         private OpenIdConnectProtocolException CreateOpenIdConnectProtocolException(OpenIdConnectMessage message, HttpResponseMessage response)
         {
             var description = message.ErrorDescription ?? "error_description is null";
             var errorUri = message.ErrorUri ?? "error_uri is null";
 
-            if (response != null)
-            {
-                Logger.ResponseErrorWithStatusCode(message.Error, description, errorUri, (int)response.StatusCode);
-            }
-            else
-            {
-                Logger.ResponseError(message.Error, description, errorUri);
-            }
+            Logger.ResponseErrorWithStatusCode(message.Error, description, errorUri, (int)response.StatusCode);
 
-            return new OpenIdConnectProtocolException(string.Format(
-                CultureInfo.InvariantCulture,
-                Resources.MessageContainsError,
-                message.Error,
-                description,
-                errorUri));
+            return new OpenIdConnectProtocolException(string.Format(CultureInfo.InvariantCulture, Resources.MessageContainsError,
+                message.Error, description, errorUri));
         }
     }
 }
