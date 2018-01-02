@@ -56,6 +56,11 @@ namespace Microsoft.AspNetCore.Authentication
             {
                 throw new ArgumentException(Resources.FormatException_OptionMustBeProvided(nameof(CallbackPath)), nameof(CallbackPath));
             }
+
+            if (RemoteFailureRedirect == null || !RemoteFailureRedirect.HasValue)
+            {
+                throw new ArgumentException(Resources.FormatException_OptionMustBeProvided(nameof(RemoteFailureRedirect)), nameof(RemoteFailureRedirect));
+            }
         }
 
         /// <summary>
@@ -88,6 +93,11 @@ namespace Microsoft.AspNetCore.Authentication
         /// The middleware will process this request when it arrives.
         /// </summary>
         public PathString CallbackPath { get; set; }
+
+        /// <summary>
+        /// Remote protocol errors reported to the CallbackPath will be redirected to this path. The default value is "/Home/Error".
+        /// </summary>
+        public PathString RemoteFailureRedirect { get; set; } = "/Home/Error";
 
         /// <summary>
         /// Gets or sets the authentication scheme corresponding to the middleware

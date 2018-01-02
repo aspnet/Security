@@ -5,6 +5,7 @@ using System;
 using System.Security.Cryptography;
 using System.Text.Encodings.Web;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Http.Extensions;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 
@@ -50,9 +51,10 @@ namespace Microsoft.AspNetCore.Authentication
             AuthenticationTicket ticket = null;
             Exception exception = null;
             AuthenticationProperties properties = null;
+            HandleRequestResult authResult = null;
             try
             {
-                var authResult = await HandleRemoteAuthenticateAsync();
+                authResult = await HandleRemoteAuthenticateAsync();
                 if (authResult == null)
                 {
                     exception = new InvalidOperationException("Invalid return state, unable to redirect.");
@@ -105,7 +107,17 @@ namespace Microsoft.AspNetCore.Authentication
 
                 if (errorContext.Failure != null)
                 {
-                    throw new Exception("An error was encountered while handling the remote login.", errorContext.Failure);
+                    var builder = new QueryBuilder();
+                    if (authResult?.ErrorTitle != null)
+                    {
+                        builder.Add("error", authResult.ErrorTitle);
+                    }
+                    if (authResult?.ErrorDescription != null)
+                    {
+                        builder.Add("error_description", authResult.ErrorDescription);
+                    }
+                    Context.Response.Redirect(Options.RemoteFailureRedirect + builder.ToQueryString());
+                    return true;
                 }
             }
 

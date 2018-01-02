@@ -23,6 +23,16 @@ namespace Microsoft.AspNetCore.Authentication
         public bool Skipped { get; private set; }
 
         /// <summary>
+        /// The error category name.
+        /// </summary>
+        public string ErrorTitle { get; private set; }
+
+        /// <summary>
+        /// A detailed description of the error.
+        /// </summary>
+        public string ErrorDescription { get; private set; }
+
+        /// <summary>
         /// Indicates that authentication was successful.
         /// </summary>
         /// <param name="ticket">The ticket representing the authentication result.</param>
@@ -73,6 +83,31 @@ namespace Microsoft.AspNetCore.Authentication
         /// <returns>The result.</returns>
         public static new HandleRequestResult Fail(string failureMessage, AuthenticationProperties properties)
             => Fail(new Exception(failureMessage), properties);
+
+        /// <summary>
+        /// Indicates that there was a failure during authentication and supplies an appropriate error title and description.
+        /// </summary>
+        /// <param name="failureMessage">The failure message.</param>
+        /// <param name="errorTitle">The error category name.</param>
+        /// <param name="errorDescription">A detailed description of the error.</param>
+        /// <param name="properties">Additional state values for the authentication session.</param>
+        /// <returns></returns>
+        public static HandleRequestResult Fail(string failureMessage, string errorTitle, string errorDescription, AuthenticationProperties properties)
+            => Fail(new Exception(failureMessage), errorTitle, errorDescription, properties);
+
+
+        /// <summary>
+        /// Indicates that there was a failure during authentication and supplies an appropriate error title and description.
+        /// </summary>
+        /// <param name="failure">The failure.</param>
+        /// <param name="errorTitle">The error category name.</param>
+        /// <param name="errorDescription">A detailed description of the error.</param>
+        /// <param name="properties">Additional state values for the authentication session.</param>
+        /// <returns></returns>
+        public static HandleRequestResult Fail(Exception failure, string errorTitle, string errorDescription, AuthenticationProperties properties)
+        {
+            return new HandleRequestResult() { Failure = failure, ErrorTitle = errorTitle, ErrorDescription = errorDescription, Properties = properties };
+        }
 
         /// <summary>
         /// Discontinue all processing for this request and return to the client.
