@@ -57,8 +57,12 @@ namespace Microsoft.AspNetCore.Authentication.WsFederation
         /// <returns></returns>
         public override Task<bool> HandleRequestAsync()
         {
-            if (Options.RemoteSignOutPath.HasValue && Options.RemoteSignOutPath == Request.Path)
+            // RemoteSignOutPath and CallbackPath may be the same, fall through if the message doesn't match.
+            if (Options.RemoteSignOutPath.HasValue && Options.RemoteSignOutPath == Request.Path && HttpMethods.IsGet(Request.Method)
+                && string.Equals(Request.Query[WsFederationConstants.WsFederationParameterNames.Wa],
+                    WsFederationConstants.WsFederationActions.SignOutCleanup, StringComparison.OrdinalIgnoreCase))
             {
+                // We've received a remote sign-out request
                 return HandleRemoteSignOutAsync();
             }
 
@@ -374,18 +378,12 @@ namespace Microsoft.AspNetCore.Authentication.WsFederation
         }
 
         /// <summary>
-        /// Handles requests to the RemoteSignOutPath and signs out the user.
+        /// Handles wsignoutcleanup1.0 messages sent to the RemoteSignOutPath
         /// </summary>
         /// <returns></returns>
         protected virtual async Task<bool> HandleRemoteSignOutAsync()
         {
-            WsFederationMessage message = null;
-
-            if (string.Equals(Request.Method, "GET", StringComparison.OrdinalIgnoreCase))
-            {
-                message = new WsFederationMessage(Request.Query.Select(pair => new KeyValuePair<string, string[]>(pair.Key, pair.Value)));
-            }
-
+            var message = new WsFederationMessage(Request.Query.Select(pair => new KeyValuePair<string, string[]>(pair.Key, pair.Value)));
             var remoteSignOutContext = new RemoteSignOutContext(Context, Scheme, Options, message);
             await Events.RemoteSignOut(remoteSignOutContext);
 
@@ -403,15 +401,8 @@ namespace Microsoft.AspNetCore.Authentication.WsFederation
                 }
             }
 
-            if (message == null
-                || !string.Equals(message.Wa, WsFederationConstants.WsFederationActions.SignOutCleanup, StringComparison.OrdinalIgnoreCase))
-            {
-                return false;
-            }
-
             Logger.RemoteSignOut();
 
-            // We've received a remote sign-out request
             await Context.SignOutAsync(Options.SignOutScheme);
             return true;
         }

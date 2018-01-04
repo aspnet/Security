@@ -33,7 +33,10 @@ namespace Microsoft.AspNetCore.Authentication.WsFederation
         public WsFederationOptions()
         {
             CallbackPath = "/signin-wsfed";
-            RemoteSignOutPath = "/signout-wsfed";
+            // In ADFS the cleanup messages are sent to the same callback path as the initial login.
+            // In AAD it sends the cleanup message to a random Reply Url and there's no deterministic way to configure it.
+            //  If you manage to get it configured, then you can set RemoteSignOutPath accordingly.
+            RemoteSignOutPath = "/signin-wsfed";
             Events = new WsFederationEvents();
         }
 
@@ -163,7 +166,7 @@ namespace Microsoft.AspNetCore.Authentication.WsFederation
         public bool AllowUnsolicitedLogins { get; set; }
 
         /// <summary>
-        /// Requests received on this path will cause the handler to invoke SignOut using the SignInScheme.
+        /// Requests received on this path will cause the handler to invoke SignOut using the SignOutScheme.
         /// </summary>
         public PathString RemoteSignOutPath { get; set; }
 
