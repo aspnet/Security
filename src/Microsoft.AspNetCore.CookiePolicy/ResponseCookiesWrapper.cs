@@ -10,8 +10,6 @@ namespace Microsoft.AspNetCore.CookiePolicy
 {
     internal class ResponseCookiesWrapper : IResponseCookies, ITrackingConsentFeature
     {
-        private const string ConsentValue = "yes";
-
         private bool? _isConsentNeeded;
         private bool? _hasConsent;
 
@@ -51,7 +49,7 @@ namespace Microsoft.AspNetCore.CookiePolicy
                 if (!_hasConsent.HasValue)
                 {
                     var cookie = Context.Request.Cookies[Options.ConsentCookie.Name];
-                    _hasConsent = string.Equals(cookie, ConsentValue, StringComparison.Ordinal);
+                    _hasConsent = string.Equals(cookie, CookiePolicyDefaults.ConsentValue, StringComparison.Ordinal);
                 }
 
                 return _hasConsent.Value;
@@ -66,7 +64,7 @@ namespace Microsoft.AspNetCore.CookiePolicy
             {
                 var cookieOptions = Options.ConsentCookie.Build(Context);
                 // Note policy will be applied. We don't want to bypass policy because we want HttpOnly, Secure, etc. to apply.
-                Append(Options.ConsentCookie.Name, ConsentValue, cookieOptions);
+                Append(Options.ConsentCookie.Name, CookiePolicyDefaults.ConsentValue, cookieOptions);
             }
             _hasConsent = true;
         }
