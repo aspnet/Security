@@ -117,7 +117,7 @@ namespace Microsoft.AspNetCore.Authentication.WsFederation
         {
             var httpClient = CreateClient();
 
-            var response = await httpClient.GetAsync("/signout-wsfed?wa=wsignoutcleanup1.0");
+            var response = await httpClient.GetAsync("/signin-wsfed?wa=wsignoutcleanup1.0");
             response.EnsureSuccessStatusCode();
 
             var cookie = response.Headers.GetValues(HeaderNames.SetCookie).Single();
