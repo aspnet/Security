@@ -56,10 +56,7 @@ namespace Microsoft.AspNetCore.Authentication
                 {
                     var identities = context.User.Identities;
                     context.User = result.Principal;
-                    if (identities != null)
-                    {
-                        context.User.AddIdentities(identities);
-                    }
+                    context.User.AddIdentities(identities);
                 }
             }
 
