@@ -54,7 +54,9 @@ namespace Microsoft.AspNetCore.Authentication
                 var result = await context.AuthenticateAsync(defaultAuthenticate.Name);
                 if (result?.Principal != null)
                 {
+                    var identities = context.User.Identities;
                     context.User = result.Principal;
+                    context.User.AddIdentities(identities);
                 }
             }
 
