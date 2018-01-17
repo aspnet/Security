@@ -5,7 +5,7 @@
   },
   "dependencies": {
     "Microsoft.AspNetCore.Authentication.JwtBearer": "1.0.5",
-    "Microsoft.AspNetCore.Server.IISIntegration": "1.0.5",
+    "Microsoft.AspNetCore.Server.IISIntegration": "1.0.6",
     "Microsoft.AspNetCore.Server.Kestrel": "1.0.6",
     "Microsoft.AspNetCore.StaticFiles": "1.0.5",
     "Microsoft.Extensions.Configuration.UserSecrets": "1.0.2",

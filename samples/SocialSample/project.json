@@ -6,7 +6,7 @@
     "Microsoft.AspNetCore.Authentication.MicrosoftAccount": "1.0.5",
     "Microsoft.AspNetCore.Authentication.Twitter": "1.0.5",
     "Microsoft.AspNetCore.DataProtection": "1.0.5",
-    "Microsoft.AspNetCore.Server.IISIntegration": "1.0.5",
+    "Microsoft.AspNetCore.Server.IISIntegration": "1.0.6",
     "Microsoft.AspNetCore.Server.Kestrel": "1.0.6",
     "Microsoft.AspNetCore.Server.Kestrel.Https": "1.0.6",
     "Microsoft.Extensions.Configuration.UserSecrets": "1.0.2",

@@ -2,7 +2,7 @@
   "dependencies": {
     "Microsoft.AspNetCore.Authentication.Cookies": "1.0.5",
     "Microsoft.AspNetCore.Authentication.OpenIdConnect": "1.0.5",
-    "Microsoft.AspNetCore.Server.IISIntegration": "1.0.5",
+    "Microsoft.AspNetCore.Server.IISIntegration": "1.0.6",
     "Microsoft.AspNetCore.Server.Kestrel": "1.0.6",
     "Microsoft.AspNetCore.Server.Kestrel.Https": "1.0.6",
     "Microsoft.Extensions.Configuration.UserSecrets": "1.0.2",
