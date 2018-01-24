@@ -20,6 +20,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Http.Extensions;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.Options;
 using Newtonsoft.Json.Linq;
 
@@ -48,51 +49,51 @@ namespace SocialSample
 
         public void ConfigureServices(IServiceCollection services)
         {
-            if (string.IsNullOrEmpty(Configuration["facebook:appid"]))
-            {
-                // User-Secrets: https://docs.asp.net/en/latest/security/app-secrets.html
-                // See below for registration instructions for each provider.
-                throw new InvalidOperationException("User secrets must be configured for each authentication provider.");
-            }
+            //if (string.IsNullOrEmpty(Configuration["facebook:appid"]))
+            //{
+            //    // User-Secrets: https://docs.asp.net/en/latest/security/app-secrets.html
+            //    // See below for registration instructions for each provider.
+            //    throw new InvalidOperationException("User secrets must be configured for each authentication provider.");
+            //}
 
-            services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
+            services.AddAuthentication()
                 .AddCookie(o => o.LoginPath = new PathString("/login"))
                 // You must first create an app with Facebook and add its ID and Secret to your user-secrets.
                 // https://developers.facebook.com/apps/
-                .AddFacebook(o =>
-            {
-                o.AppId = Configuration["facebook:appid"];
-                o.AppSecret = Configuration["facebook:appsecret"];
-                o.Scope.Add("email");
-                o.Fields.Add("name");
-                o.Fields.Add("email");
-                o.SaveTokens = true;
-                o.Events = new OAuthEvents()
-                {
-                    OnRemoteFailure = HandleOnRemoteFailure
-                };
-            })
+                //    .AddFacebook(o =>
+                //{
+                //    o.AppId = Configuration["facebook:appid"];
+                //    o.AppSecret = Configuration["facebook:appsecret"];
+                //    o.Scope.Add("email");
+                //    o.Fields.Add("name");
+                //    o.Fields.Add("email");
+                //    o.SaveTokens = true;
+                //    o.Events = new OAuthEvents()
+                //    {
+                //        OnRemoteFailure = HandleOnRemoteFailure
+                //    };
+                //})
                 // You must first create an app with Google and add its ID and Secret to your user-secrets.
                 // https://console.developers.google.com/project
-                .AddOAuth("Google-AccessToken", "Google AccessToken only", o =>
-            {
-                o.ClientId = Configuration["google:clientid"];
-                o.ClientSecret = Configuration["google:clientsecret"];
-                o.CallbackPath = new PathString("/signin-google-token");
-                o.AuthorizationEndpoint = GoogleDefaults.AuthorizationEndpoint;
-                o.TokenEndpoint = GoogleDefaults.TokenEndpoint;
-                o.Scope.Add("openid");
-                o.Scope.Add("profile");
-                o.Scope.Add("email");
-                o.SaveTokens = true;
-                o.Events = new OAuthEvents()
-                {
-                    OnRemoteFailure = HandleOnRemoteFailure
-                };
-            })
+            //    .AddOAuth("Google-AccessToken", "Google AccessToken only", o =>
+            //{
+            //    o.ClientId = Configuration["google:clientid"];
+            //    o.ClientSecret = Configuration["google:clientsecret"];
+            //    o.CallbackPath = new PathString("/signin-google-token");
+            //    o.AuthorizationEndpoint = GoogleDefaults.AuthorizationEndpoint;
+            //    o.TokenEndpoint = GoogleDefaults.TokenEndpoint;
+            //    o.Scope.Add("openid");
+            //    o.Scope.Add("profile");
+            //    o.Scope.Add("email");
+            //    o.SaveTokens = true;
+            //    o.Events = new OAuthEvents()
+            //    {
+            //        OnRemoteFailure = HandleOnRemoteFailure
+            //    };
+            //})
                 // You must first create an app with Google and add its ID and Secret to your user-secrets.
                 // https://console.developers.google.com/project
-                .AddGoogle(o =>
+                .UseGoogleSignIn(o =>
             {
                 o.ClientId = Configuration["google:clientid"];
                 o.ClientSecret = Configuration["google:clientsecret"];
@@ -105,108 +106,108 @@ namespace SocialSample
                 };
                 o.ClaimActions.MapJsonSubKey("urn:google:image", "image", "url");
                 o.ClaimActions.Remove(ClaimTypes.GivenName);
-            })
-                // You must first create an app with Twitter and add its key and Secret to your user-secrets.
-                // https://apps.twitter.com/
-                .AddTwitter(o =>
-            {
-                o.ConsumerKey = Configuration["twitter:consumerkey"];
-                o.ConsumerSecret = Configuration["twitter:consumersecret"];
-                // http://stackoverflow.com/questions/22627083/can-we-get-email-id-from-twitter-oauth-api/32852370#32852370
-                // http://stackoverflow.com/questions/36330675/get-users-email-from-twitter-api-for-external-login-authentication-asp-net-mvc?lq=1
-                o.RetrieveUserDetails = true;
-                o.SaveTokens = true;
-                o.ClaimActions.MapJsonKey("urn:twitter:profilepicture", "profile_image_url", ClaimTypes.Uri);
-                o.Events = new TwitterEvents()
-                {
-                    OnRemoteFailure = HandleOnRemoteFailure
-                };
-            })
-                /* Azure AD app model v2 has restrictions that prevent the use of plain HTTP for redirect URLs.
-                   Therefore, to authenticate through microsoft accounts, tryout the sample using the following URL:
-                   https://localhost:44318/
-                */
-                // You must first create an app with Microsoft Account and add its ID and Secret to your user-secrets.
-                // https://apps.dev.microsoft.com/
-                .AddOAuth("Microsoft-AccessToken", "Microsoft AccessToken only", o =>
-            {
-                o.ClientId = Configuration["microsoftaccount:clientid"];
-                o.ClientSecret = Configuration["microsoftaccount:clientsecret"];
-                o.CallbackPath = new PathString("/signin-microsoft-token");
-                o.AuthorizationEndpoint = MicrosoftAccountDefaults.AuthorizationEndpoint;
-                o.TokenEndpoint = MicrosoftAccountDefaults.TokenEndpoint;
-                o.Scope.Add("https://graph.microsoft.com/user.read");
-                o.SaveTokens = true;
-                o.Events = new OAuthEvents()
-                {
-                    OnRemoteFailure = HandleOnRemoteFailure
-                };
-            })
-                // You must first create an app with Microsoft Account and add its ID and Secret to your user-secrets.
-                // https://azure.microsoft.com/en-us/documentation/articles/active-directory-v2-app-registration/
-                .AddMicrosoftAccount(o =>
-            {
-                o.ClientId = Configuration["microsoftaccount:clientid"];
-                o.ClientSecret = Configuration["microsoftaccount:clientsecret"];
-                o.SaveTokens = true;
-                o.Scope.Add("offline_access");
-                o.Events = new OAuthEvents()
-                {
-                    OnRemoteFailure = HandleOnRemoteFailure
-                };
-            })
-                // You must first create an app with GitHub and add its ID and Secret to your user-secrets.
-                // https://github.com/settings/applications/
-                .AddOAuth("GitHub-AccessToken", "GitHub AccessToken only", o =>
-            {
-                o.ClientId = Configuration["github-token:clientid"];
-                o.ClientSecret = Configuration["github-token:clientsecret"];
-                o.CallbackPath = new PathString("/signin-github-token");
-                o.AuthorizationEndpoint = "https://github.com/login/oauth/authorize";
-                o.TokenEndpoint = "https://github.com/login/oauth/access_token";
-                o.SaveTokens = true;
-                o.Events = new OAuthEvents()
-                {
-                    OnRemoteFailure = HandleOnRemoteFailure
-                };
-            })
-                // You must first create an app with GitHub and add its ID and Secret to your user-secrets.
-                // https://github.com/settings/applications/
-                .AddOAuth("GitHub", "Github", o =>
-            {
-                o.ClientId = Configuration["github:clientid"];
-                o.ClientSecret = Configuration["github:clientsecret"];
-                o.CallbackPath = new PathString("/signin-github");
-                o.AuthorizationEndpoint = "https://github.com/login/oauth/authorize";
-                o.TokenEndpoint = "https://github.com/login/oauth/access_token";
-                o.UserInformationEndpoint = "https://api.github.com/user";
-                o.ClaimsIssuer = "OAuth2-Github";
-                o.SaveTokens = true;
-                // Retrieving user information is unique to each provider.
-                o.ClaimActions.MapJsonKey(ClaimTypes.NameIdentifier, "id");
-                o.ClaimActions.MapJsonKey(ClaimTypes.Name, "login");
-                o.ClaimActions.MapJsonKey("urn:github:name", "name");
-                o.ClaimActions.MapJsonKey(ClaimTypes.Email, "email", ClaimValueTypes.Email);
-                o.ClaimActions.MapJsonKey("urn:github:url", "url");
-                o.Events = new OAuthEvents
-                {
-                    OnRemoteFailure = HandleOnRemoteFailure,
-                    OnCreatingTicket = async context =>
-                    {
-                        // Get the GitHub user
-                        var request = new HttpRequestMessage(HttpMethod.Get, context.Options.UserInformationEndpoint);
-                        request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", context.AccessToken);
-                        request.Headers.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
-
-                        var response = await context.Backchannel.SendAsync(request, context.HttpContext.RequestAborted);
-                        response.EnsureSuccessStatusCode();
-
-                        var user = JObject.Parse(await response.Content.ReadAsStringAsync());
-
-                        context.RunClaimActions(user);
-                    }
-                };
             });
+            //    // You must first create an app with Twitter and add its key and Secret to your user-secrets.
+            //    // https://apps.twitter.com/
+            //    .AddTwitter(o =>
+            //{
+            //    o.ConsumerKey = Configuration["twitter:consumerkey"];
+            //    o.ConsumerSecret = Configuration["twitter:consumersecret"];
+            //    // http://stackoverflow.com/questions/22627083/can-we-get-email-id-from-twitter-oauth-api/32852370#32852370
+            //    // http://stackoverflow.com/questions/36330675/get-users-email-from-twitter-api-for-external-login-authentication-asp-net-mvc?lq=1
+            //    o.RetrieveUserDetails = true;
+            //    o.SaveTokens = true;
+            //    o.ClaimActions.MapJsonKey("urn:twitter:profilepicture", "profile_image_url", ClaimTypes.Uri);
+            //    o.Events = new TwitterEvents()
+            //    {
+            //        OnRemoteFailure = HandleOnRemoteFailure
+            //    };
+            //})
+            //    /* Azure AD app model v2 has restrictions that prevent the use of plain HTTP for redirect URLs.
+            //       Therefore, to authenticate through microsoft accounts, tryout the sample using the following URL:
+            //       https://localhost:44318/
+            //    */
+            //    // You must first create an app with Microsoft Account and add its ID and Secret to your user-secrets.
+            //    // https://apps.dev.microsoft.com/
+            //    .AddOAuth("Microsoft-AccessToken", "Microsoft AccessToken only", o =>
+            //{
+            //    o.ClientId = Configuration["microsoftaccount:clientid"];
+            //    o.ClientSecret = Configuration["microsoftaccount:clientsecret"];
+            //    o.CallbackPath = new PathString("/signin-microsoft-token");
+            //    o.AuthorizationEndpoint = MicrosoftAccountDefaults.AuthorizationEndpoint;
+            //    o.TokenEndpoint = MicrosoftAccountDefaults.TokenEndpoint;
+            //    o.Scope.Add("https://graph.microsoft.com/user.read");
+            //    o.SaveTokens = true;
+            //    o.Events = new OAuthEvents()
+            //    {
+            //        OnRemoteFailure = HandleOnRemoteFailure
+            //    };
+            //})
+            //    // You must first create an app with Microsoft Account and add its ID and Secret to your user-secrets.
+            //    // https://azure.microsoft.com/en-us/documentation/articles/active-directory-v2-app-registration/
+            //    .AddMicrosoftAccount(o =>
+            //{
+            //    o.ClientId = Configuration["microsoftaccount:clientid"];
+            //    o.ClientSecret = Configuration["microsoftaccount:clientsecret"];
+            //    o.SaveTokens = true;
+            //    o.Scope.Add("offline_access");
+            //    o.Events = new OAuthEvents()
+            //    {
+            //        OnRemoteFailure = HandleOnRemoteFailure
+            //    };
+            //})
+            //    // You must first create an app with GitHub and add its ID and Secret to your user-secrets.
+            //    // https://github.com/settings/applications/
+            //    .AddOAuth("GitHub-AccessToken", "GitHub AccessToken only", o =>
+            //{
+            //    o.ClientId = Configuration["github-token:clientid"];
+            //    o.ClientSecret = Configuration["github-token:clientsecret"];
+            //    o.CallbackPath = new PathString("/signin-github-token");
+            //    o.AuthorizationEndpoint = "https://github.com/login/oauth/authorize";
+            //    o.TokenEndpoint = "https://github.com/login/oauth/access_token";
+            //    o.SaveTokens = true;
+            //    o.Events = new OAuthEvents()
+            //    {
+            //        OnRemoteFailure = HandleOnRemoteFailure
+            //    };
+            //})
+            //    // You must first create an app with GitHub and add its ID and Secret to your user-secrets.
+            //    // https://github.com/settings/applications/
+            //    .AddOAuth("GitHub", "Github", o =>
+            //{
+            //    o.ClientId = Configuration["github:clientid"];
+            //    o.ClientSecret = Configuration["github:clientsecret"];
+            //    o.CallbackPath = new PathString("/signin-github");
+            //    o.AuthorizationEndpoint = "https://github.com/login/oauth/authorize";
+            //    o.TokenEndpoint = "https://github.com/login/oauth/access_token";
+            //    o.UserInformationEndpoint = "https://api.github.com/user";
+            //    o.ClaimsIssuer = "OAuth2-Github";
+            //    o.SaveTokens = true;
+            //    // Retrieving user information is unique to each provider.
+            //    o.ClaimActions.MapJsonKey(ClaimTypes.NameIdentifier, "id");
+            //    o.ClaimActions.MapJsonKey(ClaimTypes.Name, "login");
+            //    o.ClaimActions.MapJsonKey("urn:github:name", "name");
+            //    o.ClaimActions.MapJsonKey(ClaimTypes.Email, "email", ClaimValueTypes.Email);
+            //    o.ClaimActions.MapJsonKey("urn:github:url", "url");
+            //    o.Events = new OAuthEvents
+            //    {
+            //        OnRemoteFailure = HandleOnRemoteFailure,
+            //        OnCreatingTicket = async context =>
+            //        {
+            //            // Get the GitHub user
+            //            var request = new HttpRequestMessage(HttpMethod.Get, context.Options.UserInformationEndpoint);
+            //            request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", context.AccessToken);
+            //            request.Headers.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
+
+            //            var response = await context.Backchannel.SendAsync(request, context.HttpContext.RequestAborted);
+            //            response.EnsureSuccessStatusCode();
+
+            //            var user = JObject.Parse(await response.Content.ReadAsStringAsync());
+
+            //            context.RunClaimActions(user);
+            //        }
+            //    };
+            //});
         }
 
         private async Task HandleOnRemoteFailure(RemoteFailureContext context)

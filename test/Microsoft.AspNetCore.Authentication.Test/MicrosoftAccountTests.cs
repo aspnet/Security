@@ -53,6 +53,58 @@ namespace Microsoft.AspNetCore.Authentication.Tests.MicrosoftAccount
             Assert.Equal(MicrosoftAccountDefaults.AuthenticationScheme, scheme.DisplayName);
         }
 
+        // Stack overflow checking is not currently implemented
+        //[Fact]
+        //public async Task TargetsSelfDoesntStackOverflow()
+        //{
+        //    var services = new ServiceCollection().AddOptions().AddLogging();
+
+        //    services.AddAuthentication(MicrosoftAccountDefaults.AuthenticationScheme)
+        //        .AddMicrosoftAccount(o =>
+        //        {
+        //            o.ForwardDefault = "alias";
+        //            o.ClientId = "Test Id";
+        //            o.ClientSecret = "Test Secret";
+        //            o.SignInScheme = "Cookies";
+        //        })
+        //        .AddCookie()
+        //        .AddScheme("alias", "alias", p => p.ForwardDefault = MicrosoftAccountDefaults.AuthenticationScheme);
+
+        //    var sp = services.BuildServiceProvider();
+        //    var context = new DefaultHttpContext();
+        //    context.RequestServices = sp;
+
+        //    const string error = "resulted in a recursive call back to itself. Check for cycles in either Forward";
+
+        //    var e = await Assert.ThrowsAsync<InvalidOperationException>(() => context.AuthenticateAsync());
+        //    Assert.Contains(error, e.Message);
+        //    e = await Assert.ThrowsAsync<InvalidOperationException>(() => context.AuthenticateAsync("alias"));
+        //    Assert.Contains(error, e.Message);
+        //    e = await Assert.ThrowsAsync<InvalidOperationException>(() => context.ChallengeAsync());
+        //    Assert.Contains(error, e.Message);
+        //    e = await Assert.ThrowsAsync<InvalidOperationException>(() => context.ChallengeAsync("alias"));
+        //    Assert.Contains(error, e.Message);
+        //    e = await Assert.ThrowsAsync<InvalidOperationException>(() => context.ForbidAsync());
+        //    Assert.Contains(error, e.Message);
+        //    e = await Assert.ThrowsAsync<InvalidOperationException>(() => context.ForbidAsync("alias"));
+        //    Assert.Contains(error, e.Message);
+
+        //    const string noHandlerError = "is configured to handle sign";
+
+        //    e = await Assert.ThrowsAsync<InvalidOperationException>(() => context.SignOutAsync());
+        //    Assert.Contains(noHandlerError, e.Message);
+        //    e = await Assert.ThrowsAsync<InvalidOperationException>(() => context.SignOutAsync(MicrosoftAccountDefaults.AuthenticationScheme));
+        //    Assert.Contains(noHandlerError, e.Message);
+        //    e = await Assert.ThrowsAsync<InvalidOperationException>(() => context.SignOutAsync("alias"));
+        //    Assert.Contains(noHandlerError, e.Message);
+        //    e = await Assert.ThrowsAsync<InvalidOperationException>(() => context.SignInAsync(new ClaimsPrincipal()));
+        //    Assert.Contains(noHandlerError, e.Message);
+        //    e = await Assert.ThrowsAsync<InvalidOperationException>(() => context.SignInAsync(MicrosoftAccountDefaults.AuthenticationScheme, new ClaimsPrincipal()));
+        //    Assert.Contains(noHandlerError, e.Message);
+        //    e = await Assert.ThrowsAsync<InvalidOperationException>(() => context.SignInAsync("alias", new ClaimsPrincipal()));
+        //    Assert.Contains(noHandlerError, e.Message);
+        //}
+
         [Fact]
         public async Task ChallengeWillTriggerApplyRedirectEvent()
         {
