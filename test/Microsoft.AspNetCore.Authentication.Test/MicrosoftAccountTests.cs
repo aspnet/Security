@@ -27,6 +27,13 @@ namespace Microsoft.AspNetCore.Authentication.Tests.MicrosoftAccount
 {
     public class MicrosoftAccountTests
     {
+        private void ConfigureDefaults(MicrosoftAccountOptions o)
+        {
+            o.ClientId = "whatever";
+            o.ClientSecret = "whatever";
+            o.SignInScheme = "auth1";
+        }
+
         [Fact]
         public async Task CanForwardDefault()
         {
@@ -39,9 +46,7 @@ namespace Microsoft.AspNetCore.Authentication.Tests.MicrosoftAccount
             })
             .AddMicrosoftAccount(o =>
             {
-                o.ClientId = "whatever";
-                o.ClientSecret = "whatever";
-                o.SignInScheme = "auth1";
+                ConfigureDefaults(o);
                 o.ForwardDefault = "auth1";
             });
 
@@ -84,9 +89,7 @@ namespace Microsoft.AspNetCore.Authentication.Tests.MicrosoftAccount
             })
             .AddMicrosoftAccount(o =>
             {
-                o.ClientId = "whatever";
-                o.ClientSecret = "whatever";
-                o.SignInScheme = "auth1";
+                ConfigureDefaults(o);
                 o.ForwardDefault = "auth1";
                 o.ForwardSignOut = "specific";
             });
@@ -116,9 +119,7 @@ namespace Microsoft.AspNetCore.Authentication.Tests.MicrosoftAccount
             })
             .AddMicrosoftAccount(o =>
             {
-                o.ClientId = "whatever";
-                o.ClientSecret = "whatever";
-                o.SignInScheme = "auth1";
+                ConfigureDefaults(o);
                 o.ForwardDefault = "auth1";
                 o.ForwardSignOut = "specific";
             });
@@ -143,14 +144,12 @@ namespace Microsoft.AspNetCore.Authentication.Tests.MicrosoftAccount
             services.AddAuthentication(o =>
             {
                 o.DefaultScheme = MicrosoftAccountDefaults.AuthenticationScheme;
-                o.DefaultSignInScheme = "auth1";
                 o.AddScheme<TestHandler2>("auth1", "auth1");
                 o.AddScheme<TestHandler>("specific", "specific");
             })
             .AddMicrosoftAccount(o =>
             {
-                o.ClientId = "whatever";
-                o.ClientSecret = "whatever";
+                ConfigureDefaults(o);
                 o.ForwardDefault = "auth1";
                 o.ForwardForbid = "specific";
             });
@@ -186,14 +185,12 @@ namespace Microsoft.AspNetCore.Authentication.Tests.MicrosoftAccount
             services.AddAuthentication(o =>
             {
                 o.DefaultScheme = MicrosoftAccountDefaults.AuthenticationScheme;
-                o.DefaultSignInScheme = "auth1";
                 o.AddScheme<TestHandler2>("auth1", "auth1");
                 o.AddScheme<TestHandler>("specific", "specific");
             })
             .AddMicrosoftAccount(o =>
             {
-                o.ClientId = "whatever";
-                o.ClientSecret = "whatever";
+                ConfigureDefaults(o);
                 o.ForwardDefault = "auth1";
                 o.ForwardAuthenticate = "specific";
             });
@@ -228,14 +225,12 @@ namespace Microsoft.AspNetCore.Authentication.Tests.MicrosoftAccount
             services.AddAuthentication(o =>
             {
                 o.DefaultScheme = MicrosoftAccountDefaults.AuthenticationScheme;
-                o.DefaultSignInScheme = "auth1";
                 o.AddScheme<TestHandler>("specific", "specific");
                 o.AddScheme<TestHandler2>("auth1", "auth1");
             })
             .AddMicrosoftAccount(o =>
             {
-                o.ClientId = "whatever";
-                o.ClientSecret = "whatever";
+                ConfigureDefaults(o);
                 o.ForwardDefault = "auth1";
                 o.ForwardChallenge = "specific";
             });
@@ -276,9 +271,7 @@ namespace Microsoft.AspNetCore.Authentication.Tests.MicrosoftAccount
             })
             .AddMicrosoftAccount(o =>
             {
-                o.ClientId = "whatever";
-                o.ClientSecret = "whatever";
-                o.SignInScheme = "auth1";
+                ConfigureDefaults(o);
                 o.ForwardDefault = "auth1";
                 o.ForwardDefaultSelector = _ => "selector";
             });
@@ -331,9 +324,7 @@ namespace Microsoft.AspNetCore.Authentication.Tests.MicrosoftAccount
             })
             .AddMicrosoftAccount(o =>
             {
-                o.ClientId = "whatever";
-                o.ClientSecret = "whatever";
-                o.SignInScheme = "auth1";
+                ConfigureDefaults(o);
                 o.ForwardDefault = "auth1";
                 o.ForwardDefaultSelector = _ => null;
             });
@@ -386,9 +377,7 @@ namespace Microsoft.AspNetCore.Authentication.Tests.MicrosoftAccount
             })
             .AddMicrosoftAccount(o =>
             {
-                o.ClientId = "whatever";
-                o.ClientSecret = "whatever";
-                o.SignInScheme = "auth1";
+                ConfigureDefaults(o);
                 o.ForwardDefault = "auth1";
                 o.ForwardDefaultSelector = _ => "selector";
                 o.ForwardAuthenticate = "specific";
