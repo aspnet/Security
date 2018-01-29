@@ -9,6 +9,7 @@ using System.Security.Claims;
 using System.Text;
 using System.Text.Encodings.Web;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authentication.OAuth;
 using Microsoft.AspNetCore.Authentication.Tests;
 using Microsoft.AspNetCore.Builder;
@@ -680,7 +681,7 @@ namespace Microsoft.AspNetCore.Authentication.Facebook
                 app => app.UseAuthentication(),
                 services =>
                 {
-                    services.AddAuthentication(FacebookDefaults.AuthenticationScheme)
+                    services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
                         .AddCookie()
                         .AddFacebook(o => 
                     {

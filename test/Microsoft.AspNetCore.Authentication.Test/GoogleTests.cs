@@ -1471,7 +1471,7 @@ namespace Microsoft.AspNetCore.Authentication.Google
                     services.AddAuthentication(TestExtensions.CookieAuthenticationScheme)
                         .AddCookie(TestExtensions.CookieAuthenticationScheme, o => o.ForwardChallenge = GoogleDefaults.AuthenticationScheme)
                         .AddGoogle(configureOptions)
-                        .AddGoogle(o =>
+                        .AddFacebook(o =>
                         {
                             o.ClientId = "Test ClientId";
                             o.ClientSecret = "Test AppSecrent";
