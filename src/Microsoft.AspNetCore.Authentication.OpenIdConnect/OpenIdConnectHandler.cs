@@ -155,7 +155,7 @@ namespace Microsoft.AspNetCore.Authentication.OpenIdConnect
         /// <returns>A task executing the sign out procedure</returns>
         public async virtual Task SignOutAsync(AuthenticationProperties properties)
         {
-            var target = ResolveTarget(Options.ForwardSignIn);
+            var target = ResolveTarget(Options.ForwardSignOut);
             if (target != null)
             {
                 await Context.SignOutAsync(target, properties);
