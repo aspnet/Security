@@ -64,7 +64,7 @@ namespace Microsoft.Extensions.Logging
             _unexpectedCorrelationCookieValue = LoggerMessage.Define<string, string>(
                eventId: 16,
                logLevel: LogLevel.Warning,
-               formatString: "The correlation cookie value '{CorrelationCookieName}' did not match the expected value '{CorrelationCookieValue}'.");
+               formatString: "The correlation cookie value '{CookieValue}' did not match the expected value '{ExpectedCookieValue}'.");
         }
 
         public static void AuthenticationSchemeAuthenticated(this ILogger logger, string authenticationScheme)
@@ -117,9 +117,9 @@ namespace Microsoft.Extensions.Logging
             _correlationCookieNotFound(logger, cookieName, null);
         }
 
-        public static void UnexpectedCorrelationCookieValue(this ILogger logger, string cookieName, string cookieValue)
+        public static void UnexpectedCorrelationCookieValue(this ILogger logger, string cookieValue, string expectedCookieValue)
         {
-            _unexpectedCorrelationCookieValue(logger, cookieName, cookieValue, null);
+            _unexpectedCorrelationCookieValue(logger, cookieValue, expectedCookieValue, null);
         }
     }
 }
