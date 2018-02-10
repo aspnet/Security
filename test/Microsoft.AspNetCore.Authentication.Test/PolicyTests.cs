@@ -12,14 +12,14 @@ using Xunit;
 
 namespace Microsoft.AspNetCore.Authentication
 {
-    public class VirtualHandlerTests
+    public class PolicyTests
     {
         [Fact]
         public async Task CanDispatch()
         {
             var server = CreateServer(services =>
             {
-                services.AddAuthentication(o =>
+                services.AddLogging().AddAuthentication(o =>
                 {
                     o.AddScheme<TestHandler>("auth1", "auth1");
                     o.AddScheme<TestHandler>("auth2", "auth2");
@@ -54,8 +54,7 @@ namespace Microsoft.AspNetCore.Authentication
         [Fact]
         public async Task DefaultTargetSelectorWinsOverDefaultTarget()
         {
-            var services = new ServiceCollection().AddOptions();
-
+            var services = new ServiceCollection().AddOptions().AddLogging();
             services.AddAuthentication(o =>
             {
                 o.AddScheme<TestHandler>("auth1", "auth1");
@@ -110,8 +109,7 @@ namespace Microsoft.AspNetCore.Authentication
         [Fact]
         public async Task NullDefaultTargetSelectorFallsBacktoDefaultTarget()
         {
-            var services = new ServiceCollection().AddOptions();
-
+            var services = new ServiceCollection().AddOptions().AddLogging();
             services.AddAuthentication(o =>
             {
                 o.AddScheme<TestHandler>("auth1", "auth1");
@@ -166,8 +164,7 @@ namespace Microsoft.AspNetCore.Authentication
         [Fact]
         public async Task SpecificTargetAlwaysWinsOverDefaultTarget()
         {
-            var services = new ServiceCollection().AddOptions();
-
+            var services = new ServiceCollection().AddOptions().AddLogging();
             services.AddAuthentication(o =>
             {
                 o.AddScheme<TestHandler>("auth1", "auth1");
@@ -227,8 +224,7 @@ namespace Microsoft.AspNetCore.Authentication
         [Fact]
         public async Task VirtualSchemeTargetsForwardWithDefaultTarget()
         {
-            var services = new ServiceCollection().AddOptions();
-
+            var services = new ServiceCollection().AddOptions().AddLogging();
             services.AddAuthentication(o =>
             {
                 o.AddScheme<TestHandler>("auth1", "auth1");
@@ -280,8 +276,7 @@ namespace Microsoft.AspNetCore.Authentication
         [Fact]
         public async Task VirtualSchemeTargetsOverrideDefaultTarget()
         {
-            var services = new ServiceCollection().AddOptions();
-
+            var services = new ServiceCollection().AddOptions().AddLogging();
             services.AddAuthentication(o =>
             {
                 o.AddScheme<TestHandler>("auth1", "auth1");
