@@ -18,6 +18,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.TestHost;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging.Abstractions;
+using Microsoft.Extensions.Options;
 using Newtonsoft.Json;
 using Xunit;
 
@@ -423,13 +424,19 @@ namespace Microsoft.AspNetCore.Authentication.Google
         [Fact]
         public async Task VerifySignInSchemeCannotBeSetToSelf()
         {
-            var server = CreateServer(o =>
+            var services = new ServiceCollection();
+            services.AddLogging()
+                .AddAuthentication().AddGoogle(o =>
             {
                 o.ClientId = "Test Id";
                 o.ClientSecret = "Test Secret";
                 o.SignInScheme = GoogleDefaults.AuthenticationScheme;
             });
-            var error = await Assert.ThrowsAsync<InvalidOperationException>(() => server.SendAsync("https://example.com/challenge"));
+            var sp = services.BuildServiceProvider();
+            var context = new DefaultHttpContext();
+            context.RequestServices = sp;
+            var handlers = sp.GetRequiredService<IAuthenticationHandlerProvider>();
+            var error = await Assert.ThrowsAsync<InvalidOperationException>(() => handlers.GetHandlerAsync(context, GoogleDefaults.AuthenticationScheme));
             Assert.Contains("cannot be set to itself", error.Message);
         }
 
@@ -1457,9 +1464,9 @@ namespace Microsoft.AspNetCore.Authentication.Google
                 .ConfigureServices(services =>
                 {
                     services.AddTransient<IClaimsTransformation, ClaimsTransformer>();
+
                     services.AddAuthentication(TestExtensions.CookieAuthenticationScheme)
-                        .AddCookie(TestExtensions.CookieAuthenticationScheme, o => o.ForwardChallenge = GoogleDefaults.AuthenticationScheme)
-                        .AddGoogle(configureOptions)
+                        .UseGoogleSignIn(configureOptions)
                         .AddFacebook(o =>
                         {
                             o.ClientId = "Test ClientId";

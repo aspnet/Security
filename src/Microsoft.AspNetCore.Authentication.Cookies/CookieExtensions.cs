@@ -28,5 +28,28 @@ namespace Microsoft.Extensions.DependencyInjection
             builder.Services.TryAddEnumerable(ServiceDescriptor.Singleton<IPostConfigureOptions<CookieAuthenticationOptions>, PostConfigureCookieAuthenticationOptions>());
             return builder.AddScheme<CookieAuthenticationOptions, CookieAuthenticationHandler>(authenticationScheme, displayName, configureOptions);
         }
+
+        /// <summary>
+        /// Try to add a cookie with the specified scheme only if that scheme has not been registered. 
+        /// </summary>
+        /// <param name="builder"></param>
+        /// <param name="authenticationScheme"></param>
+        /// <param name="displayName"></param>
+        public static AuthenticationBuilder TryAddCookie(this AuthenticationBuilder builder, string authenticationScheme, string displayName)
+        {
+            builder.Services.TryAddEnumerable(ServiceDescriptor.Singleton<IPostConfigureOptions<CookieAuthenticationOptions>, PostConfigureCookieAuthenticationOptions>());
+            builder.Services.TryAddTransient<CookieAuthenticationHandler>();
+            builder.Services.Configure<AuthenticationOptions>(o =>
+            {
+                if (!o.SchemeMap.ContainsKey(authenticationScheme))
+                {
+                    o.AddScheme(authenticationScheme, scheme => {
+                        scheme.HandlerType = typeof(CookieAuthenticationHandler);
+                        scheme.DisplayName = displayName;
+                    });
+                }
+            });
+            return builder;
+        }
     }
 }
