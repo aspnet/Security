@@ -425,13 +425,19 @@ namespace Microsoft.AspNetCore.Authentication.Tests.MicrosoftAccount
         [Fact]
         public async Task VerifySignInSchemeCannotBeSetToSelf()
         {
-            var server = CreateServer(o =>
-            {
-                o.ClientId = "Test Id";
-                o.ClientSecret = "Test Secret";
-                o.SignInScheme = MicrosoftAccountDefaults.AuthenticationScheme;
-            });
-            var error = await Assert.ThrowsAsync<InvalidOperationException>(() => server.SendAsync("https://example.com/challenge"));
+            var services = new ServiceCollection();
+            services.AddLogging()
+                .AddAuthentication().AddMicrosoftAccount(o =>
+                {
+                    o.ClientId = "Test Id";
+                    o.ClientSecret = "Test Secret";
+                    o.SignInScheme = MicrosoftAccountDefaults.AuthenticationScheme;
+                });
+            var sp = services.BuildServiceProvider();
+            var context = new DefaultHttpContext();
+            context.RequestServices = sp;
+            var handlers = sp.GetRequiredService<IAuthenticationHandlerProvider>();
+            var error = await Assert.ThrowsAsync<InvalidOperationException>(() => handlers.GetHandlerAsync(context, MicrosoftAccountDefaults.AuthenticationScheme));
             Assert.Contains("cannot be set to itself", error.Message);
         }
 
@@ -630,12 +636,7 @@ namespace Microsoft.AspNetCore.Authentication.Tests.MicrosoftAccount
                         }
                     });
                 })
-                .ConfigureServices(services =>
-                {
-                    services.AddAuthentication(TestExtensions.CookieAuthenticationScheme)
-                        .AddCookie(TestExtensions.CookieAuthenticationScheme, o => { })
-                        .AddMicrosoftAccount(configureOptions);
-                });
+                .ConfigureServices(services => services.AddAuthentication().UseMicrosoftAccountSignIn(configureOptions));
             return new TestServer(builder);
         }
 
