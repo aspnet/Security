@@ -31,11 +31,10 @@ namespace Microsoft.Extensions.DependencyInjection
 
         /// <summary>
         /// Try to add a cookie with the specified scheme only if that scheme has not been registered. 
+        /// Always configures this cookie as the default scheme and configures <see cref="AuthenticationSchemeOptions.ForwardChallenge"/>
+        /// to point to <paramref name="challengeScheme"/>.
         /// </summary>
-        /// <param name="builder"></param>
-        /// <param name="authenticationScheme"></param>
-        /// <param name="displayName"></param>
-        public static AuthenticationBuilder TryAddCookie(this AuthenticationBuilder builder, string authenticationScheme, string displayName)
+        public static AuthenticationBuilder UseRemoteSignInCookie(this AuthenticationBuilder builder, string authenticationScheme, string displayName, string challengeScheme)
         {
             builder.Services.TryAddEnumerable(ServiceDescriptor.Singleton<IPostConfigureOptions<CookieAuthenticationOptions>, PostConfigureCookieAuthenticationOptions>());
             builder.Services.TryAddTransient<CookieAuthenticationHandler>();
@@ -49,6 +48,8 @@ namespace Microsoft.Extensions.DependencyInjection
                     });
                 }
             });
+            builder.Services.Configure<CookieAuthenticationOptions>(CookieAuthenticationDefaults.AuthenticationScheme, o => o.ForwardChallenge = challengeScheme);
+            builder.Services.Configure<AuthenticationOptions>(o => o.DefaultScheme = authenticationScheme);
             return builder;
         }
     }

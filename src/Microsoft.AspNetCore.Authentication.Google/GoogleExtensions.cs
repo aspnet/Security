@@ -36,11 +36,7 @@ namespace Microsoft.Extensions.DependencyInjection
                 // Override instead of default since this method is opinionated on the cookie scheme name.
                 o.SignInScheme = CookieAuthenticationDefaults.AuthenticationScheme;
             });
-
-            builder.TryAddCookie(CookieAuthenticationDefaults.AuthenticationScheme, CookieAuthenticationDefaults.AuthenticationScheme);
-            builder.Services.Configure<CookieAuthenticationOptions>(CookieAuthenticationDefaults.AuthenticationScheme, o => o.ForwardChallenge = GoogleDefaults.AuthenticationScheme);
-            builder.Services.Configure<AuthenticationOptions>(o => o.DefaultScheme = CookieAuthenticationDefaults.AuthenticationScheme);
-            return builder;
+            return builder.UseRemoteSignInCookie(CookieAuthenticationDefaults.AuthenticationScheme, CookieAuthenticationDefaults.AuthenticationScheme, GoogleDefaults.AuthenticationScheme);
         }
     }
 }
