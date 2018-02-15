@@ -123,6 +123,12 @@ namespace Microsoft.AspNetCore.Authentication.Cookies
         public ISecureDataFormat<AuthenticationTicket> TicketDataFormat { get; set; }
 
         /// <summary>
+        /// The TicketSerializer is used to serialize the identity and other properties which are stored in the
+        /// cookie value. If not provided the default from TicketSerializer.Default will be used.
+        /// </summary>
+        public IDataSerializer<AuthenticationTicket> TicketSerializer { get; set; }
+
+        /// <summary>
         /// The component used to get cookies from the request or set them on the response.
         ///
         /// ChunkingCookieManager will be used by default.
