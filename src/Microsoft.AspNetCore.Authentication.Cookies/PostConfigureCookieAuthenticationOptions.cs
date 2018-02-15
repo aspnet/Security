@@ -34,9 +34,11 @@ namespace Microsoft.AspNetCore.Authentication.Cookies
             }
             if (options.TicketDataFormat == null)
             {
+                options.TicketSerializer = options.TicketSerializer ?? TicketSerializer.Default;
+
                 // Note: the purpose for the data protector must remain fixed for interop to work.
                 var dataProtector = options.DataProtectionProvider.CreateProtector("Microsoft.AspNetCore.Authentication.Cookies.CookieAuthenticationMiddleware", name, "v2");
-                options.TicketDataFormat = new TicketDataFormat(dataProtector);
+                options.TicketDataFormat = new SecureDataFormat<AuthenticationTicket>(options.TicketSerializer, dataProtector);
             }
             if (options.CookieManager == null)
             {
