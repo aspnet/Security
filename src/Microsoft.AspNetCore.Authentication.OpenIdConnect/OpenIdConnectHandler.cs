@@ -875,6 +875,11 @@ namespace Microsoft.AspNetCore.Authentication.OpenIdConnect
                 tokens.Add(new AuthenticationToken { Name = OpenIdConnectParameterNames.TokenType, Value = message.TokenType });
             }
 
+            if (!string.IsNullOrEmpty(message.Scope))
+            {
+                tokens.Add(new AuthenticationToken { Name = OpenIdConnectParameterNames.Scope, Value = message.Scope });
+            }
+
             if (!string.IsNullOrEmpty(message.ExpiresIn))
             {
                 if (int.TryParse(message.ExpiresIn, NumberStyles.Integer, CultureInfo.InvariantCulture, out int value))
