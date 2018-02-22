@@ -18,7 +18,7 @@ namespace Microsoft.AspNetCore.Authentication
         public SignOutAuthenticationHandler(IOptionsMonitor<TOptions> options, ILoggerFactory logger, UrlEncoder encoder, ISystemClock clock) : base(options, logger, encoder, clock)
         { }
 
-        public Task SignOutAsync(AuthenticationProperties properties)
+        public virtual Task SignOutAsync(AuthenticationProperties properties)
         {
             var target = ResolveTarget(Options.ForwardSignOut);
             return (target != null)

@@ -14,12 +14,12 @@ namespace Microsoft.AspNetCore.Authentication
     /// Adds support for SignInAsync
     /// </summary>
     public abstract class SignInAuthenticationHandler<TOptions> : SignOutAuthenticationHandler<TOptions>, IAuthenticationSignInHandler
-            where TOptions : AuthenticationSchemeOptions, new()
+        where TOptions : AuthenticationSchemeOptions, new()
     {
         public SignInAuthenticationHandler(IOptionsMonitor<TOptions> options, ILoggerFactory logger, UrlEncoder encoder, ISystemClock clock) : base(options, logger, encoder, clock)
         { }
 
-        public Task SignInAsync(ClaimsPrincipal user, AuthenticationProperties properties)
+        public virtual Task SignInAsync(ClaimsPrincipal user, AuthenticationProperties properties)
         {
             var target = ResolveTarget(Options.ForwardSignIn);
             return (target != null)
