@@ -355,39 +355,6 @@ namespace Microsoft.AspNetCore.Authentication
             Assert.Equal("auth3", transaction.FindClaimValue(ClaimTypes.NameIdentifier, "auth3"));
         }
 
-        [Fact]
-        public async Task TargetsDefaultSchemeByDefault()
-        {
-            var server = CreateServer(services =>
-            {
-                services.AddAuthentication(o =>
-                {
-                    o.DefaultScheme = "default";
-                    o.AddScheme<TestHandler>("default", "default");
-                })
-                .AddPolicyScheme("virtual", "virtual", p => { });
-            });
-
-            var transaction = await server.SendAsync("http://example.com/auth/virtual");
-            Assert.Equal("default", transaction.FindClaimValue(ClaimTypes.NameIdentifier, "default"));
-        }
-
-        [Fact]
-        public async Task TargetsDefaultSchemeThrowsWithNoDefault()
-        {
-            var server = CreateServer(services =>
-            {
-                services.AddAuthentication(o =>
-                {
-                    o.AddScheme<TestHandler>("default", "default");
-                })
-                .AddPolicyScheme("virtual", "virtual", p => { });
-            });
-
-            var error = await Assert.ThrowsAsync<InvalidOperationException>(() => server.SendAsync("http://example.com/auth/virtual"));
-            Assert.Contains("No authenticationScheme was specified", error.Message);
-        }
-
         private class TestHandler : IAuthenticationSignInHandler
         {
             public AuthenticationScheme Scheme { get; set; }

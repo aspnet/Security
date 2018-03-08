@@ -5,7 +5,6 @@ using System;
 using System.Security.Claims;
 using System.Text.Encodings.Web;
 using System.Threading.Tasks;
-using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 
@@ -20,18 +19,18 @@ namespace Microsoft.AspNetCore.Authentication
         { }
 
         protected override Task HandleChallengeAsync(AuthenticationProperties properties)
-            => Context.ChallengeAsync(properties);
+            => throw new NotImplementedException();
 
         protected override Task HandleForbiddenAsync(AuthenticationProperties properties)
-            => Context.ForbidAsync(properties);
+            => throw new NotImplementedException();
 
         protected override Task HandleSignInAsync(ClaimsPrincipal user, AuthenticationProperties properties)
-            => Context.SignInAsync(user, properties);
+            => throw new NotImplementedException();
 
         protected override Task HandleSignOutAsync(AuthenticationProperties properties)
-            => Context.SignOutAsync(properties);
+            => throw new NotImplementedException();
 
         protected override Task<AuthenticateResult> HandleAuthenticateAsync()
-            => Context.AuthenticateAsync();
+            => throw new NotImplementedException();
     }
 }
