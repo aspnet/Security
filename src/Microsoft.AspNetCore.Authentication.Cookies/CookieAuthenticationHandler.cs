@@ -14,9 +14,7 @@ using Microsoft.Net.Http.Headers;
 
 namespace Microsoft.AspNetCore.Authentication.Cookies
 {
-    public class CookieAuthenticationHandler :
-        SignInAuthenticationHandler<CookieAuthenticationOptions>,
-        IAuthenticationSignOutHandler
+    public class CookieAuthenticationHandler : SignInAuthenticationHandler<CookieAuthenticationOptions>
     {
         private const string HeaderValueNoCache = "no-cache";
         private const string HeaderValueEpocDate = "Thu, 01 Jan 1970 00:00:00 GMT";
