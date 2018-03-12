@@ -18,6 +18,7 @@
     <ProjectReference Include="..\..\src\Microsoft.AspNetCore.Authentication.Facebook\Microsoft.AspNetCore.Authentication.Facebook.csproj" />
     <ProjectReference Include="..\..\src\Microsoft.AspNetCore.Authentication.Google\Microsoft.AspNetCore.Authentication.Google.csproj" />
     <ProjectReference Include="..\..\src\Microsoft.AspNetCore.Authentication.MicrosoftAccount\Microsoft.AspNetCore.Authentication.MicrosoftAccount.csproj" />
+    <ProjectReference Include="..\..\src\Microsoft.AspNetCore.Authentication.VsoAccount\Microsoft.AspNetCore.Authentication.VsoAccount.csproj" />
     <ProjectReference Include="..\..\src\Microsoft.AspNetCore.Authentication.Twitter\Microsoft.AspNetCore.Authentication.Twitter.csproj" />
   </ItemGroup>
 

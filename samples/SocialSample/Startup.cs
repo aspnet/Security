@@ -12,6 +12,7 @@ using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authentication.Facebook;
 using Microsoft.AspNetCore.Authentication.Google;
 using Microsoft.AspNetCore.Authentication.MicrosoftAccount;
+using Microsoft.AspNetCore.Authentication.VsoAccount;
 using Microsoft.AspNetCore.Authentication.OAuth;
 using Microsoft.AspNetCore.Authentication.Twitter;
 using Microsoft.AspNetCore.Builder;
@@ -150,6 +151,20 @@ namespace SocialSample
                 o.ClientSecret = Configuration["microsoftaccount:clientsecret"];
                 o.SaveTokens = true;
                 o.Scope.Add("offline_access");
+                o.Events = new OAuthEvents()
+                {
+                    OnRemoteFailure = HandleOnRemoteFailure
+                };
+            })
+                // You must first create an app with Microsoft Vso and add its ID and Secret to your user-secrets.
+                // https://app.vsaex.visualstudio.com/app/register
+                // More information on https://docs.microsoft.com/en-us/vsts/integrate/get-started/authentication/oauth
+                .AddVsoAccount(o =>
+            {
+                o.ClientId = Configuration["vsoaccount:clientid"];
+                o.ClientSecret = Configuration["vsoaccount:clientsecret"];
+                o.SaveTokens = true;
+                o.Scope.Add("vso.profile");
                 o.Events = new OAuthEvents()
                 {
                     OnRemoteFailure = HandleOnRemoteFailure
@@ -299,7 +314,8 @@ namespace SocialSample
 
                     var currentAuthType = user.Identities.First().AuthenticationType;
                     if (string.Equals(GoogleDefaults.AuthenticationScheme, currentAuthType)
-                        || string.Equals(MicrosoftAccountDefaults.AuthenticationScheme, currentAuthType))
+                        || string.Equals(MicrosoftAccountDefaults.AuthenticationScheme, currentAuthType)
+                        || string.Equals(VsoAccountDefaults.AuthenticationScheme, currentAuthType))
                     {
                         var refreshToken = authProperties.GetTokenValue("refresh_token");
 
@@ -470,6 +486,10 @@ namespace SocialSample
             else if (string.Equals(MicrosoftAccountDefaults.AuthenticationScheme, currentAuthType))
             {
                 return Task.FromResult<OAuthOptions>(context.RequestServices.GetRequiredService<IOptionsMonitor<MicrosoftAccountOptions>>().Get(currentAuthType));
+            }
+            else if (string.Equals(VsoAccountDefaults.AuthenticationScheme, currentAuthType))
+            {
+                return Task.FromResult<OAuthOptions>(context.RequestServices.GetRequiredService<IOptionsMonitor<VsoAccountOptions>>().Get(currentAuthType));
             }
             else if (string.Equals(FacebookDefaults.AuthenticationScheme, currentAuthType))
             {
