@@ -10,6 +10,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Xml;
 using System.Xml.Linq;
+using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.TestHost;
 
@@ -17,7 +18,7 @@ namespace Microsoft.AspNetCore.Authentication
 {
     public static class TestExtensions
     {
-        public const string CookieAuthenticationScheme = "External";
+        public const string CookieAuthenticationScheme = CookieAuthenticationDefaults.AuthenticationScheme;
 
         public static async Task<Transaction> SendAsync(this TestServer server, string uri, string cookieHeader = null)
         {

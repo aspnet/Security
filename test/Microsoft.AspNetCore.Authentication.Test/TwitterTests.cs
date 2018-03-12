@@ -418,13 +418,19 @@ namespace Microsoft.AspNetCore.Authentication.Twitter
         [Fact]
         public async Task VerifySignInSchemeCannotBeSetToSelf()
         {
-            var server = CreateServer(o =>
-            {
-                o.ConsumerKey = "Test Consumer Key";
-                o.ConsumerSecret = "Test Consumer Secret";
-                o.SignInScheme = TwitterDefaults.AuthenticationScheme;
-            });
-            var error = await Assert.ThrowsAsync<InvalidOperationException>(() => server.SendAsync("https://example.com/challenge"));
+            var services = new ServiceCollection();
+            services.AddLogging()
+                .AddAuthentication().AddTwitter(o =>
+                {
+                    o.ConsumerKey = "Test Consumer Key";
+                    o.ConsumerSecret = "Test Consumer Secret";
+                    o.SignInScheme = TwitterDefaults.AuthenticationScheme;
+                });
+            var sp = services.BuildServiceProvider();
+            var context = new DefaultHttpContext();
+            context.RequestServices = sp;
+            var handlers = sp.GetRequiredService<IAuthenticationHandlerProvider>();
+            var error = await Assert.ThrowsAsync<InvalidOperationException>(() => handlers.GetHandlerAsync(context, TwitterDefaults.AuthenticationScheme));
             Assert.Contains("cannot be set to itself", error.Message);
         }
 
@@ -660,9 +666,7 @@ namespace Microsoft.AspNetCore.Authentication.Twitter
                         o.SignInScheme = "External";
                         options(o);
                     };
-                    services.AddAuthentication()
-                        .AddCookie("External", _ => { })
-                        .AddTwitter(wrapOptions);
+                    services.AddAuthentication().UseTwitterSignIn(wrapOptions);
                 });
             return new TestServer(builder);
         }

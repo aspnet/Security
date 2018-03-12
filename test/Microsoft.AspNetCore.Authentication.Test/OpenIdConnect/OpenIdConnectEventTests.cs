@@ -1213,13 +1213,8 @@ namespace Microsoft.AspNetCore.Authentication.Test.OpenIdConnect
             var builder = new WebHostBuilder()
                 .ConfigureServices(services =>
                 {
-                    services.AddAuthentication(auth =>
-                    {
-                        auth.DefaultScheme = CookieAuthenticationDefaults.AuthenticationScheme;
-                        auth.DefaultChallengeScheme = OpenIdConnectDefaults.AuthenticationScheme;
-                    })
-                        .AddCookie()
-                        .AddOpenIdConnect(o =>
+                    services.AddAuthentication()
+                        .UseOpenIdConnectSignIn(o =>
                     {
                         o.Events = events;
                         o.ClientId = "ClientId";

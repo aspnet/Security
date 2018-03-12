@@ -3,6 +3,7 @@
 
 using System;
 using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authentication.OpenIdConnect;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.Options;
@@ -24,6 +25,23 @@ namespace Microsoft.Extensions.DependencyInjection
         {
             builder.Services.TryAddEnumerable(ServiceDescriptor.Singleton<IPostConfigureOptions<OpenIdConnectOptions>, OpenIdConnectPostConfigureOptions>());
             return builder.AddRemoteScheme<OpenIdConnectOptions, OpenIdConnectHandler>(authenticationScheme, displayName, configureOptions);
+        }
+
+        /// <summary>
+        /// Add OpenIdConnect authentication with a default cookie to use as the default scheme.
+        /// </summary>
+        /// <param name="builder"></param>
+        /// <param name="configureOptions"></param>
+        /// <returns></returns>
+        public static AuthenticationBuilder UseOpenIdConnectSignIn(this AuthenticationBuilder builder, Action<OpenIdConnectOptions> configureOptions)
+        {
+            builder.AddOpenIdConnect(OpenIdConnectDefaults.AuthenticationScheme, o =>
+            {
+                configureOptions?.Invoke(o);
+                // Override instead of default since this method is opinionated on the cookie scheme name.
+                o.SignInScheme = CookieAuthenticationDefaults.AuthenticationScheme;
+            });
+            return builder.UseRemoteSignInCookie(CookieAuthenticationDefaults.AuthenticationScheme, CookieAuthenticationDefaults.AuthenticationScheme, OpenIdConnectDefaults.AuthenticationScheme);
         }
     }
 }
