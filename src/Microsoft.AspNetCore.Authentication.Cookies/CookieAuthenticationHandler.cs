@@ -29,10 +29,17 @@ namespace Microsoft.AspNetCore.Authentication.Cookies
         private string _sessionKey;
         private Task<AuthenticateResult> _readCookieTask;
         private AuthenticationTicket _refreshTicket;
+        private readonly ITicketStore _diSessionStore;
 
-        public CookieAuthenticationHandler(IOptionsMonitor<CookieAuthenticationOptions> options, ILoggerFactory logger, UrlEncoder encoder, ISystemClock clock)
+        private ITicketStore GetSessionStore() => Options.UseSessionStoreFromDI
+            ? _diSessionStore ?? Options.SessionStore
+            : Options.SessionStore;
+
+        public CookieAuthenticationHandler(IOptionsMonitor<CookieAuthenticationOptions> options, ILoggerFactory logger, UrlEncoder encoder, ISystemClock clock, ITicketStore diSessionStore = default)
             : base(options, logger, encoder, clock)
-        { }
+        {
+            _diSessionStore = diSessionStore;
+        }
 
         /// <summary>
         /// The handler calls methods on the events which give the application control at certain points where processing is occurring.
@@ -132,7 +139,8 @@ namespace Microsoft.AspNetCore.Authentication.Cookies
                 return AuthenticateResult.Fail("Unprotect ticket failed");
             }
 
-            if (Options.SessionStore != null)
+            var sessionStore = GetSessionStore();
+            if (sessionStore != null)
             {
                 var claim = ticket.Principal.Claims.FirstOrDefault(c => c.Type.Equals(SessionIdClaim));
                 if (claim == null)
@@ -140,7 +148,7 @@ namespace Microsoft.AspNetCore.Authentication.Cookies
                     return AuthenticateResult.Fail("SessionId missing");
                 }
                 _sessionKey = claim.Value;
-                ticket = await Options.SessionStore.RetrieveAsync(_sessionKey);
+                ticket = await sessionStore.RetrieveAsync(_sessionKey);
                 if (ticket == null)
                 {
                     return AuthenticateResult.Fail("Identity missing in session store");
@@ -152,9 +160,9 @@ namespace Microsoft.AspNetCore.Authentication.Cookies
 
             if (expiresUtc != null && expiresUtc.Value < currentUtc)
             {
-                if (Options.SessionStore != null)
+                if (sessionStore != null)
                 {
-                    await Options.SessionStore.RemoveAsync(_sessionKey);
+                    await sessionStore.RemoveAsync(_sessionKey);
                 }
                 return AuthenticateResult.Fail("Ticket expired");
             }
@@ -221,9 +229,10 @@ namespace Microsoft.AspNetCore.Authentication.Cookies
                     properties.ExpiresUtc = _refreshExpiresUtc;
                 }
 
-                if (Options.SessionStore != null && _sessionKey != null)
+                var sessionStore = GetSessionStore();
+                if (sessionStore != null && _sessionKey != null)
                 {
-                    await Options.SessionStore.RenewAsync(_sessionKey, ticket);
+                    await sessionStore.RenewAsync(_sessionKey, ticket);
                     var principal = new ClaimsPrincipal(
                         new ClaimsIdentity(
                             new[] { new Claim(SessionIdClaim, _sessionKey, ClaimValueTypes.String, Options.ClaimsIssuer) },
@@ -298,13 +307,14 @@ namespace Microsoft.AspNetCore.Authentication.Cookies
 
             var ticket = new AuthenticationTicket(signInContext.Principal, signInContext.Properties, signInContext.Scheme.Name);
 
-            if (Options.SessionStore != null)
+            var sessionStore = GetSessionStore();
+            if (sessionStore != null)
             {
                 if (_sessionKey != null)
                 {
-                    await Options.SessionStore.RemoveAsync(_sessionKey);
+                    await sessionStore.RemoveAsync(_sessionKey);
                 }
-                _sessionKey = await Options.SessionStore.StoreAsync(ticket);
+                _sessionKey = await sessionStore.StoreAsync(ticket);
                 var principal = new ClaimsPrincipal(
                     new ClaimsIdentity(
                         new[] { new Claim(SessionIdClaim, _sessionKey, ClaimValueTypes.String, Options.ClaimsIssuer) },
@@ -345,9 +355,10 @@ namespace Microsoft.AspNetCore.Authentication.Cookies
             // Process the request cookie to initialize members like _sessionKey.
             await EnsureCookieTicket();
             var cookieOptions = BuildCookieOptions();
-            if (Options.SessionStore != null && _sessionKey != null)
+            var sessionStore = GetSessionStore();
+            if (sessionStore != null && _sessionKey != null)
             {
-                await Options.SessionStore.RemoveAsync(_sessionKey);
+                await sessionStore.RemoveAsync(_sessionKey);
             }
 
             var context = new CookieSigningOutContext(

@@ -136,6 +136,17 @@ namespace Microsoft.AspNetCore.Authentication.Cookies
         public ITicketStore SessionStore { get; set; }
 
         /// <summary>
+        /// A value that indicates whether the <see cref="ITicketStore"/> instance to use as a session store should be 
+        /// requested from the Dependency Injection container instead of the <see cref="SessionStore"/> property value.
+        /// </summary>
+        /// <seealso cref="SessionStore"/>
+        /// <remarks>
+        /// Use of a session store from DI requires an <see cref="ITicketStore"/> service to be registered in the 
+        /// DI container.
+        /// </remarks>
+        public bool UseSessionStoreFromDI { get; set; }
+
+        /// <summary>
         /// <para>
         /// Controls how much time the authentication ticket stored in the cookie will remain valid from the point it is created
         /// The expiration information is stored in the protected cookie ticket. Because of that an expired cookie will be ignored

@@ -11,9 +11,9 @@ namespace CookieSessionSample
         private const string KeyPrefix = "AuthSessionStore-";
         private IMemoryCache _cache;
 
-        public MemoryCacheTicketStore()
+        public MemoryCacheTicketStore(IMemoryCache cache)
         {
-            _cache = new MemoryCache(new MemoryCacheOptions());
+            _cache = cache ?? new MemoryCache(new MemoryCacheOptions());
         }
 
         public async Task<string> StoreAsync(AuthenticationTicket ticket)
