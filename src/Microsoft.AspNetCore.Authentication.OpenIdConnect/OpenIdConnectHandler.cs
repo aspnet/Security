@@ -738,6 +738,14 @@ namespace Microsoft.AspNetCore.Authentication.OpenIdConnect
             Logger.RedeemingCodeForTokens();
 
             var requestMessage = new HttpRequestMessage(HttpMethod.Post, _configuration.TokenEndpoint);
+            // Per OIDC spec 2.1.6.1 the Client Id and Secret must be encoded into the Authorization header.
+            // http://openid.net/specs/openid-connect-basic-1_0.html#TokenRequest
+            var basicAuthHeader = Convert.ToBase64String(Encoding.UTF8.GetBytes($"{tokenEndpointRequest.ClientId}:{tokenEndpointRequest.ClientSecret}"));
+            if (requestMessage.Headers.TryAddWithoutValidation("Authorization", basicAuthHeader))
+            {
+                tokenEndpointRequest.ClientSecret = null;
+                tokenEndpointRequest.ClientId = null;
+            }
             requestMessage.Content = new FormUrlEncodedContent(tokenEndpointRequest.Parameters);
 
             var responseMessage = await Backchannel.SendAsync(requestMessage);
