@@ -32,8 +32,8 @@ namespace Microsoft.AspNetCore.Authentication.JwtBearer
         /// </summary>
         protected new JwtBearerEvents Events
         {
-            get { return (JwtBearerEvents)base.Events; }
-            set { base.Events = value; }
+            get => (JwtBearerEvents)base.Events;
+            set => base.Events = value;
         }
 
         protected override Task<object> CreateEventsAsync() => Task.FromResult<object>(new JwtBearerEvents());
