@@ -81,13 +81,11 @@ namespace Microsoft.AspNetCore.Authorization
         /// <returns>A reference to this instance after the operation has completed.</returns>
         public AuthorizationPolicyBuilder Combine(AuthorizationPolicy policy)
         {
-            if (policy == null)
+            if (policy != null)
             {
-                throw new ArgumentNullException(nameof(policy));
+                AddAuthenticationSchemes(policy.AuthenticationSchemes.ToArray());
+                AddRequirements(policy.Requirements.ToArray());
             }
-
-            AddAuthenticationSchemes(policy.AuthenticationSchemes.ToArray());
-            AddRequirements(policy.Requirements.ToArray());
             return this;
         }
 

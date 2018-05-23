@@ -4,7 +4,6 @@
 using System;
 using System.Linq;
 using System.Threading.Tasks;
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Authorization.Infrastructure;
 using Microsoft.Extensions.Options;
 using Xunit;
@@ -17,6 +16,13 @@ namespace Microsoft.AspNetCore.Authorization.Test
         public void RequireRoleThrowsIfEmpty()
         {
             Assert.Throws<InvalidOperationException>(() => new AuthorizationPolicyBuilder().RequireRole());
+        }
+
+        [Fact]
+        public void CombineIgnoresNullPolicies()
+        {
+            var builder = new AuthorizationPolicyBuilder(policy: null).Combine(policy: null);
+            Assert.Empty(builder.Requirements);
         }
 
         [Fact]
