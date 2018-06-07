@@ -249,7 +249,7 @@ namespace Microsoft.AspNetCore.Authentication.Cookies
             }
         }
 
-        protected async override Task HandleSignInAsync(ClaimsPrincipal user, AuthenticationProperties properties)
+        protected override async Task HandleSignInAsync(ClaimsPrincipal user, AuthenticationProperties properties)
         {
             if (user == null)
             {
@@ -336,7 +336,7 @@ namespace Microsoft.AspNetCore.Authentication.Cookies
             Logger.SignedIn(Scheme.Name);
         }
 
-        protected async override Task HandleSignOutAsync(AuthenticationProperties properties)
+        protected override async Task HandleSignOutAsync(AuthenticationProperties properties)
         {
             properties = properties ?? new AuthenticationProperties();
 
