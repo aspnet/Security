@@ -3,6 +3,7 @@
 
 using System;
 using System.Threading.Tasks;
+using Microsoft.IdentityModel.Protocols.OpenIdConnect;
 
 namespace Microsoft.AspNetCore.Authentication.OpenIdConnect
 {
@@ -28,11 +29,16 @@ namespace Microsoft.AspNetCore.Authentication.OpenIdConnect
 
         /// <summary>
         /// Invoked before redirecting to the identity provider to authenticate. This can be used to set
-        /// <see cref="RedirectContext.ProtocolMessage"/>
-        /// that will be persisted through the authentication process. The ProtocolMessage can also be used to add or alter
+        /// values in <c>ProtocolMessage.State</c> that will be persisted through the authentication process.
+        /// The <see cref="RedirectContext.ProtocolMessage"/> can also be used to add or alter
         /// parameters sent to the identity provider.
         /// </summary>
-        /// <seealso cref="IdentityModel.Protocols.OpenIdConnect.OpenIdConnectMessage"/>
+        /// <remarks>
+        /// While this can be used to rewrite the redirect URLs if the app is behind a proxy server, its best to use
+        /// <c>ForwardedHeadersOptions</c>. Please see: https://docs.microsoft.com/en-us/aspnet/core/host-and-deploy/proxy-load-balancer?view=aspnetcore-2.1.
+        /// </remarks>
+        /// <seealso cref="OpenIdConnectMessage"/>
+        /// <seealso cref="OpenIdConnectMessage.State"/>
         public Func<RedirectContext, Task> OnRedirectToIdentityProvider { get; set; } = context => Task.CompletedTask;
 
         /// <summary>

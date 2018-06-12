@@ -33,6 +33,8 @@ namespace Microsoft.AspNetCore.Authentication
         /// <summary>
         /// Gets or Sets the URI used for the redirect operation.
         /// </summary>
+        /// <remarks>If you cannot let ASP.NET rewrite the <see cref="HttpRequest.PathBase"/>
+        /// for you, such as through <c>ForwardedHeadersOptions</c></remarks> you can use this.
         public string RedirectUri { get; set; }
     }
 }
