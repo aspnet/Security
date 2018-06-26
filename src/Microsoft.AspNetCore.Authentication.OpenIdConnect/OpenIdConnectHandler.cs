@@ -738,6 +738,14 @@ namespace Microsoft.AspNetCore.Authentication.OpenIdConnect
             Logger.RedeemingCodeForTokens();
 
             var requestMessage = new HttpRequestMessage(HttpMethod.Post, _configuration.TokenEndpoint);
+
+            if (this.Options.ClientAuthenticationMode == OpenIdConnectClientAuthenticationMode.Basic)
+            {
+                requestMessage.Headers.Authorization = new AuthenticationHeaderValue("Basic", Convert.ToBase64String(Encoding.UTF8.GetBytes(tokenEndpointRequest.ClientId+":"+tokenEndpointRequest.ClientSecret)));
+                tokenEndpointRequest.ClientId = null;
+                tokenEndpointRequest.ClientSecret = null;
+            }
+
             requestMessage.Content = new FormUrlEncodedContent(tokenEndpointRequest.Parameters);
 
             var responseMessage = await Backchannel.SendAsync(requestMessage);
