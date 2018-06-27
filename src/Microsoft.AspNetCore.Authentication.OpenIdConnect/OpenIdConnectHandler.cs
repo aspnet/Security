@@ -741,7 +741,9 @@ namespace Microsoft.AspNetCore.Authentication.OpenIdConnect
 
             if (this.Options.ClientAuthenticationMode == OpenIdConnectClientAuthenticationMode.Basic)
             {
-                requestMessage.Headers.Authorization = new AuthenticationHeaderValue("Basic", Convert.ToBase64String(Encoding.UTF8.GetBytes(tokenEndpointRequest.ClientId+":"+tokenEndpointRequest.ClientSecret)));
+                var basicHeader = Convert.ToBase64String(
+                    Encoding.UTF8.GetBytes($"{tokenEndpointRequest.ClientId}:{tokenEndpointRequest.ClientSecret}"));
+                requestMessage.Headers.Authorization = new AuthenticationHeaderValue("Basic", basicHeader);
                 tokenEndpointRequest.ClientId = null;
                 tokenEndpointRequest.ClientSecret = null;
             }
