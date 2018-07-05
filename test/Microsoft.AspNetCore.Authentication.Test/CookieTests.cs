@@ -941,6 +941,7 @@ namespace Microsoft.AspNetCore.Authentication.Cookies
                         {
                             ctx.ShouldRenew = true;
                             ctx.ReplacePrincipal(new ClaimsPrincipal(new ClaimsIdentity(new GenericIdentity("Alice2", "Cookies2"))));
+                            ctx.Properties.Items["updated"] = "yes";
                         }
                         return Task.FromResult(0);
                     }
@@ -957,17 +958,20 @@ namespace Microsoft.AspNetCore.Authentication.Cookies
 
             var transaction3 = await SendAsync(server, "http://example.com/me/Cookies", transaction1.CookieNameValue);
             Assert.Equal("Alice", FindClaimValue(transaction2, ClaimTypes.Name));
+            Assert.Null(FindPropertiesValue(transaction3, "updated"));
 
             replace = true;
 
             var transaction4 = await SendAsync(server, "http://example.com/me/Cookies", transaction1.CookieNameValue);
             Assert.NotNull(transaction4.SetCookie);
             Assert.Equal("Alice2", FindClaimValue(transaction4, ClaimTypes.Name));
+            Assert.Equal("yes", FindPropertiesValue(transaction4, "updated"));
 
             replace = false;
 
             var transaction5 = await SendAsync(server, "http://example.com/me/Cookies", transaction4.CookieNameValue);
             Assert.Equal("Alice2", FindClaimValue(transaction5, ClaimTypes.Name));
+            Assert.Equal("yes", FindPropertiesValue(transaction4, "updated"));
         }
 
         [Fact]
@@ -1798,6 +1802,16 @@ namespace Microsoft.AspNetCore.Authentication.Cookies
                 return null;
             }
             return claim.Attribute("value").Value;
+        }
+
+        private static string FindPropertiesValue(Transaction transaction, string key)
+        {
+            var property = transaction.ResponseElement.Elements("extra").SingleOrDefault(elt => elt.Attribute("type").Value == key);
+            if (property == null)
+            {
+                return null;
+            }
+            return property.Attribute("value").Value;
         }
 
         private static async Task<XElement> GetAuthData(TestServer server, string url, string cookie)
