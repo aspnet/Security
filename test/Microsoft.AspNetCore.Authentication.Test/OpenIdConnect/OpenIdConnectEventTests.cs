@@ -750,8 +750,8 @@ namespace Microsoft.AspNetCore.Authentication.Test.OpenIdConnect
                 ExpectUserInfoReceived = true,
             };
 
-            var clientId = "a-test-client";
-            var clientSecret = "asecret";
+            var clientId = "@!12AD!0008!6D30.23D7";
+            var clientSecret = "P@55W0rd!";
             AuthenticationHeaderValue authorization = null;
             var server = CreateServer(events, AppWritePath,
                 option =>
@@ -772,7 +772,7 @@ namespace Microsoft.AspNetCore.Authentication.Test.OpenIdConnect
             await PostAsync(server, "signin-oidc", "id_token=my_id_token&state=protected_state&code=my_code");
             
             Assert.Equal("Basic",authorization.Scheme);
-            Assert.Equal(Convert.ToBase64String(Encoding.UTF8.GetBytes(clientId+":"+clientSecret)),authorization.Parameter);
+            Assert.Equal("JTQwJTIxMTJBRCUyMTAwMDglMjE2RDMwLjIzRDc6UCU0MDU1VzByZCUyMQ==",authorization.Parameter);
         }
 
         [Fact]

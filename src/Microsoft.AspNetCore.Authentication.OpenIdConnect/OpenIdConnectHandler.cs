@@ -739,15 +739,8 @@ namespace Microsoft.AspNetCore.Authentication.OpenIdConnect
 
             var requestMessage = new HttpRequestMessage(HttpMethod.Post, _configuration.TokenEndpoint);
 
-            if (this.Options.ClientAuthenticationMode == OpenIdConnectClientAuthenticationMode.Basic)
-            {
-                var basicHeader = Convert.ToBase64String(
-                    Encoding.UTF8.GetBytes($"{tokenEndpointRequest.ClientId}:{tokenEndpointRequest.ClientSecret}"));
-                requestMessage.Headers.Authorization = new AuthenticationHeaderValue("Basic", basicHeader);
-                tokenEndpointRequest.ClientId = null;
-                tokenEndpointRequest.ClientSecret = null;
-            }
-
+            this.Options.ClientAuthenticationMode.SetClientAuthentication(requestMessage, tokenEndpointRequest);
+            
             requestMessage.Content = new FormUrlEncodedContent(tokenEndpointRequest.Parameters);
 
             var responseMessage = await Backchannel.SendAsync(requestMessage);

@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using System.IdentityModel.Tokens.Jwt;
 using Microsoft.AspNetCore.Authentication.Internal;
 using Microsoft.AspNetCore.Authentication.OAuth.Claims;
+using Microsoft.AspNetCore.Authentication.OpenIdConnect.ClientAuthentication;
 using Microsoft.AspNetCore.Http;
 using Microsoft.IdentityModel.Protocols;
 using Microsoft.IdentityModel.Protocols.OpenIdConnect;
@@ -127,7 +128,7 @@ namespace Microsoft.AspNetCore.Authentication.OpenIdConnect
         /// Configure the way the client authenticate on the server
         /// https://tools.ietf.org/html/rfc6749#section-2.3.1
         /// </summary>
-        public OpenIdConnectClientAuthenticationMode ClientAuthenticationMode { get; set; }
+        public IClientAuthentication ClientAuthenticationMode { get; set; }
         /// <summary>
         /// Configuration provided directly by the developer. If provided, then MetadataAddress and the Backchannel properties
         /// will not be used. This information should not be updated during request processing.

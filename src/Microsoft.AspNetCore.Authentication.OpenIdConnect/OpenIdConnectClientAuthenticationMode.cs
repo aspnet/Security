@@ -1,17 +1,19 @@
-﻿namespace Microsoft.AspNetCore.Authentication.OpenIdConnect
+﻿using Microsoft.AspNetCore.Authentication.OpenIdConnect.ClientAuthentication;
+
+namespace Microsoft.AspNetCore.Authentication.OpenIdConnect
 {
     /// <summary>
     /// Configure the client authentication mode to call access_token endpoint
     /// </summary>
-    public enum OpenIdConnectClientAuthenticationMode
+    public class OpenIdConnectClientAuthenticationMode
     {
         /// <summary>
         /// Send client id and client secret in the request body 
         /// </summary>
-        Post,
+        public static IClientAuthentication Post { get; } = new FormPost();
         /// <summary>
         /// Use basic authorization header
         /// </summary>
-        Basic
+        public static IClientAuthentication Basic { get; } = new BasicAuthentication();
     }
 }
