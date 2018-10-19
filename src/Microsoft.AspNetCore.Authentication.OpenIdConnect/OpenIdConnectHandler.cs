@@ -34,7 +34,7 @@ namespace Microsoft.AspNetCore.Authentication.OpenIdConnect
 
         private static readonly RandomNumberGenerator CryptoRandom = RandomNumberGenerator.Create();
 
-        private OpenIdConnectConfiguration _configuration;
+        protected OpenIdConnectConfiguration Configuration { get; private set; }
 
         protected HttpClient Backchannel => Options.Backchannel;
 
@@ -166,15 +166,15 @@ namespace Microsoft.AspNetCore.Authentication.OpenIdConnect
 
             Logger.EnteringOpenIdAuthenticationHandlerHandleSignOutAsync(GetType().FullName);
 
-            if (_configuration == null && Options.ConfigurationManager != null)
+            if (Configuration == null && Options.ConfigurationManager != null)
             {
-                _configuration = await Options.ConfigurationManager.GetConfigurationAsync(Context.RequestAborted);
+                Configuration = await Options.ConfigurationManager.GetConfigurationAsync(Context.RequestAborted);
             }
 
             var message = new OpenIdConnectMessage()
             {
                 EnableTelemetryParameters = !Options.DisableTelemetry,
-                IssuerAddress = _configuration?.EndSessionEndpoint ?? string.Empty,
+                IssuerAddress = Configuration?.EndSessionEndpoint ?? string.Empty,
 
                 // Redirect back to SigneOutCallbackPath first before user agent is redirected to actual post logout redirect uri
                 PostLogoutRedirectUri = BuildRedirectUriIfRelative(Options.SignedOutCallbackPath)
@@ -316,16 +316,16 @@ namespace Microsoft.AspNetCore.Authentication.OpenIdConnect
             }
             Logger.PostAuthenticationLocalRedirect(properties.RedirectUri);
 
-            if (_configuration == null && Options.ConfigurationManager != null)
+            if (Configuration == null && Options.ConfigurationManager != null)
             {
-                _configuration = await Options.ConfigurationManager.GetConfigurationAsync(Context.RequestAborted);
+                Configuration = await Options.ConfigurationManager.GetConfigurationAsync(Context.RequestAborted);
             }
 
             var message = new OpenIdConnectMessage
             {
                 ClientId = Options.ClientId,
                 EnableTelemetryParameters = !Options.DisableTelemetry,
-                IssuerAddress = _configuration?.AuthorizationEndpoint ?? string.Empty,
+                IssuerAddress = Configuration?.AuthorizationEndpoint ?? string.Empty,
                 RedirectUri = BuildRedirectUri(Options.CallbackPath),
                 Resource = Options.Resource,
                 ResponseType = Options.ResponseType,
@@ -523,10 +523,10 @@ namespace Microsoft.AspNetCore.Authentication.OpenIdConnect
                     return HandleRequestResult.Fail(CreateOpenIdConnectProtocolException(authorizationResponse, response: null), properties);
                 }
 
-                if (_configuration == null && Options.ConfigurationManager != null)
+                if (Configuration == null && Options.ConfigurationManager != null)
                 {
                     Logger.UpdatingConfiguration();
-                    _configuration = await Options.ConfigurationManager.GetConfigurationAsync(Context.RequestAborted);
+                    Configuration = await Options.ConfigurationManager.GetConfigurationAsync(Context.RequestAborted);
                 }
 
                 PopulateSessionProperties(authorizationResponse, properties);
@@ -722,9 +722,9 @@ namespace Microsoft.AspNetCore.Authentication.OpenIdConnect
                 properties.Items[OpenIdConnectSessionProperties.SessionState] = message.SessionState;
             }
 
-            if (!string.IsNullOrEmpty(_configuration.CheckSessionIframe))
+            if (!string.IsNullOrEmpty(Configuration.CheckSessionIframe))
             {
-                properties.Items[OpenIdConnectSessionProperties.CheckSessionIFrame] = _configuration.CheckSessionIframe;
+                properties.Items[OpenIdConnectSessionProperties.CheckSessionIFrame] = Configuration.CheckSessionIframe;
             }
         }
 
@@ -737,7 +737,7 @@ namespace Microsoft.AspNetCore.Authentication.OpenIdConnect
         {
             Logger.RedeemingCodeForTokens();
 
-            var requestMessage = new HttpRequestMessage(HttpMethod.Post, _configuration.TokenEndpoint);
+            var requestMessage = new HttpRequestMessage(HttpMethod.Post, Configuration.TokenEndpoint);
             requestMessage.Content = new FormUrlEncodedContent(tokenEndpointRequest.Parameters);
 
             var responseMessage = await Backchannel.SendAsync(requestMessage);
@@ -787,7 +787,7 @@ namespace Microsoft.AspNetCore.Authentication.OpenIdConnect
             OpenIdConnectMessage message, JwtSecurityToken jwt,
             ClaimsPrincipal principal, AuthenticationProperties properties)
         {
-            var userInfoEndpoint = _configuration?.UserInfoEndpoint;
+            var userInfoEndpoint = Configuration?.UserInfoEndpoint;
 
             if (string.IsNullOrEmpty(userInfoEndpoint))
             {
@@ -1156,13 +1156,13 @@ namespace Microsoft.AspNetCore.Authentication.OpenIdConnect
                 throw new SecurityTokenException(string.Format(CultureInfo.InvariantCulture, Resources.UnableToValidateToken, idToken));
             }
 
-            if (_configuration != null)
+            if (Configuration != null)
             {
-                var issuer = new[] { _configuration.Issuer };
+                var issuer = new[] { Configuration.Issuer };
                 validationParameters.ValidIssuers = validationParameters.ValidIssuers?.Concat(issuer) ?? issuer;
 
-                validationParameters.IssuerSigningKeys = validationParameters.IssuerSigningKeys?.Concat(_configuration.SigningKeys)
-                    ?? _configuration.SigningKeys;
+                validationParameters.IssuerSigningKeys = validationParameters.IssuerSigningKeys?.Concat(Configuration.SigningKeys)
+                    ?? Configuration.SigningKeys;
             }
 
             var principal = Options.SecurityTokenValidator.ValidateToken(idToken, validationParameters, out SecurityToken validatedToken);
