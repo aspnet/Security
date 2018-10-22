@@ -63,6 +63,17 @@ namespace Microsoft.AspNetCore.Authentication.OAuth
             var error = query["error"];
             if (!StringValues.IsNullOrEmpty(error))
             {
+                // Note: access_denied errors are special protocol errors indicating the user didn't
+                // approve the authorization demand requested by the remote authorization server.
+                // Since it's a frequent scenario (that is not caused by incorrect configuration),
+                // access_denied errors are handled differently if AccessDeniedPath was populated.
+                if (Options.AccessDeniedPath.HasValue && StringValues.Equals(error, "access_denied"))
+                {
+                    Response.Redirect(BuildRedirectUri(Options.AccessDeniedPath));
+
+                    return HandleRequestResult.Handle();
+                }
+
                 var failureMessage = new StringBuilder();
                 failureMessage.Append(error);
                 var errorDescription = query["error_description"];

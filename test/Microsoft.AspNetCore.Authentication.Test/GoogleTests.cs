@@ -378,7 +378,7 @@ namespace Microsoft.AspNetCore.Authentication.Google
                 } : new OAuthEvents();
             });
             var sendTask = server.SendAsync("https://example.com/signin-google?error=OMG&error_description=SoBad&error_uri=foobar&state=protected_state",
-                ".AspNetCore.Correlation.Google.corrilationId=N");
+                ".AspNetCore.Correlation.Google.correlationId=N");
             if (redirect)
             {
                 var transaction = await sendTask;
@@ -1205,7 +1205,7 @@ namespace Microsoft.AspNetCore.Authentication.Google
                 Assert.Equal("protected_state", protectedText);
                 var properties = new AuthenticationProperties(new Dictionary<string, string>()
                 {
-                    { ".xsrf", "corrilationId" },
+                    { ".xsrf", "correlationId" },
                     { "testkey", "testvalue" }
                 });
                 properties.RedirectUri = "http://testhost/redirect";

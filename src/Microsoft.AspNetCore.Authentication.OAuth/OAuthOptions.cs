@@ -3,11 +3,9 @@
 
 using System;
 using System.Collections.Generic;
-using Microsoft.AspNetCore.Authentication;
-using Microsoft.AspNetCore.Authentication.OAuth;
-using Microsoft.AspNetCore.Authentication.OAuth.Claims;
-using Microsoft.AspNetCore.Http.Authentication;
 using System.Globalization;
+using Microsoft.AspNetCore.Authentication.OAuth.Claims;
+using Microsoft.AspNetCore.Http;
 
 namespace Microsoft.AspNetCore.Authentication.OAuth
 {
@@ -80,6 +78,14 @@ namespace Microsoft.AspNetCore.Authentication.OAuth
         /// IOAuthAuthenticationEvents.Authenticated or OAuthAuthenticationHandler.CreateTicketAsync.
         /// </summary>
         public string UserInformationEndpoint { get; set; }
+
+        /// <summary>
+        /// Gets or sets the optional path the user agent is redirected to if the user
+        /// doesn't approve the authorization demand requested by the remote server.
+        /// If this property is not populated, an exception is thrown if an access_denied
+        /// response is returned by the remote authorization server to the callback endpoint.
+        /// </summary>
+        public PathString AccessDeniedPath { get; set; }
 
         /// <summary>
         /// Gets or sets the <see cref="OAuthEvents"/> used to handle authentication events.

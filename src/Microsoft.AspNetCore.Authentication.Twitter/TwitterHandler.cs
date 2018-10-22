@@ -55,11 +55,20 @@ namespace Microsoft.AspNetCore.Authentication.Twitter
 
             var properties = requestToken.Properties;
 
-            // REVIEW: see which of these are really errors
-
             var denied = query["denied"];
             if (!StringValues.IsNullOrEmpty(denied))
             {
+                // Note: denied errors are special protocol errors indicating the user didn't
+                // approve the authorization demand requested by the remote authorization server.
+                // Since it's a frequent scenario (that is not caused by incorrect configuration),
+                // denied errors are handled differently if AccessDeniedPath was populated.
+                if (Options.AccessDeniedPath.HasValue)
+                {
+                    Response.Redirect(BuildRedirectUri(Options.AccessDeniedPath));
+
+                    return HandleRequestResult.Handle();
+                }
+
                 return HandleRequestResult.Fail("The user denied permissions.", properties);
             }
 

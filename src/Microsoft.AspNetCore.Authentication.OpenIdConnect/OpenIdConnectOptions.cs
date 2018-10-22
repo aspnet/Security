@@ -184,6 +184,14 @@ namespace Microsoft.AspNetCore.Authentication.OpenIdConnect
         };
 
         /// <summary>
+        /// Gets or sets the optional path the user agent is redirected to if the user
+        /// doesn't approve the authorization demand requested by the remote server.
+        /// If this property is not populated, an exception is thrown if an access_denied
+        /// response is returned by the remote authorization server to the callback endpoint.
+        /// </summary>
+        public PathString AccessDeniedPath { get; set; }
+
+        /// <summary>
         /// The request path within the application's base path where the user agent will be returned after sign out from the identity provider.
         /// See post_logout_redirect_uri from http://openid.net/specs/openid-connect-session-1_0.html#RedirectionAfterLogout.
         /// </summary>

@@ -520,6 +520,18 @@ namespace Microsoft.AspNetCore.Authentication.OpenIdConnect
                 // if any of the error fields are set, throw error null
                 if (!string.IsNullOrEmpty(authorizationResponse.Error))
                 {
+                    // Note: access_denied errors are special protocol errors indicating the user didn't
+                    // approve the authorization demand requested by the remote authorization server.
+                    // Since it's a frequent scenario (that is not caused by incorrect configuration),
+                    // access_denied errors are handled differently if AccessDeniedPath was populated.
+                    if (Options.AccessDeniedPath.HasValue &&
+                        string.Equals(authorizationResponse.Error, "access_denied", StringComparison.Ordinal))
+                    {
+                        Response.Redirect(BuildRedirectUri(Options.AccessDeniedPath));
+
+                        return HandleRequestResult.Handle();
+                    }
+
                     return HandleRequestResult.Fail(CreateOpenIdConnectProtocolException(authorizationResponse, response: null), properties);
                 }
 

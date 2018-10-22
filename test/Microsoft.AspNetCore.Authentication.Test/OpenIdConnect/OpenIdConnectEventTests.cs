@@ -1248,7 +1248,7 @@ namespace Microsoft.AspNetCore.Authentication.Test.OpenIdConnect
         private Task<HttpResponseMessage> PostAsync(TestServer server, string path, string form)
         {
             var client = server.CreateClient();
-            var cookie = ".AspNetCore.Correlation." + OpenIdConnectDefaults.AuthenticationScheme + ".corrilationId=N";
+            var cookie = ".AspNetCore.Correlation." + OpenIdConnectDefaults.AuthenticationScheme + ".correlationId=N";
             client.DefaultRequestHeaders.Add("Cookie", cookie);
             return client.PostAsync("signin-oidc",
                 new StringContent(form, Encoding.ASCII, "application/x-www-form-urlencoded"));
@@ -1273,7 +1273,7 @@ namespace Microsoft.AspNetCore.Authentication.Test.OpenIdConnect
                 Assert.Equal("protected_state", protectedText);
                 var properties = new AuthenticationProperties(new Dictionary<string, string>()
                 {
-                    { ".xsrf", "corrilationId" },
+                    { ".xsrf", "correlationId" },
                     { OpenIdConnectDefaults.RedirectUriForCodePropertiesKey, "redirect_uri" },
                     { "testkey", "testvalue" }
                 });

@@ -2,8 +2,8 @@
 // Licensed under the Apache License, Version 2.0. See License.txt in the project root for license information.
 
 using System;
-using System.Security.Claims;
 using System.Globalization;
+using System.Security.Claims;
 using Microsoft.AspNetCore.Authentication.OAuth.Claims;
 using Microsoft.AspNetCore.Http;
 
@@ -68,6 +68,14 @@ namespace Microsoft.AspNetCore.Authentication.Twitter
         /// Gets or sets the type used to secure data handled by the handler.
         /// </summary>
         public ISecureDataFormat<RequestToken> StateDataFormat { get; set; }
+
+        /// <summary>
+        /// Gets or sets the optional path the user agent is redirected to if the user
+        /// doesn't approve the authorization demand requested by the Twitter server.
+        /// If this property is not populated, an exception is thrown if a denied
+        /// response is returned by Twitter's remote APIs to the callback endpoint.
+        /// </summary>
+        public PathString AccessDeniedPath { get; set; }
 
         /// <summary>
         /// Gets or sets the <see cref="TwitterEvents"/> used to handle authentication events.
