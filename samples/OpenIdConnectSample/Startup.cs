@@ -129,7 +129,6 @@ namespace OpenIdConnectSample
 
                 if (context.Request.Path.Equals("/access-denied-from-remote"))
                 {
-                    await context.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
                     await WriteHtmlAsync(response, async res =>
                     {
                         await res.WriteAsync($"<h1>Access Denied error received from the remote authorization server</h1>");

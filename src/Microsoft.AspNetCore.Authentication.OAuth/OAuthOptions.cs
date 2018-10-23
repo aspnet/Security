@@ -82,8 +82,8 @@ namespace Microsoft.AspNetCore.Authentication.OAuth
         /// <summary>
         /// Gets or sets the optional path the user agent is redirected to if the user
         /// doesn't approve the authorization demand requested by the remote server.
-        /// If this property is not populated, an exception is thrown if an access_denied
-        /// response is returned by the remote authorization server to the callback endpoint.
+        /// This property is not set by default. In this case, an exception is thrown
+        /// if an access_denied response is returned by the remote authorization server.
         /// </summary>
         public PathString AccessDeniedPath { get; set; }
 

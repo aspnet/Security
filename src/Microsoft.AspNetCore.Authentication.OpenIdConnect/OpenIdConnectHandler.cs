@@ -524,6 +524,7 @@ namespace Microsoft.AspNetCore.Authentication.OpenIdConnect
                     // approve the authorization demand requested by the remote authorization server.
                     // Since it's a frequent scenario (that is not caused by incorrect configuration),
                     // access_denied errors are handled differently if AccessDeniedPath was populated.
+                    // Visit https://tools.ietf.org/html/rfc6749#section-4.1.2.1 for more information.
                     if (Options.AccessDeniedPath.HasValue &&
                         string.Equals(authorizationResponse.Error, "access_denied", StringComparison.Ordinal))
                     {
