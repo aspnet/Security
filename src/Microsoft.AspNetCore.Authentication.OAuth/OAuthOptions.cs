@@ -80,14 +80,6 @@ namespace Microsoft.AspNetCore.Authentication.OAuth
         public string UserInformationEndpoint { get; set; }
 
         /// <summary>
-        /// Gets or sets the optional path the user agent is redirected to if the user
-        /// doesn't approve the authorization demand requested by the remote server.
-        /// This property is not set by default. In this case, an exception is thrown
-        /// if an access_denied response is returned by the remote authorization server.
-        /// </summary>
-        public PathString AccessDeniedPath { get; set; }
-
-        /// <summary>
         /// Gets or sets the <see cref="OAuthEvents"/> used to handle authentication events.
         /// </summary>
         public new OAuthEvents Events

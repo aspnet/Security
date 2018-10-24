@@ -175,7 +175,7 @@ namespace Microsoft.AspNetCore.Authentication.Twitter
         }
 
         [Fact]
-        public async Task HandleRemoteAuthenticateAsync_RedirectsToAccessDeniedPathWhenExplicitlySet()
+        public async Task HandleRequestAsync_RedirectsToAccessDeniedPathWhenExplicitlySet()
         {
             var server = CreateServer(o =>
             {
@@ -186,6 +186,7 @@ namespace Microsoft.AspNetCore.Authentication.Twitter
                     Sender = BackchannelRequestToken
                 };
                 o.AccessDeniedPath = "/access-denied";
+                o.Events.OnRemoteFailure = context => throw new InvalidOperationException("This event should not be called.");
             },
             async context =>
             {

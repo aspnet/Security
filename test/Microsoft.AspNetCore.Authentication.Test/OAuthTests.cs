@@ -252,7 +252,7 @@ namespace Microsoft.AspNetCore.Authentication.OAuth
         }
 
         [Fact]
-        public async Task HandleRemoteAuthenticateAsync_RedirectsToAccessDeniedPathWhenExplicitlySet()
+        public async Task HandleRequestAsync_RedirectsToAccessDeniedPathWhenExplicitlySet()
         {
             var server = CreateServer(
                 s => s.AddAuthentication().AddOAuth(
@@ -267,6 +267,7 @@ namespace Microsoft.AspNetCore.Authentication.OAuth
                         opt.CallbackPath = "/oauth-callback";
                         opt.AccessDeniedPath = "/access-denied";
                         opt.StateDataFormat = new TestStateDataFormat();
+                        opt.Events.OnRemoteFailure = context => throw new InvalidOperationException("This event should not be called.");
                     }));
 
             var transaction = await server.SendAsync("https://www.example.com/oauth-callback?error=access_denied&state=protected_state",
@@ -274,6 +275,42 @@ namespace Microsoft.AspNetCore.Authentication.OAuth
 
             Assert.Equal(HttpStatusCode.Redirect, transaction.Response.StatusCode);
             Assert.Equal("https://www.example.com/access-denied", transaction.Response.Headers.Location.AbsoluteUri);
+        }
+
+        [Fact]
+        public async Task HandleRequestAsync_InvokesRemoteFailureEventWhenAccessDeniedPathIsNotExplicitlySet()
+        {
+            var server = CreateServer(
+                s => s.AddAuthentication().AddOAuth(
+                    "Weblie",
+                    opt =>
+                    {
+                        opt.ClientId = "Test Id";
+                        opt.ClientSecret = "secret";
+                        opt.SignInScheme = CookieAuthenticationDefaults.AuthenticationScheme;
+                        opt.AuthorizationEndpoint = "https://example.com/provider/login";
+                        opt.TokenEndpoint = "https://example.com/provider/token";
+                        opt.CallbackPath = "/oauth-callback";
+                        opt.StateDataFormat = new TestStateDataFormat();
+                        opt.Events = new OAuthEvents()
+                        {
+                            OnRemoteFailure = context =>
+                            {
+                                Assert.IsType<AccessDeniedException>(context.Failure);
+                                Assert.Equal("Access was denied by the resource owner or by the remote server.", context.Failure.Message);
+                                Assert.Equal("testvalue", context.Properties.Items["testkey"]);
+                                context.Response.StatusCode = StatusCodes.Status406NotAcceptable;
+                                context.HandleResponse();
+                                return Task.CompletedTask;
+                            }
+                        };
+                    }));
+
+            var transaction = await server.SendAsync("https://www.example.com/oauth-callback?error=access_denied&state=protected_state",
+                ".AspNetCore.Correlation.Weblie.correlationId=N");
+
+            Assert.Equal(HttpStatusCode.NotAcceptable, transaction.Response.StatusCode);
+            Assert.Null(transaction.Response.Headers.Location);
         }
 
         [Fact]
@@ -295,7 +332,7 @@ namespace Microsoft.AspNetCore.Authentication.OAuth
                         {
                             OnRemoteFailure = context =>
                             {
-                                Assert.Contains("access_denied", context.Failure.Message);
+                                Assert.Contains("custom_error", context.Failure.Message);
                                 Assert.Equal("testvalue", context.Properties.Items["testkey"]);
                                 context.Response.StatusCode = StatusCodes.Status406NotAcceptable;
                                 context.HandleResponse();
@@ -304,7 +341,7 @@ namespace Microsoft.AspNetCore.Authentication.OAuth
                         };
                     }));
 
-            var transaction = await server.SendAsync("https://www.example.com/oauth-callback?error=access_denied&state=protected_state",
+            var transaction = await server.SendAsync("https://www.example.com/oauth-callback?error=custom_error&state=protected_state",
                 ".AspNetCore.Correlation.Weblie.correlationId=N");
 
             Assert.Equal(HttpStatusCode.NotAcceptable, transaction.Response.StatusCode);
