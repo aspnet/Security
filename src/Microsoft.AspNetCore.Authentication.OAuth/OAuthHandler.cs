@@ -205,7 +205,7 @@ namespace Microsoft.AspNetCore.Authentication.OAuth
         {
             if (string.IsNullOrEmpty(properties.RedirectUri))
             {
-                properties.RedirectUri = CurrentUri;
+                properties.RedirectUri = OriginalPathBase + Request.Path + Request.QueryString;
             }
 
             // OAuth2 10.12 CSRF

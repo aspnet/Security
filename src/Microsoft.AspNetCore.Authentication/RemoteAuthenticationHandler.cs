@@ -5,6 +5,7 @@ using System;
 using System.Security.Cryptography;
 using System.Text.Encodings.Web;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.WebUtilities;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 
@@ -109,7 +110,12 @@ namespace Microsoft.AspNetCore.Authentication
                     // Otherwise, invoke the RemoteFailure event for further processing.
                     if (Options.AccessDeniedPath.HasValue)
                     {
-                        Response.Redirect(BuildRedirectUri(Options.AccessDeniedPath));
+                        string uri = Options.AccessDeniedPath;
+                        if (!string.IsNullOrEmpty(Options.ReturnUrlParameter) && !string.IsNullOrEmpty(properties?.RedirectUri))
+                        {
+                            uri = QueryHelpers.AddQueryString(uri, Options.ReturnUrlParameter, properties.RedirectUri);
+                        }
+                        Response.Redirect(uri);
 
                         return true;
                     }

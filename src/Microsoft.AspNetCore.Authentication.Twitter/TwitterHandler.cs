@@ -132,7 +132,7 @@ namespace Microsoft.AspNetCore.Authentication.Twitter
         {
             if (string.IsNullOrEmpty(properties.RedirectUri))
             {
-                properties.RedirectUri = CurrentUri;
+                properties.RedirectUri = OriginalPathBase + Request.Path + Request.QueryString;
             }
 
             // If CallbackConfirmed is false, this will throw

@@ -211,7 +211,7 @@ namespace Microsoft.AspNetCore.Authentication.Twitter
             var response = await client.SendAsync(request);
 
             Assert.Equal(HttpStatusCode.Redirect, response.StatusCode);
-            Assert.Equal("http://localhost/access-denied", response.Headers.Location.AbsoluteUri);
+            Assert.Equal("/access-denied?ReturnUrl=%2Fchallenge", response.Headers.Location.ToString());
         }
 
         [Fact]
