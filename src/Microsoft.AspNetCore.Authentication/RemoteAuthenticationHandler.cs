@@ -248,7 +248,10 @@ namespace Microsoft.AspNetCore.Authentication
             Logger.AccessDeniedError();
             var context = new AccessDeniedContext(Context, Scheme, Options)
             {
-                Properties = properties
+                AccessDeniedPath = Options.AccessDeniedPath,
+                Properties = properties,
+                ReturnUrl = properties?.RedirectUri,
+                ReturnUrlParameter = Options.ReturnUrlParameter
             };
             await Events.AccessDenied(context);
 
@@ -268,12 +271,12 @@ namespace Microsoft.AspNetCore.Authentication
 
             // If an access denied endpoint was specified, redirect the user agent.
             // Otherwise, invoke the RemoteFailure event for further processing.
-            if (Options.AccessDeniedPath.HasValue)
+            if (context.AccessDeniedPath.HasValue)
             {
-                string uri = Options.AccessDeniedPath;
-                if (!string.IsNullOrEmpty(Options.ReturnUrlParameter) && !string.IsNullOrEmpty(properties?.RedirectUri))
+                string uri = context.AccessDeniedPath;
+                if (!string.IsNullOrEmpty(context.ReturnUrlParameter) && !string.IsNullOrEmpty(context.ReturnUrl))
                 {
-                    uri = QueryHelpers.AddQueryString(uri, Options.ReturnUrlParameter, properties.RedirectUri);
+                    uri = QueryHelpers.AddQueryString(uri, context.ReturnUrlParameter, context.ReturnUrl);
                 }
                 Response.Redirect(uri);
 

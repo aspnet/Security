@@ -392,6 +392,35 @@ namespace Microsoft.AspNetCore.Authentication.Google
             }
         }
 
+        [Fact]
+        public async Task ReplyPathWithAccessDeniedError_AllowsCustomizingPath()
+        {
+            var server = CreateServer(o =>
+            {
+                o.ClientId = "Test Id";
+                o.ClientSecret = "Test Secret";
+                o.StateDataFormat = new TestStateDataFormat();
+                o.AccessDeniedPath = "/access-denied";
+                o.Events = new OAuthEvents()
+                {
+                    OnAccessDenied = ctx =>
+                    {
+                        Assert.Equal("/access-denied", ctx.AccessDeniedPath.Value);
+                        Assert.Equal("http://testhost/redirect", ctx.ReturnUrl);
+                        Assert.Equal("ReturnUrl", ctx.ReturnUrlParameter);
+                        ctx.AccessDeniedPath = "/custom-denied-page";
+                        ctx.ReturnUrl = "http://www.google.com/";
+                        ctx.ReturnUrlParameter = "rurl";
+                        return Task.FromResult(0);
+                    }
+                };
+            });
+            var transaction = await server.SendAsync("https://example.com/signin-google?error=access_denied&error_description=SoBad&error_uri=foobar&state=protected_state",
+                ".AspNetCore.Correlation.Google.correlationId=N");
+            Assert.Equal(HttpStatusCode.Redirect, transaction.Response.StatusCode);
+            Assert.Equal("/custom-denied-page?rurl=http%3A%2F%2Fwww.google.com%2F", transaction.Response.Headers.GetValues("Location").First());
+        }
+
         [Theory]
         [InlineData(true)]
         [InlineData(false)]
