@@ -66,7 +66,7 @@ namespace Microsoft.AspNetCore.Authentication.OAuth
                 // Note: access_denied errors are special protocol errors indicating the user didn't
                 // approve the authorization demand requested by the remote authorization server.
                 // Since it's a frequent scenario (that is not caused by incorrect configuration),
-                // denied errors are handled differently using a special "access denied" exception.
+                // denied errors are handled differently using HandleAccessDeniedErrorAsync().
                 // Visit https://tools.ietf.org/html/rfc6749#section-4.1.2.1 for more information.
                 if (StringValues.Equals(error, "access_denied"))
                 {
