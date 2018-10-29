@@ -230,7 +230,7 @@ namespace Microsoft.AspNetCore.Authentication.Twitter
                     OnRemoteFailure = context =>
                     {
                         Assert.NotNull(context.Failure);
-                        Assert.Equal("The user denied permissions.", context.Failure.Message);
+                        Assert.Equal("Access was denied by the resource owner or by the remote server.", context.Failure.Message);
                         Assert.NotNull(context.Properties);
                         Assert.Equal("testvalue", context.Properties.Items["testkey"]);
                         context.Response.StatusCode = StatusCodes.Status406NotAcceptable;

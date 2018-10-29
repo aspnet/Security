@@ -70,8 +70,7 @@ namespace Microsoft.AspNetCore.Authentication.OAuth
                 // Visit https://tools.ietf.org/html/rfc6749#section-4.1.2.1 for more information.
                 if (StringValues.Equals(error, "access_denied"))
                 {
-                    return HandleRequestResult.Fail(new AccessDeniedException(
-                        "Access was denied by the resource owner or by the remote server."), properties);
+                    return await HandleAccessDeniedErrorAsync(properties);
                 }
 
                 var failureMessage = new StringBuilder();

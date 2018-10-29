@@ -527,8 +527,7 @@ namespace Microsoft.AspNetCore.Authentication.OpenIdConnect
                     // Visit https://tools.ietf.org/html/rfc6749#section-4.1.2.1 for more information.
                     if (string.Equals(authorizationResponse.Error, "access_denied", StringComparison.Ordinal))
                     {
-                        return HandleRequestResult.Fail(new AccessDeniedException(
-                            "Access was denied by the resource owner or by the remote server."), properties);
+                        return await HandleAccessDeniedErrorAsync(properties);
                     }
 
                     return HandleRequestResult.Fail(CreateOpenIdConnectProtocolException(authorizationResponse, response: null), properties);

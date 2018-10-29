@@ -81,46 +81,6 @@ namespace Microsoft.AspNetCore.Authentication
 
             if (exception != null)
             {
-                if (exception is AccessDeniedException ex)
-                {
-                    Logger.AccessDeniedError();
-                    var accessDeniedContext = new AccessDeniedContext(Context, Scheme, Options, ex)
-                    {
-                        Properties = properties
-                    };
-                    await Events.AccessDenied(accessDeniedContext);
-
-                    if (accessDeniedContext.Result != null)
-                    {
-                        if (accessDeniedContext.Result.Handled)
-                        {
-                            return true;
-                        }
-                        else if (accessDeniedContext.Result.Skipped)
-                        {
-                            return false;
-                        }
-                        else if (accessDeniedContext.Result.Failure != null)
-                        {
-                            throw new Exception("An error was returned from the AccessDenied event.", accessDeniedContext.Result.Failure);
-                        }
-                    }
-
-                    // If an access denied endpoint was specified, redirect the user agent.
-                    // Otherwise, invoke the RemoteFailure event for further processing.
-                    if (Options.AccessDeniedPath.HasValue)
-                    {
-                        string uri = Options.AccessDeniedPath;
-                        if (!string.IsNullOrEmpty(Options.ReturnUrlParameter) && !string.IsNullOrEmpty(properties?.RedirectUri))
-                        {
-                            uri = QueryHelpers.AddQueryString(uri, Options.ReturnUrlParameter, properties.RedirectUri);
-                        }
-                        Response.Redirect(uri);
-
-                        return true;
-                    }
-                }
-
                 Logger.RemoteAuthenticationError(exception.Message);
                 var errorContext = new RemoteFailureContext(Context, Scheme, Options, exception)
                 {
@@ -281,6 +241,46 @@ namespace Microsoft.AspNetCore.Authentication
             }
 
             return true;
+        }
+
+        protected virtual async Task<HandleRequestResult> HandleAccessDeniedErrorAsync(AuthenticationProperties properties)
+        {
+            Logger.AccessDeniedError();
+            var context = new AccessDeniedContext(Context, Scheme, Options)
+            {
+                Properties = properties
+            };
+            await Events.AccessDenied(context);
+
+            if (context.Result != null)
+            {
+                if (context.Result.Handled)
+                {
+                    Logger.AccessDeniedContextHandled();
+                }
+                else if (context.Result.Skipped)
+                {
+                    Logger.AccessDeniedContextSkipped();
+                }
+
+                return context.Result;
+            }
+
+            // If an access denied endpoint was specified, redirect the user agent.
+            // Otherwise, invoke the RemoteFailure event for further processing.
+            if (Options.AccessDeniedPath.HasValue)
+            {
+                string uri = Options.AccessDeniedPath;
+                if (!string.IsNullOrEmpty(Options.ReturnUrlParameter) && !string.IsNullOrEmpty(properties?.RedirectUri))
+                {
+                    uri = QueryHelpers.AddQueryString(uri, Options.ReturnUrlParameter, properties.RedirectUri);
+                }
+                Response.Redirect(uri);
+
+                return HandleRequestResult.Handle();
+            }
+
+            return HandleRequestResult.Fail("Access was denied by the resource owner or by the remote server.", properties);
         }
     }
 }

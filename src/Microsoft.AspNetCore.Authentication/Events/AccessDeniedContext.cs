@@ -13,17 +13,10 @@ namespace Microsoft.AspNetCore.Authentication
         public AccessDeniedContext(
             HttpContext context,
             AuthenticationScheme scheme,
-            RemoteAuthenticationOptions options,
-            AccessDeniedException failure)
+            RemoteAuthenticationOptions options)
             : base(context, scheme, options)
         {
-            Failure = failure;
         }
-
-        /// <summary>
-        /// User friendly error message for the error.
-        /// </summary>
-        public AccessDeniedException Failure { get; set; }
 
         /// <summary>
         /// Additional state values for the authentication session.

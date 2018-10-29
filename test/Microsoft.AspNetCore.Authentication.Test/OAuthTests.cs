@@ -296,7 +296,6 @@ namespace Microsoft.AspNetCore.Authentication.OAuth
                         {
                             OnRemoteFailure = context =>
                             {
-                                Assert.IsType<AccessDeniedException>(context.Failure);
                                 Assert.Equal("Access was denied by the resource owner or by the remote server.", context.Failure.Message);
                                 Assert.Equal("testvalue", context.Properties.Items["testkey"]);
                                 context.Response.StatusCode = StatusCodes.Status406NotAcceptable;

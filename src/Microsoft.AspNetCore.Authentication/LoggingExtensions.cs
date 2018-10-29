@@ -19,6 +19,8 @@ namespace Microsoft.Extensions.Logging
         private static readonly Action<ILogger, string, Exception> _correlationCookieNotFound;
         private static readonly Action<ILogger, string, string, Exception> _unexpectedCorrelationCookieValue;
         private static readonly Action<ILogger, Exception> _accessDeniedError;
+        private static readonly Action<ILogger, Exception> _accessDeniedContextHandled;
+        private static readonly Action<ILogger, Exception> _accessDeniedContextSkipped;
 
         static LoggingExtensions()
         {
@@ -70,6 +72,14 @@ namespace Microsoft.Extensions.Logging
                 eventId: 17,
                 logLevel: LogLevel.Information,
                 formatString: "Access was denied by the resource owner or by the remote server.");
+            _accessDeniedContextHandled = LoggerMessage.Define(
+                eventId: 18,
+                logLevel: LogLevel.Debug,
+                formatString: "The AccessDenied event returned Handled.");
+            _accessDeniedContextSkipped = LoggerMessage.Define(
+                eventId: 19,
+                logLevel: LogLevel.Debug,
+                formatString: "The AccessDenied event returned Skipped.");
         }
 
         public static void AuthenticationSchemeAuthenticated(this ILogger logger, string authenticationScheme)
@@ -130,6 +140,16 @@ namespace Microsoft.Extensions.Logging
         public static void AccessDeniedError(this ILogger logger)
         {
             _accessDeniedError(logger, null);
+        }
+
+        public static void AccessDeniedContextHandled(this ILogger logger)
+        {
+            _accessDeniedContextHandled(logger, null);
+        }
+
+        public static void AccessDeniedContextSkipped(this ILogger logger)
+        {
+            _accessDeniedContextSkipped(logger, null);
         }
     }
 }
