@@ -83,7 +83,7 @@ namespace Microsoft.AspNetCore.Authentication.WsFederation
             // Save the original challenge URI so we can redirect back to it when we're done.
             if (string.IsNullOrEmpty(properties.RedirectUri))
             {
-                properties.RedirectUri = OriginalPathBase + Request.Path + Request.QueryString;
+                properties.RedirectUri = OriginalPathBase + OriginalPath + Request.QueryString;
             }
 
             var wsFederationMessage = new WsFederationMessage()

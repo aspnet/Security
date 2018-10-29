@@ -186,7 +186,7 @@ namespace Microsoft.AspNetCore.Authentication.OpenIdConnect
                 properties.RedirectUri = BuildRedirectUriIfRelative(Options.SignedOutRedirectUri);
                 if (string.IsNullOrWhiteSpace(properties.RedirectUri))
                 {
-                    properties.RedirectUri = OriginalPathBase + Request.Path + Request.QueryString;
+                    properties.RedirectUri = OriginalPathBase + OriginalPath + Request.QueryString;
                 }
             }
             Logger.PostSignOutRedirect(properties.RedirectUri);
@@ -312,7 +312,7 @@ namespace Microsoft.AspNetCore.Authentication.OpenIdConnect
             // 2. CurrentUri if RedirectUri is not set)
             if (string.IsNullOrEmpty(properties.RedirectUri))
             {
-                properties.RedirectUri = OriginalPathBase + Request.Path + Request.QueryString;
+                properties.RedirectUri = OriginalPathBase + OriginalPath + Request.QueryString;
             }
             Logger.PostAuthenticationLocalRedirect(properties.RedirectUri);
 
