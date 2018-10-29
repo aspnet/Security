@@ -360,6 +360,41 @@ namespace Microsoft.AspNetCore.Authentication.Google
         [Theory]
         [InlineData(true)]
         [InlineData(false)]
+        public async Task ReplyPathWithAccessDeniedErrorFails(bool redirect)
+        {
+            var server = CreateServer(o =>
+            {
+                o.ClientId = "Test Id";
+                o.ClientSecret = "Test Secret";
+                o.StateDataFormat = new TestStateDataFormat();
+                o.Events = redirect ? new OAuthEvents()
+                {
+                    OnAccessDenied = ctx =>
+                    {
+                        ctx.Response.Redirect("/error?FailureMessage=AccessDenied");
+                        ctx.HandleResponse();
+                        return Task.FromResult(0);
+                    }
+                } : new OAuthEvents();
+            });
+            var sendTask = server.SendAsync("https://example.com/signin-google?error=access_denied&error_description=SoBad&error_uri=foobar&state=protected_state",
+                ".AspNetCore.Correlation.Google.correlationId=N");
+            if (redirect)
+            {
+                var transaction = await sendTask;
+                Assert.Equal(HttpStatusCode.Redirect, transaction.Response.StatusCode);
+                Assert.Equal("/error?FailureMessage=AccessDenied", transaction.Response.Headers.GetValues("Location").First());
+            }
+            else
+            {
+                var error = await Assert.ThrowsAnyAsync<Exception>(() => sendTask);
+                Assert.Equal("Access was denied by the resource owner or by the remote server.", error.GetBaseException().Message);
+            }
+        }
+
+        [Theory]
+        [InlineData(true)]
+        [InlineData(false)]
         public async Task ReplyPathWithErrorFails(bool redirect)
         {
             var server = CreateServer(o =>
