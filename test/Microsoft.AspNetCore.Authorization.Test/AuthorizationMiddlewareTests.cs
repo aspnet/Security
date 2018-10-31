@@ -19,38 +19,6 @@ namespace Microsoft.AspNetCore.Authorization.Test
 {
     public class AuthorizationMiddlewareTests
     {
-        public class TestRequestDelegate
-        {
-            private readonly int _statusCode;
-
-            public bool Called => CalledCount > 0;
-            public int CalledCount { get; private set; }
-
-            public Task RequestDelegate(HttpContext context)
-            {
-                CalledCount++;
-                context.Response.StatusCode = _statusCode;
-                return Task.CompletedTask;
-            }
-
-            public TestRequestDelegate(int statusCode = 200)
-            {
-                _statusCode = statusCode;
-            }
-        }
-
-        private AuthorizationMiddleware CreateMiddleware(RequestDelegate requestDelegate = null, IAuthorizationPolicyProvider policyProvider = null)
-        {
-            requestDelegate = requestDelegate ?? ((context) => Task.CompletedTask);
-
-            return new AuthorizationMiddleware(requestDelegate, policyProvider);
-        }
-
-        private Endpoint CreateEndpoint(params object[] metadata)
-        {
-            return new Endpoint(context => Task.CompletedTask, new EndpointMetadataCollection(metadata), "Test endpoint");
-        }
-
         [Fact]
         public async Task NoEndpoint_AnonymousUser_Allows()
         {
@@ -87,41 +55,6 @@ namespace Microsoft.AspNetCore.Authorization.Test
 
             // Assert
             Assert.True(next.Called);
-        }
-
-        private class TestAuthenticationService : IAuthenticationService
-        {
-            public bool ChallengeCalled { get; private set; }
-            public bool ForbidCalled { get; private set; }
-            public bool AuthenticateCalled { get; private set; }
-
-            public Task<AuthenticateResult> AuthenticateAsync(HttpContext context, string scheme)
-            {
-                AuthenticateCalled = true;
-                return Task.FromResult(AuthenticateResult.Fail("Denied"));
-            }
-
-            public Task ChallengeAsync(HttpContext context, string scheme, AuthenticationProperties properties)
-            {
-                ChallengeCalled = true;
-                return Task.CompletedTask;
-            }
-
-            public Task ForbidAsync(HttpContext context, string scheme, AuthenticationProperties properties)
-            {
-                ForbidCalled = true;
-                return Task.CompletedTask;
-            }
-
-            public Task SignInAsync(HttpContext context, string scheme, ClaimsPrincipal principal, AuthenticationProperties properties)
-            {
-                throw new NotImplementedException();
-            }
-
-            public Task SignOutAsync(HttpContext context, string scheme, AuthenticationProperties properties)
-            {
-                throw new NotImplementedException();
-            }
         }
 
         [Fact]
@@ -346,6 +279,18 @@ namespace Microsoft.AspNetCore.Authorization.Test
             Assert.True(authenticationService.ForbidCalled);
         }
 
+        private AuthorizationMiddleware CreateMiddleware(RequestDelegate requestDelegate = null, IAuthorizationPolicyProvider policyProvider = null)
+        {
+            requestDelegate = requestDelegate ?? ((context) => Task.CompletedTask);
+
+            return new AuthorizationMiddleware(requestDelegate, policyProvider);
+        }
+
+        private Endpoint CreateEndpoint(params object[] metadata)
+        {
+            return new Endpoint(context => Task.CompletedTask, new EndpointMetadataCollection(metadata), "Test endpoint");
+        }
+
         private HttpContext GetHttpContext(
             bool anonymous = false,
             Action<IServiceCollection> registerServices = null,
@@ -401,28 +346,67 @@ namespace Microsoft.AspNetCore.Authorization.Test
                 httpContext.Features.Set<IEndpointFeature>(endpointFeature);
             }
             httpContext.RequestServices = serviceProvider;
-            //auth.Setup(c => c.AuthenticateAsync(httpContext.Object, "Bearer")).ReturnsAsync(AuthenticateResult.Success(new AuthenticationTicket(bearerPrincipal, "Bearer")));
-            //auth.Setup(c => c.AuthenticateAsync(httpContext.Object, "Basic")).ReturnsAsync(AuthenticateResult.Success(new AuthenticationTicket(basicPrincipal, "Basic")));
-            //auth.Setup(c => c.AuthenticateAsync(httpContext.Object, "Fails")).ReturnsAsync(AuthenticateResult.Fail("Fails"));
-            //httpContext.SetupProperty(c => c.User);
             if (!anonymous)
             {
                 httpContext.User = validUser;
             }
-            //httpContext.SetupGet(c => c.RequestServices).Returns(serviceProvider);
-
-            //// AuthorizationFilterContext
-            //var actionContext = new ActionContext(
-            //    httpContext: httpContext.Object,
-            //    routeData: new RouteData(),
-            //    actionDescriptor: new ActionDescriptor());
-
-            //var authorizationContext = new Filters.AuthorizationFilterContext(
-            //    actionContext,
-            //    Enumerable.Empty<IFilterMetadata>().ToList()
-            //);
 
             return httpContext;
+        }
+
+        private class TestAuthenticationService : IAuthenticationService
+        {
+            public bool ChallengeCalled { get; private set; }
+            public bool ForbidCalled { get; private set; }
+            public bool AuthenticateCalled { get; private set; }
+
+            public Task<AuthenticateResult> AuthenticateAsync(HttpContext context, string scheme)
+            {
+                AuthenticateCalled = true;
+                return Task.FromResult(AuthenticateResult.Fail("Denied"));
+            }
+
+            public Task ChallengeAsync(HttpContext context, string scheme, AuthenticationProperties properties)
+            {
+                ChallengeCalled = true;
+                return Task.CompletedTask;
+            }
+
+            public Task ForbidAsync(HttpContext context, string scheme, AuthenticationProperties properties)
+            {
+                ForbidCalled = true;
+                return Task.CompletedTask;
+            }
+
+            public Task SignInAsync(HttpContext context, string scheme, ClaimsPrincipal principal, AuthenticationProperties properties)
+            {
+                throw new NotImplementedException();
+            }
+
+            public Task SignOutAsync(HttpContext context, string scheme, AuthenticationProperties properties)
+            {
+                throw new NotImplementedException();
+            }
+        }
+
+        private class TestRequestDelegate
+        {
+            private readonly int _statusCode;
+
+            public bool Called => CalledCount > 0;
+            public int CalledCount { get; private set; }
+
+            public Task RequestDelegate(HttpContext context)
+            {
+                CalledCount++;
+                context.Response.StatusCode = _statusCode;
+                return Task.CompletedTask;
+            }
+
+            public TestRequestDelegate(int statusCode = 200)
+            {
+                _statusCode = statusCode;
+            }
         }
     }
 }
