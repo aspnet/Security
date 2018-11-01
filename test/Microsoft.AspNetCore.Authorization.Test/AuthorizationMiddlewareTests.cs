@@ -28,7 +28,7 @@ namespace Microsoft.AspNetCore.Authorization.Test
             policyProvider.Setup(p => p.GetDefaultPolicyAsync()).ReturnsAsync(policy);
             var next = new TestRequestDelegate();
 
-            var middleware = CreateMiddleware(next.RequestDelegate, policyProvider.Object);
+            var middleware = CreateMiddleware(next.Invoke, policyProvider.Object);
             var context = GetHttpContext(anonymous: true);
 
             // Act
@@ -47,7 +47,7 @@ namespace Microsoft.AspNetCore.Authorization.Test
             policyProvider.Setup(p => p.GetDefaultPolicyAsync()).ReturnsAsync(policy);
             var next = new TestRequestDelegate();
 
-            var middleware = CreateMiddleware(next.RequestDelegate, policyProvider.Object);
+            var middleware = CreateMiddleware(next.Invoke, policyProvider.Object);
             var context = GetHttpContext(anonymous: true, endpoint: CreateEndpoint());
 
             // Act
@@ -67,7 +67,7 @@ namespace Microsoft.AspNetCore.Authorization.Test
             var next = new TestRequestDelegate();
             var authenticationService = new TestAuthenticationService();
 
-            var middleware = CreateMiddleware(next.RequestDelegate, policyProvider.Object);
+            var middleware = CreateMiddleware(next.Invoke, policyProvider.Object);
             var context = GetHttpContext(anonymous: true, endpoint: CreateEndpoint(new AuthorizeAttribute()), authenticationService: authenticationService);
 
             // Act
@@ -88,7 +88,7 @@ namespace Microsoft.AspNetCore.Authorization.Test
             policyProvider.Setup(p => p.GetPolicyAsync(It.IsAny<string>())).ReturnsAsync(policy)
                 .Callback(() => getPolicyCount++);
             var next = new TestRequestDelegate();
-            var middleware = CreateMiddleware(next.RequestDelegate, policyProvider.Object);
+            var middleware = CreateMiddleware(next.Invoke, policyProvider.Object);
             var context = GetHttpContext(anonymous: true, endpoint: CreateEndpoint(new AuthorizeAttribute("whatever")));
 
             // Act & Assert
@@ -114,7 +114,7 @@ namespace Microsoft.AspNetCore.Authorization.Test
             policyProvider.Setup(p => p.GetDefaultPolicyAsync()).ReturnsAsync(policy);
             var next = new TestRequestDelegate();
 
-            var middleware = CreateMiddleware(next.RequestDelegate, policyProvider.Object);
+            var middleware = CreateMiddleware(next.Invoke, policyProvider.Object);
             var context = GetHttpContext(endpoint: CreateEndpoint(new AuthorizeAttribute()));
 
             // Act
@@ -134,7 +134,7 @@ namespace Microsoft.AspNetCore.Authorization.Test
             var next = new TestRequestDelegate();
             var authenticationService = new TestAuthenticationService();
 
-            var middleware = CreateMiddleware(next.RequestDelegate, policyProvider.Object);
+            var middleware = CreateMiddleware(next.Invoke, policyProvider.Object);
             var context = GetHttpContext(anonymous: true, endpoint: CreateEndpoint(new AuthorizeAttribute(), new AllowAnonymousAttribute()), authenticationService: authenticationService);
 
             // Act
@@ -155,7 +155,7 @@ namespace Microsoft.AspNetCore.Authorization.Test
             var next = new TestRequestDelegate();
             var authenticationService = new TestAuthenticationService();
 
-            var middleware = CreateMiddleware(next.RequestDelegate, policyProvider.Object);
+            var middleware = CreateMiddleware(next.Invoke, policyProvider.Object);
             var context = GetHttpContext(endpoint: CreateEndpoint(new AuthorizeAttribute()), authenticationService: authenticationService);
 
             // Act
@@ -176,7 +176,7 @@ namespace Microsoft.AspNetCore.Authorization.Test
             var next = new TestRequestDelegate();
             var authenticationService = new TestAuthenticationService();
 
-            var middleware = CreateMiddleware(next.RequestDelegate, policyProvider.Object);
+            var middleware = CreateMiddleware(next.Invoke, policyProvider.Object);
             var context = GetHttpContext(endpoint: CreateEndpoint(new AuthorizeAttribute()), authenticationService: authenticationService);
 
             // Act
@@ -198,7 +198,7 @@ namespace Microsoft.AspNetCore.Authorization.Test
             policyProvider.Setup(p => p.GetDefaultPolicyAsync()).ReturnsAsync(policy);
             var next = new TestRequestDelegate();
 
-            var middleware = CreateMiddleware(next.RequestDelegate, policyProvider.Object);
+            var middleware = CreateMiddleware(next.Invoke, policyProvider.Object);
             var context = GetHttpContext(endpoint: CreateEndpoint(new AuthorizeAttribute()));
 
             // Act
@@ -222,7 +222,7 @@ namespace Microsoft.AspNetCore.Authorization.Test
             policyProvider.Setup(p => p.GetDefaultPolicyAsync()).ReturnsAsync(policy);
             var next = new TestRequestDelegate();
 
-            var middleware = CreateMiddleware(next.RequestDelegate, policyProvider.Object);
+            var middleware = CreateMiddleware(next.Invoke, policyProvider.Object);
             var endpoint = CreateEndpoint(new AuthorizeAttribute());
             var context = GetHttpContext(endpoint: endpoint);
 
@@ -243,7 +243,7 @@ namespace Microsoft.AspNetCore.Authorization.Test
             var next = new TestRequestDelegate();
             var authenticationService = new TestAuthenticationService();
 
-            var middleware = CreateMiddleware(next.RequestDelegate, policyProvider.Object);
+            var middleware = CreateMiddleware(next.Invoke, policyProvider.Object);
             var context = GetHttpContext(endpoint: CreateEndpoint(new AuthorizeAttribute()), authenticationService: authenticationService);
 
             // Act
@@ -267,7 +267,7 @@ namespace Microsoft.AspNetCore.Authorization.Test
             var next = new TestRequestDelegate();
             var authenticationService = new TestAuthenticationService();
 
-            var middleware = CreateMiddleware(next.RequestDelegate, policyProvider.Object);
+            var middleware = CreateMiddleware(next.Invoke, policyProvider.Object);
             var context = GetHttpContext(endpoint: CreateEndpoint(new AuthorizeAttribute()), authenticationService: authenticationService);
 
             // Act
@@ -396,16 +396,16 @@ namespace Microsoft.AspNetCore.Authorization.Test
             public bool Called => CalledCount > 0;
             public int CalledCount { get; private set; }
 
-            public Task RequestDelegate(HttpContext context)
+            public TestRequestDelegate(int statusCode = 200)
+            {
+                _statusCode = statusCode;
+            }
+
+            public Task Invoke(HttpContext context)
             {
                 CalledCount++;
                 context.Response.StatusCode = _statusCode;
                 return Task.CompletedTask;
-            }
-
-            public TestRequestDelegate(int statusCode = 200)
-            {
-                _statusCode = statusCode;
             }
         }
     }
