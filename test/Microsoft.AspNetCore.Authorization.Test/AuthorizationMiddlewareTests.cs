@@ -2,6 +2,7 @@
 // Licensed under the Apache License, Version 2.0. See License.txt in the project root for license information.
 
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Security.Claims;
 using System.Threading.Tasks;
@@ -42,7 +43,7 @@ namespace Microsoft.AspNetCore.Authorization.Test
         public async Task HasEndpointWithoutAuth_AnonymousUser_Allows()
         {
             // Arrange
-            var policy = new AuthorizationPolicyBuilder().RequireAssertion(_ => true).Build();
+            var policy = new AuthorizationPolicyBuilder().RequireAuthenticatedUser().Build();
             var policyProvider = new Mock<IAuthorizationPolicyProvider>();
             policyProvider.Setup(p => p.GetDefaultPolicyAsync()).ReturnsAsync(policy);
             var next = new TestRequestDelegate();
@@ -76,6 +77,27 @@ namespace Microsoft.AspNetCore.Authorization.Test
             // Assert
             Assert.False(next.Called);
             Assert.True(authenticationService.ChallengeCalled);
+        }
+
+        [Fact]
+        public async Task HasEndpointWithAuth_AnonymousUser_ChallengePerScheme()
+        {
+            // Arrange
+            var policy = new AuthorizationPolicyBuilder().RequireAuthenticatedUser().AddAuthenticationSchemes("schema1", "schema2").Build();
+            var policyProvider = new Mock<IAuthorizationPolicyProvider>();
+            policyProvider.Setup(p => p.GetDefaultPolicyAsync()).ReturnsAsync(policy);
+            var next = new TestRequestDelegate();
+            var authenticationService = new TestAuthenticationService();
+
+            var middleware = CreateMiddleware(next.Invoke, policyProvider.Object);
+            var context = GetHttpContext(anonymous: true, endpoint: CreateEndpoint(new AuthorizeAttribute()), authenticationService: authenticationService);
+
+            // Act
+            await middleware.Invoke(context);
+
+            // Assert
+            Assert.False(next.Called);
+            Assert.Equal(2, authenticationService.ChallengeCount);
         }
 
         [Fact]
@@ -256,6 +278,27 @@ namespace Microsoft.AspNetCore.Authorization.Test
         }
 
         [Fact]
+        public async Task Invoke_RequireUnknownRole_ForbidPerScheme()
+        {
+            // Arrange
+            var policy = new AuthorizationPolicyBuilder().RequireRole("Wut").AddAuthenticationSchemes("Basic", "Bearer").Build();
+            var policyProvider = new Mock<IAuthorizationPolicyProvider>();
+            policyProvider.Setup(p => p.GetDefaultPolicyAsync()).ReturnsAsync(policy);
+            var next = new TestRequestDelegate();
+            var authenticationService = new TestAuthenticationService();
+
+            var middleware = CreateMiddleware(next.Invoke, policyProvider.Object);
+            var context = GetHttpContext(endpoint: CreateEndpoint(new AuthorizeAttribute()), authenticationService: authenticationService);
+
+            // Act
+            await middleware.Invoke(context);
+
+            // Assert
+            Assert.False(next.Called);
+            Assert.Equal(2, authenticationService.ForbidCount);
+        }
+
+        [Fact]
         public async Task Invoke_InvalidClaimShouldForbid()
         {
             // Arrange
@@ -315,8 +358,6 @@ namespace Microsoft.AspNetCore.Authorization.Test
                         new Claim(ClaimTypes.NameIdentifier, "John Bear")},
                         "Bearer");
 
-            var bearerPrincipal = new ClaimsPrincipal(bearerIdentity);
-
             validUser.AddIdentity(bearerIdentity);
 
             // ServiceProvider
@@ -329,10 +370,7 @@ namespace Microsoft.AspNetCore.Authorization.Test
             serviceCollection.AddLogging();
             serviceCollection.AddAuthorization();
             serviceCollection.AddAuthorizationPolicyEvaluator();
-            if (registerServices != null)
-            {
-                registerServices(serviceCollection);
-            }
+            registerServices?.Invoke(serviceCollection);
 
             var serviceProvider = serviceCollection.BuildServiceProvider();
 
@@ -356,25 +394,36 @@ namespace Microsoft.AspNetCore.Authorization.Test
 
         private class TestAuthenticationService : IAuthenticationService
         {
-            public bool ChallengeCalled { get; private set; }
-            public bool ForbidCalled { get; private set; }
-            public bool AuthenticateCalled { get; private set; }
+            public bool ChallengeCalled => ChallengeCount > 0;
+            public bool ForbidCalled => ForbidCount > 0;
+            public bool AuthenticateCalled => AuthenticateCount > 0;
+
+            public int ChallengeCount { get; private set; }
+            public int ForbidCount { get; private set; }
+            public int AuthenticateCount { get; private set; }
 
             public Task<AuthenticateResult> AuthenticateAsync(HttpContext context, string scheme)
             {
-                AuthenticateCalled = true;
+                AuthenticateCount++;
+
+                var identity = context.User.Identities.SingleOrDefault(i => i.AuthenticationType == scheme);
+                if (identity != null)
+                {
+                    return Task.FromResult(AuthenticateResult.Success(new AuthenticationTicket(new ClaimsPrincipal(identity), scheme)));
+                }
+
                 return Task.FromResult(AuthenticateResult.Fail("Denied"));
             }
 
             public Task ChallengeAsync(HttpContext context, string scheme, AuthenticationProperties properties)
             {
-                ChallengeCalled = true;
+                ChallengeCount++;
                 return Task.CompletedTask;
             }
 
             public Task ForbidAsync(HttpContext context, string scheme, AuthenticationProperties properties)
             {
-                ForbidCalled = true;
+                ForbidCount++;
                 return Task.CompletedTask;
             }
 
