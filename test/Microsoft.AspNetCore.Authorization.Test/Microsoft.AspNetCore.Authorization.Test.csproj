@@ -6,7 +6,6 @@
 
   <ItemGroup>
     <ProjectReference Include="..\..\src\Microsoft.AspNetCore.Authorization\Microsoft.AspNetCore.Authorization.csproj" />
-    <ProjectReference Include="..\..\src\Microsoft.AspNetCore.Authorization.Middleware\Microsoft.AspNetCore.Authorization.Middleware.csproj" />
     <ProjectReference Include="..\..\src\Microsoft.AspNetCore.Authorization.Policy\Microsoft.AspNetCore.Authorization.Policy.csproj" />
   </ItemGroup>
 
