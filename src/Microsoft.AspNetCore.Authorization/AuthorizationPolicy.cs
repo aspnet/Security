@@ -159,6 +159,12 @@ namespace Microsoft.AspNetCore.Authorization
                     policyBuilder.Combine(await policyProvider.GetDefaultPolicyAsync());
                 }
             }
+            var requiredPolicy = await policyProvider.GetRequiredPolicyAsync();
+            if (requiredPolicy != null)
+            {
+                any = true;
+                policyBuilder.Combine(requiredPolicy);
+            }
             return any ? policyBuilder.Build() : null;
         }
     }

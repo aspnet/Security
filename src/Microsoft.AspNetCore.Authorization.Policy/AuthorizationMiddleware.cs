@@ -40,16 +40,10 @@ namespace Microsoft.AspNetCore.Authorization
                 throw new ArgumentNullException(nameof(context));
             }
 
-            var endpoint = context.Features.Get<IEndpointFeature>()?.Endpoint;
-            if (endpoint == null)
-            {
-                await _next(context);
-                return;
-            }
-
             var policyEvaluator = context.RequestServices.GetRequiredService<IPolicyEvaluator>();
 
-            var authorizeData = endpoint.Metadata.GetOrderedMetadata<IAuthorizeData>();
+            var endpoint = context.Features.Get<IEndpointFeature>()?.Endpoint;
+            var authorizeData = endpoint?.Metadata.GetOrderedMetadata<IAuthorizeData>() ?? Array.Empty<IAuthorizeData>();
             var policy = await AuthorizationPolicy.CombineAsync(_policyProvider, authorizeData);
             if (policy == null)
             {
@@ -60,13 +54,14 @@ namespace Microsoft.AspNetCore.Authorization
             var authenticateResult = await policyEvaluator.AuthenticateAsync(policy, context);
 
             // Allow Anonymous skips all authorization
-            if (endpoint.Metadata.GetMetadata<IAllowAnonymous>() != null)
+            if (endpoint?.Metadata.GetMetadata<IAllowAnonymous>() != null)
             {
                 await _next(context);
                 return;
             }
 
-            var authorizeResult = await policyEvaluator.AuthorizeAsync(policy, authenticateResult, context, endpoint);
+            // Note that the resource will be null if there is no matched endpoint
+            var authorizeResult = await policyEvaluator.AuthorizeAsync(policy, authenticateResult, context, resource: endpoint);
 
             if (authorizeResult.Challenged)
             {

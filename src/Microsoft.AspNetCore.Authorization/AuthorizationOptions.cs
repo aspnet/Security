@@ -28,6 +28,11 @@ namespace Microsoft.AspNetCore.Authorization
         public AuthorizationPolicy DefaultPolicy { get; set; } = new AuthorizationPolicyBuilder().RequireAuthenticatedUser().Build();
 
         /// <summary>
+        /// Gets or sets the required authorization policy. Defaults to null.
+        /// </summary>
+        public AuthorizationPolicy RequiredPolicy { get; set; }
+
+        /// <summary>
         /// Add an authorization policy with the provided name.
         /// </summary>
         /// <param name="name">The name of the policy.</param>

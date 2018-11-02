@@ -39,6 +39,15 @@ namespace Microsoft.AspNetCore.Authorization
         }
 
         /// <summary>
+        /// Gets the required authorization policy.
+        /// </summary>
+        /// <returns>The required authorization policy.</returns>
+        public Task<AuthorizationPolicy> GetRequiredPolicyAsync()
+        {
+            return Task.FromResult(_options.RequiredPolicy);
+        }
+
+        /// <summary>
         /// Gets a <see cref="AuthorizationPolicy"/> from the given <paramref name="policyName"/>
         /// </summary>
         /// <param name="policyName">The policy name to retrieve.</param>
