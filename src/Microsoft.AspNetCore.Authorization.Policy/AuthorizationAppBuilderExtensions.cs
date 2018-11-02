@@ -3,6 +3,7 @@
 
 using System;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.Extensions.Options;
 
 namespace Microsoft.AspNetCore.Builder
 {
@@ -16,6 +17,21 @@ namespace Microsoft.AspNetCore.Builder
             }
 
             return app.UseMiddleware<AuthorizationMiddleware>();
+        }
+
+        public static IApplicationBuilder UseAuthorization(this IApplicationBuilder app, AuthorizationOptions options)
+        {
+            if (app == null)
+            {
+                throw new ArgumentNullException(nameof(app));
+            }
+
+            if (options == null)
+            {
+                throw new ArgumentNullException(nameof(options));
+            }
+
+            return app.UseMiddleware<AuthorizationMiddleware>(new DefaultAuthorizationPolicyProvider(Options.Create(options)));
         }
     }
 }

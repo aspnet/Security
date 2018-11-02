@@ -40,8 +40,6 @@ namespace Microsoft.AspNetCore.Authorization
                 throw new ArgumentNullException(nameof(context));
             }
 
-            var policyEvaluator = context.RequestServices.GetRequiredService<IPolicyEvaluator>();
-
             var endpoint = context.Features.Get<IEndpointFeature>()?.Endpoint;
             var authorizeData = endpoint?.Metadata.GetOrderedMetadata<IAuthorizeData>() ?? Array.Empty<IAuthorizeData>();
             var policy = await AuthorizationPolicy.CombineAsync(_policyProvider, authorizeData);
@@ -50,6 +48,8 @@ namespace Microsoft.AspNetCore.Authorization
                 await _next(context);
                 return;
             }
+
+            var policyEvaluator = context.RequestServices.GetRequiredService<IPolicyEvaluator>();
 
             var authenticateResult = await policyEvaluator.AuthenticateAsync(policy, context);
 
