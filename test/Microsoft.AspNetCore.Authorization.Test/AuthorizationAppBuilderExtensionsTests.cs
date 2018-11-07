@@ -10,9 +10,9 @@ using Microsoft.AspNetCore.Authorization.Test.TestObjects;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Builder.Internal;
 using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Http.Endpoints;
 using Microsoft.AspNetCore.Http.Features;
 using Microsoft.Extensions.DependencyInjection;
-using Moq;
 using Xunit;
 
 namespace Microsoft.AspNetCore.Authorization.Test
@@ -32,15 +32,14 @@ namespace Microsoft.AspNetCore.Authorization.Test
 
             var appFunc = app.Build();
 
-            var endpointFeature = Mock.Of<IEndpointFeature>();
-            endpointFeature.Endpoint = new Endpoint(
-                context => Task.CompletedTask,
+            var endpoint = new Endpoint(
+                null,
                 new EndpointMetadataCollection(new AuthorizeAttribute()),
                 "Test endpoint");
 
             var httpContext = new DefaultHttpContext();
             httpContext.RequestServices = services;
-            httpContext.Features.Set(endpointFeature);
+            httpContext.SetEndpoint(endpoint);
 
             // Act
             await appFunc(httpContext);

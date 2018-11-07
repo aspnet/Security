@@ -7,6 +7,7 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authorization.Policy;
 using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Http.Endpoints;
 using Microsoft.AspNetCore.Http.Features;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -40,7 +41,7 @@ namespace Microsoft.AspNetCore.Authorization
                 throw new ArgumentNullException(nameof(context));
             }
 
-            var endpoint = context.Features.Get<IEndpointFeature>()?.Endpoint;
+            var endpoint = context.GetEndpoint();
             var authorizeData = endpoint?.Metadata.GetOrderedMetadata<IAuthorizeData>() ?? Array.Empty<IAuthorizeData>();
             var policy = await AuthorizationPolicy.CombineAsync(_policyProvider, authorizeData);
             if (policy == null)

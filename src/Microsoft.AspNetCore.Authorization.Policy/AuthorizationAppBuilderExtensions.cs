@@ -3,12 +3,19 @@
 
 using System;
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.Extensions.Options;
 
 namespace Microsoft.AspNetCore.Builder
 {
+    /// <summary>
+    /// Extension methods to add authorization capabilities to an HTTP application pipeline.
+    /// </summary>
     public static class AuthorizationAppBuilderExtensions
     {
+        /// <summary>
+        /// Adds the <see cref="AuthorizationMiddleware"/> to the specified <see cref="IApplicationBuilder"/>, which enables authorization capabilities.
+        /// </summary>
+        /// <param name="app">The <see cref="IApplicationBuilder"/> to add the middleware to.</param>
+        /// <returns>A reference to this instance after the operation has completed.</returns>
         public static IApplicationBuilder UseAuthorization(this IApplicationBuilder app)
         {
             if (app == null)
@@ -17,21 +24,6 @@ namespace Microsoft.AspNetCore.Builder
             }
 
             return app.UseMiddleware<AuthorizationMiddleware>();
-        }
-
-        public static IApplicationBuilder UseAuthorization(this IApplicationBuilder app, AuthorizationOptions options)
-        {
-            if (app == null)
-            {
-                throw new ArgumentNullException(nameof(app));
-            }
-
-            if (options == null)
-            {
-                throw new ArgumentNullException(nameof(options));
-            }
-
-            return app.UseMiddleware<AuthorizationMiddleware>(new DefaultAuthorizationPolicyProvider(Options.Create(options)));
         }
     }
 }
