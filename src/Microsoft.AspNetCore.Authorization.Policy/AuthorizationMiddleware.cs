@@ -50,6 +50,7 @@ namespace Microsoft.AspNetCore.Authorization
                 return;
             }
 
+            // Policy evaluator has transient lifetime so it fetched from request services instead of injecting in constructor
             var policyEvaluator = context.RequestServices.GetRequiredService<IPolicyEvaluator>();
 
             var authenticateResult = await policyEvaluator.AuthenticateAsync(policy, context);
